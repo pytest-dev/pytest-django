@@ -1,7 +1,7 @@
 pytest_django
 =============
 
-pytest_django is a plugin for [py.test](http://pytest.org/) that provides a set of useful tools for testing Django applications.
+pytest_django is a plugin for [py.test](http://pytest.org/) that provides a set of useful tools for testing [Django](http://www.djangoproject.com/) applications.
 
 Requires:
 
@@ -21,17 +21,26 @@ containing:
 Usage
 -----
 
-If you run py.test in the root directory of your Django project, it will 
-attempt to import the settings and run any tests. It is backwards compatible 
-with Django's unittest test cases.
+Run py.test in the root directory of your Django project:
+
+    $ py.test
+
+This will attempt to import the Django settings and run any tests.
 
 Note that the default py.test collector is used, as well as any file within a 
 tests directory. As such, so it will not honour `INSTALLED_APPS`. You must use 
 `collect_ignore` in a `conftest.py` file to exclude any tests you don't want 
 to be run.
 
+See [py.test's documentation](http://pytest.org/) for more information, 
+including usage of the `-k` option for selecting specific tests.
+
 A `--settings` option is provided for explicitly setting a settings module, 
 similar to `manage.py`.
+
+pytest_django makes py.test's built in unittest support fully backwards 
+compatible with Django's unittest test cases. If they are failing, this is a 
+bug.
 
 Hooks
 -----
