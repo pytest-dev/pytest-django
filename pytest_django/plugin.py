@@ -54,7 +54,7 @@ class DjangoManager(object):
         
         management.get_commands()
         management._commands['syncdb'] = 'django.core'
-        if hasattr(settings, "SOUTH_TESTS_MIGRATE") and settings.SOUTH_TESTS_MIGRATE:
+        if 'south' in settings.INSTALLED_APPS and hasattr(settings, "SOUTH_TESTS_MIGRATE") and settings.SOUTH_TESTS_MIGRATE:
             try:
                 from south.management.commands.syncdb import Command
             except ImportError:
