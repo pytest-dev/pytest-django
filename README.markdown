@@ -80,3 +80,13 @@ Example:
     @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])  
     def test_equals(a, b):
         assert a == b
+
+Fixtures
+--------
+
+Fixtures can be loaded with `py.test.fixture(name)`. For example:
+
+    def pytest_funcarg__articles(request):
+        py.test.load_fixture('test_articles')
+        return Article.objects.all()
+

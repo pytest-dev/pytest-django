@@ -183,7 +183,23 @@ def pytest_namespace():
             function.funcarglist = funcarglist  
             return function  
         return wrapper
-    return {'params': params}
+    
+    def load_fixture(fixture):
+        """
+        Loads a fixture, useful for loading fixtures in funcargs.
+        
+        Example:
+        
+            def pytest_funcarg__articles(request):
+                py.test.load_fixture('test_articles')
+                return Article.objects.all()
+        """
+        call_command('loaddata', fixture, **{
+            'verbosity': 0,
+            'commit': not settings.DATABASE_SUPPORTS_TRANSACTIONS
+        })
+    
+    return {'params': params, 'load_fixture': load_fixture}
 
 def pytest_generate_tests(metafunc):
     """
