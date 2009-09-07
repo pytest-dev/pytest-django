@@ -4,9 +4,32 @@ from django.core.management import call_command
 from django.core.urlresolvers import clear_url_caches
 from django.db import connection, transaction
 from django.test.client import Client
-from django.test.testcases import disable_transaction_methods, restore_transaction_methods, TestCase
+from django.test.testcases import TestCase
 from django.test.utils import setup_test_environment, teardown_test_environment
 from pytest_django.client import RequestFactory
+
+real_commit = transaction.commit
+real_rollback = transaction.rollback
+real_enter_transaction_management = transaction.enter_transaction_management
+real_leave_transaction_management = transaction.leave_transaction_management
+real_managed = transaction.managed
+
+def nop(*args, **kwargs):
+    return
+
+def disable_transaction_methods():
+    transaction.commit = nop
+    transaction.rollback = nop
+    transaction.enter_transaction_management = nop
+    transaction.leave_transaction_management = nop
+    transaction.managed = nop
+
+def restore_transaction_methods():
+    transaction.commit = real_commit
+    transaction.rollback = real_rollback
+    transaction.enter_transaction_management = real_enter_transaction_management
+    transaction.leave_transaction_management = real_leave_transaction_management
+    transaction.managed = real_managed
 
 class DjangoManager(object):
     """
