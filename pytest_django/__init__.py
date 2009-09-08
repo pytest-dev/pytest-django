@@ -31,6 +31,6 @@ def pytest_collect_file(path, parent):
     directories which are typically not tests. That might need manually
     overriding in conftest files.
     """
-    if path.check(fnmatch="tests/*.py"):
+    if path.check(fnmatch="tests*.py"):
         return parent.Module(path, parent=parent)
 
