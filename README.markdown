@@ -84,7 +84,7 @@ Example:
 Fixtures
 --------
 
-Fixtures can be loaded with `py.test.fixture(name)`. For example:
+Fixtures can be loaded with `py.test.load_fixture(name)`. For example:
 
     def pytest_funcarg__articles(request):
         py.test.load_fixture('test_articles')
