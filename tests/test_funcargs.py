@@ -33,3 +33,19 @@ def test_client(client):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+
+def check_django_settings():
+    from django.conf import settings
+    assert settings.DEFAULT_FROM_EMAIL == 'somethingdifferent@example.com'
+
+# These tests should really be done with a testdir, but setting up the Django
+# environment within the temporary tests is a right pain
+def test_settings(settings):
+    assert settings.DEFAULT_FROM_EMAIL != 'somethingdifferent@example.com', settings.DEFAULT_FROM_EMAIL
+    settings.DEFAULT_FROM_EMAIL = 'somethingdifferent@example.com'
+    assert settings.DEFAULT_FROM_EMAIL == 'somethingdifferent@example.com'
+    check_django_settings()
+    
+    
+def test_settings_again(settings):
+    test_settings(settings)

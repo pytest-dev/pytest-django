@@ -21,13 +21,6 @@ def test_mail():
 def test_mail_again():
     test_mail()
 
-def test_settings():
-    assert settings.DEFAULT_FROM_EMAIL != 'foo@example.com'
-    settings.DEFAULT_FROM_EMAIL == 'foo@example.com'
-
-def test_settings_again():
-    test_settings()
-
 def test_database_rollback():
     assert Item.objects.count() == 0
     Item.objects.create(name='blah')
@@ -36,23 +29,12 @@ def test_database_rollback():
 def test_database_rollback_again():
     test_database_rollback()
 
-class TestFixtures:
-    fixtures = ['items']
-    
-    def test_fixtures(self):
-        assert Item.objects.count() == 1
-        assert Item.objects.all()[0].name == 'Fixture item'
-    
-    def test_fixtures_again(self):
-        """Ensure fixtures are only loaded once."""
-        self.test_fixtures()
-
 def test_load_fixtures():
     py.test.load_fixture('items')
     assert Item.objects.count() == 1
     assert Item.objects.all()[0].name == 'Fixture item'
 
-def test_fixtures_again():
+def test_load_fixtures_again():
     """Ensure fixtures are only loaded once."""
     test_load_fixtures()
     

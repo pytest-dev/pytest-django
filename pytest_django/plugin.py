@@ -1,3 +1,4 @@
+import copy
 from django.conf import settings
 from django.core import mail, management
 from django.core.management import call_command
@@ -83,11 +84,12 @@ class DjangoManager(object):
             item.teardown = lambda: None
     
     def pytest_runtest_setup(self, item):
-        self._old_settings = settings
         item_obj = self._get_item_obj(item)
         
         # This is a Django unittest TestCase
-        if self._is_unittest(item_obj):
+        if self._is_unittest(item_obj):            
+            # We have to run these here since py.test's unittest plugin skips
+            # __call__()
             item_obj.client = Client()
             item_obj._pre_setup()
             item_obj.setUp()
@@ -95,12 +97,6 @@ class DjangoManager(object):
         
         if not settings.DATABASE_SUPPORTS_TRANSACTIONS:
             call_command('flush', verbosity=self.verbosity, interactive=False)
-            if hasattr(item_obj, 'fixtures'):
-                # We have to use this slightly awkward syntax due to the fact
-                # that we're using *args and **kwargs together.
-                call_command('loaddata', *item_obj.fixtures, **{
-                    'verbosity': self.verbosity
-                })
         else:
             transaction.enter_transaction_management()
             transaction.managed(True)
@@ -109,11 +105,6 @@ class DjangoManager(object):
             from django.contrib.sites.models import Site
             Site.objects.clear_cache()
 
-            if hasattr(item_obj, 'fixtures'):
-                call_command('loaddata', *item_obj.fixtures, **{
-                    'verbosity': self.verbosity,
-                    'commit': False
-                })
         if hasattr(item_obj, 'urls'):
             settings.ROOT_URLCONF = item_obj.urls
             clear_url_caches()
@@ -138,10 +129,6 @@ class DjangoManager(object):
                 pass
             connection.close()
         
-        for setting in dir(self._old_settings):
-            if setting == setting.upper():
-                setattr(self, setting, getattr(self._old_settings, setting))
-    
     def _get_item_obj(self, item):
         try:
             return item.obj.im_self
@@ -158,10 +145,29 @@ def pytest_configure(config):
     config.pluginmanager.register(DjangoManager(verbosity))
 
 def pytest_funcarg__client(request):
+    """
+    Returns a Django test client instance.
+    """
     return Client()
 
 def pytest_funcarg__rf(request):
+    """
+    Returns a RequestFactory instance.
+    """
     return RequestFactory()
+
+def pytest_funcarg__settings(request):
+    """
+    Returns a Django settings object that restores any changes after the test 
+    has been run.
+    """
+    old_settings = copy.deepcopy(settings)
+    def restore_settings():
+        for setting in dir(old_settings):
+            if setting == setting.upper():
+                setattr(settings, setting, getattr(old_settings, setting))
+    request.addfinalizer(restore_settings)
+    return settings
 
 def pytest_namespace():
     """
@@ -207,4 +213,4 @@ def pytest_generate_tests(metafunc):
     used.
     """
     for funcargs in getattr(metafunc.function, 'funcarglist', ()):  
-        metafunc.addcall(funcargs=funcargs)  
+        metafunc.addcall(funcargs=funcargs)

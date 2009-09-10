@@ -47,9 +47,7 @@ Hooks
 
 The session start/finish and setup/teardown hooks act like Django's `test` 
 management command and unittest test cases. This includes creating the test 
-database and maintaining a constant test environment, amongst other things. 
-Additionally, it will attempt to restore the settings at the end of each test, 
-so it is safe to modify settings within a test.
+database and maintaining a constant test environment, amongst other things.
 
 Funcargs
 --------
@@ -68,6 +66,17 @@ Example:
 
 An instance of Simon Willison's excellent 
 [RequestFactory](http://www.djangosnippets.org/snippets/963/).
+
+### `settings`
+
+A Django settings object that restores itself after the tests have run, making
+it safe to modify for testing purposes.
+
+Example:
+    
+    def test_middleware(settings, client):
+        settings.MIDDLEWARE_CLASSES = ('app.middleware.SomeMiddleware',)
+        assert 'Middleware works!' in client.get('/')
 
 `@py.test.params` decorator
 ---------------------------
