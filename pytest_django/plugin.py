@@ -137,12 +137,64 @@ class DjangoManager(object):
     
     def _is_unittest(self, item_obj):
         return issubclass(type(item_obj), TestCase)
-        
+    
+    def pytest_namespace(self):
+        """
+        Sets up the py.test.params decorator.
+        """
+        def params(funcarglist):
+            """
+            A decorator to make parametrised tests easy. Takes a list of 
+            dictionaries of keyword arguments for the function. A test is 
+            created for each dictionary.
+
+            Example:
+
+                @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])  
+                def test_equals(a, b):
+                    assert a == b
+            """
+            def wrapper(function):  
+                function.funcarglist = funcarglist  
+                return function  
+            return wrapper
+
+        def load_fixture(fixture):
+            """
+            Loads a fixture, useful for loading fixtures in funcargs.
+
+            Example:
+
+                def pytest_funcarg__articles(request):
+                    py.test.load_fixture('test_articles')
+                    return Article.objects.all()
+            """
+            call_command('loaddata', fixture, **{
+                'verbosity': self.verbosity + 1,
+                'commit': not settings.DATABASE_SUPPORTS_TRANSACTIONS
+            })
+
+        return {'params': params, 'load_fixture': load_fixture}
+
+    def pytest_generate_tests(self, metafunc):
+        """
+        Generates parametrised tests if the py.test.params decorator has been 
+        used.
+        """
+        for funcargs in getattr(metafunc.function, 'funcarglist', ()):  
+            metafunc.addcall(funcargs=funcargs)
+
+    
 def pytest_configure(config):
     verbosity = 0
     if config.getvalue('verbose'):
         verbosity = 1
     config.pluginmanager.register(DjangoManager(verbosity))
+
+
+######################################
+# funcargs
+######################################
 
 def pytest_funcarg__client(request):
     """
@@ -169,48 +221,3 @@ def pytest_funcarg__settings(request):
     request.addfinalizer(restore_settings)
     return settings
 
-def pytest_namespace():
-    """
-    Sets up the py.test.params decorator.
-    """
-    def params(funcarglist):
-        """
-        A decorator to make parametrised tests easy. Takes a list of 
-        dictionaries of keyword arguments for the function. A test is created
-        for each dictionary.
-        
-        Example:
-        
-            @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])  
-            def test_equals(a, b):
-                assert a == b
-        """
-        def wrapper(function):  
-            function.funcarglist = funcarglist  
-            return function  
-        return wrapper
-    
-    def load_fixture(fixture):
-        """
-        Loads a fixture, useful for loading fixtures in funcargs.
-        
-        Example:
-        
-            def pytest_funcarg__articles(request):
-                py.test.load_fixture('test_articles')
-                return Article.objects.all()
-        """
-        call_command('loaddata', fixture, **{
-            'verbosity': 0,
-            'commit': not settings.DATABASE_SUPPORTS_TRANSACTIONS
-        })
-    
-    return {'params': params, 'load_fixture': load_fixture}
-
-def pytest_generate_tests(metafunc):
-    """
-    Generates parametrised tests if the py.test.params decorator has been 
-    used.
-    """
-    for funcargs in getattr(metafunc.function, 'funcarglist', ()):  
-        metafunc.addcall(funcargs=funcargs)
