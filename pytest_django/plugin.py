@@ -7,6 +7,10 @@ from django.db import connection, transaction
 from django.test.client import Client
 from django.test.testcases import TestCase
 from django.test.utils import setup_test_environment, teardown_test_environment
+try:
+    from functools import wraps
+except ImportError:
+    from django.utils.functional import wraps  # Python 2.3, 2.4 fallback.
 from pytest_django.client import RequestFactory
 
 real_commit = transaction.commit
@@ -45,6 +49,7 @@ class DjangoManager(object):
     
     old_database_name = None
     _old_settings = []
+    _old_urlconf = None
     
     def __init__(self, verbosity=0):
         self.verbosity = verbosity
@@ -86,6 +91,12 @@ class DjangoManager(object):
     def pytest_runtest_setup(self, item):
         item_obj = self._get_item_obj(item)
         
+        # Set the URLs if the py.test.urls() decorator has been applied
+        if hasattr(item.obj, 'urls'):
+            self._old_urlconf = settings.ROOT_URLCONF
+            settings.ROOT_URLCONF = item.obj.urls
+            clear_url_caches()
+            
         # This is a Django unittest TestCase
         if self._is_unittest(item_obj):            
             # We have to run these here since py.test's unittest plugin skips
@@ -104,10 +115,6 @@ class DjangoManager(object):
 
             from django.contrib.sites.models import Site
             Site.objects.clear_cache()
-
-        if hasattr(item_obj, 'urls'):
-            settings.ROOT_URLCONF = item_obj.urls
-            clear_url_caches()
 
         mail.outbox = []
         
@@ -128,6 +135,10 @@ class DjangoManager(object):
             except transaction.TransactionManagementError:
                 pass
             connection.close()
+        
+        if hasattr(item, 'urls') and self._old_urlconf is not None:
+            settings.ROOT_URLCONF = self._old_urlconf
+            self._old_urlconf = None
         
     def _get_item_obj(self, item):
         try:
@@ -173,8 +184,23 @@ class DjangoManager(object):
                 'verbosity': self.verbosity + 1,
                 'commit': not settings.DATABASE_SUPPORTS_TRANSACTIONS
             })
-
-        return {'params': params, 'load_fixture': load_fixture}
+        
+        def urls(urlconf):
+            """
+            A decorator to change the URLconf for a particular test, similar 
+            to the `urls` attribute on Django's `TestCase`.
+            
+            Example:
+            
+                @py.test.urls('myapp.test_urls')
+                def test_something(client):
+                    assert 'Success!' in client.get('/some_path/')
+            """
+            def wrapper(function):
+                function.urls = urlconf
+            return wrapper
+        
+        return {'params': params, 'load_fixture': load_fixture, 'urls': urls}
 
     def pytest_generate_tests(self, metafunc):
         """

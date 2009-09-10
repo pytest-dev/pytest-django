@@ -1,7 +1,5 @@
-from django.conf import settings
 from django.core import mail
 from app.models import Item
-import py
 
 # It doesn't matter which order all the _again methods are run, we just need 
 # to check the environment remains constant.
@@ -29,18 +27,3 @@ def test_database_rollback():
 def test_database_rollback_again():
     test_database_rollback()
 
-def test_load_fixtures():
-    py.test.load_fixture('items')
-    assert Item.objects.count() == 1
-    assert Item.objects.all()[0].name == 'Fixture item'
-
-def test_load_fixtures_again():
-    """Ensure fixtures are only loaded once."""
-    test_load_fixtures()
-    
-
-class TestUrls:
-    urls = 'tests.urls_test'
-    
-    def test_urls(self, client):
-        client.get('/test_url/').content == 'Test URL works!'

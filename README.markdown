@@ -58,7 +58,7 @@ A Django test client instance.
 
 Example:
 
-    def test_something(client)
+    def test_something(client):
         assert 'Success!' in client.get('/path/')
         
 
@@ -78,8 +78,10 @@ Example:
         settings.MIDDLEWARE_CLASSES = ('app.middleware.SomeMiddleware',)
         assert 'Middleware works!' in client.get('/')
 
-`@py.test.params` decorator
----------------------------
+Decorators
+----------
+
+### `@py.test.params`
 
 A decorator to make parametrised tests easy. Takes a list of dictionaries of 
 keyword arguments for the function. A test is created for each dictionary.
@@ -89,6 +91,17 @@ Example:
     @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])  
     def test_equals(a, b):
         assert a == b
+
+### `@py.test.urls`
+
+Provides the ability to change the URLconf for this test, similar to the 
+`urls` attribute on Django's `TestCase`.
+
+Example:
+    
+    @py.test.urls('myapp.test_urls')
+    def test_something(client):
+        assert 'Success!' in client.get('/some_path/')
 
 Fixtures
 --------
