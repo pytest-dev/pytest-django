@@ -9,6 +9,7 @@ import py
 
 def pytest_addoption(parser):
     parser.addoption('--settings', help='The Python path to a Django settings module, e.g. "myproject.settings.main". If this isn\'t provided, the DJANGO_SETTINGS_MODULE environment variable will be used.', default=None)
+    parser.addoption('--noinput', help='Tells Django not to ask for any user input.', action='store_true', default=False)
 
 def pytest_configure(config):
     try:

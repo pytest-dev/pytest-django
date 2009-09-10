@@ -51,8 +51,9 @@ class DjangoManager(object):
     _old_settings = []
     _old_urlconf = None
     
-    def __init__(self, verbosity=0):
+    def __init__(self, verbosity=0, noinput=False):
         self.verbosity = verbosity
+        self.noinput = noinput
     
     def pytest_sessionstart(self, session):
         setup_test_environment()
@@ -75,7 +76,7 @@ class DjangoManager(object):
                 management._commands['syncdb'] = MigrateAndSyncCommand()
         
         self.old_database_name = settings.DATABASE_NAME
-        connection.creation.create_test_db(self.verbosity)
+        connection.creation.create_test_db(self.verbosity, autoclobber=self.noinput)
 
     def pytest_sessionfinish(self, session, exitstatus):
         connection.creation.destroy_test_db(self.old_database_name, self.verbosity)
@@ -107,7 +108,7 @@ class DjangoManager(object):
             return
         
         if not settings.DATABASE_SUPPORTS_TRANSACTIONS:
-            call_command('flush', verbosity=self.verbosity, interactive=False)
+            call_command('flush', verbosity=self.verbosity, interactive=not self.noinput)
         else:
             transaction.enter_transaction_management()
             transaction.managed(True)
@@ -215,7 +216,7 @@ def pytest_configure(config):
     verbosity = 0
     if config.getvalue('verbose'):
         verbosity = 1
-    config.pluginmanager.register(DjangoManager(verbosity))
+    config.pluginmanager.register(DjangoManager(verbosity=verbosity, noinput=config.getvalue('noinput')))
 
 
 ######################################
