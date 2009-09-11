@@ -47,13 +47,13 @@ class DjangoManager(object):
     settings within tests.
     """
     
-    old_database_name = None
-    _old_settings = []
-    _old_urlconf = None
-    
     def __init__(self, verbosity=0, noinput=False):
         self.verbosity = verbosity
         self.noinput = noinput
+        
+        self._old_database_name = None
+        self._old_settings = []
+        self._old_urlconf = None
     
     def pytest_sessionstart(self, session):
         setup_test_environment()
@@ -75,11 +75,11 @@ class DjangoManager(object):
                             break
                 management._commands['syncdb'] = MigrateAndSyncCommand()
         
-        self.old_database_name = settings.DATABASE_NAME
+        self._old_database_name = settings.DATABASE_NAME
         connection.creation.create_test_db(self.verbosity, autoclobber=self.noinput)
 
     def pytest_sessionfinish(self, session, exitstatus):
-        connection.creation.destroy_test_db(self.old_database_name, self.verbosity)
+        connection.creation.destroy_test_db(self._old_database_name, self.verbosity)
         teardown_test_environment()
     
     def pytest_itemstart(self, item):
