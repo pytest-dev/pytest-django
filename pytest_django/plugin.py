@@ -1,5 +1,6 @@
 import copy
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core import mail, management
 from django.core.management import call_command
 from django.core.urlresolvers import clear_url_caches
@@ -205,6 +206,24 @@ def pytest_funcarg__client(request):
     Returns a Django test client instance.
     """
     return Client()
+
+def pytest_funcarg__admin_client(request):
+    """
+    Returns a Django test client logged in as an admin user.
+    """
+    try:
+        User.objects.get(username='admin')
+    except User.DoesNotExist:
+        user = User.objects.create_user('admin', 'admin@example.com', 
+                                        'password')
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        
+    client = Client()
+    client.login(username='admin', password='password')
+    
+    return client    
 
 def pytest_funcarg__rf(request):
     """
