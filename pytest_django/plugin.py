@@ -1,4 +1,5 @@
 import copy
+import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail, management
@@ -25,9 +26,11 @@ class DjangoManager(object):
     settings within tests.
     """
     
-    def __init__(self, verbosity=0, noinput=False):
+    def __init__(self, verbosity=0, noinput=False, copy_live_db=False, database=''):
         self.verbosity = verbosity
         self.noinput = noinput
+        self.copy_live_db = copy_live_db
+        self.database = database
         
         self._old_database_name = None
         self._old_settings = []
@@ -36,6 +39,8 @@ class DjangoManager(object):
     def pytest_sessionstart(self, session):
         setup_test_environment()
         settings.DEBUG = False
+        if self.database:
+            settings.DATABASE_NAME = self.database
         
         management.get_commands()
         management._commands['syncdb'] = 'django.core'
@@ -54,7 +59,7 @@ class DjangoManager(object):
                 management._commands['syncdb'] = MigrateAndSyncCommand()
         
         self._old_database_name = settings.DATABASE_NAME
-        connection.creation.create_test_db(self.verbosity, autoclobber=self.noinput)
+        create_test_db(self.verbosity, autoclobber=self.noinput, copy_test_db=self.copy_live_db)
 
     def pytest_sessionfinish(self, session, exitstatus):
         connection.creation.destroy_test_db(self._old_database_name, self.verbosity)
@@ -194,7 +199,12 @@ def pytest_configure(config):
     verbosity = 0
     if config.getvalue('verbose'):
         verbosity = 1
-    config.pluginmanager.register(DjangoManager(verbosity=verbosity, noinput=config.getvalue('noinput')))
+    config.pluginmanager.register(DjangoManager(
+                                    verbosity=verbosity, 
+                                    noinput=config.getvalue('noinput'),
+                                    copy_live_db=config.getvalue('copy_live_db'),
+                                    database=config.getvalue('database_name')
+                                 ))
 
 
 ######################################
@@ -244,3 +254,51 @@ def pytest_funcarg__settings(request):
     request.addfinalizer(restore_settings)
     return settings
 
+
+
+def create_test_db(verbosity=1, autoclobber=False, copy_test_db=False):
+    """
+    Creates a test database, prompting the user for confirmation if the
+    database already exists. Returns the name of the test database created.
+    """
+    if verbosity >= 1:
+        print "Creating test database..."
+
+    test_database_name = connection.creation._create_test_db(verbosity, autoclobber)
+
+    connection.close()
+    old_database_name = settings.DATABASE_NAME
+    settings.DATABASE_NAME = test_database_name
+
+    connection.settings_dict["DATABASE_NAME"] = test_database_name
+    can_rollback = connection.creation._rollback_works()
+    settings.DATABASE_SUPPORTS_TRANSACTIONS = can_rollback
+    connection.settings_dict["DATABASE_SUPPORTS_TRANSACTIONS"] = can_rollback
+    
+    if copy_test_db:
+        if verbosity >= 1:
+            print "Copying database %s to test..." % copy_test_db
+        try:
+            # --copy_live_db is either 'data' or 'schema'. the choices are
+            # controlled by the management command, so by the time we're here
+            # we just assume that if it's "schema" we add -d, if not we don't
+            no_data_opt='-d '
+            if copy_test_db != 'schema':
+                no_data_opt=''
+            os.system("sh -c 'mysqldump -u %s %s %s | mysql -u %s %s'" %
+                      (settings.DATABASE_USER, no_data_opt, old_database_name, settings.DATABASE_USER,test_database_name))
+        except Exception, e:
+            raise e
+
+    call_command('syncdb', verbosity=verbosity, interactive=False)
+    call_command('migrate', '', verbosity=verbosity)
+
+    if settings.CACHE_BACKEND.startswith('db://'):
+        cache_name = settings.CACHE_BACKEND[len('db://'):]
+        call_command('createcachetable', cache_name)
+
+    # Get a cursor (even though we don't need one yet). This has
+    # the side effect of initializing the test database.
+    cursor = connection.cursor()
+
+    return test_database_name
