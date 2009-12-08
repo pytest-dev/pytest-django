@@ -38,6 +38,18 @@ including usage of the `-k` option for selecting specific tests.
 A `--settings` option is provided for explicitly setting a settings module, 
 similar to `manage.py`.
 
+The `--copy_live_db` switch will copy your live database to run the tests 
+against, rather than creating a new one from scratch each time. This is useful 
+if you're using a database migration system such as South, and have a large 
+number of migrations defined, which can be very slow to run.
+
+There is also a `--database` option which works in conjunction with 
+`--copy_live_db` to specify a particular database to copy, to avoid problems 
+caused by tests interacting with data that's in your database already but which
+isn't created via migrations or test setup code. With this option, you can 
+have a ready-migrated database which is used just for testing, while you 
+continue to develop on your main database.
+
 pytest_django makes py.test's built in unittest support fully backwards 
 compatible with Django's unittest test cases. If they are failing, this is a 
 bug.
