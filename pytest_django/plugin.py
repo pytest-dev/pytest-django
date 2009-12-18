@@ -291,7 +291,8 @@ def create_test_db(verbosity=1, autoclobber=False, copy_test_db=False):
             raise e
 
     call_command('syncdb', verbosity=verbosity, interactive=False)
-    call_command('migrate', '', verbosity=verbosity)
+    if 'south' in settings.INSTALLED_APPS and hasattr(settings, "SOUTH_TESTS_MIGRATE") and settings.SOUTH_TESTS_MIGRATE:
+        call_command('migrate', '', verbosity=verbosity)
 
     if settings.CACHE_BACKEND.startswith('db://'):
         cache_name = settings.CACHE_BACKEND[len('db://'):]
