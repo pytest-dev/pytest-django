@@ -1,6 +1,5 @@
 from django.test.client import Client
 from pytest_django.client import RequestFactory
-import py
 
 pytest_plugins = ['pytester']
 

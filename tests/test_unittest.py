@@ -55,4 +55,4 @@ class TestUrls(TestCase):
     urls = 'tests.urls_test'
     
     def test_urls(self):
-        self.client.get('/test_url/').content == 'Test URL works!'
+        self.assertTrue(self.client.get('/test_url/').content == 'Test URL works!')

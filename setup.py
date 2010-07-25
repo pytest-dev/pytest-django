@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from distutils.core import setup
+from setuptools import setup
  
 setup(
     name='pytest_django',
-    version='0.1',
+    version='0.2',
     description='A Django plugin for py.test.',
     author='Ben Firshman',
     author_email='ben@firshman.co.uk',
