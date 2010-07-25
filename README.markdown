@@ -11,9 +11,10 @@ Requires:
 Changes between orginal and this fork
 -------------------------------------
 
-The original pytest_django module didn't work correctly with django 1.2.1.
-This fork uses django's TestSuite and TestCase to setup the test database and environment instead of re-implementing the code in the py.test plugin.
-Some command line options have been removed: 
+The original pytest_django module didn't work for me. It was written for django 1.1 and is probably not completely compatible with django 1.2.1.        
+
+This fork uses django's TestSuite and TestCase to setup the test database and environment instead of implementing the database setup code in the py.test plugin.
+As a result some command line options have been removed: 
 
 1. `--copy_live_db`
 2. `--database` 
