@@ -7,6 +7,8 @@ from django.test.client import Client
 from django.test.testcases import TransactionTestCase, TestCase
 from django.test.simple import DjangoTestSuiteRunner
 from pytest_django.client import RequestFactory
+import py
+import sys
 
 class DjangoManager(object):
     """
@@ -32,14 +34,20 @@ class DjangoManager(object):
         self.testcase = None
         
     def pytest_sessionstart(self, session):
+        capture = py.io.StdCapture()
         self.suite_runner = DjangoTestSuiteRunner()
         self.suite_runner.setup_test_environment()
         self.old_db_config = self.suite_runner.setup_databases()
         settings.DATABASE_SUPPORTS_TRANSACTIONS = True
+        unused_out, err = capture.reset()
+        sys.stderr.write(err)
  
     def pytest_sessionfinish(self, session, exitstatus):
+        capture = py.io.StdCapture()
         self.suite_runner.teardown_test_environment()
         self.suite_runner.teardown_databases(self.old_db_config)
+        unused_out, err = capture.reset()
+        sys.stderr.write(err)
     
     def pytest_itemstart(self, item):
         # This lets us control the order of the setup/teardown
