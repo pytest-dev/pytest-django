@@ -35,6 +35,13 @@ class DjangoManager(object):
         
     def pytest_sessionstart(self, session):
         capture = py.io.StdCapture()
+        try:
+            from south.management.commands import patch_for_test_db_setup
+            patch_for_test_db_setup()
+            import logging
+            logging.getLogger("south").setLevel(logging.INFO)  # do not emit any log messages
+        except ImportError:
+            pass
         self.suite_runner = DjangoTestSuiteRunner()
         self.suite_runner.setup_test_environment()
         self.old_db_config = self.suite_runner.setup_databases()

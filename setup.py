@@ -4,7 +4,7 @@ from setuptools import setup
  
 setup(
     name='pytest_django',
-    version='0.2',
+    version='0.2.1',
     description='A Django plugin for py.test.',
     author='Ben Firshman',
     author_email='ben@firshman.co.uk',
