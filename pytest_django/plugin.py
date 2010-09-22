@@ -2,6 +2,7 @@ import copy
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.core import management
 from django.core.urlresolvers import clear_url_caches
 from django.test.client import Client
 from django.test.testcases import TransactionTestCase, TestCase
@@ -35,13 +36,10 @@ class DjangoManager(object):
         
     def pytest_sessionstart(self, session):
         capture = py.io.StdCapture()
-        try:
-            from south.management.commands import patch_for_test_db_setup
-            patch_for_test_db_setup()
-            import logging
-            logging.getLogger("south").setLevel(logging.INFO)  # do not emit any log messages
-        except ImportError:
-            pass
+        # make sure the normal django syncdb command is run (do not run migrations for tests)
+        # this is faster and less error prone
+        management.get_commands()  # load commands dict
+        management._commands['syncdb'] = 'django.core'  # make sure `south` migrations are disabled
         self.suite_runner = DjangoTestSuiteRunner()
         self.suite_runner.setup_test_environment()
         self.old_db_config = self.suite_runner.setup_databases()
