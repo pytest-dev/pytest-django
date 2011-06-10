@@ -11,6 +11,7 @@ from pytest_django.client import RequestFactory
 import py
 import sys
 
+
 class DjangoManager(object):
     """
     A Django plugin for py.test that handles creating and destroying the
@@ -35,7 +36,7 @@ class DjangoManager(object):
         self.testcase = None
         
     def pytest_sessionstart(self, session):
-        capture = py.io.StdCapture()
+        #capture = py.io.StdCapture()
         # make sure the normal django syncdb command is run (do not run migrations for tests)
         # this is faster and less error prone
         management.get_commands()  # load commands dict
@@ -44,8 +45,8 @@ class DjangoManager(object):
         self.suite_runner.setup_test_environment()
         self.old_db_config = self.suite_runner.setup_databases()
         settings.DATABASE_SUPPORTS_TRANSACTIONS = True
-        unused_out, err = capture.reset()
-        sys.stderr.write(err)
+        #unused_out, err = capture.reset()
+        #srsys.stderr.write(err)
  
     def pytest_sessionfinish(self, session, exitstatus):
         capture = py.io.StdCapture()
@@ -81,7 +82,8 @@ class DjangoManager(object):
         
         testcase = _get_testcase(item_obj)
         testcase.tearDown()
-        testcase._post_teardown()
+        if not isinstance(item_obj, TestCase):
+            testcase._post_teardown()
             
         if hasattr(item, 'urls') and self._old_urlconf is not None:
             settings.ROOT_URLCONF = self._old_urlconf
