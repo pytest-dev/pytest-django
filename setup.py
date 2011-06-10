@@ -19,4 +19,10 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing'],
+    # the following makes a plugin available to py.test
+    entry_points = {
+        'django_pytest': [
+            'name_of_plugin = pytest_django',
+        ]
+    },
 )
