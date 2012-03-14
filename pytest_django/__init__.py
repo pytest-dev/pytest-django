@@ -1,5 +1,5 @@
 """
-This is just an intermediate plugin that sets up the django environment and 
+This is just an intermediate plugin that sets up the django environment and
 loads the main plugin
 """
 
@@ -15,13 +15,7 @@ def pytest_configure(config):
     config_settings = config.getvalue('settings')
     if config_settings is not None:
         os.environ['DJANGO_SETTINGS_MODULE'] = config_settings
-    try:
-        import settings
-    except ImportError:
-        pass
-    else:
-        from django.core.management import setup_environ
-        setup_environ(settings)
+
     from pytest_django import plugin
     config.pluginmanager.register(plugin)
 
@@ -29,8 +23,8 @@ def pytest_configure(config):
 def pytest_collect_file(path, parent):
     """
     Load all files in a tests directory as tests, following Django convention.
-    
-    However, we still load files such as test_urls.py in application 
+
+    However, we still load files such as test_urls.py in application
     directories which are typically not tests. That might need manually
     overriding in conftest files.
     """
