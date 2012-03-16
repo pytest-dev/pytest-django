@@ -18,15 +18,3 @@ def pytest_configure(config):
 
     from pytest_django import plugin
     config.pluginmanager.register(plugin)
-
-
-def pytest_collect_file(path, parent):
-    """
-    Load all files in a tests directory as tests, following Django convention.
-
-    However, we still load files such as test_urls.py in application
-    directories which are typically not tests. That might need manually
-    overriding in conftest files.
-    """
-    if path.check(fnmatch="tests*.py"):
-        return parent.Module(path, parent=parent)
