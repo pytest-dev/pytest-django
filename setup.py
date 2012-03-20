@@ -20,9 +20,4 @@ setup(
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing'],
     # the following makes a plugin available to py.test
-    entry_points = {
-        'django_pytest': [
-            'name_of_plugin = pytest_django',
-        ]
-    },
-)
+    entry_points=dict(pytest11=['django = pytest_django']))
