@@ -16,5 +16,6 @@ def pytest_configure(config):
     if config_settings is not None:
         os.environ['DJANGO_SETTINGS_MODULE'] = config_settings
 
-    from pytest_django import plugin
-    config.pluginmanager.register(plugin)
+    if "DJANGO_SETTINGS_MODULE" in os.environ:
+        from pytest_django import plugin
+        config.pluginmanager.register(plugin)
