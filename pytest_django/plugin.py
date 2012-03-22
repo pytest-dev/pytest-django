@@ -23,9 +23,8 @@ class DjangoManager(object):
     settings within tests.
     """
 
-    def __init__(self, verbosity=0, noinput=False):
+    def __init__(self, verbosity=0):
         self.verbosity = verbosity
-        self.noinput = noinput
 
         self._old_database_name = None
         self._old_settings = []
@@ -156,16 +155,6 @@ class DjangoManager(object):
         """
         for funcargs in getattr(metafunc.function, 'funcarglist', ()):
             metafunc.addcall(funcargs=funcargs)
-
-
-def pytest_configure(config):
-    verbosity = 0
-    if config.getvalue('verbose'):
-        verbosity = 1
-    config.pluginmanager.register(DjangoManager(
-                                    verbosity=verbosity,
-                                    noinput=config.getvalue('noinput'),
-                                 ))
 
 
 ######################################

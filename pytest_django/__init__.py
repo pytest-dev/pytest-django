@@ -5,17 +5,33 @@ loads the main plugin
 
 import os
 
+SETTINGS_DESC = """
+The Python path to a Django settings module,
+e.g. "myproject.settings.main". If this isn't provided,
+django_settings_module must be set in the ini file.
+""".strip()
+
 
 def pytest_addoption(parser):
-    parser.addoption('--settings', help='The Python path to a Django settings module, e.g. "myproject.settings.main". If this isn\'t provided, the DJANGO_SETTINGS_MODULE environment variable will be used.', default=None)
-    parser.addoption('--noinput', help='Tells Django not to ask for any user input.', action='store_true', default=False)
+    group = parser.getgroup("django", "run tests for a Django application")
+    group.addoption('--settings', help=SETTINGS_DESC, default=None)
+    parser.addini("django_settings_module", SETTINGS_DESC)
 
 
 def pytest_configure(config):
-    config_settings = config.getvalue('settings')
-    if config_settings is not None:
-        os.environ['DJANGO_SETTINGS_MODULE'] = config_settings
+    config_settings = (config.getvalue('settings')
+                       or config.getini("django_settings_module"))
 
-    if "DJANGO_SETTINGS_MODULE" in os.environ:
-        from pytest_django import plugin
-        config.pluginmanager.register(plugin)
+    if not config_settings:
+        return
+
+    os.environ['DJANGO_SETTINGS_MODULE'] = config_settings
+
+    if config.getvalue('verbose'):
+        verbosity = 1
+    else:
+        verbosity = 0
+
+    from pytest_django import plugin
+    config.pluginmanager.register(plugin)
+    config.pluginmanager.register(plugin.DjangoManager(verbosity=verbosity))
