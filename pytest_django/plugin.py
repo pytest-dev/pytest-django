@@ -96,25 +96,6 @@ class DjangoManager(object):
             return None
 
     def pytest_namespace(self):
-        """
-        Sets up the py.test.params decorator.
-        """
-        def params(funcarglist):
-            """
-            A decorator to make parametrised tests easy. Takes a list of
-            dictionaries of keyword arguments for the function. A test is
-            created for each dictionary.
-
-            Example:
-
-                @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])
-                def test_equals(a, b):
-                    assert a == b
-            """
-            def wrapper(function):
-                function.funcarglist = funcarglist
-                return function
-            return wrapper
 
         def load_fixture(fixture):
             """
@@ -146,15 +127,7 @@ class DjangoManager(object):
                 function.urls = urlconf
             return wrapper
 
-        return {'params': params, 'load_fixture': load_fixture, 'urls': urls}
-
-    def pytest_generate_tests(self, metafunc):
-        """
-        Generates parametrised tests if the py.test.params decorator has been
-        used.
-        """
-        for funcargs in getattr(metafunc.function, 'funcarglist', ()):
-            metafunc.addcall(funcargs=funcargs)
+        return {'load_fixture': load_fixture, 'urls': urls}
 
 
 ######################################

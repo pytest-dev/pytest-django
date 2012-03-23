@@ -5,8 +5,8 @@ pytest_django is a plugin for [py.test](http://pytest.org/) that provides a set 
 
 Requires:
 
-  * Django 1.2.1
-  * py.test 1.3.2
+  * Django 1.2.x
+  * py.test 2.x
 
 Changes between orginal and this fork
 -------------------------------------
@@ -92,17 +92,6 @@ Example:
 
 Decorators
 ----------
-
-### `@py.test.params`
-
-A decorator to make parametrised tests easy. Takes a list of dictionaries of 
-keyword arguments for the function. A test is created for each dictionary.
-
-Example:
-
-    @py.test.params([dict(a=1, b=2), dict(a=3, b=3), dict(a=5, b=4)])  
-    def test_equals(a, b):
-        assert a == b
 
 ### `@py.test.urls`
 
