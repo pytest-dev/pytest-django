@@ -1,4 +1,4 @@
 *.pyc
 build/
 /dist/
-/pytest_django_pp.egg-info/
+*.egg-info
