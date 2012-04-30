@@ -4,14 +4,14 @@
 from setuptools import setup
 
 setup(
-    name='pytest-django-pp',
+    name='pytest-django',
     version='1.0.0',
     description='A Django plugin for py.test.',
-    author='Ben Firshman',
-    author_email='ben@firshman.co.uk',
-    maintainer="pediapress",
-    maintainer_email="development@pediapress.com",
-    url='https://github.com/pediapress/pytest_django',
+    author='Andreas Pelme',
+    author_email='andreas@pelme.se',
+    maintainer="Andreas Pelme",
+    maintainer_email="andreas@pelme.se",
+    url='https://github.com/pelme/pytest_django',
     packages=['pytest_django'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
