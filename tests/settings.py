@@ -1,5 +1,10 @@
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = '/tmp/test'
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/test'
+    }
+}
+
 ROOT_URLCONF = 'tests.urls'
 INSTALLED_APPS = [
     'django.contrib.auth',
