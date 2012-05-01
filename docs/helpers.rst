@@ -12,7 +12,10 @@ rf
 ~~
 An instance of a `django.test.client.RequestFactory <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.client.RequestFactory>`_.
 
-Example usage::
+Example
+"""""""
+
+::
 
     from myapp.views import my_view
 
@@ -25,7 +28,10 @@ client
 ~~~~~~
 An instance of a `django.test.client.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_.
 
-Example usage::
+Example
+"""""""
+
+::
 
     def test_with_client(client):
         response = client.get('/')
@@ -36,7 +42,10 @@ admin_client
 ~~~~~~~~~~~~
 An instance of a `django.test.client.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_, that is logged in as an admin user.
 
-Example usage::
+Example
+"""""""
+
+::
 
     def test_an_admin_view(admin_client):
         response = admin_client.get('/admin/')
@@ -69,7 +78,10 @@ pytest.urls
 ~~~~~~~~~~~
 A decorator to change the URLconf for a particular test, similar to the `urls` attribute on Django's `TestCase`.
 
-Example usage::
+Example
+"""""""
+
+::
 
     @pytest.urls('myapp.test_urls')
     def test_something(client):
