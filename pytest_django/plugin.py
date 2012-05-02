@@ -40,6 +40,7 @@ def pytest_sessionstart(session):
     suite_runner.setup_test_environment()
     old_db_config = suite_runner.setup_databases()
 
+    settings.DEBUG_PROPAGATE_EXCEPTIONS = True
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -60,15 +61,15 @@ _old_urlconf = None
 def pytest_runtest_setup(item):
     global _old_urlconf
 
-    # Invoke Django code to prepare the environment for the test run
-    if not is_django_unittest(item):
-        django_setup_item(item)
-
     # Set the URLs if the pytest.urls() decorator has been applied
     if hasattr(item.obj, 'urls'):
         _old_urlconf = settings.ROOT_URLCONF
         settings.ROOT_URLCONF = item.obj.urls
         clear_url_caches()
+
+    # Invoke Django code to prepare the environment for the test run
+    if not is_django_unittest(item):
+        django_setup_item(item)
 
 
 def pytest_runtest_teardown(item):

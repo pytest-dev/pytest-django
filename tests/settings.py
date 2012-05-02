@@ -13,3 +13,5 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'tests.app',
 ]
+
+STATIC_URL = '/static/'
