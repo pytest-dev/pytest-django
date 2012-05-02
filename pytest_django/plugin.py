@@ -40,7 +40,6 @@ def pytest_sessionstart(session):
     suite_runner.setup_test_environment()
     old_db_config = suite_runner.setup_databases()
 
-    settings.DATABASE_SUPPORTS_TRANSACTIONS = True
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -99,7 +98,6 @@ def pytest_namespace():
         """
         call_command('loaddata', fixture, **{
             'verbosity': 1,
-            'commit': not settings.DATABASE_SUPPORTS_TRANSACTIONS
         })
 
     def urls(urlconf):
