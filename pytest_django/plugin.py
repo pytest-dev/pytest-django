@@ -24,6 +24,20 @@ suite_runner = None
 old_db_config = None
 
 
+def get_runner(config):
+    if config.option.no_db:
+        DjangoTestSuiteRunner.setup_databases = lambda self: None
+        DjangoTestSuiteRunner.teardown_databases = lambda self, db_config: None
+    return DjangoTestSuiteRunner
+
+
+def pytest_addoption(parser):
+    group = parser.getgroup("general")
+    group._addoption('--no-db',
+                     action='store_true', dest='no_db', default=False,
+                     help='Run tests without a database')
+
+
 def _disable_south_management_command():
     management.get_commands()
     # make sure `south` migrations are disabled
@@ -35,7 +49,8 @@ def pytest_sessionstart(session):
 
     _disable_south_management_command()
 
-    suite_runner = DjangoTestSuiteRunner(interactive=False)
+    runner = get_runner(session.config)
+    suite_runner = runner(interactive=False)
 
     suite_runner.setup_test_environment()
     old_db_config = suite_runner.setup_databases()
@@ -68,7 +83,7 @@ def pytest_runtest_setup(item):
         clear_url_caches()
 
     # Invoke Django code to prepare the environment for the test run
-    if not is_django_unittest(item):
+    if not item.config.option.no_db and not is_django_unittest(item):
         django_setup_item(item)
 
 
@@ -76,7 +91,7 @@ def pytest_runtest_teardown(item):
     global _old_urlconf
 
     # Call Django code to tear down
-    if not is_django_unittest(item):
+    if not item.config.option.no_db and not is_django_unittest(item):
         django_teardown_item(item)
 
     if hasattr(item, 'urls') and _old_urlconf is not None:
