@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.1.1
+-----
+ * Flush tables after each test run with transaction_test_case instead of before.
+
 1.1
 ---
 
