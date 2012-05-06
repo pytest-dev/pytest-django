@@ -18,6 +18,9 @@ def get_django_unittest(item):
     """
     if 'transaction_test_case' in item.keywords:
         cls = TransactionTestCase
+    elif item.config.option.no_db:
+        cls = TestCase
+        cls._fixture_setup = lambda self: None
     else:
         cls = TestCase
 
