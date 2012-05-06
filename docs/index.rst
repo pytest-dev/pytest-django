@@ -8,6 +8,7 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
 
    tutorial
    helpers
+   command_line_options
    faq
    changelog
 
