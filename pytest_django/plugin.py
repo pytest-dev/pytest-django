@@ -25,10 +25,13 @@ old_db_config = None
 
 
 def get_runner(config):
+    runner = DjangoTestSuiteRunner(interactive=False)
+
     if config.option.no_db:
-        DjangoTestSuiteRunner.setup_databases = lambda self: None
-        DjangoTestSuiteRunner.teardown_databases = lambda self, db_config: None
-    return DjangoTestSuiteRunner
+        runner.setup_databases = lambda self: None
+        runner.teardown_databases = lambda self, db_config: None
+
+    return runner
 
 
 def pytest_addoption(parser):
@@ -49,10 +52,9 @@ def pytest_sessionstart(session):
 
     _disable_south_management_command()
 
-    runner = get_runner(session.config)
-    suite_runner = runner(interactive=False)
-
+    suite_runner = get_runner(session.config)
     suite_runner.setup_test_environment()
+
     old_db_config = suite_runner.setup_databases()
 
     settings.DEBUG_PROPAGATE_EXCEPTIONS = True
