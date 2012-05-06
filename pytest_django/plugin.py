@@ -15,10 +15,13 @@ from django.core.management import call_command
 from django.core import management
 from django.core.urlresolvers import clear_url_caches
 from django.test.simple import DjangoTestSuiteRunner
+import django.db.backends.util
+
 
 from .utils import is_django_unittest, django_setup_item, django_teardown_item
 
 import py
+
 
 suite_runner = None
 old_db_config = None
@@ -28,8 +31,18 @@ def get_runner(config):
     runner = DjangoTestSuiteRunner(interactive=False)
 
     if config.option.no_db:
-        runner.setup_databases = lambda: None
-        runner.teardown_databases = lambda db_config: None
+        def cursor_wrapper_exception(*args, **kwargs):
+            raise RuntimeError('No database access is allowed since --no-db was used!')
+
+        def setup_databases():
+            # Monkey patch CursorWrapper to warn against database usgae
+            django.db.backends.util.CursorWrapper = cursor_wrapper_exception
+
+        def teardown_databases(db_config):
+            pass
+
+        runner.setup_databases = setup_databases
+        runner.teardown_databases = teardown_databases
 
     return runner
 
