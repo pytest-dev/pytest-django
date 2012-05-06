@@ -28,8 +28,8 @@ def get_runner(config):
     runner = DjangoTestSuiteRunner(interactive=False)
 
     if config.option.no_db:
-        runner.setup_databases = lambda self: None
-        runner.teardown_databases = lambda self, db_config: None
+        runner.setup_databases = lambda: None
+        runner.teardown_databases = lambda db_config: None
 
     return runner
 
