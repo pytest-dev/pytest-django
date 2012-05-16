@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 from django.db import transaction
 
 from pytest_django import transaction_test_case
