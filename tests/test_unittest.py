@@ -54,7 +54,10 @@ class TestFixturesWithSetup(TestCase):
 
 
 class TestUrls(TestCase):
-    urls = 'tests.urls_test'
+    """
+    Make sure overriding ``urls`` works.
+    """
+    urls = 'tests.urls_unittest'
 
     def test_urls(self):
         self.assertTrue(self.client.get('/test_url/').content == 'Test URL works!')
