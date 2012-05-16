@@ -5,9 +5,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import connections
 from django.test.client import RequestFactory, Client
-from django.test.testcases import LiveServerThread
 
-from .marks import transaction_test_case
+try:
+    from django.test.testcases import LiveServerThread
+    LIVE_SERVER_SUPPORT = True
+except ImportError:
+    LIVE_SERVER_SUPPORT = False
 
 
 def pytest_funcarg__client(request):
@@ -122,6 +125,9 @@ def get_live_server_host_ports():
 
 
 def pytest_funcarg__live_server(request):
+    if not LIVE_SERVER_SUPPORT:
+        raise Exception('The kwarg liveserver is not supported in Django <= 1.3')
+
     def setup_live_server():
         return LiveServer(*get_live_server_host_ports())
 
