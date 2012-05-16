@@ -59,7 +59,7 @@ decorators
 transaction_test_case
 ~~~~~~~~~~~~~~~~~~~~~
 
-When writing unittest style tests, Django's `django.test.TestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase> or
+When writing unittest style tests, Django's `django.test.TestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_ or
 `django.test.TransactionTestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_ is the easiest way of
 writing test cases which gets a clean test database.
 
