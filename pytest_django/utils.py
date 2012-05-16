@@ -1,6 +1,13 @@
 from django.db import connections
 from django.core.management import call_command
-from django.test.testcases import SimpleTestCase, TransactionTestCase, TestCase
+
+from django.test import TransactionTestCase, TestCase
+
+try:
+    from django.test import SimpleTestCase as DjangoBaseTestCase
+    DjangoBaseTestCase  # Avoid pyflakes warning about redefinition of import
+except ImportError:
+    DjangoBaseTestCase = TestCase
 
 
 def is_django_unittest(item):
@@ -8,7 +15,7 @@ def is_django_unittest(item):
     Returns True if the item is a Django test case, otherwise False.
     """
 
-    return hasattr(item.obj, 'im_class') and issubclass(item.obj.im_class, SimpleTestCase)
+    return hasattr(item.obj, 'im_class') and issubclass(item.obj.im_class, DjangoBaseTestCase)
 
 
 def get_django_unittest(item):

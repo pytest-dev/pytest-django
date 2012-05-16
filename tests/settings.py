@@ -15,3 +15,6 @@ INSTALLED_APPS = [
 ]
 
 STATIC_URL = '/static/'
+SECRET_KEY = 'foobar'
+
+SITE_ID = 1234  # Needed for 1.3 compatibility
