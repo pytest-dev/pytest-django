@@ -10,4 +10,4 @@ install:
   - pip install --use-mirrors -q pytest
   - pip install --use-mirrors -q django==$DJANGO_VERSION
   - python setup.py develop
-script: py.test
+script: DJANGO_SETTINGS_MODULE=tests.settings py.test
