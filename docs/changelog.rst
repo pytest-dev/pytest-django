@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.2.1
+-----
+ * Disable database access and raise errors when using --no-db and accessing
+   the database by accident.
+
 1.2
 ---
  * Added the ``--no-db`` command line option.
