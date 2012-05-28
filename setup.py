@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name='pytest-django',
-    version='1.2.1',
+    version='1.2.2',
     description='A Django plugin for py.test.',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',

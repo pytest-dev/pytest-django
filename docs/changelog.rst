@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.2.2
+-----
+ * Fixed Django 1.3 compatibility.
+
 1.2.1
 -----
  * Disable database access and raise errors when using --no-db and accessing
