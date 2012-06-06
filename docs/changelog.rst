@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.3
+---
+ * Added ``--reuse-db`` and ``--create-db`` to allow database re-use.
+
 1.2.2
 -----
  * Fixed Django 1.3 compatibility.
