@@ -2,8 +2,6 @@ import urllib
 import django
 import pytest
 
-from pytest_django import transaction_test_case
-
 from .app.models import Item
 from .test_transactions import django_transactions_is_noops
 
@@ -25,14 +23,12 @@ def _test_live_server(live_server):
     assert response_data == 'Item count: 2'
 
 
-@transaction_test_case
 @pytest.urls('tests.urls_liveserver')
 @pytest.mark.skipif(is_not_django_14_or_newer)
 def test_live_server_url_funcarg(live_server):
     _test_live_server(live_server)
 
 
-@transaction_test_case
 @pytest.urls('tests.urls_liveserver')
 @pytest.mark.skipif(is_not_django_14_or_newer)
 def test_live_server_url_funcarg_again(live_server):
@@ -43,7 +39,6 @@ def pytest_funcarg__created_item(request):
     return Item.objects.create(name='created by a funcarg')
 
 
-@transaction_test_case
 @pytest.mark.skipif(is_not_django_14_or_newer)
 def test_live_server_created_item(created_item, live_server):
     # Make sure created_item exists from the live_server

@@ -110,6 +110,8 @@ def pytest_sessionfinish(session, exitstatus):
 _old_urlconf = None
 
 
+# trylast is needed to have access to funcargs
+@py.test.mark.trylast
 def pytest_runtest_setup(item):
     global _old_urlconf
 
