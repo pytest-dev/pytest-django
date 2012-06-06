@@ -4,3 +4,4 @@ build/
 *.egg-info
 _build
 .tox
+.DS_Store
