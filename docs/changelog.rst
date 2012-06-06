@@ -3,7 +3,9 @@ Changelog
 
 1.3
 ---
- * Added ``--reuse-db`` and ``--create-db`` to allow database re-use.
+ * Added ``--reuse-db`` and ``--create-db`` to allow database re-use. Many
+   thanks to `django-nose` <https://github.com/jbalogh/django-nose>` for
+   code and inspiration for this feature.
 
 1.2.2
 -----
