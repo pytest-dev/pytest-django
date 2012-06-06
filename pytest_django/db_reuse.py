@@ -58,7 +58,7 @@ def create_test_db(self, verbosity=1, autoclobber=False):
     return test_database_name
 
 
-def monkey_patch_creation_for_db_reuse(force_create_db):
+def monkey_patch_creation_for_db_reuse():
     for alias in connections:
         connection = connections[alias]
         creation = connection.creation
