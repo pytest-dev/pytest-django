@@ -8,8 +8,9 @@ funcargs
 pytest-django provides some pytest funcargs to provide depencies for tests. More information on funcargs is available in the `py.test documentation <http://pytest.org/latest/funcargs.html>`_
 
 
-rf
-~~
+``rf`` - ``RequestFactory``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 An instance of a `django.test.client.RequestFactory <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.client.RequestFactory>`_.
 
 Example
@@ -24,9 +25,9 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
-client
-~~~~~~
-An instance of a `django.test.client.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_.
+``client`` - ``django.test.Client``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+An instance of a `django.test.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_.
 
 Example
 """""""
@@ -38,9 +39,9 @@ Example
         assert response.content == 'Foobar'
 
 
-admin_client
+``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~
-An instance of a `django.test.client.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_, that is logged in as an admin user.
+An instance of a `django.test.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_, that is logged in as an admin user.
 
 Example
 """""""
@@ -56,8 +57,8 @@ Example
 decorators
 ----------
 
-transaction_test_case
-~~~~~~~~~~~~~~~~~~~~~
+``transaction_test_case``
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When writing unittest style tests, Django's `django.test.TestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_ or
 `django.test.TransactionTestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_ is the easiest way of
@@ -74,8 +75,8 @@ When transaction behaviour is being tested, the ``transaction_test_case`` decora
         # and reset to its original state.
         pass
 
-pytest.urls
-~~~~~~~~~~~
+``pytest.urls``
+~~~~~~~~~~~~~~
 A decorator to change the URLconf for a particular test, similar to the `urls` attribute on Django's `TestCase`.
 
 Example
