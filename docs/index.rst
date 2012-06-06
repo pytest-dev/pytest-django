@@ -4,9 +4,10 @@ Welcome to pytest-django's documentation!
 pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a set of useful tools for testing `Django <http://www.djangoproject.com/>`_ applications and projects.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    tutorial
+   database
    helpers
    command_line_options
    faq

@@ -7,7 +7,6 @@ test. Additionally, the settings are copied before each test and restored at
 the end of the test, so it is safe to modify settings within tests.
 """
 
-
 import sys
 
 from django.conf import settings
@@ -15,10 +14,12 @@ from django.core.management import call_command
 from django.core import management
 from django.core.urlresolvers import clear_url_caches
 from django.test.simple import DjangoTestSuiteRunner
+
 import django.db.backends.util
 
 
 from .utils import is_django_unittest, django_setup_item, django_teardown_item
+from .db_reuse import monkey_patch_creation_for_db_reuse
 
 import py
 
@@ -35,7 +36,7 @@ def get_runner(config):
             raise RuntimeError('No database access is allowed since --no-db was used!')
 
         def setup_databases():
-            # Monkey patch CursorWrapper to warn against database usgae
+            # Monkey patch CursorWrapper to warn against database usage
             django.db.backends.util.CursorWrapper = cursor_wrapper_exception
 
         def teardown_databases(db_config):
@@ -44,14 +45,35 @@ def get_runner(config):
         runner.setup_databases = setup_databases
         runner.teardown_databases = teardown_databases
 
+    elif config.option.reuse_db:
+
+        if not config.option.create_db:
+            monkey_patch_creation_for_db_reuse()
+
+        # Leave the database for the next test run
+        runner.teardown_databases = lambda db_config: None
+
     return runner
 
 
 def pytest_addoption(parser):
-    group = parser.getgroup("general")
+    group = parser.getgroup('django database setup')
     group._addoption('--no-db',
                      action='store_true', dest='no_db', default=False,
-                     help='Run tests without a database')
+                     help='Run tests without setting up database access. Any '
+                          'communication with databases will result in an '
+                          'exception.')
+
+    group._addoption('--reuse-db',
+                     action='store_true', dest='reuse_db', default=False,
+                     help='Re-use the testing database if it already exists, '
+                          'and do not remove it when the test finishes. This '
+                          'option will be ignored when --no-db is given.')
+
+    group._addoption('--create-db',
+                     action='store_true', dest='create_db', default=False,
+                     help='Re-create the database, even if it exists. This '
+                          'option will be ignored if not --reuse-db is given.')
 
 
 def _disable_south_management_command():
