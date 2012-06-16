@@ -6,8 +6,7 @@ https://github.com/jbalogh/django-nose/
 """
 
 import new
-
-from django.db import connections
+import py
 
 
 def can_support_db_reuse(connection):
@@ -59,6 +58,8 @@ def create_test_db(self, verbosity=1, autoclobber=False):
 
 
 def monkey_patch_creation_for_db_reuse():
+    connections = py.std.django.connections
+
     for alias in connections:
         connection = connections[alias]
         creation = connection.creation

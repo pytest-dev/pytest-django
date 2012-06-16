@@ -1,12 +1,9 @@
 import copy
 
+import pytest
 
-from django.conf import settings
-from django.contrib.auth.models import User
-
-from django.test.client import RequestFactory, Client
-
-from .live_server_helper import (HAS_LIVE_SERVER_SUPPORT, LiveServer,
+from .lazy_django import skip_if_no_django
+from .live_server_helper import (has_live_server_support, LiveServer,
                                  get_live_server_host_ports)
 
 
@@ -14,6 +11,9 @@ def pytest_funcarg__client(request):
     """
     Returns a Django test client instance.
     """
+    skip_if_no_django()
+
+    from django.test.client import Client
     return Client()
 
 
@@ -21,6 +21,8 @@ def pytest_funcarg__admin_client(request):
     """
     Returns a Django test client logged in as an admin user.
     """
+    from django.contrib.auth.models import User
+    from django.test.client import Client
 
     try:
         User.objects.get(username='admin')
@@ -41,6 +43,8 @@ def pytest_funcarg__rf(request):
     """
     Returns a RequestFactory instance.
     """
+    from django.test.client import RequestFactory
+
     return RequestFactory()
 
 
@@ -49,6 +53,8 @@ def pytest_funcarg__settings(request):
     Returns a Django settings object that restores any changes after the test
     has been run.
     """
+    from django.conf import settings
+
     old_settings = copy.deepcopy(settings)
 
     def restore_settings():
@@ -60,8 +66,8 @@ def pytest_funcarg__settings(request):
 
 
 def pytest_funcarg__live_server(request):
-    if not HAS_LIVE_SERVER_SUPPORT:
-        raise Exception('The liveserver funcarg is not supported in Django <= 1.3')
+    if not has_live_server_support():
+        pytest.fail('live_server tests is not supported in Django <= 1.3')
 
     def setup_live_server():
         return LiveServer(*get_live_server_host_ports())

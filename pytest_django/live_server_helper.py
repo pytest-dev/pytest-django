@@ -1,15 +1,20 @@
 import os
-from django.db import connections
 
-try:
-    from django.test.testcases import LiveServerThread
-    HAS_LIVE_SERVER_SUPPORT = True
-except ImportError:
-    HAS_LIVE_SERVER_SUPPORT = False
+
+def has_live_server_support():
+    try:
+        from django.test.testcases import LiveServerThread
+        LiveServerThread  # Ignore pyflakes warning
+        return True
+
+    except ImportError:
+        return False
 
 
 class LiveServer(object):
     def __init__(self, host, possible_ports):
+        from django.test.testcases import LiveServerThread
+        from django.db import connections
 
         connections_override = {}
 

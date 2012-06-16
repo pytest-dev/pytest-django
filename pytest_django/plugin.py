@@ -7,37 +7,28 @@ test. Additionally, the settings are copied before each test and restored at
 the end of the test, so it is safe to modify settings within tests.
 """
 
-import sys
+import os
 
-from django.conf import settings
-from django.core.management import call_command
-from django.core import management
-from django.core.urlresolvers import clear_url_caches
-from django.test.simple import DjangoTestSuiteRunner
-
-import django.db.backends.util
-
-
-from .utils import is_django_unittest, django_setup_item, django_teardown_item
 from .db_reuse import monkey_patch_creation_for_db_reuse
+from .lazy_django import do_django_imports, django_is_usable
+from .utils import is_django_unittest, django_setup_item, django_teardown_item
 
 import py
 
 
-suite_runner = None
-old_db_config = None
+def get_django_runner(no_db, reuse_db, create_db):
+    do_django_imports()
 
+    runner = py.std.django.test.simple.DjangoTestSuiteRunner(interactive=False)
 
-def get_runner(config):
-    runner = DjangoTestSuiteRunner(interactive=False)
-
-    if config.option.no_db:
+    if no_db:
         def cursor_wrapper_exception(*args, **kwargs):
-            raise RuntimeError('No database access is allowed since --no-db was used!')
+            raise RuntimeError('No database access is allowed since --no-db '
+                               'was used!')
 
         def setup_databases():
             # Monkey patch CursorWrapper to warn against database usage
-            django.db.backends.util.CursorWrapper = cursor_wrapper_exception
+            py.std.django.db.backends.util.CursorWrapper = cursor_wrapper_exception
 
         def teardown_databases(db_config):
             pass
@@ -45,9 +36,9 @@ def get_runner(config):
         runner.setup_databases = setup_databases
         runner.teardown_databases = teardown_databases
 
-    elif config.option.reuse_db:
+    elif reuse_db:
 
-        if not config.option.create_db:
+        if not create_db:
             monkey_patch_creation_for_db_reuse()
 
         # Leave the database for the next test run
@@ -57,7 +48,7 @@ def get_runner(config):
 
 
 def pytest_addoption(parser):
-    group = parser.getgroup('django database setup')
+    group = parser.getgroup('django')
     group._addoption('--no-db',
                      action='store_true', dest='no_db', default=False,
                      help='Run tests without setting up database access. Any '
@@ -75,36 +66,63 @@ def pytest_addoption(parser):
                      help='Re-create the database, even if it exists. This '
                           'option will be ignored if not --reuse-db is given.')
 
+    group._addoption('--ds',
+                     action='store', type='string', dest='ds', default=None,
+                     help='Set DJANGO_SETTINGS_MODULE.')
+
+    parser.addini('DJANGO_SETTINGS_MODULE',
+                  'Django settings module to use by pytest-django')
+
 
 def _disable_south_management_command():
-    management.get_commands()
-    # make sure `south` migrations are disabled
-    management._commands['syncdb'] = 'django.core'
+    py.std.django.management.management.get_commands()
+    py.std.django.management.management._commands['syncdb'] = 'django.core'
+
+
+def configure_django_settings_module(session):
+    # Figure out DJANGO_SETTINGS_MODULE, the first of these that is true:ish
+    # will be used
+    ordered_settings = [
+        session.config.option.ds,
+        session.config.getini('DJANGO_SETTINGS_MODULE'),
+        os.environ.get('DJANGO_SETTINGS_MODULE')
+    ]
+
+    try:
+        ds = [x for x in ordered_settings if x][0]
+    except IndexError:
+        # Make sure it is undefined
+        os.environ.pop('DJANGO_SETTINGS_MODULE', None)
+    else:
+        os.environ['DJANGO_SETTINGS_MODULE'] = ds
 
 
 def pytest_sessionstart(session):
-    global suite_runner, old_db_config
+    configure_django_settings_module(session)
 
-    _disable_south_management_command()
+    if django_is_usable():
+        runner = get_django_runner(no_db=session.config.option.no_db,
+                                   create_db=session.config.option.create_db,
+                                   reuse_db=session.config.option.reuse_db)
 
-    suite_runner = get_runner(session.config)
-    suite_runner.setup_test_environment()
+        runner.setup_test_environment()
+        old_db_config = runner.setup_databases()
 
-    old_db_config = suite_runner.setup_databases()
+        py.std.django.conf.settings.DEBUG_PROPAGATE_EXCEPTIONS = True
 
-    settings.DEBUG_PROPAGATE_EXCEPTIONS = True
+        session.config.pytest_django_runner = runner
+        session.config.pytest_django_old_db_config = old_db_config
+    else:
+        session.config.pytest_django_runner = None
 
 
 def pytest_sessionfinish(session, exitstatus):
-    global suite_runner, old_db_config
+    runner = session.config.pytest_django_runner
 
-    capture = py.io.StdCapture()
-    suite_runner.teardown_test_environment()
-
-    suite_runner.teardown_databases(old_db_config)
-
-    unused_out, err = capture.reset()
-    sys.stderr.write(err)
+    if runner:
+        print('\n')
+        runner.teardown_databases(session.config.pytest_django_old_db_config)
+        runner.teardown_test_environment()
 
 
 _old_urlconf = None
@@ -117,9 +135,9 @@ def pytest_runtest_setup(item):
 
     # Set the URLs if the pytest.urls() decorator has been applied
     if hasattr(item.obj, 'urls'):
-        _old_urlconf = settings.ROOT_URLCONF
-        settings.ROOT_URLCONF = item.obj.urls
-        clear_url_caches()
+        _old_urlconf = py.std.django.conf.settings.ROOT_URLCONF
+        py.std.django.conf.settings.ROOT_URLCONF = item.obj.urls
+        py.std.django.core.urlresolvers.clear_url_caches()
 
     # Invoke Django code to prepare the environment for the test run
     if not item.config.option.no_db and not is_django_unittest(item):
@@ -134,9 +152,10 @@ def pytest_runtest_teardown(item):
         django_teardown_item(item)
 
     if hasattr(item, 'urls') and _old_urlconf is not None:
-        settings.ROOT_URLCONF = _old_urlconf
+
+        py.std.django.conf.settings.ROOT_URLCONF = _old_urlconf
         _old_urlconf = None
-        clear_url_caches()
+        py.std.django.core.urlresolvers.clear_url_caches()
 
 
 def pytest_namespace():
