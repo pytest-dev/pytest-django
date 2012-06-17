@@ -6,14 +6,6 @@ from django.conf import settings
 
 from pytest_django.db_reuse import can_support_db_reuse
 
-MODEL = '''
-from django.db import models
-
-class Item(models.Model):
-    name = models.CharField(max_length=10)
-
-'''
-
 
 TESTS = '''
 from app.models import Item
@@ -23,6 +15,8 @@ def test_db_can_be_accessed():
 '''
 
 import shutil
+
+TESTS_DIR = py.path.local(__file__)
 
 
 def test_db_reuse(testdir, monkeypatch):
@@ -55,10 +49,10 @@ INSTALLED_APPS = [
 ''' % {'db_settings': repr(db_settings)}
 
     tpkg_path = testdir.mkpydir('tpkg')
-
-    app_source = py.path.local(__file__).dirpath('app')
+    app_source = TESTS_DIR.dirpath('app')
 
     # Copy the test app to make it available in the new test run
+
     shutil.copytree(unicode(app_source), unicode(tpkg_path.join('app')))
 
     tpkg_path.join("test_db_reuse.py").write(TESTS)
