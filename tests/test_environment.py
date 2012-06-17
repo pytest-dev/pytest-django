@@ -35,4 +35,7 @@ def test_database_rollback_again():
 
 
 def test_database_name():
-    assert connection.settings_dict['NAME'] == ':memory:'
+    name = connection.settings_dict['NAME']
+    assert name == ':memory:' or name.startswith('test_')
+
+

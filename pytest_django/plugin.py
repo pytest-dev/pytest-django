@@ -140,20 +140,10 @@ def pytest_runtest_teardown(item):
 
 
 def pytest_namespace():
-
     def load_fixture(fixture):
-        """
-        Loads a fixture, useful for loading fixtures in funcargs.
-
-        Example:
-
-            def pytest_funcarg__articles(request):
-                pytest.load_fixture('test_articles')
-                return Article.objects.all()
-        """
-        call_command('loaddata', fixture, **{
-            'verbosity': 1,
-        })
+        raise Exception('load_fixture is deprecated. Use a standard Django '
+                        'test case or invoke call_command("loaddata", fixture)'
+                        'instead.')
 
     def urls(urlconf):
         """
