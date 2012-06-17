@@ -58,7 +58,7 @@ def create_test_db(self, verbosity=1, autoclobber=False):
 
 
 def monkey_patch_creation_for_db_reuse():
-    connections = py.std.django.connections
+    from django.db import connections
 
     for alias in connections:
         connection = connections[alias]
