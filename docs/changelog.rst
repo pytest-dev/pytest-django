@@ -1,5 +1,9 @@
 Changelog
 =========
+1.4
+---
+* Removed undocumented pytest.load_fixture: If you need this feature, just use
+  ``django.management.call_command('loaddata', 'foo.json')`` instead.
 
 1.3
 ---
