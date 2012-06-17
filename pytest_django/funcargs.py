@@ -21,6 +21,8 @@ def pytest_funcarg__admin_client(request):
     """
     Returns a Django test client logged in as an admin user.
     """
+    skip_if_no_django()
+
     from django.contrib.auth.models import User
     from django.test.client import Client
 
@@ -43,6 +45,8 @@ def pytest_funcarg__rf(request):
     """
     Returns a RequestFactory instance.
     """
+    skip_if_no_django()
+
     from django.test.client import RequestFactory
 
     return RequestFactory()
@@ -53,6 +57,8 @@ def pytest_funcarg__settings(request):
     Returns a Django settings object that restores any changes after the test
     has been run.
     """
+    skip_if_no_django()
+
     from django.conf import settings
 
     old_settings = copy.deepcopy(settings)
@@ -66,6 +72,8 @@ def pytest_funcarg__settings(request):
 
 
 def pytest_funcarg__live_server(request):
+    skip_if_no_django()
+
     if not has_live_server_support():
         pytest.fail('live_server tests is not supported in Django <= 1.3')
 

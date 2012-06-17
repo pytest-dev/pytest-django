@@ -72,6 +72,17 @@ def django_setup_item(item):
     item.keywords['_django_setup'] = True
 
 
+def disable_south_syncdb():
+    """
+    Make sure the builtin syncdb is used instead of South's.
+    """
+    from django.core import management
+    commands = management.get_commands()
+
+    if commands['syncdb'] == 'south':
+        management._commands['syncdb'] = 'django.core'
+
+
 def django_teardown_item(item):
     if not item.keywords.get('_django_setup'):
         return

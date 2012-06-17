@@ -2,6 +2,8 @@
 NON_DJANGO_TESTS = '''
 import os
 
+import pytest
+
 from pytest_django.lazy_django import django_is_usable
 
 def test_django_settings_module_not_set():
@@ -15,6 +17,23 @@ def test_django_is_usable():
 
 def test_funcarg_client_skip(client):
     assert False, 'This test should be skipped'
+
+def test_funcarg_admin_client_skip(admin_client):
+    assert False, 'This test should be skipped'
+
+def test_funcarg_rf_skip(rf):
+    assert False, 'This test should be skipped'
+
+def test_funcarg_settings_skip(settings):
+    assert False, 'This test should be skipped'
+
+def test_funcarg_live_server_skip(live_server):
+    assert False, 'This test should be skipped'
+
+@pytest.urls('foo.bar')
+def test_urls():
+    assert False, 'This test should be skipped'
+
 
 '''
 
@@ -31,6 +50,22 @@ def test_non_django_test(testdir, monkeypatch):
 
     result.stdout.fnmatch_lines([
         "*test_funcarg_client_skip SKIPPED*",
+    ])
+
+    result.stdout.fnmatch_lines([
+        "*test_funcarg_admin_client_skip SKIPPED*",
+    ])
+
+    result.stdout.fnmatch_lines([
+        "*test_funcarg_rf_skip SKIPPED*",
+    ])
+
+    result.stdout.fnmatch_lines([
+        "*test_funcarg_settings_skip SKIPPED*",
+    ])
+
+    result.stdout.fnmatch_lines([
+        "*test_funcarg_live_server_skip SKIPPED*",
     ])
 
     assert result.ret == 0
