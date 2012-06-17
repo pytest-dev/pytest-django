@@ -4,8 +4,6 @@ import py
 
 from django.conf import settings
 
-from pytest_django.db_reuse import can_support_db_reuse
-
 
 TESTS = '''
 from app.models import Item
