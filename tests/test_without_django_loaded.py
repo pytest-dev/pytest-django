@@ -34,7 +34,6 @@ def test_funcarg_live_server_skip(live_server):
 def test_urls():
     assert False, 'This test should be skipped'
 
-
 '''
 
 
@@ -45,27 +44,13 @@ def test_non_django_test(testdir, monkeypatch):
 
     result = testdir.runpytest('-v')
     result.stdout.fnmatch_lines([
+        '*test_funcarg_client_skip SKIPPED*',
+        '*test_funcarg_admin_client_skip SKIPPED*',
+        '*test_funcarg_rf_skip SKIPPED*',
+        '*test_funcarg_settings_skip SKIPPED*',
+        '*test_funcarg_live_server_skip SKIPPED*',
+        '*test_urls SKIPPED*',
         "*2 passed*",
-    ])
-
-    result.stdout.fnmatch_lines([
-        "*test_funcarg_client_skip SKIPPED*",
-    ])
-
-    result.stdout.fnmatch_lines([
-        "*test_funcarg_admin_client_skip SKIPPED*",
-    ])
-
-    result.stdout.fnmatch_lines([
-        "*test_funcarg_rf_skip SKIPPED*",
-    ])
-
-    result.stdout.fnmatch_lines([
-        "*test_funcarg_settings_skip SKIPPED*",
-    ])
-
-    result.stdout.fnmatch_lines([
-        "*test_funcarg_live_server_skip SKIPPED*",
     ])
 
     assert result.ret == 0
