@@ -1,5 +1,7 @@
 from __future__ import with_statement
 
+import pytest
+
 from django.db import transaction
 
 from pytest_django import transaction_test_case
@@ -29,19 +31,23 @@ def django_transactions_is_noops():
     return Item.objects.exists()
 
 
-@transaction_test_case
+@transaction_test_case          # XXX
+@pytest.mark.djangodb(transaction=True)
 def test_transaction_test_case():
     assert not django_transactions_is_noops()
 
 
-@transaction_test_case
+@transaction_test_case          # XXX
+@pytest.mark.djangodb(transaction=True)
 def test_transaction_test_case_again():
     test_transaction_test_case()
 
 
+@pytest.mark.djangodb
 def test_normal_test_case():
     assert django_transactions_is_noops()
 
 
+@pytest.mark.djangodb
 def test_normal_test_case_again():
     test_normal_test_case()

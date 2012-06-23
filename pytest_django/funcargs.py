@@ -74,6 +74,9 @@ def pytest_funcarg__settings(request):
 def pytest_funcarg__live_server(request):
     skip_if_no_django()
 
+    if not hasattr(request.function, 'djangodb'):
+        request.function.djangodb = pytest.mark.djangodb(transaction=True)
+
     if not has_live_server_support():
         pytest.fail('live_server tests is not supported in Django <= 1.3')
 
@@ -83,4 +86,6 @@ def pytest_funcarg__live_server(request):
     def teardown_live_server(live_server):
         live_server.thread.join()
 
-    return request.cached_setup(setup=setup_live_server, teardown=teardown_live_server, scope='session')
+    return request.cached_setup(setup=setup_live_server,
+                                teardown=teardown_live_server,
+                                scope='session')
