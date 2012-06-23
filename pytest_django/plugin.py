@@ -91,21 +91,24 @@ def pytest_addoption(parser):
                   'Django settings module to use by pytest-django')
 
 
-def configure_django_settings_module(session):
-    """
-    Configures DJANGO_SETTINGS_MODULE. The first specified value from the
-    following will be used:
-     * --ds command line option
-     * DJANGO_SETTINGS_MODULE pytest.ini option
-     * DJANGO_SETTINGS_MODULE
+def pytest_configure(config):
+    """Configure DJANGO_SETTINGS_MODULE
 
+    The first specified value from the following will be used:
+
+    * --ds command line option
+    * DJANGO_SETTINGS_MODULE pytest.ini option
+    * DJANGO_SETTINGS_MODULE
+
+    It will set the "ds" config option regardless of the method used
+    to set DJANGO_SETTINGS_MODULE, allowing to check for the plugin
+    being used by doing `config.getvalue('ds')`.
     """
     ordered_settings = [
-        session.config.option.ds,
-        session.config.getini('DJANGO_SETTINGS_MODULE'),
+        config.option.ds,
+        config.getini('DJANGO_SETTINGS_MODULE'),
         os.environ.get('DJANGO_SETTINGS_MODULE')
     ]
-
     try:
         # Get the first non-empty value
         ds = [x for x in ordered_settings if x][0]
@@ -113,12 +116,11 @@ def configure_django_settings_module(session):
         # No value was given -- make sure DJANGO_SETTINGS_MODULE is undefined
         os.environ.pop('DJANGO_SETTINGS_MODULE', None)
     else:
+        config.option.ds = ds   # enables config.getvalue('ds')
         os.environ['DJANGO_SETTINGS_MODULE'] = ds
 
 
 def pytest_sessionstart(session):
-    configure_django_settings_module(session)
-
     if django_is_usable():
         from django.conf import settings
 
