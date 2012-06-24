@@ -2,6 +2,7 @@ import copy
 
 import pytest
 
+from .django_compat import setup_databases
 from .lazy_django import skip_if_no_django
 from .live_server_helper import (has_live_server_support, LiveServer,
                                  get_live_server_host_ports)
@@ -22,6 +23,9 @@ def pytest_funcarg__admin_client(request):
     Returns a Django test client logged in as an admin user.
     """
     skip_if_no_django()
+    if not hasattr(request.function, 'djangodb'):
+        request.function.djangodb = pytest.mark.djangodb
+    setup_databases(request._pyfuncitem.session)
 
     from django.contrib.auth.models import User
     from django.test.client import Client

@@ -10,7 +10,8 @@ the end of the test, so it is safe to modify settings within tests.
 import os
 
 from .db_reuse import monkey_patch_creation_for_db_reuse
-from .django_compat import (disable_south_syncdb, is_django_unittest,
+from .django_compat import (disable_south_syncdb, setup_databases,
+                            teardown_databases, is_django_unittest,
                             clear_django_outbox, django_setup_item,
                             django_teardown_item)
 from .lazy_django import django_is_usable, skip_if_no_django
@@ -115,10 +116,9 @@ def pytest_sessionstart(session):
 
 
 def pytest_sessionfinish(session, exitstatus):
-    runner = getattr(session.config, 'pytest_django_runner', None)
+    runner = getattr(session.config, 'django_runner', None)
     if runner:
-        print('\n')
-        runner.teardown_databases(session.config.pytest_django_old_db_config)
+        teardown_databases(session)
         runner.teardown_test_environment()
 
 
@@ -168,10 +168,7 @@ def pytest_runtest_setup(item):
     if hasattr(item.obj, 'djangodb'):
         # Setup Django databases
         skip_if_no_django()
-        if not hasattr(item.session, 'django_dbcfg'):
-            disable_south_syncdb()
-            dbcfg = item.session.django_runner.setup_databases()
-            item.session.django_dbcfg = dbcfg
+        setup_databases(item.session)
         django_setup_item(item)
     elif django_is_usable() and not is_django_unittest(item):
         # Block access to the Django databases

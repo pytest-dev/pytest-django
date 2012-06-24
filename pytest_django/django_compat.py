@@ -15,10 +15,32 @@ def disable_south_syncdb():
         management._commands['syncdb'] = 'django.core'
 
 
+def setup_databases(session):
+    """Ensure test databases are set up for this session
+
+    It is safe to call this multiple times.
+    """
+    if not hasattr(session, 'django_dbcfg'):
+        disable_south_syncdb()
+        dbcfg = session.django_runner.setup_databases()
+        session.django_dbcfg = dbcfg
+
+
+def teardown_databases(session):
+    """Ensure test databases are torn down for this session
+
+    It is safe to call this even if the databases where not setup in
+    the first place.
+    """
+    if hasattr(session, 'django_runner') and hasattr(session, 'django_dbcfg'):
+        print('\n')
+        session.django_runner.teardown_databases(session.django_dbcfg)
+
+
 def is_transaction_test_case(item):
     mark = getattr(item.obj, 'djangodb', None)
     if mark:
-        if mark.transaction:
+        if getattr(mark, 'transaction', None):
             return True
         if has_live_server_support() and 'live_server' in item.funcargs:
             # This case is odd, it can only happen if someone marked
