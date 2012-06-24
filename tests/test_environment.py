@@ -42,3 +42,6 @@ def test_database_name():
     assert name == ':memory:' or name.startswith('test_')
 
 
+def test_database_noaccess():
+    with pytest.raises(pytest.fail.Exception):
+        Item.objects.count()
