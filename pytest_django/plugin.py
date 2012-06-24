@@ -135,9 +135,16 @@ def validate_djangodb(marker):
     marker.transaction, marker.multidb = apifun(*marker.args, **marker.kwargs)
 
 
-# trylast is needed to have access to funcargs
+# Trylast is needed to have access to funcargs, live_server suport
+# needs this and some funcargs add the djangodb marker which also
+# needs this to be called afterwards.
 @py.test.mark.trylast
 def pytest_runtest_setup(item):
+    # Validate the djangodb mark early, this makes things easier later
+    if hasattr(item.obj, 'djangodb'):
+        validate_djangodb(item.obj.djangodb)
+
+    # Empty the django test outbox
     if django_is_usable():
         clear_django_outbox()
 
@@ -150,9 +157,16 @@ def pytest_runtest_setup(item):
         settings.ROOT_URLCONF = item.obj.urls
         clear_url_caches()
 
+    # Backwards compatibility
+    if hasattr(item.obj, 'transaction_test_case'):
+        if not hasattr(item.obj, 'djangodb'):
+            item.obj.djangodb = pytest.mark.djangodb(transaction=True)
+            validate_djangodb(item.obj.djangodb)
+        else:
+            item.obj.djangodb.transaction = True
+
     if hasattr(item.obj, 'djangodb'):
         # Setup Django databases
-        validate_djangodb(item.obj.djangodb)
         skip_if_no_django()
         if not hasattr(item.session, 'django_dbcfg'):
             disable_south_syncdb()
