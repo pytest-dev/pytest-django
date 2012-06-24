@@ -55,6 +55,8 @@ def django_setup_item(item):
         pass
     else:
         item.django_unittest = TestCase(methodName='__init__')
+        if item.obj.djangodb.multidb:
+            item.django_unittest.multi_db = True
         item.django_unittest._pre_setup()
 
 
