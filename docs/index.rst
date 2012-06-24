@@ -37,8 +37,8 @@ Quick Start
 Requirements
 ============
 
-These packages are required to use pytest-django, and should be installed
-separately.
+These packages are required to use pytest-django, pip will install
+them automatically.
 
  * Django 1.3+ (1.4 is supported)
 

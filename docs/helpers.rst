@@ -40,7 +40,7 @@ Example
 
 
 ``admin_client`` - ``django.test.Client`` logged in as admin
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 An instance of a `django.test.Client <https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_, that is logged in as an admin user.
 
 Example
@@ -52,13 +52,48 @@ Example
         response = admin_client.get('/admin/')
         assert response.status_code == 200
 
+As an extra bonus this will automatically mark the database using the
+``djangodb`` mark.
+
+
+Markers
+-------
+
+``pytest-django`` registers and uses two markers.  See the py.test
+documentation_ on what marks and and for notes on using_ them.
+
+.. _documentation: http://pytest.org/latest/mark.html
+.. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
+
+
+.. py:function:: pytest.mark.djangodb(transaction=False, multidb=False)
+
+   This is used to mark a test function as requiring the database.  It
+   will ensure the database is setup correctly for the test.  Any test
+   not marked with ``djangodb`` which tries to use the database will
+   fail.
+
+   The *transaction* argument will allow the test to use
+   transactions.  Without it transaction operations are noops during
+   the test.
+
+   The *multidb* argument will ensure all tests databases are setup.
+   Normally only the default database is setup.
+
 
 
 decorators
 ----------
 
+Decorators are deprecated and have been replaced with ``py.test``
+marks.
+
+
 ``transaction_test_case``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 1.4
+   Use :func:`pytest.mark.djangodb` instead.
 
 When writing unittest style tests, Django's `django.test.TestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_ or
 `django.test.TransactionTestCase <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_ is the easiest way of
@@ -76,7 +111,12 @@ When transaction behaviour is being tested, the ``transaction_test_case`` decora
         pass
 
 ``pytest.urls``
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+
+.. deprecated:: 1.4
+   Use :func:`pytest.mark.urls` instead.
+
+
 A decorator to change the URLconf for a particular test, similar to the `urls` attribute on Django's `TestCase`.
 
 Example

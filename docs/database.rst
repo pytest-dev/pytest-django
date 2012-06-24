@@ -1,20 +1,86 @@
 Database creation/re-use
 ========================
 
-By default, when invoking ``py.test`` with ``pytest-django`` installed,
-databases defined in the settings will be created the same way as when
-``manage.py test`` is invoked.
+``pytest-django`` takes a conservative approach to enabling database
+access.  By default your tests will fail if they try to access the
+database.  Only if you explicitly request database access will this be
+allowed.  This encourages you to keep database-needing tests to a
+minimum which is a best practice since next-to-no business logic
+should be requiring the database.  Moreover it makes it very clear
+what code uses the database and catches any mistakes.
 
-``pytest-django`` offers some greater flexibility how the test database
-should be created/destroyed.
+Enabling database access
+------------------------
+
+You can use `py.test marks <http://pytest.org/latest/mark.html>`_ to
+tell ``pytest-django`` your test needs database access::
+
+   import pytest
+
+   @pytest.mark.djangodb
+   def test_my_user():
+       me = User.objects.get(username='me')
+       assert me.is_superuser
+
+It is also possible to mark all tests in a class or module at once.
+This demonstrates all the ways of marking, even though they overlap.
+Just one of these marks would have been sufficient.  See the `py.test
+documentation
+<http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules>`_
+for detail::
+
+   import pytest
+
+   pytestmark = pytest.mark.djangodb
+
+   @pytest.mark.djangodb
+   class Test Users:
+       pytestmark = pytest.mark.djangodb
+       def test_my_user(self):
+           me = User.objects.get(username='me')
+           assert me.is_superuser
 
 
-``--no-db`` - disable database access
---------------------------------------
-This option can be given to prevent the database from being accessed during
-test runs. It will raise exceptions for any Django database access. It can be
-useful when writing pure unit tests to make sure database access does not
-happens by accident.
+By default ``pytest-django`` will set up the Django databases the
+first time a test needs them.  Once setup the database is cached for
+used for all subsequent tests and rolls back transactions to isolate
+tests from each other.  This is the same way the standard Django
+`TestCase
+<https://docs.djangoproject.com/en/1.4/topics/testing/#testcase>`_
+uses the database.  However ``pytest-django`` also caters for
+transaction test cases and allows you to keep the test databases
+configured across different test runs.
+
+
+Testing transactions
+--------------------
+
+Django itself has the ``TransactionTestCase`` which allows you to test
+transactions and will flush the database between tests to isolate
+them.  The downside of this is that these tests are much slower to
+set up due to the required flushing of the database.
+``pytest-django`` also supports this style of tests, which you can
+select using an argument to the ``djangodb`` mark::
+
+   @pytest.mark.djangodb(transaction=True)
+   def test_spam():
+       pass  # test relying on transactions
+
+
+Tests requiring multiple databases
+----------------------------------
+
+Just like Django by default ``pytest-django`` only sets up the default
+database.  If your test needs all the databases you can specify this
+with another argument to the ``djangodb`` mark::
+
+   @pytest.mark.djangodb(multidb=True)
+   def test_spam():
+       pass  # test needing multiple databases
+
+This works just like the Django `multi_db
+<https://docs.djangoproject.com/en/1.4/topics/testing/#multi-database-support>`_
+support which you can consult for more details.
 
 
 ``--reuse-db`` - reuse the testing database between test runs
