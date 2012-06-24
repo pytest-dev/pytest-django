@@ -80,6 +80,11 @@ documentation_ on what marks and and for notes on using_ them.
    The *multidb* argument will ensure all tests databases are setup.
    Normally only the default database is setup.
 
+.. py:function:: pytest.mark.urls(urls)
+
+   Specify a different URL conf module for the marked tests.  *urls*
+   is a string pointing to a module, e.g. ``myapp.test_urls``.  This
+   is similar to Django's ``TestCase.urls`` attribute.
 
 
 decorators

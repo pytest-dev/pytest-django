@@ -102,6 +102,12 @@ def pytest_configure(config):
         'TransactionTestCase while the *multidb* argument will work like '
         "Django's multi_db option on a TestCase: all test databases will be "
         'flushed instead of just the default.')
+    config.addinivalue_line(
+        'markers',
+        'urls(modstr): Use a different URLconf for this test, similar to '
+        'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
+        'a string specifying the module of a URL config, e.g. '
+        '"my_app.test_urls".')
 
 
 def pytest_sessionstart(session):
@@ -135,6 +141,17 @@ def validate_djangodb(marker):
     marker.transaction, marker.multidb = apifun(*marker.args, **marker.kwargs)
 
 
+def validate_urls(marker):
+    """This function validates the urls marker
+
+    It checks the signature and creates the `urls` attribute on the
+    marker which will have the correct value.
+    """
+    def apifun(urls):
+        return urls
+    marker.urls = apifun(*marker.args, **marker.kwargs)
+
+
 # Trylast is needed to have access to funcargs, live_server suport
 # needs this and some funcargs add the djangodb marker which also
 # needs this to be called afterwards.
@@ -149,12 +166,18 @@ def pytest_runtest_setup(item):
         clear_django_outbox()
 
     # Set the URLs if the pytest.urls() decorator has been applied
-    if hasattr(item.obj, 'urls'):
+    marker = getattr(item.obj, 'urls', None)
+    if marker:
         skip_if_no_django()
         from django.conf import settings
         from django.core.urlresolvers import clear_url_caches
+        if isinstance(marker, basestring):
+            urls = marker       # Backwards compatibility
+        else:
+            validate_urls(marker)
+            urls = marker.urls
         item.django_urlconf = settings.ROOT_URLCONF
-        settings.ROOT_URLCONF = item.obj.urls
+        settings.ROOT_URLCONF = urls
         clear_url_caches()
 
     # Backwards compatibility
@@ -188,7 +211,7 @@ def pytest_runtest_teardown(item):
     if django_is_usable():
         django_teardown_item(item)
 
-    if hasattr(item, 'urls'):
+    if hasattr(item, 'django_urlconf'):
         from django.conf import settings
         from django.core.urlresolvers import clear_url_caches
         settings.ROOT_URLCONF = item.django_urlconf
