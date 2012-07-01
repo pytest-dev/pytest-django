@@ -24,7 +24,7 @@ from django.conf import settings
 import pytest
 
 
-@pytest.urls('tests.urls_overridden')
+@pytest.mark.urls('tests.urls_overridden')
 def test_urls(client):
     assert settings.ROOT_URLCONF == 'tests.urls_overridden'
     assert is_valid_path('/overridden_url/')
