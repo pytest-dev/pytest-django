@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from pytest_django.lazy_django import django_is_usable
+from pytest_django.lazy_django import django_settings_is_configured
 
 def test_django_settings_module_not_set():
     """
@@ -12,8 +12,8 @@ def test_django_settings_module_not_set():
     """
     assert 'DJANGO_SETTINGS_MODULE' not in os.environ
 
-def test_django_is_usable():
-    assert not django_is_usable()
+def test_django_settings_is_configured():
+    assert not django_settings_is_configured()
 
 def test_funcarg_client_skip(client):
     assert False, 'This test should be skipped'

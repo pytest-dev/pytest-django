@@ -12,9 +12,9 @@ import os
 from .db_reuse import monkey_patch_creation_for_db_reuse
 from .django_compat import (disable_south_syncdb, is_django_unittest,
                             django_setup_item, django_teardown_item)
-from .lazy_django import django_is_usable, skip_if_no_django
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
-import py
+import pytest
 
 
 def get_django_test_runner(no_db, reuse_db, create_db):
@@ -63,6 +63,28 @@ def get_django_test_runner(no_db, reuse_db, create_db):
     return runner
 
 
+def get_django_settings_module(config):
+    """
+    Returns the value of DJANGO_SETTINGS_MODULE. The first specified value from
+    the following will be used:
+     * --ds command line option
+     * DJANGO_SETTINGS_MODULE pytest.ini option
+     * DJANGO_SETTINGS_MODULE
+
+    """
+    ordered_settings = [
+        config.option.ds,
+        config.getini('DJANGO_SETTINGS_MODULE'),
+        os.environ.get('DJANGO_SETTINGS_MODULE')
+    ]
+
+    for ds in ordered_settings:
+        if ds:
+            return ds
+
+    return None
+
+
 def pytest_addoption(parser):
     group = parser.getgroup('django')
 
@@ -91,36 +113,37 @@ def pytest_addoption(parser):
                   'Django settings module to use by pytest-django')
 
 
-def configure_django_settings_module(session):
-    """
-    Configures DJANGO_SETTINGS_MODULE. The first specified value from the
-    following will be used:
-     * --ds command line option
-     * DJANGO_SETTINGS_MODULE pytest.ini option
-     * DJANGO_SETTINGS_MODULE
+def pytest_configure(config):
+    ds = get_django_settings_module(config)
 
-    """
-    ordered_settings = [
-        session.config.option.ds,
-        session.config.getini('DJANGO_SETTINGS_MODULE'),
-        os.environ.get('DJANGO_SETTINGS_MODULE')
-    ]
-
-    try:
-        # Get the first non-empty value
-        ds = [x for x in ordered_settings if x][0]
-    except IndexError:
-        # No value was given -- make sure DJANGO_SETTINGS_MODULE is undefined
-        os.environ.pop('DJANGO_SETTINGS_MODULE', None)
-    else:
+    if ds:
         os.environ['DJANGO_SETTINGS_MODULE'] = ds
+    else:
+        os.environ.pop('DJANGO_SETTINGS_MODULE', None)
 
 
 def pytest_sessionstart(session):
-    configure_django_settings_module(session)
+    if django_settings_is_configured():
 
-    if django_is_usable():
+        # This import fiddling is needed to give a proper error message
+        # when the Django settings module cannot be found
+        try:
+            import django
+            django  # Silence pyflakes
+        except ImportError:
+            raise pytest.UsageError('django could not be imported, make sure '
+                                    'it is installed and available on your'
+                                    'PYTHONPATH')
+
         from django.conf import settings
+
+        try:
+            # Make sure the settings actually gets loaded
+            settings.DATABASES
+        except ImportError, e:
+            # An import error here means that DJANGO_SETTINGS_MODULE could not
+            # be imported
+            raise pytest.UsageError(*e.args)
 
         runner = get_django_test_runner(no_db=session.config.option.no_db,
                                         create_db=session.config.option.create_db,
@@ -148,7 +171,7 @@ def pytest_sessionfinish(session, exitstatus):
 
 
 # trylast is needed to have access to funcargs
-@py.test.mark.trylast
+@pytest.mark.trylast
 def pytest_runtest_setup(item):
     # Set the URLs if the pytest.urls() decorator has been applied
     if hasattr(item.obj, 'urls'):

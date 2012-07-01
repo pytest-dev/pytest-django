@@ -1,4 +1,4 @@
-from .lazy_django import django_is_usable
+from .lazy_django import django_settings_is_configured
 from .live_server_helper import has_live_server_support
 
 
@@ -27,7 +27,7 @@ def is_django_unittest(item):
     Returns True if the item is a Django test case, otherwise False.
     """
     # The test case itself cannot have been created unless Django can be used
-    if not django_is_usable():
+    if not django_settings_is_configured():
         return False
 
     base_class = get_django_base_test_case_class()
@@ -56,7 +56,7 @@ def get_django_unittest(item):
 
 
 def django_setup_item(item):
-    if not django_is_usable():
+    if not django_settings_is_configured():
         return
 
     if is_transaction_test_case(item):

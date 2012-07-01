@@ -8,11 +8,10 @@ import pytest
 
 
 def skip_if_no_django():
-    """
-    """
-    if not django_is_usable():
+    """Raises a skip exception when no Django settings are available"""
+    if not django_settings_is_configured():
         pytest.skip('Test skipped since DJANGO_SETTINGS_MODULE is not defined.')
 
 
-def django_is_usable():
+def django_settings_is_configured():
     return bool(os.environ.get('DJANGO_SETTINGS_MODULE'))
