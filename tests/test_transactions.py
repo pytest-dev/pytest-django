@@ -49,25 +49,3 @@ def test_normal_test_case():
 @pytest.mark.djangodb
 def test_normal_test_case_again():
     test_normal_test_case()
-
-
-@transaction_test_case
-def test_transaction_legacy():
-    assert not django_transactions_is_noops()
-
-
-@transaction_test_case
-def test_transaction_legacy_again():
-    test_transaction_legacy()
-
-
-@pytest.mark.djangodb
-@transaction_test_case
-def test_transaction_legacy_incomplete_djangodb():
-    assert not django_transactions_is_noops()
-
-
-@pytest.mark.djangodb
-@transaction_test_case
-def test_transaction_legacy_incomplete_djangodb_again():
-    test_transaction_legacy_incomplete_djangodb()

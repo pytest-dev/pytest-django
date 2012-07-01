@@ -30,7 +30,7 @@ def test_funcarg_settings_skip(settings):
 def test_funcarg_live_server_skip(live_server):
     assert False, 'This test should be skipped'
 
-@pytest.urls('foo.bar')
+@pytest.mark.urls('foo.bar')
 def test_urls():
     assert False, 'This test should be skipped'
 

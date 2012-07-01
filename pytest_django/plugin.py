@@ -204,11 +204,13 @@ def pytest_runtest_setup(item):
         skip_if_no_django()
         from django.conf import settings
         from django.core.urlresolvers import clear_url_caches
+
         if isinstance(marker, basestring):
             urls = marker       # Backwards compatibility
         else:
             validate_urls(marker)
             urls = marker.urls
+
         item.django_urlconf = settings.ROOT_URLCONF
         settings.ROOT_URLCONF = urls
         clear_url_caches()
@@ -254,29 +256,3 @@ def pytest_runtest_teardown(item):
     if hasattr(item, 'django_cursor_wrapper'):
         import django.db.backends.util
         django.db.backends.util.CursorWrapper = item.django_cursor_wrapper
-
-
-def pytest_namespace():
-    def load_fixture(fixture):
-        raise Exception('load_fixture is deprecated. Use a standard Django '
-                        'test case or invoke call_command("loaddata", fixture)'
-                        'instead.')
-
-    def urls(urlconf):
-        """
-        A decorator to change the URLconf for a particular test, similar
-        to the `urls` attribute on Django's `TestCase`.
-
-        Example:
-
-            @pytest.urls('myapp.test_urls')
-            def test_something(client):
-                assert 'Success!' in client.get('/some_path/')
-        """
-        def wrapper(function):
-            function.urls = urlconf
-            return function
-
-        return wrapper
-
-    return {'load_fixture': load_fixture, 'urls': urls}

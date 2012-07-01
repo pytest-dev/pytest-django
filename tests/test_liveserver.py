@@ -9,6 +9,7 @@ is_not_django_14_or_newer = repr(django.VERSION[:2] < (1, 4))
 
 
 def _test_live_server(live_server):
+
     # Make sure we are running with real transactions
     assert not django_transactions_is_noops()
 
