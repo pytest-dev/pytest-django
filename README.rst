@@ -3,8 +3,8 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
 Requirements
 ============
 
-These packages are required to use pytest-django, and should be installed
-separately.
+These packages are required to use pytest-django, when using pip they
+will be installed automatically.
 
  * Django 1.3+ (1.4 is supported)
 

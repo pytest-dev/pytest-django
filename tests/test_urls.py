@@ -32,3 +32,8 @@ def test_urls(client):
     response = client.get('/overridden_url/')
 
     assert response.content == 'Overridden urlconf works!'
+
+
+@pytest.mark.urls('tests.urls_overridden')
+def test_urls_mark(client):
+    test_urls(client)

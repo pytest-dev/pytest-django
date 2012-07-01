@@ -1,6 +1,6 @@
-##########################
+#############################
 Contributing to pytest-django
-##########################
+#############################
 
 Like every open-source project, pytest-django is always looking for motivated
 individuals to contribute to it's source code.
@@ -167,8 +167,9 @@ double cookie points. Seriously. You rock.
 .. _GitHub : http://www.github.com
 .. _GitHub help : http://help.github.com
 .. _freenode : http://freenode.net/
-.. _@djangocmsstatus : https://twitter.com/djangocmsstatus
-.. _@andreaspelme : https://twitter.com/djangocms
+.. _@djangocms: https://twitter.com/djangocms
+.. _@andreaspelme : https://twitter.com/andreaspelme
 .. _pull request : http://help.github.com/send-pull-requests/
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _django CMS: https://www.django-cms.org/
