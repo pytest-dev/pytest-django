@@ -67,43 +67,49 @@ As an extra bonus this will automatically mark the database using the
 Markers
 -------
 
-``pytest-django`` registers and uses two markers.  See the py.test
-documentation_ on what marks and and for notes on using_ them.
+``pytest-django`` registers and uses markers.  See the py.test documentation_
+on what marks and and for notes on using_ them.
 
 .. _documentation: http://pytest.org/latest/mark.html
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-.. py:function:: pytest.mark.djangodb(transaction=False, multidb=False)
+.. py:function:: pytest.mark.djangodb([transaction=False, multidb=False])
 
    This is used to mark a test function as requiring the database.  It
-   will ensure the database is setup correctly for the test.  Any test
-   not marked with ``djangodb`` which tries to use the database will
+   will ensure the database is setup correctly for the test.
+   
+   Any test not marked with ``djangodb`` which tries to use the database will
    fail.
 
-   The ``transaction`` argument will allow the test to use real transactions.
-   With ``transaction=False`` (the default when not specified), transaction
-   operations are noops during the test. This is the same behavior that
-   `django.test.TestCase
-   <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_
-   uses. When ``transaction=True``, the behavior will be the same as
-   `django.test.TransactionTestCase
-   <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
+   :type transaction: bool
+   :param transaction:
+     The ``transaction`` argument will allow the test to use real transactions.
+     With ``transaction=False`` (the default when not specified), transaction
+     operations are noops during the test. This is the same behavior that
+     `django.test.TestCase
+     <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_
+     uses. When ``transaction=True``, the behavior will be the same as
+     `django.test.TransactionTestCase
+     <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
 
-   The ``multidb`` argument will ensure all tests databases are setup. Normally
-   only the ``default`` database alias is setup.
+   :type multidb: bool
+   :param multidb:
+     The ``multidb`` argument will ensure all tests databases are setup.
+     Normally only the ``default`` database alias is setup.
 
 .. py:function:: pytest.mark.urls(urls)
 
-   Specify a different URL conf module for the marked tests.  *urls*
-   is a string pointing to a module, e.g. ``myapp.test_urls``.  This
-   is similar to Django's ``TestCase.urls`` attribute.
+   Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
 
+   :type urls: string
+   :param urls:
+     The urlconf module to use for the test, e.g. ``myapp.test_urls``.  This is
+     similar to Django's ``TestCase.urls`` attribute.
 
-   Example
-   """""""
-   ::
+   Example usage::
 
      @pytest.mark.urls('myapp.test_urls')
      def test_something(client):
-         assert 'Success!' in client.get('/some_path/')
+         assert 'Success!' in client.get('/some_url_defined_in_test_urls/')
+
