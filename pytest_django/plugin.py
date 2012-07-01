@@ -215,14 +215,6 @@ def pytest_runtest_setup(item):
         settings.ROOT_URLCONF = urls
         clear_url_caches()
 
-    # Backwards compatibility
-    if hasattr(item.obj, 'transaction_test_case'):
-        if not hasattr(item.obj, 'djangodb'):
-            item.obj.djangodb = pytest.mark.djangodb(transaction=True)
-            validate_djangodb(item.obj.djangodb)
-        else:
-            item.obj.djangodb.transaction = True
-
     if hasattr(item.obj, 'djangodb'):
         # Setup Django databases
         skip_if_no_django()
