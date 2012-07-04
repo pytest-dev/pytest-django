@@ -190,10 +190,6 @@ def validate_urls(marker):
 # needs this to be called afterwards.
 @pytest.mark.trylast
 def pytest_runtest_setup(item):
-    # Validate the djangodb mark early, this makes things easier later
-    if hasattr(item.obj, 'djangodb'):
-        validate_djangodb(item.obj.djangodb)
-
     # Empty the django test outbox
     if django_settings_is_configured():
         clear_django_outbox()
@@ -213,6 +209,7 @@ def pytest_runtest_setup(item):
     if hasattr(item.obj, 'djangodb'):
         # Setup Django databases
         skip_if_no_django()
+        validate_djangodb(item.obj.djangodb)
         setup_databases(item.session)
         django_setup_item(item)
     elif django_settings_is_configured() and not is_django_unittest(item):
