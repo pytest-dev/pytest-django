@@ -5,6 +5,19 @@ Changelog
 * Removed undocumented pytest.load_fixture: If you need this feature, just use
   ``django.management.call_command('loaddata', 'foo.json')`` instead.
 
+* Make the plugin behave gracefully without DJANGO_SETTINGS_MODULE
+  specified.  ``py.test`` will still work and tests needing django
+  features will skip.
+
+* Allow specifying of DJANGO_SETTINGS_MODULE on the command line and
+  py.test ini configuration file as well as the environment variable.
+
+* Do not allow database access in tests by default.  Introduce
+  ``pytest.mark.djangodb`` to enable database access.
+
+* Deprecate the ``transaction_test_case`` decorator, this is now
+  integrated with the ``djangodb`` mark.
+
 1.3
 ---
 * Added ``--reuse-db`` and ``--create-db`` to allow database re-use. Many

@@ -33,7 +33,7 @@ before_script:
   - mysql -e 'create database pytest_django;'
   - mysql -e 'create database pytest_django_reuse;'
 
-script: DJANGO_SETTINGS_MODULE=tests.settings_$DB py.test
+script: py.test --ds=tests.settings_$DB
 
 
 matrix:

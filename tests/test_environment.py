@@ -1,3 +1,6 @@
+from __future__ import with_statement
+
+import pytest
 from django.core import mail
 from django.db import connection
 from app.models import Item
@@ -24,12 +27,14 @@ def test_mail_again():
     test_mail()
 
 
+@pytest.mark.djangodb
 def test_database_rollback():
     assert Item.objects.count() == 0
     Item.objects.create(name='blah')
     assert Item.objects.count() == 1
 
 
+@pytest.mark.djangodb
 def test_database_rollback_again():
     test_database_rollback()
 
@@ -39,3 +44,6 @@ def test_database_name():
     assert name == ':memory:' or name.startswith('test_')
 
 
+def test_database_noaccess():
+    with pytest.raises(pytest.fail.Exception):
+        Item.objects.count()

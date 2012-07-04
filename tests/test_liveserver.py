@@ -9,6 +9,7 @@ is_not_django_14_or_newer = repr(django.VERSION[:2] < (1, 4))
 
 
 def _test_live_server(live_server):
+
     # Make sure we are running with real transactions
     assert not django_transactions_is_noops()
 
@@ -23,13 +24,13 @@ def _test_live_server(live_server):
     assert response_data == 'Item count: 2'
 
 
-@pytest.urls('tests.urls_liveserver')
+@pytest.mark.urls('tests.urls_liveserver')
 @pytest.mark.skipif(is_not_django_14_or_newer)
-def test_live_server_url_funcarg(live_server):
+def test_live_server_funcarg(live_server):
     _test_live_server(live_server)
 
 
-@pytest.urls('tests.urls_liveserver')
+@pytest.mark.urls('tests.urls_liveserver')
 @pytest.mark.skipif(is_not_django_14_or_newer)
 def test_live_server_url_funcarg_again(live_server):
     _test_live_server(live_server)
@@ -40,6 +41,7 @@ def pytest_funcarg__created_item(request):
 
 
 @pytest.mark.skipif(is_not_django_14_or_newer)
+@pytest.mark.urls('tests.urls_liveserver')
 def test_live_server_created_item(created_item, live_server):
     # Make sure created_item exists from the live_server
     response_data = urllib.urlopen(live_server + '/item_count/').read()
