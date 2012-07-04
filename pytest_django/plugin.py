@@ -205,14 +205,9 @@ def pytest_runtest_setup(item):
         from django.conf import settings
         from django.core.urlresolvers import clear_url_caches
 
-        if isinstance(marker, basestring):
-            urls = marker       # Backwards compatibility
-        else:
-            validate_urls(marker)
-            urls = marker.urls
-
+        validate_urls(marker)
         item.django_urlconf = settings.ROOT_URLCONF
-        settings.ROOT_URLCONF = urls
+        settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
 
     if hasattr(item.obj, 'djangodb'):
