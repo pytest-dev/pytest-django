@@ -8,6 +8,15 @@ from .live_server_helper import (has_live_server_support, LiveServer,
                                  get_live_server_host_ports)
 
 
+def pytest_funcarg__djangodb(request):
+    """Ensure the Django test database is loaded"""
+    # Not sure if there's much point in the marking
+    skip_if_no_django()
+    if not hasattr(request.function, 'djangodb'):
+        request.function.djangodb = pytest.mark.djangodb
+    setup_databases(request._pyfuncitem.session)
+
+
 def pytest_funcarg__client(request):
     """
     Returns a Django test client instance.
@@ -22,10 +31,7 @@ def pytest_funcarg__admin_client(request):
     """
     Returns a Django test client logged in as an admin user.
     """
-    skip_if_no_django()
-    if not hasattr(request.function, 'djangodb'):
-        request.function.djangodb = pytest.mark.djangodb
-    setup_databases(request._pyfuncitem.session)
+    request.getfuncargvalue('djangodb')
 
     from django.contrib.auth.models import User
     from django.test.client import Client
