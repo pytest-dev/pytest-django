@@ -63,6 +63,14 @@ Example
 As an extra bonus this will automatically mark the database using the
 ``djangodb`` mark.
 
+``djangodb`` 
+~~~~~~~~~~~~~
+
+This funcarg will ensure the Django database is set up.  This only
+required for funcargs which want to use the database themselves.  A
+test function should normally use the :py:func:`~pytest.mark.djangodb`
+mark to signal it needs the database.
+
 
 Markers
 -------
