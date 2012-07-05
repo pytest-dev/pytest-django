@@ -1,4 +1,7 @@
-from django.test.client import Client, RequestFactory
+from django.http import HttpRequest
+from django.test.client import Client
+from pytest_django.client import RequestFactory
+import pytest
 
 pytest_plugins = ['pytester']
 
@@ -14,6 +17,19 @@ def test_admin_client(admin_client):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+    try:
+        rf.request()
+    except:
+        pytest.fail(msg='Plain call to funcarg rf.request() throws error.')
+    request = rf.get('/path/')
+    assert isinstance(request, HttpRequest)
+    assert request.path == '/path/'
+    assert request.method == 'GET'
+    request = rf.post('/submit/', {'foo': 'bar'})
+    assert isinstance(request, HttpRequest)
+    assert request.path == '/submit/'
+    assert request.method == 'POST'
+    assert request.POST['foo'] == 'bar'
 
 
 # These tests should really be done with a testdir, but setting up the Django
