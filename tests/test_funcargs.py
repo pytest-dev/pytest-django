@@ -21,11 +21,11 @@ def test_rf(rf):
         rf.request()
     except:
         pytest.fail(msg='Plain call to funcarg rf.request() throws error.')
-    request = RequestFactory().get('/path/')
+    request = rf.get('/path/')
     assert isinstance(request, HttpRequest)
     assert request.path == '/path/'
     assert request.method == 'GET'
-    request = RequestFactory().post('/submit/', {'foo': 'bar'})
+    request = rf.post('/submit/', {'foo': 'bar'})
     assert isinstance(request, HttpRequest)
     assert request.path == '/submit/'
     assert request.method == 'POST'
