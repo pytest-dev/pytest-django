@@ -4,7 +4,8 @@ import copy
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from django.test.client import RequestFactory, Client
+from django.test.client import Client
+from .client import RequestFactory
 
 from .live_server_helper import (HAS_LIVE_SERVER_SUPPORT, LiveServer,
                                  get_live_server_host_ports)
