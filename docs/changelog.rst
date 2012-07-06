@@ -4,6 +4,7 @@ Changelog
 ---
 * Removed undocumented pytest.load_fixture: If you need this feature, just use
   ``django.management.call_command('loaddata', 'foo.json')`` instead.
+* Fixed issue with RequestFactory in Django 1.3.
 
 1.3
 ---
