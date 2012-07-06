@@ -1,7 +1,10 @@
 from django.db import connections
+from django.core import mail
 from django.core.management import call_command
 
 from django.test import TransactionTestCase, TestCase
+from django.test.testcases import (disable_transaction_methods,
+                                   restore_transaction_methods)
 
 try:
     from django.test import SimpleTestCase as DjangoBaseTestCase
@@ -52,9 +55,12 @@ def django_setup_item(item):
     if is_transaction_test_case(item):
         # Nothing needs to be done
         pass
-    else:
-        # Use the standard TestCase teardown
+    elif is_django_unittest(item):
+        # Use the standard TestCase setup
         get_django_unittest(item)._pre_setup()
+    else:
+        mail.outbox = []
+        disable_transaction_methods()
 
     # django_setup_item will not be called if the test is skipped, but teardown
     # will always be called. Set this flag to tell django_teardown_item if
@@ -66,7 +72,7 @@ def django_teardown_item(item):
     if not item.keywords.get('_django_setup'):
         return
 
-    if is_transaction_test_case(item):
+    if is_transaction_test_case(item) or not is_django_unittest(item):
         # Flush the database and close database connections
         # Django does this by default *before* each test instead of after
         for db in connections:
@@ -77,3 +83,6 @@ def django_teardown_item(item):
     else:
         # Use the standard TestCase teardown
         get_django_unittest(item)._post_teardown()
+
+    if not is_django_unittest(item):
+        restore_transaction_methods()
