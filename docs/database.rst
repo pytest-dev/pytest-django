@@ -8,6 +8,12 @@ databases defined in the settings will be created the same way as when
 ``pytest-django`` offers some greater flexibility how the test database
 should be created/destroyed.
 
+Django ``TestCase`` / ``TransactionTestCase`` will be automatically picked up
+and be able to access the database. Tests from a function will behave the same
+way as if specifyed on a method in ``TestCase``.
+
+Test classes which does not inherit from Djangos ``TestCase`` will not be able
+to access the database.
 
 ``--no-db`` - disable database access
 --------------------------------------
