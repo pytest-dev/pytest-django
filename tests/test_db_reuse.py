@@ -34,9 +34,10 @@ def test_db_reuse(testdir, monkeypatch):
 # Pypy compatibility
 try:
     from psycopg2ct import compat
-    compat.register()
 except ImportError:
     pass
+else:
+    compat.register()
 
 DATABASES = %(db_settings)s
 
