@@ -23,8 +23,8 @@ def pytest_funcarg__admin_client(request):
     Returns a Django test client logged in as an admin user.
     """
     skip_if_no_django()
-    if not hasattr(request.function, 'djangodb'):
-        request.function.djangodb = pytest.mark.djangodb
+    if not hasattr(request.function, 'django_db'):
+        request.function.django_db = pytest.mark.django_db
     setup_databases(request._pyfuncitem.session)
 
     from django.contrib.auth.models import User
@@ -78,8 +78,8 @@ def pytest_funcarg__settings(request):
 def pytest_funcarg__live_server(request):
     skip_if_no_django()
 
-    if not hasattr(request.function, 'djangodb'):
-        request.function.djangodb = pytest.mark.djangodb(transaction=True)
+    if not hasattr(request.function, 'django_db'):
+        request.function.django_db = pytest.mark.django_db(transaction=True)
 
     if not has_live_server_support():
         pytest.fail('live_server tests is not supported in Django <= 1.3')

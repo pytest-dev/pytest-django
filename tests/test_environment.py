@@ -27,14 +27,14 @@ def test_mail_again():
     test_mail()
 
 
-@pytest.mark.djangodb
+@pytest.mark.django_db
 def test_database_rollback():
     assert Item.objects.count() == 0
     Item.objects.create(name='blah')
     assert Item.objects.count() == 1
 
 
-@pytest.mark.djangodb
+@pytest.mark.django_db
 def test_database_rollback_again():
     test_database_rollback()
 

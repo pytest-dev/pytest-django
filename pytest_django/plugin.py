@@ -109,7 +109,7 @@ def pytest_configure(config):
     # Register the marks
     config.addinivalue_line(
         'markers',
-        'djangodb(transaction=False, multidb=False): Mark the test as using '
+        'django_db(transaction=False, multidb=False): Mark the test as using '
         'the django test database.  The *transaction* argument marks will '
         "allow you to use transactions in the test like Django's "
         'TransactionTestCase while the *multidb* argument will work like '
@@ -161,8 +161,8 @@ def pytest_sessionfinish(session, exitstatus):
         runner.teardown_test_environment()
 
 
-def validate_djangodb(marker):
-    """This function validates the djangodb marker
+def validate_django_db(marker):
+    """This function validates the django_db marker
 
     It checks the signature and creates the `transaction` and
     `mutlidb` attributes on the marker which will have the correct
@@ -186,13 +186,13 @@ def validate_urls(marker):
 
 
 # Trylast is needed to have access to funcargs, live_server suport
-# needs this and some funcargs add the djangodb marker which also
+# needs this and some funcargs add the django_db marker which also
 # needs this to be called afterwards.
 @pytest.mark.trylast
 def pytest_runtest_setup(item):
-    # Validate the djangodb mark early, this makes things easier later
-    if hasattr(item.obj, 'djangodb'):
-        validate_djangodb(item.obj.djangodb)
+    # Validate the django_db mark early, this makes things easier later
+    if hasattr(item.obj, 'django_db'):
+        validate_django_db(item.obj.django_db)
 
     # Empty the django test outbox
     if django_settings_is_configured():
@@ -215,7 +215,7 @@ def pytest_runtest_setup(item):
         settings.ROOT_URLCONF = urls
         clear_url_caches()
 
-    if hasattr(item.obj, 'djangodb'):
+    if hasattr(item.obj, 'django_db'):
         # Setup Django databases
         skip_if_no_django()
         setup_databases(item.session)
@@ -228,7 +228,7 @@ def pytest_runtest_setup(item):
             __tracebackhide__ = True
             __tracebackhide__  # Silence pyflakes
             pytest.fail('Database access not allowed, '
-                        'use the "djangodb" mark to enable')
+                        'use the "django_db" mark to enable')
 
         item.django_cursor_wrapper = django.db.backends.util.CursorWrapper
         django.db.backends.util.CursorWrapper = cursor_wrapper

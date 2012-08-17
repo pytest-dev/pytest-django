@@ -38,13 +38,13 @@ def teardown_databases(session):
 
 
 def is_transaction_test_case(item):
-    mark = getattr(item.obj, 'djangodb', None)
+    mark = getattr(item.obj, 'django_db', None)
     if mark:
         if getattr(mark, 'transaction', None):
             return True
         if has_live_server_support() and 'live_server' in item.funcargs:
             # This case is odd, it can only happen if someone marked
-            # the function requesting live_server with the djangodb
+            # the function requesting live_server with the django_db
             # mark, but forgot to add transaction=True.
             return True
 
@@ -79,7 +79,7 @@ def django_setup_item(item):
         pass
     else:
         item.django_unittest = TestCase(methodName='__init__')
-        if item.obj.djangodb.multidb:
+        if item.obj.django_db.multidb:
             item.django_unittest.multi_db = True
         item.django_unittest._pre_setup()
 

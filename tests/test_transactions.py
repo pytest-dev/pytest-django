@@ -4,8 +4,6 @@ import pytest
 
 from django.db import transaction
 
-from pytest_django import transaction_test_case
-
 from app.models import Item
 
 
@@ -31,21 +29,21 @@ def django_transactions_is_noops():
     return Item.objects.exists()
 
 
-@pytest.mark.djangodb(transaction=True)
+@pytest.mark.django_db(transaction=True)
 def test_transaction_test_case():
     assert not django_transactions_is_noops()
 
 
-@pytest.mark.djangodb(transaction=True)
+@pytest.mark.django_db(transaction=True)
 def test_transaction_test_case_again():
     test_transaction_test_case()
 
 
-@pytest.mark.djangodb
+@pytest.mark.django_db
 def test_normal_test_case():
     assert django_transactions_is_noops()
 
 
-@pytest.mark.djangodb
+@pytest.mark.django_db
 def test_normal_test_case_again():
     test_normal_test_case()
