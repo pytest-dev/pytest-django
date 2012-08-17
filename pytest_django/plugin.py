@@ -109,12 +109,10 @@ def pytest_configure(config):
     # Register the marks
     config.addinivalue_line(
         'markers',
-        'django_db(transaction=False, multidb=False): Mark the test as using '
+        'django_db(transaction=False): Mark the test as using '
         'the django test database.  The *transaction* argument marks will '
-        "allow you to use transactions in the test like Django's "
-        'TransactionTestCase while the *multidb* argument will work like '
-        "Django's multi_db option on a TestCase: all test databases will be "
-        'flushed instead of just the default.')
+        "allow you to use real transactions in the test like Django's "
+        'TransactionTestCase.')
     config.addinivalue_line(
         'markers',
         'urls(modstr): Use a different URLconf for this test, similar to '
@@ -169,9 +167,10 @@ def validate_django_db(marker):
     value.
     """
     # Use a fake function to check the signature
-    def apifun(transaction=False, multidb=False):
-        return transaction, multidb
-    marker.transaction, marker.multidb = apifun(*marker.args, **marker.kwargs)
+    def apifun(transaction=False):
+        return (transaction, )
+
+    (marker.transaction, ) = apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
