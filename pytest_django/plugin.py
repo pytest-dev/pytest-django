@@ -168,9 +168,9 @@ def validate_django_db(marker):
     """
     # Use a fake function to check the signature
     def apifun(transaction=False):
-        return (transaction, )
+        return transaction
 
-    (marker.transaction, ) = apifun(*marker.args, **marker.kwargs)
+    marker.transaction = apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
