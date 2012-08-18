@@ -33,6 +33,12 @@ def drop_database():
                 or r.std_out == 'DROP DATABASE\n')
         return
 
+    if ENGINE == 'mysql':
+        r = envoy.run('echo DROP DATABASE %s | mysql -u root' % TEST_DB_NAME)
+        assert ('database doesn\'t exist' in r.std_err
+                or r.status_code == 0)
+        return
+
     raise AssertionError('%s cannot be tested properly!' % ENGINE)
 
 
@@ -41,12 +47,21 @@ def db_exists():
         r = envoy.run('echo SELECT 1 | psql %s' % TEST_DB_NAME)
         return r.status_code == 0
 
+    if ENGINE == 'mysql':
+        r = envoy.run('echo SELECT 1 | mysql %s' % TEST_DB_NAME)
+        return r.status_code == 0
+
     raise AssertionError('%s cannot be tested properly!' % ENGINE)
 
 
 def mark_database():
     if ENGINE == 'postgresql_psycopg2':
         r = envoy.run('echo CREATE TABLE mark_table(); | psql %s' % TEST_DB_NAME)
+        assert r.status_code == 0
+        return
+
+    if ENGINE == 'mysql':
+        r = envoy.run('echo CREATE TABLE mark_table(kaka int); | mysql %s' % TEST_DB_NAME)
         assert r.status_code == 0
         return
 
@@ -60,6 +75,10 @@ def mark_exists():
 
         # When something pops out on std_out, we are good
         return bool(f.std_out)
+
+    if ENGINE == 'mysql':
+        f = envoy.run('echo SELECT 1 FROM mark_table | mysql %s' % TEST_DB_NAME)
+        return f.status_code == 0
 
     raise AssertionError('%s cannot be tested properly!' % ENGINE)
 
