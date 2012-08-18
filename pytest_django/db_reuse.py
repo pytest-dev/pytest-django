@@ -41,7 +41,6 @@ def create_test_db(self, verbosity=1, autoclobber=False):
     will not actually create a new database, but just reuse the
     existing.
     """
-
     test_database_name = self._get_test_db_name()
     self.connection.settings_dict['NAME'] = test_database_name
 
