@@ -35,7 +35,7 @@ class LiveServer(object):
         return 'http://%s:%s' % (self.thread.host, self.thread.port)
 
     def __repr__(self):
-        return '<LiveServer listenting at %s>' % unicode(self)
+        return '<LiveServer listening at %s>' % unicode(self)
 
     def __add__(self, other):
         # Support string concatenation
