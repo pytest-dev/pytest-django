@@ -3,7 +3,7 @@ import pytest
 
 def transaction_test_case(*args, **kwargs):
     raise pytest.UsageError('transaction_test_case has been deprecated: use '
-                            'pytest.mark.djangodb(transaction=True) ')
+                            'pytest.mark.django_db(transaction=True) ')
 
 
 def pytest_namespace():

@@ -8,7 +8,7 @@ from .live_server_helper import (has_live_server_support, LiveServer,
                                  get_live_server_host_ports)
 
 
-def pytest_funcarg__djangodb(request):
+def pytest_funcarg__django_db(request):
     """Ensure the Django test database is loaded"""
     # Not sure if there's much point in the marking
     skip_if_no_django()
@@ -31,7 +31,7 @@ def pytest_funcarg__admin_client(request):
     """
     Returns a Django test client logged in as an admin user.
     """
-    request.getfuncargvalue('djangodb')
+    request.getfuncargvalue('django_db')
 
     from django.contrib.auth.models import User
     from django.test.client import Client
@@ -84,8 +84,8 @@ def pytest_funcarg__settings(request):
 def pytest_funcarg__live_server(request):
     skip_if_no_django()
 
-    if not hasattr(request.function, 'djangodb'):
-        request.function.djangodb = pytest.mark.djangodb(transaction=True)
+    if not hasattr(request.function, 'django_db'):
+        request.function.django_db = pytest.mark.django_db(transaction=True)
 
     if not has_live_server_support():
         pytest.fail('live_server tests is not supported in Django <= 1.3')

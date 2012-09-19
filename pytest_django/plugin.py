@@ -109,12 +109,10 @@ def pytest_configure(config):
     # Register the marks
     config.addinivalue_line(
         'markers',
-        'djangodb(transaction=False, multidb=False): Mark the test as using '
+        'django_db(transaction=False): Mark the test as using '
         'the django test database.  The *transaction* argument marks will '
-        "allow you to use transactions in the test like Django's "
-        'TransactionTestCase while the *multidb* argument will work like '
-        "Django's multi_db option on a TestCase: all test databases will be "
-        'flushed instead of just the default.')
+        "allow you to use real transactions in the test like Django's "
+        'TransactionTestCase.')
     config.addinivalue_line(
         'markers',
         'urls(modstr): Use a different URLconf for this test, similar to '
@@ -161,17 +159,18 @@ def pytest_sessionfinish(session, exitstatus):
         runner.teardown_test_environment()
 
 
-def validate_djangodb(marker):
-    """This function validates the djangodb marker
+def validate_django_db(marker):
+    """This function validates the django_db marker
 
     It checks the signature and creates the `transaction` and
     `mutlidb` attributes on the marker which will have the correct
     value.
     """
     # Use a fake function to check the signature
-    def apifun(transaction=False, multidb=False):
-        return transaction, multidb
-    marker.transaction, marker.multidb = apifun(*marker.args, **marker.kwargs)
+    def apifun(transaction=False):
+        return transaction
+
+    marker.transaction = apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
@@ -186,10 +185,11 @@ def validate_urls(marker):
 
 
 # Trylast is needed to have access to funcargs, live_server suport
-# needs this and some funcargs add the djangodb marker which also
+# needs this and some funcargs add the django_db marker which also
 # needs this to be called afterwards.
 @pytest.mark.trylast
 def pytest_runtest_setup(item):
+
     # Empty the django test outbox
     if django_settings_is_configured():
         clear_django_outbox()
@@ -206,10 +206,10 @@ def pytest_runtest_setup(item):
         settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
 
-    if hasattr(item.obj, 'djangodb'):
+    if hasattr(item.obj, 'django_db'):
         # Setup Django databases
         skip_if_no_django()
-        validate_djangodb(item.obj.djangodb)
+        validate_django_db(item.obj.djangodb)
         setup_databases(item.session)
         django_setup_item(item)
     elif django_settings_is_configured() and not is_django_unittest(item):
@@ -220,7 +220,7 @@ def pytest_runtest_setup(item):
             __tracebackhide__ = True
             __tracebackhide__  # Silence pyflakes
             pytest.fail('Database access not allowed, '
-                        'use the "djangodb" mark to enable')
+                        'use the "django_db" mark to enable')
 
         item.django_cursor_wrapper = django.db.backends.util.CursorWrapper
         django.db.backends.util.CursorWrapper = cursor_wrapper

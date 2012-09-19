@@ -8,7 +8,7 @@ def test_client(client):
     assert isinstance(client, Client)
 
 
-@pytest.mark.djangodb
+@pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)
     assert admin_client.get('/admin-required/').content == 'You are an admin'
