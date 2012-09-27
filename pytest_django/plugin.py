@@ -7,7 +7,16 @@ test. Additionally, the settings are copied before each test and restored at
 the end of the test, so it is safe to modify settings within tests.
 """
 
+import os
 import sys
+
+# Check to see if django-configurations is being used
+try:
+    if "DJANGO_CONFIGURATION" in os.environ:
+        import configurations.importer
+        configurations.importer.install()
+except ImportError:
+    pass
 
 from django.conf import settings
 from django.core.management import call_command
