@@ -39,26 +39,47 @@ def test_ds_env(testdir, monkeypatch):
     assert result.ret == 0
 
 
+# def test_ds_ini(testdir, monkeypatch):
+#     path = testdir.mkpydir('tpkg')
+
+#     SETTINGS_NAME = 'settings_ini'
+
+#     # Should be ignored
+#     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
+
+
+#     testdir.tmpdir.join('pytest.ini').write(PYTEST_INI % SETTINGS_NAME)
+#     path.join('%s.py' % SETTINGS_NAME).write(BARE_SETTINGS)
+#     path.join("test_ds.py").write(DJANGO_SETTINGS_MODULE_TEST % SETTINGS_NAME)
+
+#     result = testdir.runpytest('')
+#     result.stdout.fnmatch_lines([
+#         "*1 passed*",
+#     ])
+
+#     assert result.ret == 0
+
 def test_ds_ini(testdir, monkeypatch):
-    path = testdir.mkpydir('tpkg')
-
-    SETTINGS_NAME = 'settings_ini'
-
-    # Should be ignored
+    pkg = testdir.mkpydir('tpkg')
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
+    testdir.makeini("""\
+       [pytest]
+       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+    """)
+    settings = pkg.join('settings_ini.py')
+    settings.write(BARE_SETTINGS)
+    testdir.makepyfile("""
+       import os
 
-
-    testdir.tmpdir.join('pytest.ini').write(PYTEST_INI % SETTINGS_NAME)
-    path.join('%s.py' % SETTINGS_NAME).write(BARE_SETTINGS)
-    path.join("test_ds.py").write(DJANGO_SETTINGS_MODULE_TEST % SETTINGS_NAME)
-
-    result = testdir.runpytest('')
-    result.stdout.fnmatch_lines([
-        "*1 passed*",
-    ])
-
-    assert result.ret == 0
-
+       def test_ds(pytestconfig):
+           print 'xxx', repr(pytestconfig.option.ds)
+           print 'xxx', repr(os.environ.get('DJANGO_SETTINGS_MODULE'))
+           print 'xxx', repr(pytestconfig.getini('DJANGO_SETTINGS_MODULE'))
+           assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
+    """)
+    # testdir.plugins = ['pytest_django']
+    result = testdir.runpytest()
+    result.stdout.fnmatch_lines(['*1 passed*'])
 
 
 def test_ds_option(testdir, monkeypatch):

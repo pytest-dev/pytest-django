@@ -1,7 +1,9 @@
 import copy
-import envoy
 
 import py
+import pytest
+
+envoy = pytest.importorskip('envoy')
 
 from django.conf import settings
 
@@ -91,7 +93,7 @@ def test_db_reuse(testdir, monkeypatch):
     """
 
     if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
-        py.test.skip('Do not test db reuse since database does not support it')
+        pytest.skip('Do not test db reuse since database does not support it')
 
     db_settings = copy.deepcopy(settings.DATABASES)
     db_settings['default']['NAME'] = DB_NAME

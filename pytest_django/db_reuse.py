@@ -1,5 +1,4 @@
-"""
-Functions to aid in preserving the test database between test runs.
+"""Functions to aid in preserving the test database between test runs.
 
 The code in this module is heavily inspired by django-nose:
 https://github.com/jbalogh/django-nose/

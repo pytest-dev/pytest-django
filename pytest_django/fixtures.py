@@ -1,0 +1,223 @@
+"""All pytest-django fixtures"""
+
+import copy
+import os
+
+import pytest
+
+from . import live_server_helper
+from .db_reuse import monkey_patch_creation_for_db_reuse
+from .lazy_django import skip_if_no_django
+
+__all__ = ['_django_db_setup', 'db', 'transactional_db',
+           'client', 'admin_client', 'rf', 'settings', 'live_server',
+           '_live_server_helper']
+
+
+################ Internal Fixtures ################
+
+
+@pytest.fixture(scope='session')
+def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
+    """Session-wide database setup, internal to pytest-django"""
+    skip_if_no_django()
+
+    from django.core import management
+
+    # Setup db reuse
+    if request.config.getvalue('reuse_db'):
+        if not request.config.getvalue('create_db'):
+            monkey_patch_creation_for_db_reuse()
+        _django_runner.teardown_databases = lambda db_cfg: None
+
+    # Disable south's syncdb command
+    commands = management.get_commands()
+    if commands['syncdb'] == 'south':
+        management._commands['syncdb'] = 'django.core'
+
+    # Create the database
+    with _django_cursor_wrapper:
+        db_cfg = _django_runner.setup_databases()
+
+    def teardown_database():
+        with _django_cursor_wrapper:
+            _django_runner.teardown_databases(db_cfg)
+
+    request.addfinalizer(teardown_database)
+
+
+################ User visible fixtures ################
+
+
+@pytest.fixture(scope='function')
+def db(request, _django_db_setup, _django_cursor_wrapper):
+    """Require a django test database
+
+    This database will be setup with the default fixtures and will
+    have the transaction management disabled.  At the end of the test
+    the transaction will be rolled back to undo any changes to the
+    database.  This is more limited then the ``transaction_db``
+    resource but faster.
+
+    If both this and ``transaction_db`` are requested then the
+    database setup will behave as only ``transaction_db`` was
+    requested.
+    """
+    if 'transactional_db' not in request.funcargnames:
+
+        from django.test import TestCase
+
+        _django_cursor_wrapper.enable()
+        case = TestCase(methodName='__init__')
+        case._pre_setup()
+        request.addfinalizer(case._post_teardown)
+        request.addfinalizer(_django_cursor_wrapper.disable)
+
+
+@pytest.fixture(scope='function')
+def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
+    """Require a django test database with transaction support
+
+    This will re-initialise the django database for each test and is
+    thus slower then the normal ``db`` fixture.
+
+    If you want to use the database with transactions you must request
+    this resource.  If both this and ``db`` are requested then the
+    database setup will behave as only ``transaction_db`` was
+    requested.
+    """
+    _django_cursor_wrapper.enable()
+
+    def flushdb():
+        """Flush the database and close database connections"""
+        # Django does this by default *before* each test
+        # instead of after.
+        from django.db import connections
+        from django.core.management import call_command
+
+        for db in connections:
+            call_command('flush', verbosity=0,
+                         interactive=False, database=db)
+        for conn in connections.all():
+            conn.close()
+
+    request.addfinalizer(_django_cursor_wrapper.disable)
+    request.addfinalizer(flushdb)
+
+
+@pytest.fixture()
+def client():
+    """A Django test client instance"""
+    skip_if_no_django()
+
+    from django.test.client import Client
+
+    return Client()
+
+
+@pytest.fixture()
+def admin_client(db):
+    """A Django test client logged in as an admin user"""
+    from django.contrib.auth.models import User
+    from django.test.client import Client
+
+    try:
+        User.objects.get(username='admin')
+    except User.DoesNotExist:
+        user = User.objects.create_user('admin', 'admin@example.com',
+                                        'password')
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+
+    client = Client()
+    client.login(username='admin', password='password')
+    return client
+
+
+@pytest.fixture()
+def rf():
+    """RequestFactory instance"""
+    skip_if_no_django()
+
+    from django.test.client import RequestFactory
+
+    return RequestFactory()
+
+
+@pytest.fixture()
+def settings(request):
+    """A Django settings object which restores changes after the testrun"""
+    skip_if_no_django()
+
+    from django.conf import settings
+
+    old_settings = copy.deepcopy(settings)
+
+    def restore_settings():
+        for setting in dir(old_settings):
+            if setting == setting.upper():
+                setattr(settings, setting, getattr(old_settings, setting))
+
+    request.addfinalizer(restore_settings)
+    return settings
+
+
+# @pytest.fixture(scope='session')
+# def live_server(request, transactional_db):
+#     # XXX Teardown seems wrong, scoping is different from Django too.
+#     #     Lastly this should probably have a
+#     #     --liveserver=localhost:8080 option.  Although maybe
+#     #     DJANGO_LIVE_TEST_SERVER_ADDRESS is good enough.
+#     skip_if_no_django()
+#     if not has_live_server_support():
+#         pytest.fail('live_server tests is not supported in Django <= 1.3')
+#     server = LiveServer(*get_live_server_host_ports())
+#     request.addfinalizer(server.thread.join)
+#     return server
+
+
+@pytest.fixture(scope='session')
+def live_server(request):
+    """Run a live Django server in the background during tests
+
+    The address the server is started from is taken from the
+    --liveserver command line option or if this is not provided from
+    the DJANGO_LIVE_TEST_SERVER_ADDRESS environment variable.  If
+    neither is provided ``localhost:8081`` is used.  See the Django
+    documentation for it's full syntax.
+
+    NOTE: If the live server needs database access to handle a request
+          your test will have to request database access.  Furthermore
+          when the tests want to see data added by the live-server (or
+          the other way around) transactional database access will be
+          needed as data inside a transaction is not shared between
+          the live server and test code.
+    """
+    skip_if_no_django()
+    addr = request.config.getvalue('liveserver')
+    if not addr:
+        addr = os.getenv('DJANGO_TEST_LIVE_SERVER_ADDRESS')
+    if not addr:
+        addr = 'localhost:8081'
+    server = live_server_helper.LiveServer(addr)
+    request.addfinalizer(server.stop)
+    return server
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _live_server_helper(request):
+    """Helper to make live_server work, internal to pytest-django
+
+    This helper will dynamically request the transactional_db fixture
+    for a tests which uses the live_server fixture.  This allows the
+    server and test to access the database whithout having to mark
+    this explicitly which is handy since it is usually required and
+    matches the Django behaviour.
+
+    The separate helper is required since live_server can not request
+    transactional_db directly since it is session scoped instead of
+    function-scoped.
+    """
+    if 'live_server' in request.funcargnames:
+        request.getfuncargvalue('transactional_db')
