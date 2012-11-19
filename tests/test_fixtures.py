@@ -5,7 +5,6 @@ from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 
 from app.models import Item
-from .test_transactions import noop_transactions
 
 
 def noop_transactions():
