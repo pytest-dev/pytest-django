@@ -148,33 +148,19 @@ def rf():
 @pytest.fixture()
 def settings(request):
     """A Django settings object which restores changes after the testrun"""
+    # XXX Consider automatically resetting the settings for each test.
     skip_if_no_django()
 
-    from django.conf import settings
+    import django.conf
 
-    old_settings = copy.deepcopy(settings)
+    orig_wrapped = django.conf.settings._wrapped
+    django.conf.settings._wrapped = copy.deepcopy(orig_wrapped)
 
     def restore_settings():
-        for setting in dir(old_settings):
-            if setting == setting.upper():
-                setattr(settings, setting, getattr(old_settings, setting))
+        django.conf.settings._wrapped = orig_wrapped
 
     request.addfinalizer(restore_settings)
-    return settings
-
-
-# @pytest.fixture(scope='session')
-# def live_server(request, transactional_db):
-#     # XXX Teardown seems wrong, scoping is different from Django too.
-#     #     Lastly this should probably have a
-#     #     --liveserver=localhost:8080 option.  Although maybe
-#     #     DJANGO_LIVE_TEST_SERVER_ADDRESS is good enough.
-#     skip_if_no_django()
-#     if not has_live_server_support():
-#         pytest.fail('live_server tests is not supported in Django <= 1.3')
-#     server = LiveServer(*get_live_server_host_ports())
-#     request.addfinalizer(server.thread.join)
-#     return server
+    return django.conf.settings
 
 
 @pytest.fixture(scope='session')

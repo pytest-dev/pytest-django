@@ -59,11 +59,11 @@ def pytest_configure(config):
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = config.option.ds = ds
         try:
-            from django.conf import settings
+            import django.conf
         except ImportError:
             raise pytest.UsageError('Django could not be imported')
         try:
-            settings.DATABASES
+            django.conf.settings.DATABASES
         except ImportError as e:
             raise pytest.UsageError(*e.args)  # Lazy settings import failed
     else:
@@ -103,12 +103,12 @@ def _django_runner(request):
     """
     if request.config.option.ds:
 
-        from django.conf import settings
+        import django.conf
         from django.test.simple import DjangoTestSuiteRunner
 
         runner = DjangoTestSuiteRunner(interactive=False)
         runner.setup_test_environment()
-        settings.DEBUG_PROPAGATE_EXCEPTIONS = True
+        django.conf.settings.DEBUG_PROPAGATE_EXCEPTIONS = True
         request.addfinalizer(runner.teardown_test_environment)
         return runner
 
@@ -175,16 +175,16 @@ def _django_set_urlconf(request):
     marker = request.keywords.get('urls', None)
     if marker:
         skip_if_no_django()
-        from django.conf import settings
+        import django.conf
         from django.core.urlresolvers import clear_url_caches
 
         validate_urls(marker)
-        original_urlconf = settings.ROOT_URLCONF
-        settings.ROOT_URLCONF = marker.urls
+        original_urlconf = django.conf.settings.ROOT_URLCONF
+        django.conf.settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
 
         def restore():
-            settings.ROOT_URLCONF = original_urlconf
+            django.conf.settings.ROOT_URLCONF = original_urlconf
 
         request.addfinalizer(restore)
 
