@@ -1,77 +1,13 @@
-import pytest
+"""Test for user-visible fixtures
 
-import django.db
+Not quite all fixtures are tested here, the db and transactional_db
+fixtures are tested in test_database and the live_server fixture in
+test_live_server.
+"""
+
+import pytest
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
-
-from app.models import Item
-
-
-def noop_transactions():
-    """Test whether transactions are disabled
-
-    Return True if tranactions are disabled, False if they are
-    enabled.
-    """
-    # A rollback will only work if transactions are enabled.
-    # Otherwise the created objects will still exist.
-    with django.db.transaction.commit_manually():
-        Item.objects.create(name='transaction_noop_test')
-        django.db.transaction.rollback()
-    try:
-        Item.objects.get(name='transaction_noop_test')
-    except Exception:
-        return False
-    else:
-        return True
-
-
-class TestDatabaseFixtures:
-    """Tests for the db and transactional_db fixtures"""
-
-    @pytest.fixture(params=['db', 'transactional_db'])
-    def both_dbs(self, request):
-        if request.param == 'transactional_db':
-            return request.getfuncargvalue('transactional_db')
-        elif request.param == 'db':
-            return request.getfuncargvalue('db')
-
-    def test_access(self, both_dbs):
-        Item.objects.create(name='spam')
-
-    def test_clean_db(self, both_dbs):
-        # Relies on the order: test_access created an object
-        assert Item.objects.count() == 0
-
-    def test_transactions_disabled(self, db):
-        assert noop_transactions()
-
-    def test_transactions_enabled(self, transactional_db):
-        assert not noop_transactions()
-
-    @pytest.fixture
-    def mydb(self, both_dbs):
-        # This fixture must be able to access the database
-        Item.objects.create(name='spam')
-
-    def test_mydb(self, mydb):
-        # Check the fixture had access to the db
-        item = Item.objects.get(name='spam')
-        assert item
-
-    def test_fixture_clean(self, both_dbs):
-        # Relies on the order: test_mydb created an object
-        # See https://github.com/pelme/pytest_django/issues/17
-        assert Item.objects.count() == 0
-
-    @pytest.fixture
-    def fin(self, request, both_dbs):
-        # This finalizer must be able to access the database
-        request.addfinalizer(lambda: Item.objects.create(name='spam'))
-
-    def test_fin(self, fin):
-        # Check finalizer has db access (teardown will fail if not)
-        pass
 
 
 def test_client(client):
