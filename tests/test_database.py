@@ -32,6 +32,19 @@ def test_noaccess():
         Item.objects.count()
 
 
+@pytest.fixture
+def noaccess():
+    with pytest.raises(pytest.fail.Exception):
+        Item.objects.create(name='spam')
+    with pytest.raises(pytest.fail.Exception):
+        Item.objects.count()
+
+
+def test_noaccess_fixture(noaccess):
+    # Setup will fail if this test needs to fail
+    pass
+
+
 class TestDatabaseFixtures:
     """Tests for the db and transactional_db fixtures"""
 
