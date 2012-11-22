@@ -63,7 +63,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transaction_db`` was
     requested.
     """
-    if 'transactional_db' not in request.funcargnames:
+    if ('transactional_db' not in request.funcargnames and
+            'live_server' not in request.funcargnames):
 
         from django.test import TestCase
 
