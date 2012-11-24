@@ -5,3 +5,4 @@ build/
 _build
 .tox
 .DS_Store
+*~

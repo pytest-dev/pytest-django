@@ -1,56 +1,69 @@
-import os
+import pytest
 
 
-def has_live_server_support():
-    try:
-        from django.test.testcases import LiveServerThread
-        LiveServerThread  # Ignore pyflakes warning
-        return True
+def supported():
+    import django.test.testcases
 
-    except ImportError:
-        return False
+    return hasattr(django.test.testcases, 'LiveServerThread')
 
 
 class LiveServer(object):
-    def __init__(self, host, possible_ports):
-        from django.test.testcases import LiveServerThread
+    """The liveserver fixture
+
+    This is the object which is returned to the actual user when they
+    request the ``live_server`` fixture.  The fixture handles creation
+    and stopping however.
+    """
+
+    def __init__(self, addr):
+        try:
+            from django.test.testcases import LiveServerThread
+        except ImportError:
+            pytest.skip('live_server tests not supported in Django < 1.4')
         from django.db import connections
 
         connections_override = {}
-
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
             if (conn.settings_dict['ENGINE'] == 'django.db.backends.sqlite3'
-                and conn.settings_dict['NAME'] == ':memory:'):
+                    and conn.settings_dict['NAME'] == ':memory:'):
                 # Explicitly enable thread-shareability for this connection
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
-        self.thread = LiveServerThread(host, possible_ports, connections_override)
+        host, possible_ports = parse_addr(addr)
+        self.thread = LiveServerThread(host, possible_ports,
+                                       connections_override)
         self.thread.daemon = True
         self.thread.start()
-
         self.thread.is_ready.wait()
-
         if self.thread.error:
             raise self.thread.error
 
-    def __unicode__(self):
+    def stop(self):
+        """Stop the server"""
+        self.thread.join()
+
+    @property
+    def url(self):
         return 'http://%s:%s' % (self.thread.host, self.thread.port)
 
+    def __unicode__(self):
+        return self.url
+
     def __repr__(self):
-        return '<LiveServer listenting at %s>' % unicode(self)
+        return '<LiveServer listenting at %s>' % self.url
 
     def __add__(self, other):
         # Support string concatenation
         return unicode(self) + other
 
 
-def get_live_server_host_ports():
-    # This code is copy-pasted from django/test/testcases.py
-
-    specified_address = os.environ.get('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:8081')
+def parse_addr(specified_address):
+    """Parse the --liveserver argument into a host/IP address and port range"""
+    # This code is based on
+    # django.test.testcases.LiveServerTestCase.setUpClass
 
     # The specified ports may be of the form '8000-8010,8080,9200-9300'
     # i.e. a comma-separated list of ports or ranges of ports, so we break
@@ -70,6 +83,7 @@ def get_live_server_host_ports():
                 for port in range(extremes[0], extremes[1] + 1):
                     possible_ports.append(port)
     except Exception:
-        raise Exception('Invalid address ("%s") for live server.' % specified_address)
+        raise Exception(
+            'Invalid address ("%s") for live server.' % specified_address)
 
     return (host, possible_ports)

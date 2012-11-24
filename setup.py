@@ -12,9 +12,10 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
 setup(
     name='pytest-django',
-    version='1.3.2',
+    version='1.5',
     description='A Django plugin for py.test.',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
@@ -23,7 +24,7 @@ setup(
     url='http://pytest-django.readthedocs.org/',
     packages=['pytest_django'],
     long_description=read('README.rst'),
-    install_requires=['pytest>=2.2.4', 'django>=1.3'],
+    install_requires=['pytest>=2.3.4', 'django>=1.3'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
@@ -32,4 +33,4 @@ setup(
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing'],
     # the following makes a plugin available to py.test
-    entry_points={'pytest11': ['django = pytest_django']})
+    entry_points={'pytest11': ['django = pytest_django.plugin']})

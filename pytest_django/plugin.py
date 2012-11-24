@@ -1,88 +1,42 @@
-"""
-A Django plugin for pytest that handles creating and destroying the
-test environment and test database.
+"""A py.test plugin which helps testing Django applications
 
-Similar to Django's TestCase, a transaction is started and rolled back for each
-test. Additionally, the settings are copied before each test and restored at
-the end of the test, so it is safe to modify settings within tests.
+This plugin handles creating and destroying the test environment and
+test database and provides some useful text fixtues.
 """
 
 import os
 
-from .db_reuse import monkey_patch_creation_for_db_reuse
-from .django_compat import (setup_databases, teardown_databases,
-                            is_django_unittest, clear_django_outbox,
-                            django_setup_item, django_teardown_item)
-from .lazy_django import django_settings_is_configured, skip_if_no_django
-
 import pytest
 
-
-def create_django_runner(reuse_db, create_db):
-    """Setup the Django test environment
-
-    Return an instance of DjangoTestSuiteRunner which can be used to
-    setup and teardown a Django test environment.
-
-    If ``reuse_db`` is True, if found, an existing test database will be used.
-    When no test database exists, it will be created.
-
-    If ``create_db`` is True, the test database will be created or re-created,
-    no matter what ``reuse_db`` is.
-    """
-
-    from django.test.simple import DjangoTestSuiteRunner
-
-    runner = DjangoTestSuiteRunner(interactive=False)
-    if reuse_db:
-        if not create_db:
-            monkey_patch_creation_for_db_reuse()
-        runner.teardown_databases = lambda db_config: None
-    return runner
+from .django_compat import is_django_unittest
+from .fixtures import *
+from .lazy_django import skip_if_no_django
 
 
-def get_django_settings_module(config):
-    """
-    Returns the value of DJANGO_SETTINGS_MODULE. The first specified value from
-    the following will be used:
-     * --ds command line option
-     * DJANGO_SETTINGS_MODULE pytest.ini option
-     * DJANGO_SETTINGS_MODULE
+SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 
-    """
-    ordered_settings = [
-        config.option.ds,
-        config.getini('DJANGO_SETTINGS_MODULE'),
-        os.environ.get('DJANGO_SETTINGS_MODULE')
-    ]
 
-    for ds in ordered_settings:
-        if ds:
-            return ds
-
-    return None
+################ pytest hooks ################
 
 
 def pytest_addoption(parser):
     group = parser.getgroup('django')
-
     group._addoption('--reuse-db',
                      action='store_true', dest='reuse_db', default=False,
                      help='Re-use the testing database if it already exists, '
                           'and do not remove it when the test finishes. This '
                           'option will be ignored when --no-db is given.')
-
     group._addoption('--create-db',
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
                           'option will be ignored if not --reuse-db is given.')
-
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
-
-    parser.addini('DJANGO_SETTINGS_MODULE',
-                  'Django settings module to use by pytest-django')
+    group._addoption('--liveserver', default=None,
+                      help='Address and port for the live_server fixture.')
+    parser.addini(SETTINGS_MODULE_ENV,
+                  'Django settings module to use by pytest-django.')
 
 
 def pytest_configure(config):
@@ -96,15 +50,24 @@ def pytest_configure(config):
 
     It will set the "ds" config option regardless of the method used
     to set DJANGO_SETTINGS_MODULE, allowing to check for the plugin
-    being used by doing `config.getvalue('ds')`.
+    being used by doing `config.getvalue('ds')` or `config.option.ds`.
     """
-
-    ds = get_django_settings_module(config)
-
+    # Configure DJANGO_SETTINGS_MODULE
+    ds = (config.option.ds or
+          config.getini(SETTINGS_MODULE_ENV) or
+          os.environ.get(SETTINGS_MODULE_ENV))
     if ds:
-        os.environ['DJANGO_SETTINGS_MODULE'] = ds
+        os.environ[SETTINGS_MODULE_ENV] = config.option.ds = ds
+        try:
+            import django.conf
+        except ImportError:
+            raise pytest.UsageError('Django could not be imported')
+        try:
+            django.conf.settings.DATABASES
+        except ImportError as e:
+            raise pytest.UsageError(*e.args)  # Lazy settings import failed
     else:
-        os.environ.pop('DJANGO_SETTINGS_MODULE', None)
+        os.environ.pop(SETTINGS_MODULE_ENV, None)
 
     # Register the marks
     config.addinivalue_line(
@@ -121,56 +84,159 @@ def pytest_configure(config):
         '"my_app.test_urls".')
 
 
-def pytest_sessionstart(session):
-    if django_settings_is_configured():
-        # This import fiddling is needed to give a proper error message
-        # when the Django settings module cannot be found
-        try:
-            import django
-            django  # Silence pyflakes
-        except ImportError:
-            raise pytest.UsageError('django could not be imported, make sure '
-                                    'it is installed and available on your'
-                                    'PYTHONPATH')
+################ Autouse fixtures ################
 
-        from django.conf import settings
 
-        try:
-            # Make sure the settings actually gets loaded
-            settings.DATABASES
-        except ImportError, e:
-            # An import error here means that DJANGO_SETTINGS_MODULE could not
-            # be imported
-            raise pytest.UsageError(*e.args)
+@pytest.fixture(autouse=True, scope='session')
+def _django_runner(request):
+    """Create the django runner, internal to pytest-django
 
-        runner = create_django_runner(
-            create_db=session.config.getvalue('create_db'),
-            reuse_db=session.config.getvalue('reuse_db'))
+    This does important things like setting up the local memory email
+    backend etc.
 
+    XXX It is a little dodgy that this is an autouse fixture.  Perhaps
+        an email fixture should be requested in order to be able to
+        use the Django email machinery just like you need to request a
+        db fixture for access to the Django database, etc.  But
+        without duplicating a lot more of Django's test support code
+        we need to follow this model.
+    """
+    if request.config.option.ds:
+
+        import django.conf
+        from django.test.simple import DjangoTestSuiteRunner
+
+        runner = DjangoTestSuiteRunner(interactive=False)
         runner.setup_test_environment()
-        settings.DEBUG_PROPAGATE_EXCEPTIONS = True
-        session.django_runner = runner
+        django.conf.settings.DEBUG_PROPAGATE_EXCEPTIONS = True
+        request.addfinalizer(runner.teardown_test_environment)
+        return runner
 
 
-def pytest_sessionfinish(session, exitstatus):
-    runner = getattr(session.config, 'django_runner', None)
-    if runner:
-        teardown_databases(session)
-        runner.teardown_test_environment()
+@pytest.fixture(autouse=True, scope='session')
+def _django_cursor_wrapper(request):
+    """The django cursor wrapper, internal to pytest-django
+
+    This will gobally disable all database access.  The object
+    returned has a .enable() and a .disable() method which can be used
+    to temporarily enable database access.
+    """
+    if request.config.option.ds:
+
+        import django.db.backends.util
+
+        manager = CursorManager(django.db.backends.util)
+        manager.disable()
+    else:
+        manager = CursorManager()
+    return manager
+
+
+@pytest.fixture(autouse=True)
+def _django_db_marker(request):
+    """Implement the django_db marker, internal to pytest-django
+
+    This will dynamically request the ``db`` or ``transactional_db``
+    fixtures as required by the django_db marker.
+    """
+    marker = request.keywords.get('django_db', None)
+    if marker:
+        skip_if_no_django()
+        validate_django_db(marker)
+        if is_django_unittest(request.node):
+            pass
+        elif marker.transaction:
+            request.getfuncargvalue('transactional_db')
+        else:
+            request.getfuncargvalue('db')
+
+
+@pytest.fixture(autouse=True)
+def _django_setup_unittest(request, _django_cursor_wrapper):
+    """Setup a django unittest, internal to pytest-django"""
+    # XXX This needs django configured!
+    if request.config.option.ds and is_django_unittest(request.node):
+        request.getfuncargvalue('_django_runner')
+        _django_cursor_wrapper.enable()
+        request.addfinalizer(_django_cursor_wrapper.disable)
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_clear_outbox(request):
+    """Clear the django outbox, internal to pytest-django"""
+    if request.config.option.ds:
+        from django.core import mail
+        mail.outbox = []
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_set_urlconf(request):
+    """Apply the @pytest.mark.urls marker, internal to pytest-django"""
+    marker = request.keywords.get('urls', None)
+    if marker:
+        skip_if_no_django()
+        import django.conf
+        from django.core.urlresolvers import clear_url_caches
+
+        validate_urls(marker)
+        original_urlconf = django.conf.settings.ROOT_URLCONF
+        django.conf.settings.ROOT_URLCONF = marker.urls
+        clear_url_caches()
+
+        def restore():
+            django.conf.settings.ROOT_URLCONF = original_urlconf
+
+        request.addfinalizer(restore)
+
+
+################ Helper Functions ################
+
+
+class CursorManager(object):
+    """Manager for django.db.backends.util.CursorWrapper
+
+    This is the object returned by _django_cursor_wrapper.
+
+    If created with None as django.db.backends.util the object is a
+    no-op.
+    """
+
+    def __init__(self, dbutil=None):
+        self._dbutil = dbutil
+        if dbutil:
+            self._orig_wrapper = dbutil.CursorWrapper
+
+    def _blocking_wrapper(*args, **kwargs):
+        __tracebackhide__ = True
+        __tracebackhide__  # Silence pyflakes
+        pytest.fail('Database access not allowed, '
+                    'use the "django_db" mark to enable')
+
+    def enable(self):
+        """Enable access to the django database"""
+        if self._dbutil:
+            self._dbutil.CursorWrapper = self._orig_wrapper
+
+    def disable(self):
+        if self._dbutil:
+            self._dbutil.CursorWrapper = self._blocking_wrapper
+
+    def __enter__(self):
+        self.enable()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.disable()
 
 
 def validate_django_db(marker):
     """This function validates the django_db marker
 
-    It checks the signature and creates the `transaction` and
-    `mutlidb` attributes on the marker which will have the correct
-    value.
+    It checks the signature and creates the `transaction` attribute on
+    the marker which will have the correct value.
     """
-    # Use a fake function to check the signature
     def apifun(transaction=False):
-        return transaction
-
-    marker.transaction = apifun(*marker.args, **marker.kwargs)
+        marker.transaction = transaction
+    apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
@@ -180,70 +246,5 @@ def validate_urls(marker):
     marker which will have the correct value.
     """
     def apifun(urls):
-        return urls
-    marker.urls = apifun(*marker.args, **marker.kwargs)
-
-
-# Trylast is needed to have access to funcargs, live_server suport
-# needs this and some funcargs add the django_db marker which also
-# needs this to be called afterwards.
-@pytest.mark.trylast
-def pytest_runtest_setup(item):
-    # Validate the django_db mark early, this makes things easier later
-    if hasattr(item.obj, 'django_db'):
-        validate_django_db(item.obj.django_db)
-
-    # Empty the django test outbox
-    if django_settings_is_configured():
-        clear_django_outbox()
-
-    # Set the URLs if the pytest.urls() decorator has been applied
-    marker = getattr(item.obj, 'urls', None)
-    if marker:
-        skip_if_no_django()
-        from django.conf import settings
-        from django.core.urlresolvers import clear_url_caches
-
-        if isinstance(marker, basestring):
-            urls = marker       # Backwards compatibility
-        else:
-            validate_urls(marker)
-            urls = marker.urls
-
-        item.django_urlconf = settings.ROOT_URLCONF
-        settings.ROOT_URLCONF = urls
-        clear_url_caches()
-
-    if hasattr(item.obj, 'django_db'):
-        # Setup Django databases
-        skip_if_no_django()
-        setup_databases(item.session)
-        django_setup_item(item)
-    elif django_settings_is_configured() and not is_django_unittest(item):
-        # Block access to the Django databases
-        import django.db.backends.util
-
-        def cursor_wrapper(*args, **kwargs):
-            __tracebackhide__ = True
-            __tracebackhide__  # Silence pyflakes
-            pytest.fail('Database access not allowed, '
-                        'use the "django_db" mark to enable')
-
-        item.django_cursor_wrapper = django.db.backends.util.CursorWrapper
-        django.db.backends.util.CursorWrapper = cursor_wrapper
-
-
-def pytest_runtest_teardown(item):
-    # Call Django code to tear down
-    if django_settings_is_configured():
-        django_teardown_item(item)
-
-    if hasattr(item, 'django_urlconf'):
-        from django.conf import settings
-        from django.core.urlresolvers import clear_url_caches
-        settings.ROOT_URLCONF = item.django_urlconf
-        clear_url_caches()
-
-    if hasattr(item, 'django_cursor_wrapper'):
-        import django.db.backends.util
-        django.db.backends.util.CursorWrapper = item.django_cursor_wrapper
+        marker.urls = urls
+    apifun(*marker.args, **marker.kwargs)

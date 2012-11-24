@@ -1,7 +1,9 @@
 import copy
-import envoy
 
 import py
+import pytest
+
+envoy = pytest.importorskip('envoy')
 
 from django.conf import settings
 
