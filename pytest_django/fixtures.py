@@ -192,7 +192,7 @@ def live_server(request):
     if not addr:
         addr = os.getenv('DJANGO_TEST_LIVE_SERVER_ADDRESS')
     if not addr:
-        addr = 'localhost:8081'
+        addr = 'localhost:8081,8100-8200'
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
     return server
