@@ -7,6 +7,7 @@ import pytest
 
 from . import live_server_helper
 from .db_reuse import monkey_patch_creation_for_db_reuse
+from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
 __all__ = ['_django_db_setup', 'db', 'transactional_db',
@@ -64,7 +65,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     requested.
     """
     if ('transactional_db' not in request.funcargnames and
-            'live_server' not in request.funcargnames):
+            'live_server' not in request.funcargnames and
+            not is_django_unittest(request.node)):
 
         from django.test import TestCase
 
@@ -87,23 +89,24 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transaction_db`` was
     requested.
     """
-    _django_cursor_wrapper.enable()
+    if not is_django_unittest(request.node):
+        _django_cursor_wrapper.enable()
 
-    def flushdb():
-        """Flush the database and close database connections"""
-        # Django does this by default *before* each test
-        # instead of after.
-        from django.db import connections
-        from django.core.management import call_command
+        def flushdb():
+            """Flush the database and close database connections"""
+            # Django does this by default *before* each test
+            # instead of after.
+            from django.db import connections
+            from django.core.management import call_command
 
-        for db in connections:
-            call_command('flush', verbosity=0,
-                         interactive=False, database=db)
-        for conn in connections.all():
-            conn.close()
+            for db in connections:
+                call_command('flush', verbosity=0,
+                             interactive=False, database=db)
+            for conn in connections.all():
+                conn.close()
 
-    request.addfinalizer(_django_cursor_wrapper.disable)
-    request.addfinalizer(flushdb)
+        request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(flushdb)
 
 
 @pytest.fixture()
