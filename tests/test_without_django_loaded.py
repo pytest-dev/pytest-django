@@ -103,6 +103,7 @@ def test_urls_mark(testdir):
     r.stdout.fnmatch_lines(['*1 skipped*'])
 
 
+@pytest.mark.xfail
 def test_mail(testdir):
     f = testdir.makepyfile("""
         from django.core.mail import send_mail
