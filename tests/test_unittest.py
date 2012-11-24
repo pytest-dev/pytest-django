@@ -1,3 +1,8 @@
+import shutil
+
+import py
+import pytest
+
 from django.test import TestCase
 from app.models import Item
 
@@ -60,4 +65,38 @@ class TestUrls(TestCase):
     urls = 'tests.urls_unittest'
 
     def test_urls(self):
-        self.assertTrue(self.client.get('/test_url/').content == 'Test URL works!')
+        self.assertEqual(self.client.get('/test_url/').content,
+                         'Test URL works!')
+
+
+def test_sole_test(testdir):
+    # Test TestCase when no pytest-django test ran before
+    app = py.path.local(__file__).join('..', 'app')
+    print app
+    shutil.copytree(str(app), str(testdir.tmpdir.join('app')))
+    testdir.makepyfile("""
+        from django.test import TestCase
+        from app.models import Item
+
+        class TestFoo(TestCase):
+            def test_foo(self):
+                assert Item.objects.count() == 0
+    """)
+    r = testdir.runpytest()
+    assert r.ret == 0
+
+
+@pytest.mark.usefixtures('db')
+class TestCaseWithDbFixture(TestCase):
+
+    def test_simple(self):
+        # We only want to check setup/teardown does not conflict
+        assert 1
+
+
+@pytest.mark.usefixtures('transactional_db')
+class TestCaseWithTrDbFixture(TestCase):
+
+    def test_simple(self):
+        # We only want to check setup/teardown does not conflict
+        assert 1

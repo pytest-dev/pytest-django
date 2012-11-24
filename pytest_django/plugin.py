@@ -141,11 +141,8 @@ def _django_db_marker(request):
     """
     marker = request.keywords.get('django_db', None)
     if marker:
-        skip_if_no_django()
         validate_django_db(marker)
-        if is_django_unittest(request.node):
-            pass
-        elif marker.transaction:
+        if marker.transaction:
             request.getfuncargvalue('transactional_db')
         else:
             request.getfuncargvalue('db')
@@ -154,9 +151,9 @@ def _django_db_marker(request):
 @pytest.fixture(autouse=True)
 def _django_setup_unittest(request, _django_cursor_wrapper):
     """Setup a django unittest, internal to pytest-django"""
-    # XXX This needs django configured!
     if request.config.option.ds and is_django_unittest(request.node):
         request.getfuncargvalue('_django_runner')
+        request.getfuncargvalue('_django_db_setup')
         _django_cursor_wrapper.enable()
         request.addfinalizer(_django_cursor_wrapper.disable)
 
