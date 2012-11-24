@@ -101,17 +101,3 @@ def test_urls_mark(testdir):
     r = testdir.runpytest()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*1 skipped*'])
-
-
-@pytest.mark.xfail
-def test_mail(testdir):
-    f = testdir.makepyfile("""
-        from django.core.mail import send_mail
-
-        def test_mail():
-            send_mail('Subject', 'The message.', 'from@example.com',
-                      ['to@example.com'], fail_silently=False)
-    """)
-    r = testdir.runpytest()
-    assert r.ret == 0
-    r.stdout.fnmatch_lines(['*1 skipped*'])
