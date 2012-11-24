@@ -4,6 +4,8 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
+from __future__ import with_statement
+
 import urllib
 
 import django
@@ -13,6 +15,9 @@ from django.test.client import Client, RequestFactory
 
 from .app.models import Item
 from .test_database import noop_transactions
+
+
+django  # Avoid pyflakes complaints
 
 
 def test_client(client):

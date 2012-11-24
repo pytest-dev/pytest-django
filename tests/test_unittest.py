@@ -1,10 +1,10 @@
-import shutil
-
-import py
 import pytest
 
 from django.test import TestCase
 from app.models import Item
+
+
+from .conftest import create_test_module
 
 
 class TestFixtures(TestCase):
@@ -69,33 +69,46 @@ class TestUrls(TestCase):
                          'Test URL works!')
 
 
-def test_sole_test(testdir):
-    # Test TestCase when no pytest-django test ran before
-    app = py.path.local(__file__).join('..', 'app')
-    print app
-    shutil.copytree(str(app), str(testdir.tmpdir.join('app')))
-    testdir.makepyfile("""
-        from django.test import TestCase
-        from app.models import Item
+def test_sole_test(django_testdir):
+    """
+    Make sure the database are configured when only Django TestCase classes
+    are collected, without the django_db marker.
+    """
 
-        class TestFoo(TestCase):
-            def test_foo(self):
-                assert Item.objects.count() == 0
-    """)
-    r = testdir.runpytest()
-    assert r.ret == 0
+    create_test_module(django_testdir, '''
+from django.test import TestCase
+from django.conf import settings
+
+from app.models import Item
+
+class TestFoo(TestCase):
+    def test_foo(self):
+        # Make sure we are actually using the test database
+        db_name = settings.DATABASES['default']['NAME']
+        assert db_name.startswith('test_') or db_name == ':memory:'
+
+        # Make sure it is usable
+        assert Item.objects.count() == 0
+
+''')
+
+    result = django_testdir.runpytest('-v')
+    result.stdout.fnmatch_lines([
+        "*TestFoo.test_foo PASSED*",
+    ])
+    assert result.ret == 0
 
 
-@pytest.mark.usefixtures('db')
 class TestCaseWithDbFixture(TestCase):
+    pytestmark = pytest.mark.usefixtures('db')
 
     def test_simple(self):
         # We only want to check setup/teardown does not conflict
         assert 1
 
 
-@pytest.mark.usefixtures('transactional_db')
 class TestCaseWithTrDbFixture(TestCase):
+    pytestmark = pytest.mark.usefixtures('transactional_db')
 
     def test_simple(self):
         # We only want to check setup/teardown does not conflict

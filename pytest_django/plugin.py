@@ -9,8 +9,15 @@ import os
 import pytest
 
 from .django_compat import is_django_unittest
-from .fixtures import *
+from .fixtures import (_django_db_setup, db, transactional_db, client,
+                       admin_client, rf, settings, live_server,
+                       _live_server_helper)
+
 from .lazy_django import skip_if_no_django
+
+
+(_django_db_setup, db, transactional_db, client, admin_client, rf,
+ settings, live_server, _live_server_helper)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -64,7 +71,7 @@ def pytest_configure(config):
             raise pytest.UsageError('Django could not be imported')
         try:
             django.conf.settings.DATABASES
-        except ImportError as e:
+        except ImportError, e:
             raise pytest.UsageError(*e.args)  # Lazy settings import failed
     else:
         os.environ.pop(SETTINGS_MODULE_ENV, None)

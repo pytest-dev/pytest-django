@@ -1,5 +1,7 @@
 """All pytest-django fixtures"""
 
+from __future__ import with_statement
+
 import copy
 import os
 
