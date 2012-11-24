@@ -25,19 +25,20 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
 
     from django.core import management
 
-    # Setup db reuse
-    if request.config.getvalue('reuse_db'):
-        if not request.config.getvalue('create_db'):
-            monkey_patch_creation_for_db_reuse()
-        _django_runner.teardown_databases = lambda db_cfg: None
-
     # Disable south's syncdb command
     commands = management.get_commands()
     if commands['syncdb'] == 'south':
         management._commands['syncdb'] = 'django.core'
 
-    # Create the database
     with _django_cursor_wrapper:
+
+        # Monkey patch Django's setup code to support database re-use
+        if request.config.getvalue('reuse_db'):
+            if not request.config.getvalue('create_db'):
+                monkey_patch_creation_for_db_reuse()
+            _django_runner.teardown_databases = lambda db_cfg: None
+
+        # Create the database
         db_cfg = _django_runner.setup_databases()
 
     def teardown_database():
