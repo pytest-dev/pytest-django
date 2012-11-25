@@ -177,8 +177,8 @@ def live_server(request):
     The address the server is started from is taken from the
     --liveserver command line option or if this is not provided from
     the DJANGO_LIVE_TEST_SERVER_ADDRESS environment variable.  If
-    neither is provided ``localhost:8081`` is used.  See the Django
-    documentation for it's full syntax.
+    neither is provided ``localhost:8081,8100-8200`` is used.  See the
+    Django documentation for it's full syntax.
 
     NOTE: If the live server needs database access to handle a request
           your test will have to request database access.  Furthermore
