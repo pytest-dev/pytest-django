@@ -42,7 +42,7 @@ them automatically.
 
  * Django 1.3+ (1.4 is supported)
 
- * py.test
+ * py.test 2.3.4+
 
 
 Bugs? Feature suggestions?

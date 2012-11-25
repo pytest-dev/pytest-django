@@ -31,7 +31,7 @@ How can I avoid having to type DJANGO_SETTINGS_MODULE=... to run the tests?
 
 If you are using virtualenvwrapper, use a postactivate script to set ``DJANGO_SETTINGS_MODULE`` when your project's virtualenv is activated.
 
-This snippet should to the trick (make sure to replace ``YOUR_VIRTUALENV_NAME``)::
+This snippet should do the trick (make sure to replace ``YOUR_VIRTUALENV_NAME``)::
 
     echo "export DJANGO_SETTINGS_MODULE=yourproject.settings" >> $WORKON_HOME/YOUR_VIRTUALENV_NAME/bin/postactivate
 

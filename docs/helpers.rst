@@ -2,12 +2,12 @@ Django helpers
 ==============
 
 
-funcargs
+Fixtures
 --------
 
-pytest-django provides some pytest funcargs to provide depencies for tests.
-More information on funcargs is available in the `py.test documentation
-<http://pytest.org/latest/funcargs.html>`_
+pytest-django provides some pytest fixtures to provide depencies for tests.
+More information on fixtures is available in the `py.test documentation
+<http://pytest.org/latest/fixture.html>`_.
 
 
 ``rf`` - ``RequestFactory``
@@ -63,13 +63,30 @@ Example
 As an extra bonus this will automatically mark the database using the
 ``djangodb`` mark.
 
-``djangodb`` 
-~~~~~~~~~~~~~
+``db`` 
+~~~~~~~
 
-This funcarg will ensure the Django database is set up.  This only
-required for funcargs which want to use the database themselves.  A
+This fixture will ensure the Django database is set up.  This only
+required for fixtures which want to use the database themselves.  A
 test function should normally use the :py:func:`~pytest.mark.djangodb`
 mark to signal it needs the database.
+
+``transactional_db``
+~~~~~~~~~~~~~~~~~~~~
+
+This fixture can be used to request access to the database including
+transaction support.  This is only required for fixtures which need
+database access themselves.  A test function would normally use the
+:py:func:`~pytest.mark.djangodb` mark to signal it needs the database.
+
+``live_server``
+~~~~~~~~~~~~~~~
+
+This fixture runs a live Django server in a background thread.  The
+server's URL can be retreived using the ``live_server.url`` attribute
+or by requesting it's string value: ``unicode(live_server)``.  You can
+also directly concatenate a string to form a URL: ``live_server +
+'/foo``.  
 
 
 Markers
@@ -82,13 +99,15 @@ on what marks and and for notes on using_ them.
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-.. py:function:: pytest.mark.djangodb([transaction=False, multidb=False])
+.. py:function:: pytest.mark.django_db([transaction=False])
 
    This is used to mark a test function as requiring the database.  It
    will ensure the database is setup correctly for the test.
-   
-   Any test not marked with ``djangodb`` which tries to use the database will
-   fail.
+
+   In order for a test to have access to the database it must either
+   be marked using the ``django_db`` mark or request one of the ``db``
+   or ``transcational_db`` fixtures.  Otherwise the test will fail
+   when trying to access the database.
 
    :type transaction: bool
    :param transaction:
@@ -100,11 +119,6 @@ on what marks and and for notes on using_ them.
      uses. When ``transaction=True``, the behavior will be the same as
      `django.test.TransactionTestCase
      <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
-
-   :type multidb: bool
-   :param multidb:
-     The ``multidb`` argument will ensure all tests databases are setup.
-     Normally only the ``default`` database alias is setup.
 
 .. py:function:: pytest.mark.urls(urls)
 

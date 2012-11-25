@@ -70,17 +70,16 @@ select using an argument to the ``djangodb`` mark::
 Tests requiring multiple databases
 ----------------------------------
 
-Just like Django by default ``pytest-django`` only sets up the default
-database.  If your test needs all the databases you can specify this
-with another argument to the ``djangodb`` mark::
-
-   @pytest.mark.djangodb(multidb=True)
-   def test_spam():
-       pass  # test needing multiple databases
-
-This works just like the Django `multi_db
+Currently ``pytest-django`` does not specifically support Django's
+multi-database support.  You can however use normal Django
+``TestCase`` instances to use it's `multi_db
 <https://docs.djangoproject.com/en/1.4/topics/testing/#multi-database-support>`_
-support which you can consult for more details.
+support.
+
+If you have any ideas about the best API to support multiple databases
+directly in ``pytest-django`` please get in touch, we are interested
+in eventually supporting this but unsure about simply following
+Django's approach.
 
 
 ``--reuse-db`` - reuse the testing database between test runs

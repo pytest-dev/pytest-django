@@ -1,5 +1,15 @@
 Changelog
 =========
+
+1.5
+---
+* Large parts re-written using py.test's 2.3 fixtures API.
+
+  - Fixes issue #17: Database changes made in fixtures or funcargs
+    will now be reverted as well.
+
+  - Fixes issue 21: Database teardown errors are no longer hidden.
+
 1.4
 ---
 * Removed undocumented pytest.load_fixture: If you need this feature, just use
