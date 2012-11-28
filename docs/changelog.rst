@@ -3,30 +3,39 @@ Changelog
 
 1.5
 ---
-* Large parts re-written using py.test's 2.3 fixtures API.
+* Large parts re-written using py.test's 2.3 fixtures API (issue #9).
 
   - Fixes issue #17: Database changes made in fixtures or funcargs
     will now be reverted as well.
 
   - Fixes issue 21: Database teardown errors are no longer hidden.
 
+  - Fixes issue 16: Database setup and teardown for non-TestCase
+    classes works correctly.
+
+* ``pytest.urls()`` is replaced by the standard marking API and is now
+  used as ``pytest.mark.urls()``
+
+* Make the plugin behave gracefully without DJANGO_SETTINGS_MODULE
+  specified.  ``py.test`` will still work and tests needing django
+  features will skip (issue #3).
+
+* Allow specifying of DJANGO_SETTINGS_MODULE on the command line and
+  py.test ini configuration file as well as the environment variable
+  (issue #3).
+
+* Do not allow database access in tests by default.  Introduce
+  ``pytest.mark.django_db`` to enable database access.
+
+* Deprecate the ``transaction_test_case`` decorator, this is now
+  integrated with the ``django_db`` mark.
+
 1.4
 ---
 * Removed undocumented pytest.load_fixture: If you need this feature, just use
   ``django.management.call_command('loaddata', 'foo.json')`` instead.
 
-* Make the plugin behave gracefully without DJANGO_SETTINGS_MODULE
-  specified.  ``py.test`` will still work and tests needing django
-  features will skip.
-
-* Allow specifying of DJANGO_SETTINGS_MODULE on the command line and
-  py.test ini configuration file as well as the environment variable.
-
-* Do not allow database access in tests by default.  Introduce
-  ``pytest.mark.djangodb`` to enable database access.
-
-* Deprecate the ``transaction_test_case`` decorator, this is now
-  integrated with the ``djangodb`` mark.
+* Fixed issue with RequestFactory in Django 1.3.
 
 1.3
 ---
