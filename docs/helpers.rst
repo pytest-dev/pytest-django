@@ -5,7 +5,7 @@ Markers
 -------
 
 ``pytest-django`` registers and uses markers.  See the py.test documentation_
-on what marks and and for notes on using_ them.
+on what marks are and for notes on using_ them.
 
 .. _documentation: http://pytest.org/latest/mark.html
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
