@@ -20,9 +20,9 @@ Changelog
   specified.  ``py.test`` will still work and tests needing django
   features will skip (issue #3).
 
-* Allow specifying of DJANGO_SETTINGS_MODULE on the command line and
-  py.test ini configuration file as well as the environment variable
-  (issue #3).
+* Allow specifying of DJANGO_SETTINGS_MODULE on the command line
+  (``--ds=settings``) and py.test ini configuration file as well as the
+  environment variable (issue #3).
 
 * Do not allow database access in tests by default.  Introduce
   ``pytest.mark.django_db`` to enable database access.
