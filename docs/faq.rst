@@ -40,3 +40,15 @@ How does South and pytest-django play together?
 ------------------------------------------------
 
 Djangos own syncdb will always be used to create the test database, regardless of wheter South is present or not.
+
+
+Does this work with the pytest-xdist plugin?
+--------------------------------------------
+
+Currently only with the SQLite in-memory database.  The problem is
+that a global test database is created at the start of a session.
+When distributing the tests across multiple processes each process
+will try to setup and teardown this database.
+
+This is not an insurmountable problem and will hopefully be fixed in a
+future version.
