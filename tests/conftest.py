@@ -56,6 +56,10 @@ INSTALLED_APPS = [
     return testdir
 
 
-def create_test_module(testdir, test_code):
+def create_test_module(testdir, test_code, filename='test_the_test.py'):
     tpkg_path = testdir.tmpdir / 'tpkg'
-    tpkg_path.join("test_the_actual_tests.py").write(test_code)
+    tpkg_path.join(filename).write(test_code)
+
+
+def create_conftest(testdir, conftest_code):
+    return create_test_module(testdir, conftest_code, 'conftest.py')
