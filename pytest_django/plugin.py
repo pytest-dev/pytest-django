@@ -78,10 +78,11 @@ def pytest_addoption(parser):
 
 def _handle_south_management_command():
     try:
+        # if `south` >= 0.7.1 we can use the test helper
         from south.management.commands import patch_for_test_db_setup
     except ImportError:
+        # if `south` < 0.7.1 make sure it's migrations are disabled
         management.get_commands()
-        # make sure `south` migrations are disabled
         management._commands['syncdb'] = 'django.core'
     else:
         patch_for_test_db_setup()
