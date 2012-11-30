@@ -76,16 +76,22 @@ def pytest_addoption(parser):
                           'option will be ignored if not --reuse-db is given.')
 
 
-def _disable_south_management_command():
-    management.get_commands()
-    # make sure `south` migrations are disabled
-    management._commands['syncdb'] = 'django.core'
+def _handle_south_management_command():
+    try:
+        # if `south` >= 0.7.1 we can use the test helper
+        from south.management.commands import patch_for_test_db_setup
+    except ImportError:
+        # if `south` < 0.7.1 make sure it's migrations are disabled
+        management.get_commands()
+        management._commands['syncdb'] = 'django.core'
+    else:
+        patch_for_test_db_setup()
 
 
 def pytest_sessionstart(session):
     global suite_runner, old_db_config
 
-    _disable_south_management_command()
+    _handle_south_management_command()
 
     suite_runner = get_runner(session.config)
     suite_runner.setup_test_environment()
