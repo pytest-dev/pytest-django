@@ -1,8 +1,23 @@
 Changelog
 =========
 
-1.5
----
+2.0.0
+-----
+
+This release is *backward incompatible*. The biggest change is the need
+to add the ``pytest.mark.django_db`` to tests which needs database
+access.
+
+Finding such tests is generally very easy: just run your test suite, the
+tests which needs database access will fail. Add ``pytestmark =
+pytest.mark.django_db`` to the module/class or decorate them with
+``@pytest.mark.django_db``.
+
+* Semantic version numbers are now used for versions, see http://semver.org/.
+
+* Do not allow database access in tests by default.  Introduce
+  ``pytest.mark.django_db`` to enable database access.
+
 * Large parts re-written using py.test's 2.3 fixtures API (issue #9).
 
   - Fixes issue #17: Database changes made in fixtures or funcargs
@@ -20,12 +35,9 @@ Changelog
   specified.  ``py.test`` will still work and tests needing django
   features will skip (issue #3).
 
-* Allow specifying of DJANGO_SETTINGS_MODULE on the command line
+* Allow specifying of ``DJANGO_SETTINGS_MODULE`` on the command line
   (``--ds=settings``) and py.test ini configuration file as well as the
   environment variable (issue #3).
-
-* Do not allow database access in tests by default.  Introduce
-  ``pytest.mark.django_db`` to enable database access.
 
 * Deprecate the ``transaction_test_case`` decorator, this is now
   integrated with the ``django_db`` mark.
