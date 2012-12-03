@@ -15,8 +15,8 @@ on what marks are and for notes on using_ them.
 
    This is used to mark a test function as requiring the database. It
    will ensure the database is setup correctly for the test. Each test
-   will run in its own transaction which will be rollbacked at the end
-   of the test. This behavior is the same as Djangos standard
+   will run in its own transaction which will be rolled back at the end
+   of the test. This behavior is the same as Django's standard
    `django.test.TestCase   <https://docs.djangoproject.com/en/dev/topics
    /testing/#django.test.TestCase>`_ class.
 
@@ -111,7 +111,7 @@ Example
         assert response.status_code == 200
 
 As an extra bonus this will automatically mark the database using the
-``djangodb`` mark.
+``django_db`` mark.
 
 ``db``
 ~~~~~~~
