@@ -13,8 +13,12 @@ on what marks are and for notes on using_ them.
 
 .. py:function:: pytest.mark.django_db([transaction=False])
 
-   This is used to mark a test function as requiring the database.  It
-   will ensure the database is setup correctly for the test.
+   This is used to mark a test function as requiring the database. It
+   will ensure the database is setup correctly for the test. Each test
+   will run in its own transaction which will be rollbacked at the end
+   of the test. This behavior is the same as Djangos standard
+   `django.test.TestCase   <https://docs.djangoproject.com/en/dev/topics
+   /testing/#django.test.TestCase>`_ class.
 
    In order for a test to have access to the database it must either
    be marked using the ``django_db`` mark or request one of the ``db``
