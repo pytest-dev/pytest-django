@@ -13,7 +13,15 @@ tests which needs database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 
-* Semantic version numbers are now used for versions, see http://semver.org/.
+Most of the interals has been rewritten, exploiting py.test's new
+fixtures API. This release would not be possible without Floris
+Bruynooghe who did the port to the new fixture API and fixed a number of
+bugs.
+
+The tests for pytest-django itself has been greatly improved, paving the
+way for easier additions of new and exciting features in the future!
+
+* Semantic version numbers will now be used for releases, see http://semver.org/.
 
 * Do not allow database access in tests by default.  Introduce
   ``pytest.mark.django_db`` to enable database access.
