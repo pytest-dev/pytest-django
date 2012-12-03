@@ -17,7 +17,7 @@ tell ``pytest-django`` your test needs database access::
 
    import pytest
 
-   @pytest.mark.djangodb
+   @pytest.mark.django_db
    def test_my_user():
        me = User.objects.get(username='me')
        assert me.is_superuser
@@ -31,11 +31,11 @@ for detail::
 
    import pytest
 
-   pytestmark = pytest.mark.djangodb
+   pytestmark = pytest.mark.django_db
 
-   @pytest.mark.djangodb
+   @pytest.mark.django_db
    class Test Users:
-       pytestmark = pytest.mark.djangodb
+       pytestmark = pytest.mark.django_db
        def test_my_user(self):
            me = User.objects.get(username='me')
            assert me.is_superuser
@@ -60,9 +60,9 @@ transactions and will flush the database between tests to isolate
 them.  The downside of this is that these tests are much slower to
 set up due to the required flushing of the database.
 ``pytest-django`` also supports this style of tests, which you can
-select using an argument to the ``djangodb`` mark::
+select using an argument to the ``django_db`` mark::
 
-   @pytest.mark.djangodb(transaction=True)
+   @pytest.mark.django_db(transaction=True)
    def test_spam():
        pass  # test relying on transactions
 
