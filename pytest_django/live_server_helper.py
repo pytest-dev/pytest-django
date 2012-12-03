@@ -53,7 +53,7 @@ class LiveServer(object):
         return self.url
 
     def __repr__(self):
-        return '<LiveServer listenting at %s>' % self.url
+        return '<LiveServer listening at %s>' % unicode(self)
 
     def __add__(self, other):
         # Support string concatenation
