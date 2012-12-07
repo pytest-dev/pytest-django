@@ -74,3 +74,44 @@ def test_ds_non_existent(testdir, monkeypatch):
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
     result.stderr.fnmatch_lines(['*ERROR*DOES_NOT_EXIST*'])
+
+
+def test_django_settings_configure(testdir, monkeypatch):
+    """
+    Make sure Django can be configured without setting
+    DJANGO_SETTINGS_MODULE altogether, relying on calling
+    django.conf.settings.configure() and then invoking pytest.
+    """
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+
+    p = testdir.makepyfile(run="""
+            from django.conf import settings
+            settings.configure(SECRET_KEY='set from settings.configure()',
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'
+                               }})
+
+            import pytest
+
+            pytest.main()
+    """)
+
+    testdir.makepyfile("""
+        import pytest
+
+        from django.conf import settings
+        from django.test.client import RequestFactory
+
+        def test_access_to_setting():
+            assert settings.SECRET_KEY == 'set from settings.configure()'
+
+        # This test requires Django to be properly configured to be run
+        def test_rf(rf):
+            assert isinstance(rf, RequestFactory)
+
+    """)
+    result = testdir.runpython(p)
+    result.stdout.fnmatch_lines([
+        "*2 passed*",
+    ])
