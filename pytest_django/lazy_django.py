@@ -1,5 +1,5 @@
 """
-Helpers to load Django lazily when DJANGO_SETTINGS_MODULE is not defined.
+Helpers to load Django lazily when Django settings are not able to be configured.
 """
 
 import os
@@ -14,4 +14,8 @@ def skip_if_no_django():
 
 
 def django_settings_is_configured():
-    return bool(os.environ.get('DJANGO_SETTINGS_MODULE'))
+    try:
+        import django.conf
+    except ImportError:
+        return False
+    return django.conf.settings.configured or bool(os.environ.get('DJANGO_SETTINGS_MODULE'))
