@@ -15,7 +15,7 @@ def skip_if_no_django():
 
 def django_settings_is_configured():
     try:
-        import django.conf
+        from django.conf import settings
     except ImportError:
         return False
-    return django.conf.settings.configured or bool(os.environ.get('DJANGO_SETTINGS_MODULE'))
+    return settings.configured or bool(os.environ.get('DJANGO_SETTINGS_MODULE'))

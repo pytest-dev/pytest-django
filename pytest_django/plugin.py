@@ -64,17 +64,17 @@ def pytest_configure(config):
           config.getini(SETTINGS_MODULE_ENV) or
           os.environ.get(SETTINGS_MODULE_ENV))
     try:
-        import django.conf
+        from django.conf import settings
     except ImportError:
         raise pytest.UsageError('Django could not be imported')
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = config.option.ds = ds
         try:
-            django.conf.settings.DATABASES
+            settings.DATABASES
         except ImportError, e:
             raise pytest.UsageError(*e.args)  # Lazy settings import failed
-    elif django.conf.settings.configured:
+    elif settings.configured:
         config.option.ds = 'auto'
     else:
         os.environ.pop(SETTINGS_MODULE_ENV, None)
