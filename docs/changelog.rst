@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.0.1
+-----
+
+* Fixed #26: Don't set DEBUG_PROPAGATE_EXCEPTIONS = True for test runs. Django
+  does not change this setting in the default test runner, so pytest-django
+  should not do it either.
+
 2.0.0
 -----
 
