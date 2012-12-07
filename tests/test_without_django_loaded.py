@@ -11,7 +11,7 @@ pytestmark = pytest.mark.usefixtures('no_ds')
 
 
 def test_no_ds(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         import os
 
         def test_env():
@@ -25,7 +25,7 @@ def test_no_ds(testdir):
 
 
 def test_database(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         import pytest
 
         @pytest.mark.django_db
@@ -48,7 +48,7 @@ def test_database(testdir):
 
 
 def test_client(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         def test_client(client):
             assert 0
 
@@ -61,7 +61,7 @@ def test_client(testdir):
 
 
 def test_rf(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         def test_rf(rf):
             assert 0
     """)
@@ -71,7 +71,7 @@ def test_rf(testdir):
 
 
 def test_settings(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         def test_settings(settings):
             assert 0
     """)
@@ -81,7 +81,7 @@ def test_settings(testdir):
 
 
 def test_live_server(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         def test_live_server(live_server):
             assert 0
     """)
@@ -91,7 +91,7 @@ def test_live_server(testdir):
 
 
 def test_urls_mark(testdir):
-    f = testdir.makepyfile("""
+    testdir.makepyfile("""
         import pytest
 
         @pytest.mark.urls('foo.bar')
