@@ -13,7 +13,7 @@ from .fixtures import (_django_db_setup, db, transactional_db, client,
                        admin_client, rf, settings, live_server,
                        _live_server_helper)
 
-from .lazy_django import skip_if_no_django
+from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
 (_django_db_setup, db, transactional_db, client, admin_client, rf,
@@ -63,19 +63,12 @@ def pytest_configure(config):
     ds = (config.option.ds or
           config.getini(SETTINGS_MODULE_ENV) or
           os.environ.get(SETTINGS_MODULE_ENV))
-    try:
-        from django.conf import settings
-    except ImportError:
-        raise pytest.UsageError('Django could not be imported')
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = config.option.ds = ds
-        try:
-            settings.DATABASES
-        except ImportError, e:
+
+        if django_settings_is_configured():
             raise pytest.UsageError(*e.args)  # Lazy settings import failed
-    elif settings.configured:
-        config.option.ds = 'auto'
     else:
         os.environ.pop(SETTINGS_MODULE_ENV, None)
 
