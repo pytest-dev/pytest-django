@@ -4,6 +4,9 @@ Changelog
 2.0.1
 -----
 
+* Fixed #24/#25: Make it possible to configure Django via
+  ``django.conf.settings.configure()``.
+
 * Fixed #26: Don't set DEBUG_PROPAGATE_EXCEPTIONS = True for test runs. Django
   does not change this setting in the default test runner, so pytest-django
   should not do it either.
