@@ -55,9 +55,8 @@ def pytest_configure(config):
     * DJANGO_SETTINGS_MODULE pytest.ini option
     * DJANGO_SETTINGS_MODULE
 
-    It will set the "ds" config option regardless of the method used
-    to set DJANGO_SETTINGS_MODULE, allowing to check for the plugin
-    being used by doing `config.getvalue('ds')` or `config.option.ds`.
+    If configured via django.conf.settings.configre, those settings
+    will be used instead.
     """
     # Configure DJANGO_SETTINGS_MODULE
     ds = (config.option.ds or
@@ -65,12 +64,14 @@ def pytest_configure(config):
           os.environ.get(SETTINGS_MODULE_ENV))
 
     if ds:
-        os.environ[SETTINGS_MODULE_ENV] = config.option.ds = ds
 
-        if django_settings_is_configured():
-            raise pytest.UsageError(*e.args)  # Lazy settings import failed
-    else:
-        os.environ.pop(SETTINGS_MODULE_ENV, None)
+        os.environ[SETTINGS_MODULE_ENV] = ds
+
+        from django.conf import settings
+        try:
+            settings.DATABASES
+        except ImportError as e:
+            raise pytest.UsageError(*e.args)
 
     # Register the marks
     config.addinivalue_line(
@@ -104,7 +105,7 @@ def _django_runner(request):
         without duplicating a lot more of Django's test support code
         we need to follow this model.
     """
-    if request.config.option.ds:
+    if django_settings_is_configured():
 
         import django.conf
         from django.test.simple import DjangoTestSuiteRunner
@@ -124,7 +125,7 @@ def _django_cursor_wrapper(request):
     returned has a .enable() and a .disable() method which can be used
     to temporarily enable database access.
     """
-    if request.config.option.ds:
+    if django_settings_is_configured():
 
         import django.db.backends.util
 
@@ -154,7 +155,7 @@ def _django_db_marker(request):
 @pytest.fixture(autouse=True)
 def _django_setup_unittest(request, _django_cursor_wrapper):
     """Setup a django unittest, internal to pytest-django"""
-    if request.config.option.ds and is_django_unittest(request.node):
+    if django_settings_is_configured() and is_django_unittest(request.node):
         request.getfuncargvalue('_django_runner')
         request.getfuncargvalue('_django_db_setup')
         _django_cursor_wrapper.enable()
@@ -164,7 +165,7 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
 @pytest.fixture(autouse=True, scope='function')
 def _django_clear_outbox(request):
     """Clear the django outbox, internal to pytest-django"""
-    if request.config.option.ds:
+    if django_settings_is_configured():
         from django.core import mail
         mail.outbox = []
 
