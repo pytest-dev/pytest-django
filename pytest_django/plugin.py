@@ -106,13 +106,10 @@ def _django_runner(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
-
-        import django.conf
         from django.test.simple import DjangoTestSuiteRunner
 
         runner = DjangoTestSuiteRunner(interactive=False)
         runner.setup_test_environment()
-        django.conf.settings.DEBUG_PROPAGATE_EXCEPTIONS = True
         request.addfinalizer(runner.teardown_test_environment)
         return runner
 
