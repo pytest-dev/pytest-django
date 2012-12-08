@@ -90,7 +90,9 @@ def test_django_settings_configure(testdir, monkeypatch):
                                DATABASES={'default': {
                                    'ENGINE': 'django.db.backends.sqlite3',
                                    'NAME': ':memory:'
-                               }})
+                               }},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
 
             import pytest
 
@@ -102,6 +104,8 @@ def test_django_settings_configure(testdir, monkeypatch):
 
         from django.conf import settings
         from django.test.client import RequestFactory
+        from django.test import TestCase
+        from django.contrib.auth.models import User
 
         def test_access_to_setting():
             assert settings.SECRET_KEY == 'set from settings.configure()'
@@ -110,10 +114,20 @@ def test_django_settings_configure(testdir, monkeypatch):
         def test_rf(rf):
             assert isinstance(rf, RequestFactory)
 
+        # This tests that pytest-django actually configures the database
+        # according to the settings above
+        class ATestCase(TestCase):
+            def test_user_count(self):
+                assert User.objects.count() == 0
+
+        @pytest.mark.django_db
+        def test_user_count():
+            assert User.objects.count() == 0
+
     """)
     result = testdir.runpython(p)
     result.stdout.fnmatch_lines([
-        "*2 passed*",
+        "*4 passed*",
     ])
 
 
