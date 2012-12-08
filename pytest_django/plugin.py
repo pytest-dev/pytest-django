@@ -70,7 +70,7 @@ def pytest_configure(config):
         from django.conf import settings
         try:
             settings.DATABASES
-        except ImportError as e:
+        except ImportError, e:
             raise pytest.UsageError(*e.args)
 
     # Register the marks
