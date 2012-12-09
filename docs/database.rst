@@ -34,7 +34,7 @@ for detail::
    pytestmark = pytest.mark.django_db
 
    @pytest.mark.django_db
-   class Test Users:
+   class TestUsers:
        pytestmark = pytest.mark.django_db
        def test_my_user(self):
            me = User.objects.get(username='me')

@@ -11,6 +11,9 @@ on what marks are and for notes on using_ them.
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
+``pytest.mark.django_db`` - request database access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. py:function:: pytest.mark.django_db([transaction=False])
 
    This is used to mark a test function as requiring the database. It
@@ -35,6 +38,9 @@ on what marks are and for notes on using_ them.
      uses. When ``transaction=True``, the behavior will be the same as
      `django.test.TransactionTestCase
      <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
+
+``pytest.mark.urls`` - override the urlconf
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:function:: pytest.mark.urls(urls)
 

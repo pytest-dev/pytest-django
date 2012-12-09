@@ -1,5 +1,5 @@
-Configuring the Django Settings
-===============================
+Configuring Django settings
+===========================
 
 There are a couple of different ways Django settings can be provided for
 the tests.
