@@ -131,6 +131,34 @@ def test_django_settings_configure(testdir, monkeypatch):
     ])
 
 
+def test_settings_in_hook(testdir):
+    testdir.makeconftest("""
+        from django.conf import settings
+
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """)
+    testdir.makepyfile("""
+        import pytest
+        from django.conf import settings
+        from django.contrib.auth.models import User
+
+        def test_access_to_setting():
+            assert settings.SECRET_KEY == 'set from pytest_configure'
+
+        @pytest.mark.django_db
+        def test_user_count():
+            assert User.objects.count() == 0
+    """)
+    r = testdir.runpytest()
+    assert r.ret == 0
+
+
 def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """
     Make sure Django is not imported at all if no Django settings is specified.
