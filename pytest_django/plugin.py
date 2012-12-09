@@ -55,7 +55,7 @@ def pytest_configure(config):
     * DJANGO_SETTINGS_MODULE pytest.ini option
     * DJANGO_SETTINGS_MODULE
 
-    If configured via django.conf.settings.configre, those settings
+    If configured via django.conf.settings.configure(), those settings
     will be used instead.
     """
     # Configure DJANGO_SETTINGS_MODULE
