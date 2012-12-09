@@ -7,6 +7,7 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
    :maxdepth: 3
 
    tutorial
+   configuring_django
    database
    helpers
    faq
