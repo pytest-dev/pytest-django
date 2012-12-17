@@ -41,7 +41,7 @@ DATABASES = %(db_settings)s
 INSTALLED_APPS = [
     'tpkg.app',
 ]
-
+SECRET_KEY = 'foobar'
 ''' % {'db_settings': repr(db_settings)}
 
     tpkg_path = testdir.mkpydir('tpkg')

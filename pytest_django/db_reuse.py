@@ -50,7 +50,10 @@ def create_test_db(self, verbosity=1, autoclobber=False):
         print "Re-using existing test database for alias '%s'%s..." % (
             self.connection.alias, test_db_repr)
 
-    self.connection.features.confirm()
+    # confirm() is not needed/available in Django >= 1.5
+    # See https://code.djangoproject.com/ticket/17760
+    if hasattr(self.connection.features, 'confirm'):
+        self.connection.features.confirm()
 
     return test_database_name
 
