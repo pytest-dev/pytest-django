@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.1.0
+-----
+
+* Django 1.5 support. pytest-django is now tested against 1.5 for Python
+  2.6-2.7. This is the first step towards Python 3 support.
+
 2.0.1
 -----
 

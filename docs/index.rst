@@ -38,11 +38,10 @@ Quick Start
 Requirements
 ============
 
-These packages are required to use pytest-django, pip will install
-them automatically.
+The current supported versions of Python, Django and pytest are:
 
- * Django 1.3+ (1.4 is supported)
-
+ * Python 2.5-2.7
+ * Django 1.3-1.5
  * py.test 2.3.4+
 
 
