@@ -5,6 +5,7 @@ test database and provides some useful text fixtues.
 """
 
 import os
+import sys
 
 import pytest
 
@@ -70,7 +71,8 @@ def pytest_configure(config):
         from django.conf import settings
         try:
             settings.DATABASES
-        except ImportError, e:
+        except ImportError:
+            e = sys.exc_info()[1]
             raise pytest.UsageError(*e.args)
 
     # Register the marks

@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 from django.http import HttpResponse
 
-from app.models import Item
+from .app.models import Item
 
 urlpatterns = patterns('',
     url(r'^item_count/$',

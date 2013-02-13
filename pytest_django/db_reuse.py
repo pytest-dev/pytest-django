@@ -3,8 +3,9 @@
 The code in this module is heavily inspired by django-nose:
 https://github.com/jbalogh/django-nose/
 """
+import sys
+import types
 
-import new
 import py
 
 
@@ -27,7 +28,7 @@ def test_database_exists_from_previous_run(connection):
     try:
         connection.cursor()
         return True
-    except StandardError:  # TODO: Be more discerning but still DB agnostic.
+    except Exception:  # TODO: Be more discerning but still DB agnostic.
         return False
     finally:
         connection.close()
@@ -47,8 +48,8 @@ def create_test_db(self, verbosity=1, autoclobber=False):
         test_db_repr = ''
         if verbosity >= 2:
             test_db_repr = " ('%s')" % test_database_name
-        print "Re-using existing test database for alias '%s'%s..." % (
-            self.connection.alias, test_db_repr)
+        print("Re-using existing test database for alias '%s'%s..." % (
+            self.connection.alias, test_db_repr))
 
     # confirm() is not needed/available in Django >= 1.5
     # See https://code.djangoproject.com/ticket/17760
@@ -69,5 +70,9 @@ def monkey_patch_creation_for_db_reuse():
             # Make sure our monkey patch is still valid in the future
             assert hasattr(creation, 'create_test_db')
 
-            creation.create_test_db = new.instancemethod(
-                    create_test_db, creation, creation.__class__)
+            if sys.version_info < (3, 0):
+                creation.create_test_db = types.MethodType(
+                        create_test_db, creation, creation.__class__)
+            else:
+                creation.create_test_db = types.MethodType(create_test_db,
+                        creation)

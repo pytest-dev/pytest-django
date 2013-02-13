@@ -19,7 +19,7 @@ def test_db_reuse(django_testdir):
     create_test_module(django_testdir, '''
 import pytest
 
-from app.models import Item
+from .app.models import Item
 
 @pytest.mark.django_db
 def test_db_can_be_accessed():
