@@ -11,7 +11,7 @@ def is_django_unittest(item):
         from django.test import TestCase
 
     if sys.version_info < (3, 0):
-    	return (hasattr(item.obj, 'im_class') and
+        return (hasattr(item.obj, 'im_class') and
         	    issubclass(item.obj.im_class, TestCase))
 
     return (hasattr(item.obj, '__self__') and

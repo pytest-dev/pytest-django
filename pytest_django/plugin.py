@@ -120,7 +120,7 @@ def _django_runner(request):
 def _django_cursor_wrapper(request):
     """The django cursor wrapper, internal to pytest-django
 
-    This will gobally disable all database access.  The object
+    This will globally disable all database access. The object
     returned has a .enable() and a .disable() method which can be used
     to temporarily enable database access.
     """

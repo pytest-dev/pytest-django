@@ -1,5 +1,5 @@
 import sys
-import py
+import pytest
 
 def supported():
     import django.test.testcases

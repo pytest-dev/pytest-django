@@ -6,8 +6,6 @@ https://github.com/jbalogh/django-nose/
 import sys
 import types
 
-import py
-
 
 def can_support_db_reuse(connection):
     """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
