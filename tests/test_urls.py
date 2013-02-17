@@ -1,5 +1,6 @@
 import pytest
 from django.conf import settings
+from .compat import force_text
 
 try:
     from django.core.urlresolvers import is_valid_path
@@ -29,4 +30,4 @@ def test_urls():
 @pytest.mark.urls('tests.urls_overridden')
 def test_urls_client(client):
     response = client.get('/overridden_url/')
-    assert response.content == 'Overridden urlconf works!'
+    assert force_text(response.content) == 'Overridden urlconf works!'

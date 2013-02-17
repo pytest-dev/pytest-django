@@ -204,7 +204,7 @@ def _live_server_helper(request):
 
     This helper will dynamically request the transactional_db fixture
     for a tests which uses the live_server fixture.  This allows the
-    server and test to access the database whithout having to mark
+    server and test to access the database without having to mark
     this explicitly which is handy since it is usually required and
     matches the Django behaviour.
 

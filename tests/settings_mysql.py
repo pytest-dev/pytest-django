@@ -1,4 +1,4 @@
-from settings_base import *
+from tests.settings_base import *
 
 DATABASES = {
     'default': {

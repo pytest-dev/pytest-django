@@ -9,7 +9,7 @@ from .app.models import Item
 def noop_transactions():
     """Test whether transactions are disabled
 
-    Return True if tranactions are disabled, False if they are
+    Return True if transactions are disabled, False if they are
     enabled.
     """
     # A rollback will only work if transactions are enabled.
