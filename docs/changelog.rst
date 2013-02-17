@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.2.0
+-----
+
+* Python 3 support. pytest-django now supports Python 3.2 and 3.3 in addition
+  to 2.5-2.7. Big thanks to Rafal Stozek for making this happend!
+
 2.1.0
 -----
 
