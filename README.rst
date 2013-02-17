@@ -23,7 +23,7 @@ Documentation
 `Documentation is available on Read the Docs. <http://pytest-django.readthedocs.org/en/latest/index.html>`_
 
 
-Why would I use this instead of Django's manage.pytest command?
+Why would I use this instead of Django's manage.py test command?
 ================================================================
 
 Running the test suite with pytest offers some features that are not present in Djangos standard test mechanism:
