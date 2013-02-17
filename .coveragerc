@@ -1,0 +1,4 @@
+[run]
+parallel = true
+source = pytest_django
+branch = true
