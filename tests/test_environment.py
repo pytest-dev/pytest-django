@@ -3,7 +3,7 @@ from __future__ import with_statement
 import pytest
 from django.core import mail
 from django.db import connection
-from app.models import Item
+from .app.models import Item
 
 
 # It doesn't matter which order all the _again methods are run, we just need

@@ -1,10 +1,10 @@
 import pytest
 
 from django.test import TestCase
-from app.models import Item
 
-
+from .app.models import Item
 from .conftest import create_test_module
+from .compat import force_text
 
 
 class TestFixtures(TestCase):
@@ -65,8 +65,8 @@ class TestUrls(TestCase):
     urls = 'tests.urls_unittest'
 
     def test_urls(self):
-        self.assertEqual(self.client.get('/test_url/').content,
-                         'Test URL works!')
+        resp = self.client.get('/test_url/')
+        self.assertEqual(force_text(resp.content), 'Test URL works!')
 
 
 def test_sole_test(django_testdir):
@@ -79,7 +79,7 @@ def test_sole_test(django_testdir):
 from django.test import TestCase
 from django.conf import settings
 
-from app.models import Item
+from .app.models import Item
 
 class TestFoo(TestCase):
     def test_foo(self):

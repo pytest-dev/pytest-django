@@ -6,8 +6,7 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
-import urllib
-
+import py
 import django
 import pytest
 from django.conf import settings as real_settings
@@ -15,6 +14,7 @@ from django.test.client import Client, RequestFactory
 
 from .app.models import Item
 from .test_database import noop_transactions
+from .compat import force_text, urlopen
 
 
 django  # Avoid pyflakes complaints
@@ -27,12 +27,14 @@ def test_client(client):
 @pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)
-    assert admin_client.get('/admin-required/').content == 'You are an admin'
+    resp = admin_client.get('/admin-required/')
+    assert force_text(resp.content) == 'You are an admin'
 
 
 def test_admin_client_no_db_marker(admin_client):
     assert isinstance(admin_client, Client)
-    assert admin_client.get('/admin-required/').content == 'You are an admin'
+    resp = admin_client.get('/admin-required/')
+    assert force_text(resp.content) == 'You are an admin'
 
 
 def test_rf(rf):
@@ -81,29 +83,29 @@ class TestLiveServer:
         pytest.mark.skipif('django.VERSION[:2] < (1, 4)'),
         pytest.mark.urls('tests.urls_liveserver'),
         ]
-
+    
     def test_url(self, live_server):
-        assert live_server.url == unicode(live_server)
+        assert live_server.url == force_text(live_server)
 
     def test_transactions(self, live_server):
         assert not noop_transactions()
 
     def test_db_changes_visibility(self, live_server):
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 0'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 0'
         Item.objects.create(name='foo')
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 1'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 1'
 
     def test_fixture_db(self, db, live_server):
         Item.objects.create(name='foo')
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 1'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 1'
 
     def test_fixture_transactional_db(self, transactional_db, live_server):
         Item.objects.create(name='foo')
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 1'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 1'
 
     @pytest.fixture
     def item(self):
@@ -123,13 +125,13 @@ class TestLiveServer:
         return Item.objects.create(name='foo')
 
     def test_item_db(self, item_db, live_server):
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 1'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 1'
 
     @pytest.fixture
     def item_transactional_db(self, transactional_db):
         return Item.objects.create(name='foo')
 
     def test_item_transactional_db(self, item_transactional_db, live_server):
-        response_data = urllib.urlopen(live_server + '/item_count/').read()
-        assert response_data == 'Item count: 1'
+        response_data = urlopen(live_server + '/item_count/').read()
+        assert force_text(response_data) == 'Item count: 1'
