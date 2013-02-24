@@ -12,6 +12,7 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
    helpers
    faq
    changelog
+   contributing
 
 Why would I use this instead of Django's manage.py test command?
 ================================================================

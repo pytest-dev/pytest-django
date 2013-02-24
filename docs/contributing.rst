@@ -3,28 +3,28 @@ Contributing to pytest-django
 #############################
 
 Like every open-source project, pytest-django is always looking for motivated
-individuals to contribute to it's source code.
-However, to ensure the highest code quality and keep the repository nice and
-tidy, everybody has to follow a few rules (nothing major, I promise :) )
+individuals to contribute to it's source code.  However, to ensure the highest
+code quality and keep the repository nice and tidy, everybody has to follow a
+few rules (nothing major, I promise :) )
 
 
 *********
 Community
 *********
 
-You may also be interested in following `@andreaspelme`_ on twitter to get the
-GitHub commits as well as the hudson build reports. There is also a `@djangocms`_
-account for less technical announcements.
+The fastest way to get feedback on contributions/bugs are usually to open an
+issue in the `issue tracker`_. 
 
+Discussions also happends via IRC in #pylib on irc.freenode.org. You may also
+be interested in following `@andreaspelme`_ on Twitter.
 
 *************
 In a nutshell
 *************
 
-Here's what the contribution process looks like, in a bullet-points fashion, and
-only for the stuff we host on GitHub:
+Here's what the contribution process looks like, in a bullet-points fashion:
 
-#. django CMS is hosted on `GitHub`_, at https://github.com/divio/django-cms
+#. pytest-django is hosted on `GitHub`_, at https://github.com/pelme/pytest-django
 #. The best method to contribute back is to create an account there, then fork
    the project. You can use this fork as if it was your own project, and should
    push your changes to it.
@@ -41,10 +41,6 @@ Contributing Code
 Getting the source code
 =======================
 
-If you're interested in developing a new feature for the CMS, it is recommended
-that you first discuss it on the `django-cms-developers`_  mailing list so as
-not to do any work that will not get merged in anyway.
-
 - Code will be reviewed and tested by at least one core developer, preferably
   by several. Other community members are welcome to give feedback.
 - Code *must* be tested. Your pull request should include unit-tests (that cover
@@ -54,7 +50,8 @@ not to do any work that will not get merged in anyway.
 - Usually, if unit tests are written, pass, and your change is relevant, then
   it'll be merged.
 
-Since we're hosted on GitHub, django CMS uses `git`_ as a version control system.
+Since we're hosted on GitHub, pytest-django uses `git`_ as a version control
+system.
 
 The `GitHub help`_ is very well written and will get you started on using git
 and GitHub in a jiffy. It is an invaluable resource for newbies and old timers
@@ -78,7 +75,7 @@ Process
 
 This is how you fix a bug or add a feature:
 
-#. `fork`_ us on GitHub.
+#. `fork`_ the repository on GitHub.
 #. Checkout your fork.
 #. Hack hack hack, test test test, commit commit commit, test again.
 #. Push to your fork.
@@ -97,13 +94,12 @@ person :)
 Generally tests should be:
 
 - Unitary (as much as possible). I.E. should test as much as possible only one
-  function/method/class. That's the
-  very definition of unit tests. Integration tests are interesting too
-  obviously, but require more time to maintain since they have a higher
-  probability of breaking.
+  function/method/class. That's the very definition of unit tests. Integration
+  tests are interesting too obviously, but require more time to maintain since
+  they have a higher probability of breaking.
 - Short running. No hard numbers here, but if your one test doubles the time it
-  takes for everybody to run them, it's probably an indication that you're doing
-  it wrong.
+  takes for everybody to run them, it's probably an indication that you're
+  doing it wrong.
 
 In a similar way to code, pull requests will be reviewed before pulling
 (obviously), and we encourage discussion via code review (everybody learns
@@ -112,24 +108,33 @@ something this way) or IRC discussions.
 Running the tests
 -----------------
 
-To run the tests simply execute ``DJANGO_SETTINGS_MODULE=tests.settings py.test``
-from your shell. Make sure you have Django and py.test installed before running
-the tests.
+To run the tests simply execute ``py.test`` from your shell. Make sure you have
+Django and py.test installed before running the tests.
 
 A tox.ini file is available, which will run the tests for all supported Python
 and Django versions.
 
 
+Continous integration
+---------------------
+
+`Travis`_ is used to automatically run all tests against all supported versions
+of Python, Django and different database backends.
+
+The `pytest-django Travis`_ page shows the latest test run. Travis will
+automatically pick up pull requests, test them and report the result directly
+in the pull request.
+
 **************************
 Contributing Documentation
 **************************
 
-Perhaps considered "boring" by hard-core coders, documentation is sometimes even
-more important than code! This is what brings fresh blood to a project, and
-serves as a reference for old timers. On top of this, documentation is the one
-area where less technical people can help most - you just need to write a
-semi-decent English. People need to understand you. We don't care about style or
-correctness.
+Perhaps considered "boring" by hard-core coders, documentation is sometimes
+even more important than code! This is what brings fresh blood to a project,
+and serves as a reference for old timers. On top of this, documentation is the
+one area where less technical people can help most - you just need to write a
+semi-decent English. People need to understand you. We don't care about style
+or correctness.
 
 Documentation should be:
 
@@ -156,20 +161,22 @@ double cookie points. Seriously. You rock.
 
 .. note::
 
-  This very document is based on the contributing docs of the
-  `django CMS`_ project. Many thanks for allowing us to steal it!
+  This very document is based on the contributing docs of the `django CMS`_
+  project. Many thanks for allowing us to steal it!
 
 
-.. _fork: http://github.com/divio/django-cms
+.. _fork: https://github.com/pelme/pytest_django
+.. _issue tracker: https://github.com/pelme/pytest_django/issues
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _django-cms-developers: http://groups.google.com/group/django-cms-developers
 .. _GitHub : http://www.github.com
 .. _GitHub help : http://help.github.com
 .. _freenode : http://freenode.net/
-.. _@djangocms: https://twitter.com/djangocms
 .. _@andreaspelme : https://twitter.com/andreaspelme
 .. _pull request : http://help.github.com/send-pull-requests/
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
+.. _Travis: https://travis-ci.org/
+.. _pytest-django Travis: https://travis-ci.org/pelme/pytest_django
+
