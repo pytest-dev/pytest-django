@@ -33,6 +33,12 @@ setup(
                  'License :: OSI Approved :: BSD License',
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
-                 'Topic :: Software Development :: Testing'],
+                 'Topic :: Software Development :: Testing',
+                 'Programming Language :: Python :: 2.5',
+                 'Programming Language :: Python :: 2.6',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.2',
+                 'Programming Language :: Python :: 3.3',
+                ],
     # the following makes a plugin available to py.test
     entry_points={'pytest11': ['django = pytest_django.plugin']})
