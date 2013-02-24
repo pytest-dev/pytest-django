@@ -114,6 +114,37 @@ Django and py.test installed before running the tests.
 A tox.ini file is available, which will run the tests for all supported Python
 and Django versions.
 
+Measuring test coverage
+-----------------------
+
+Some of tests are executed in subprocesses. Because of that regular
+coverage measurements (using pytest-cov plugin) are not reliable.
+
+If you want to measure coverage you'll need to create .pth file as described in
+`subprocess section of coverage documentation`_. If you're using
+"setup.py develop" thing you should uninstall pytest_django (using pip)
+for the time of measuring coverage.
+
+You'll also need mysql and postgres databases. There are predefined settings
+for each database in tests directory. You may want to modify these files
+but please don't include them in your pull requests.
+
+After this short initial setup you're ready to run tests::
+
+    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` py.test --ds=tests.postgres_settings
+
+You should repeat above step for sqlite and mysql before next step. This step
+will create a lot of ``.coverage`` files with additional suffix for every
+process.
+
+The final step is to combine all files created by different processes and
+generate html coverage report::
+
+    $ coverage combine
+    $ coverage html
+
+Your coverage report is now ready in ``htmlcov`` directory.
+
 
 Continous integration
 ---------------------
@@ -179,4 +210,5 @@ double cookie points. Seriously. You rock.
 .. _django CMS: https://www.django-cms.org/
 .. _Travis: https://travis-ci.org/
 .. _pytest-django Travis: https://travis-ci.org/pelme/pytest_django
+.. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html
 

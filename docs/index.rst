@@ -11,6 +11,7 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
    database
    helpers
    faq
+   contributing
    changelog
    contributing
 
