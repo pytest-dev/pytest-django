@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.2.1
+-----
+
+* Fixed an issue with the settings fixture when used in combination with
+  django-appconf. It now uses pytest's monkeypatch internally and should
+  be more robust.
+
 2.2.0
 -----
 
