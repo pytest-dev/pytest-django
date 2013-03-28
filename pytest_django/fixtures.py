@@ -152,22 +152,28 @@ def rf():
     return RequestFactory()
 
 
+class MonkeyPatchWrapper(object):
+    def __init__(self, monkeypatch, wrapped_object):
+        super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
+        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object', wrapped_object)
+
+    def __getattr__(self, attr):
+        return getattr(self.wrapped_object, attr)
+
+    def __setattr__(self, attr, value):
+        self.monkeypatch.setattr(self.wrapped_object, attr, value, raising=False)
+
+    def __delattr__(self, attr):
+        self.monkeypatch.delattr(self.wrapped_object, attr)
+
+
 @pytest.fixture()
-def settings(request):
+def settings(request, monkeypatch):
     """A Django settings object which restores changes after the testrun"""
-    # XXX Consider automatically resetting the settings for each test.
     skip_if_no_django()
 
-    import django.conf
-
-    orig_wrapped = django.conf.settings._wrapped
-    django.conf.settings._wrapped = copy.deepcopy(orig_wrapped)
-
-    def restore_settings():
-        django.conf.settings._wrapped = orig_wrapped
-
-    request.addfinalizer(restore_settings)
-    return django.conf.settings
+    from django.conf import settings as django_settings
+    return MonkeyPatchWrapper(monkeypatch, django_settings)
 
 
 @pytest.fixture(scope='session')
