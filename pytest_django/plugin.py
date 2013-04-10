@@ -17,12 +17,6 @@ from .fixtures import (_django_db_setup, db, transactional_db, client,
 from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
-try:
-    import configurations.importer
-except ImportError:
-    configurations = None
-
-
 (_django_db_setup, db, transactional_db, client, admin_client, rf,
  settings, live_server, _live_server_helper)
 
@@ -48,13 +42,11 @@ def pytest_addoption(parser):
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
-    # Only add the --dc option if django-configurations is available
-    if configurations is not None:
-        group._addoption('--dc',
-                         action='store', type='string', dest='dc',
-                         default=None, help='Set DJANGO_CONFIGURATION.')
-        parser.addini(CONFIGURATION_ENV,
-                      'django-configurations class to use by pytest-django.')
+    group._addoption('--dc',
+                     action='store', type='string', dest='dc', default=None,
+                     help='Set DJANGO_CONFIGURATION.')
+    parser.addini(CONFIGURATION_ENV,
+                 'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
                       help='Address and port for the live_server fixture.')
     parser.addini(SETTINGS_MODULE_ENV,
@@ -79,12 +71,9 @@ def pytest_configure(config):
           os.environ.get(SETTINGS_MODULE_ENV))
 
     # Configure DJANGO_CONFIGURATION
-    if configurations is not None:
-        dc = (config.option.dc or
-              config.getini(CONFIGURATION_ENV) or
-              os.environ.get(CONFIGURATION_ENV))
-    else:
-        dc = None
+    dc = (config.option.dc or
+          config.getini(CONFIGURATION_ENV) or
+          os.environ.get(CONFIGURATION_ENV))
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
@@ -93,6 +82,7 @@ def pytest_configure(config):
             os.environ[CONFIGURATION_ENV] = dc
 
             # Install the django-configurations importer
+            import configurations.importer
             configurations.importer.install()
 
         from django.conf import settings
