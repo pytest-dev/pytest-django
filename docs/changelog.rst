@@ -1,5 +1,10 @@
 Changelog
 =========
+2.3.0
+-----
+
+* Support for configuring settings via django-configurations. Big thanks to
+  Donald Stufft for this feature!
 
 2.2.1
 -----
