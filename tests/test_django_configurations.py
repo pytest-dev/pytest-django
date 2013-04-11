@@ -2,6 +2,12 @@
 
 If these tests fail you probably forgot to install django-configurations.
 """
+import sys
+import pytest
+
+
+pytestmark = pytest.mark.skipif("sys.version_info < (2,6)")
+
 
 BARE_SETTINGS = '''
 from configurations import Settings
