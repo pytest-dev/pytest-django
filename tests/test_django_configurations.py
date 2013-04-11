@@ -79,5 +79,5 @@ def test_dc_option(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """)
-    result = testdir.runpytest('--dc=MySettings --ds=tpkg.settings_opt')
+    result = testdir.runpytest('--ds=tpkg.settings_opt', '--dc=MySettings')
     result.stdout.fnmatch_lines(['*1 passed*'])
