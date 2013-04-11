@@ -111,9 +111,6 @@ Running the tests
 To run the tests simply execute ``py.test`` from your shell. Make sure you have
 Django and py.test installed before running the tests.
 
-A tox.ini file is available, which will run the tests for all supported Python
-and Django versions.
-
 Measuring test coverage
 -----------------------
 
