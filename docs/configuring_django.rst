@@ -36,6 +36,30 @@ Example contents of pytest.ini::
     [pytest]
     DJANGO_SETTINGS_MODULE = test_settings
 
+
+Using django-configurations
+---------------------------
+
+There is support for using `django-configurations <https://pypi.python.org/pypi/django-configurations/>`_.
+
+To do so configure the settings class using an environment variable, the --dc
+flag, or pytest.ini DJANGO_CONFIGURATION.
+
+Environment Variable::
+
+    $ export DJANGO_CONFIGURATION=MySettings
+    $ py.test
+
+Command Line Option::
+
+    $ py.test --dc=MySettings
+
+
+INI File Contents::
+
+    [pytest]
+    DJANGO_CONFIGURATION=MySettings
+
 Using ``django.conf.settings.configure()``
 ------------------------------------------
 

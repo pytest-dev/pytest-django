@@ -22,6 +22,7 @@ from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
+CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 
 
 ################ pytest hooks ################
@@ -41,6 +42,11 @@ def pytest_addoption(parser):
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
+    group._addoption('--dc',
+                     action='store', type='string', dest='dc', default=None,
+                     help='Set DJANGO_CONFIGURATION.')
+    parser.addini(CONFIGURATION_ENV,
+                 'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
                       help='Address and port for the live_server fixture.')
     parser.addini(SETTINGS_MODULE_ENV,
@@ -64,9 +70,20 @@ def pytest_configure(config):
           config.getini(SETTINGS_MODULE_ENV) or
           os.environ.get(SETTINGS_MODULE_ENV))
 
-    if ds:
+    # Configure DJANGO_CONFIGURATION
+    dc = (config.option.dc or
+          config.getini(CONFIGURATION_ENV) or
+          os.environ.get(CONFIGURATION_ENV))
 
+    if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
+
+        if dc:
+            os.environ[CONFIGURATION_ENV] = dc
+
+            # Install the django-configurations importer
+            import configurations.importer
+            configurations.importer.install()
 
         from django.conf import settings
         try:
