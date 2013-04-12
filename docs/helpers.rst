@@ -39,6 +39,16 @@ on what marks are and for notes on using_ them.
      `django.test.TransactionTestCase
      <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
 
+   .. note::
+
+      If you want access to the Django database *inside a fixture*
+      this marker will not help even if the function requesting your
+      fixture has this marker applied.  To access the database in a
+      fixture, the fixture itself will have to request the ``db`` or
+      ``transactional_db`` fixture.  See below for a description of
+      them.
+
+
 ``pytest.mark.urls`` - override the urlconf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -124,7 +134,7 @@ As an extra bonus this will automatically mark the database using the
 
 This fixture will ensure the Django database is set up.  This only
 required for fixtures which want to use the database themselves.  A
-test function should normally use the :py:func:`~pytest.mark.djangodb`
+test function should normally use the :py:func:`~pytest.mark.django_db`
 mark to signal it needs the database.
 
 ``transactional_db``
@@ -133,7 +143,7 @@ mark to signal it needs the database.
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
-:py:func:`~pytest.mark.djangodb` mark to signal it needs the database.
+:py:func:`~pytest.mark.django_db` mark to signal it needs the database.
 
 ``live_server``
 ~~~~~~~~~~~~~~~
