@@ -10,19 +10,23 @@ pytest_plugins = 'pytester'
 TESTS_DIR = py.path.local(__file__)
 
 
-from django.conf import settings
+
+@pytest.fixture()
+def django_settings():
+    from django.conf import settings
+    return settings
 
 
 from .db_helpers import create_empty_production_database, get_db_engine, DB_NAME
 
 
 @pytest.fixture(scope='function')
-def django_testdir(testdir, monkeypatch):
+def django_testdir(testdir, monkeypatch, django_settings):
     if get_db_engine() in ('mysql', 'postgresql_psycopg2'):
         # Django requires the production database to exists..
         create_empty_production_database()
 
-    db_settings = copy.deepcopy(settings.DATABASES)
+    db_settings = copy.deepcopy(django_settings.DATABASES)
     db_settings['default']['NAME'] = DB_NAME
 
     test_settings = '''
