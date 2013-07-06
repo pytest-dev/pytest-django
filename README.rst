@@ -48,10 +48,14 @@ Read the `contributing page <http://pytest-django.readthedocs.org/en/latest/cont
 
 To run the project's tests::
 
-    pip install -Ur requirements.txt
-    py.test
+    make test
+
+To build the project's docs::
+
+    make docs
 
 
 Bugs? Feature suggestions?
 ============================
+
 Report issues and feature requests at the `github issue tracker <http://github.com/pelme/pytest_django/issues>`_.
