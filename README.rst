@@ -1,13 +1,10 @@
 pytest-django is a plugin for `pytest <http://pytest.org/>`_ that provides a set of useful tools for testing `Django <http://www.djangoproject.com/>`_ applications and projects.
 
-Requirements
-============
-
-Supported Django versions: 1.3, 1.4 and 1.5
-
-Supported Python versions 2.5 - 2.7 and 3.2 - 3.3. PyPy can also be used.
-
-A recent version of pytest is required (>= 2.3.4).
+* Authors: Ben Firshman, Andreas Pelme and `contributors <https://github.com/pelme/pytest_django/contributors>`_
+* Licence: BSD
+* Compatibility: Django 1.3, 1.4 and 1.5, python 2.5 - 2.7 and 3.2 - 3.3 or PyPy, pytest >= 2.3.4
+* Project URL: https://github.com/pelme/pytest_django
+* Documentation: http://pytest-django.rtfd.org/
 
 
 Quick Start
@@ -38,6 +35,16 @@ Running the test suite with pytest offers some features that are not present in 
  * No pain of switching: Existing unittest-style tests will still work without any modifications.
 
 See the `pytest documentation <http://pytest.org/latest/>`_ for more information on pytest.
+
+
+Contributing
+============
+
+Read the `contributing page <http://pytest-django.readthedocs.org/en/latest/contributing.html>`_ from the documentation.
+
+To run the project's tests::
+
+    py.test
 
 
 Bugs? Feature suggestions?
