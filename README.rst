@@ -44,6 +44,7 @@ Read the `contributing page <http://pytest-django.readthedocs.org/en/latest/cont
 
 To run the project's tests::
 
+    pip install -Ur requirements.txt
     py.test
 
 
