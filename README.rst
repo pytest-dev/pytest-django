@@ -1,3 +1,7 @@
+.. image:: https://secure.travis-ci.org/pelme/pytest_django.png?branch=master
+   :alt: Build Status
+   :target: https://travis-ci.org/pelme/pytest_django
+
 pytest-django is a plugin for `pytest <http://pytest.org/>`_ that provides a set of useful tools for testing `Django <http://www.djangoproject.com/>`_ applications and projects.
 
 * Authors: Ben Firshman, Andreas Pelme and `contributors <https://github.com/pelme/pytest_django/contributors>`_
