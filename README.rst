@@ -13,7 +13,7 @@ A recent version of pytest is required (>= 2.3.4).
 Quick Start
 ===========
 1. ``pip install pytest-django``
-2. Make sure ``DJANGO_SETTINGS_MODULE`` is defined and and run tests with the ``pytest`` command.
+2. Make sure ``DJANGO_SETTINGS_MODULE`` is defined and and run tests with the ``py.test`` command.
 3. (Optionally) If you put your tests under a tests directory (the standard Django application layout), and your files are not named ``test_FOO.py``, `see the FAQ <http://pytest-django.readthedocs.org/en/latest/faq.html#my-tests-are-not-being-picked-up-when-i-run-pytest-from-the-root-directory-why-not>`_
 
 
