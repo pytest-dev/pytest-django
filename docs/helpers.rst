@@ -153,3 +153,19 @@ server's URL can be retreived using the ``live_server.url`` attribute
 or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
+
+``settings``
+~~~~~~~~~~~~
+
+This fixture will provide a handle on the django settings module, and
+automatically revert any changes made to the settings (modifications, additions
+and deletions).
+
+Example
+"""""""
+
+::
+
+    def test_with_secific_settings(settings):
+        settings.USE_TZ = True
+        assert settings.USE_TZ
