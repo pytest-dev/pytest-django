@@ -1,5 +1,5 @@
 """
-Helpers to load Django lazily when Django settings are not able to be configured.
+Helpers to load Django lazily when Django settings can't be configured.
 """
 
 import os

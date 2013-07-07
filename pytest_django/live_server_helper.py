@@ -1,6 +1,7 @@
 import sys
 import pytest
 
+
 def supported():
     import django.test.testcases
 

@@ -8,7 +8,8 @@ import types
 
 
 def can_support_db_reuse(connection):
-    """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
+    """Return whether it makes any sense to use REUSE_DB with the backend of a
+    connection."""
     # This is a SQLite in-memory DB. Those are created implicitly when
     # you try to connect to them, so our test below doesn't work.
     return connection.creation._get_test_db_name() != ':memory:'
@@ -70,7 +71,7 @@ def monkey_patch_creation_for_db_reuse():
 
             if sys.version_info < (3, 0):
                 creation.create_test_db = types.MethodType(
-                        create_test_db, creation, creation.__class__)
+                    create_test_db, creation, creation.__class__)
             else:
                 creation.create_test_db = types.MethodType(create_test_db,
-                        creation)
+                                                           creation)

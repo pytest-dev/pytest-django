@@ -2,7 +2,6 @@
 
 from __future__ import with_statement
 
-import copy
 import os
 
 import pytest
@@ -155,13 +154,15 @@ def rf():
 class MonkeyPatchWrapper(object):
     def __init__(self, monkeypatch, wrapped_object):
         super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
-        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object', wrapped_object)
+        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object',
+                                                    wrapped_object)
 
     def __getattr__(self, attr):
         return getattr(self.wrapped_object, attr)
 
     def __setattr__(self, attr, value):
-        self.monkeypatch.setattr(self.wrapped_object, attr, value, raising=False)
+        self.monkeypatch.setattr(self.wrapped_object, attr, value,
+                                 raising=False)
 
     def __delattr__(self, attr):
         self.monkeypatch.delattr(self.wrapped_object, attr)
