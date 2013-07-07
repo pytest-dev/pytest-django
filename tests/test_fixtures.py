@@ -6,7 +6,6 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
-import py
 import django
 import pytest
 from django.conf import settings as real_settings
@@ -83,7 +82,7 @@ class TestLiveServer:
         pytest.mark.skipif('django.VERSION[:2] < (1, 4)'),
         pytest.mark.urls('tests.urls_liveserver'),
         ]
-    
+
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
 

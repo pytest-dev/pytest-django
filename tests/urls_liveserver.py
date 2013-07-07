@@ -3,7 +3,8 @@ from django.http import HttpResponse
 
 from .app.models import Item
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^item_count/$',
         lambda r: HttpResponse('Item count: %d' % Item.objects.count()))
 )
