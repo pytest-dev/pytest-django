@@ -12,8 +12,8 @@ def is_django_unittest(item):
 
     if sys.version_info < (3, 0):
         return (hasattr(item.obj, 'im_class') and
-        	    issubclass(item.obj.im_class, TestCase))
+                issubclass(item.obj.im_class, TestCase))
 
     return (hasattr(item.obj, '__self__') and
-    		hasattr(item.obj.__self__, '__class__') and 
-    		issubclass(item.obj.__self__.__class__, TestCase))
+            hasattr(item.obj.__self__, '__class__') and
+            issubclass(item.obj.__self__.__class__, TestCase))

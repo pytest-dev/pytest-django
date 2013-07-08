@@ -2,7 +2,6 @@
 
 If these tests fail you probably forgot to install django-configurations.
 """
-import sys
 import pytest
 
 

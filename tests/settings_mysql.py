@@ -1,4 +1,4 @@
-from tests.settings_base import *
+from tests.settings_base import *  # noqa
 
 DATABASES = {
     'default': {
