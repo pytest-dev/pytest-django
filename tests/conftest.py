@@ -4,6 +4,8 @@ import py
 import shutil
 import copy
 
+from textwrap import dedent
+
 
 pytest_plugins = 'pytester'
 
@@ -26,22 +28,22 @@ def django_testdir(testdir, monkeypatch):
     db_settings = copy.deepcopy(settings.DATABASES)
     db_settings['default']['NAME'] = DB_NAME
 
-    test_settings = '''
-# Pypy compatibility
-try:
-    from psycopg2ct import compat
-except ImportError:
-    pass
-else:
-    compat.register()
+    test_settings = dedent("""
+        # Pypy compatibility
+        try:
+            from psycopg2ct import compat
+        except ImportError:
+            pass
+        else:
+            compat.register()
 
-DATABASES = %(db_settings)s
+        DATABASES = %(db_settings)s
 
-INSTALLED_APPS = [
-    'tpkg.app',
-]
-SECRET_KEY = 'foobar'
-''' % {'db_settings': repr(db_settings)}
+        INSTALLED_APPS = [
+            'tpkg.app',
+        ]
+        SECRET_KEY = 'foobar'
+    """ % {'db_settings': repr(db_settings)})
 
     tpkg_path = testdir.mkpydir('tpkg')
     app_source = TESTS_DIR.dirpath('app')

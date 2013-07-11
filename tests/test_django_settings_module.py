@@ -3,7 +3,7 @@
 If these tests fail you probably forgot to run "python setup.py develop".
 """
 
-BARE_SETTINGS = '''
+BARE_SETTINGS = """
 # At least one database must be configured
 DATABASES = {
     'default': {
@@ -12,7 +12,7 @@ DATABASES = {
     },
 }
 SECRET_KEY = 'foobar'
-'''
+"""
 
 
 def test_ds_env(testdir, monkeypatch):
