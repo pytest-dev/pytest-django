@@ -1,5 +1,10 @@
 Changelog
 =========
+2.3.1
+-----
+* Support for Django 1.5 custom user models, thanks to Leonardo Santagada.
+
+
 2.3.0
 -----
 
