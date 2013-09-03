@@ -20,8 +20,9 @@ on what marks are and for notes on using_ them.
    will ensure the database is setup correctly for the test. Each test
    will run in its own transaction which will be rolled back at the end
    of the test. This behavior is the same as Django's standard
-   `django.test.TestCase   <https://docs.djangoproject.com/en/dev/topics
-   /testing/#django.test.TestCase>`_ class.
+   `django.test.TestCase`_ class.
+
+.. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
 
    In order for a test to have access to the database it must either
    be marked using the ``django_db`` mark or request one of the ``db``
@@ -33,11 +34,11 @@ on what marks are and for notes on using_ them.
      The ``transaction`` argument will allow the test to use real transactions.
      With ``transaction=False`` (the default when not specified), transaction
      operations are noops during the test. This is the same behavior that
-     `django.test.TestCase
-     <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TestCase>`_
+     `django.test.TestCase`_
      uses. When ``transaction=True``, the behavior will be the same as
-     `django.test.TransactionTestCase
-     <https://docs.djangoproject.com/en/dev/topics/testing/#django.test.TransactionTestCase>`_
+     `django.test.TransactionTestCase`_
+
+.. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
 
    .. note::
 
@@ -79,8 +80,9 @@ More information on fixtures is available in the `py.test documentation
 ``rf`` - ``RequestFactory``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.client.RequestFactory
-<https://docs.djangoproject.com/en/dev/topics/testing/#django.test.client.RequestFactory>`_.
+An instance of a `django.test.client.RequestFactory`_
+
+.. _django.test.client.RequestFactory: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#module-django.test.client
 
 Example
 """""""
@@ -97,8 +99,9 @@ Example
 ``client`` - ``django.test.Client``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.Client
-<https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_.
+An instance of a `django.test.Client`_
+
+.. _django.test.Client: https://docs.djangoproject.com/en/dev/topics/testing/overview/#module-django.test.client
 
 Example
 """""""
@@ -113,8 +116,7 @@ Example
 ``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.Client
-<https://docs.djangoproject.com/en/dev/topics/testing/#module-django.test.client>`_,
+An instance of a `django.test.Client`_,
 that is logged in as an admin user.
 
 Example
