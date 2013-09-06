@@ -75,7 +75,7 @@ def test_ds_non_existent(testdir, monkeypatch):
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
     result.stderr.fnmatch_lines(
-        ["*Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?):*"])
+        ["*Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*):*"])
 
 
 def test_django_settings_configure(testdir, monkeypatch):
