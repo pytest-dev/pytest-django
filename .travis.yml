@@ -13,20 +13,23 @@ python:
 env:
   - DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=sqlite DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+  - DB=sqlite DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+  - DB=sqlite DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
 
   - DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+  - DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+  - DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
 
   - DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=postgres DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+  - DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+  - DB=postgres DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
 
 install:
   - pip install --use-mirrors pytest django-configurations>=0.2.1
-  - 'if [ "$DJANGO_VERSION" != "1.5c1" ]; then pip install --use-mirrors django==$DJANGO_VERSION; fi'
-  - 'if [ "$DJANGO_VERSION" == "1.5c1" ]; then pip install "https://www.djangoproject.com/download/1.5c1/tarball/#egg=django"; fi'
+  - 'if [ "$DJANGO_VERSION" != "1.5.2" ]; then pip install --use-mirrors django==$DJANGO_VERSION; fi'
+  - 'if [ "$DJANGO_VERSION" == "1.6b2" ]; then pip install "https://www.djangoproject.com/download/1.6b2/tarball/#egg=django"; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct --use-mirrors; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION --use-mirrors; fi'
   - 'if [ "$DB" == mysql ]; then pip install mysql-python --use-mirrors; fi'
@@ -50,21 +53,28 @@ matrix:
     - python: pypy
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     # pypy + mysql
     - python: pypy
       env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: pypy
       env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     # python 2.5 + django 1.5
     - python: "2.5"
-      env: DB=sqlite DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=sqlite DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "2.5"
-      env: DB=mysql DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "2.5"
-      env: DB=postgres DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    # python 2.5 + django 1.6
+    - python: "2.5"
+      env: DB=sqlite DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
+    - python: "2.5"
+      env: DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
+    - python: "2.5"
+      env: DB=postgres DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
     # python 3.2 + django 1.3
     - python: "3.2"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
@@ -81,7 +91,9 @@ matrix:
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     # python 3.2 + mysql
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    - python: "3.2"
+      env: DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
     # python 3.3 + django 1.3
     - python: "3.3"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
@@ -98,4 +110,4 @@ matrix:
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     # python 3.3 + mysql
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.5c1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
