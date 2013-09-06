@@ -42,7 +42,7 @@ Requirements
 The current supported versions of Python, Django and pytest are:
 
  * Python 2.5-2.7
- * Django 1.3-1.5
+ * Django 1.3-1.6
  * py.test 2.3.4+
 
 
