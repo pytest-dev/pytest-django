@@ -54,6 +54,8 @@ matrix:
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: pypy
       env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    - python: pypy
+      env: DB=postgres DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
     # pypy + mysql
     - python: pypy
       env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
