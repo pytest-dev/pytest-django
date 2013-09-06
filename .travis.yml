@@ -111,3 +111,5 @@ matrix:
     # python 3.3 + mysql
     - python: "3.3"
       env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    - python: "3.3"
+      env: DB=mysql DJANGO_VERSION=1.6b PSYCOPG_VERSION=2.4.5
