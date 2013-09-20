@@ -1,6 +1,11 @@
 Getting started
 ===============
 
+Andreas Pelme gave a talk at EuroPython 2013 on testing in Django with
+py.test. It shows the benefits of using py.test and how to get started:
+
+`Testing Django application with py.test (YouTube link) <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
+
 Installation
 ------------
 
