@@ -48,6 +48,8 @@ copyright = u'2012, Andreas Pelme'
 # built documents.
 #
 # The short X.Y version.
+sys.path.append(os.path.abspath(os.path.join(__file__, '../..')))
+
 version = __import__('pytest_django').__version__
 # The full version, including alpha/beta/rc tags.
 release = __import__('pytest_django').__version__
