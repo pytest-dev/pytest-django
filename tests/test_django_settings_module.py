@@ -133,7 +133,8 @@ def test_django_settings_configure(testdir, monkeypatch):
     ])
 
 
-def test_settings_in_hook(testdir):
+def test_settings_in_hook(testdir, monkeypatch):
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
     testdir.makeconftest("""
         from django.conf import settings
 

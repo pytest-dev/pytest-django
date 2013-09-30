@@ -52,26 +52,14 @@ def pytest_addoption(parser):
     parser.addini(SETTINGS_MODULE_ENV,
                   'Django settings module to use by pytest-django.')
 
-
-def pytest_configure(config):
-    """Configure DJANGO_SETTINGS_MODULE and register our marks
-
-    The first specified value from the following will be used:
-
-    * --ds command line option
-    * DJANGO_SETTINGS_MODULE pytest.ini option
-    * DJANGO_SETTINGS_MODULE
-
-    If configured via django.conf.settings.configure(), those settings
-    will be used instead.
-    """
+def _load_settings(config, options):
     # Configure DJANGO_SETTINGS_MODULE
-    ds = (config.option.ds or
+    ds = (options.ds or
           config.getini(SETTINGS_MODULE_ENV) or
           os.environ.get(SETTINGS_MODULE_ENV))
 
     # Configure DJANGO_CONFIGURATION
-    dc = (config.option.dc or
+    dc = (options.dc or
           config.getini(CONFIGURATION_ENV) or
           os.environ.get(CONFIGURATION_ENV))
 
@@ -92,6 +80,23 @@ def pytest_configure(config):
             e = sys.exc_info()[1]
             raise pytest.UsageError(*e.args)
 
+
+def pytest_load_initial_conftests(early_config, parser, args):
+    """Configure DJANGO_SETTINGS_MODULE and register our marks
+
+    The first specified value from the following will be used:
+
+    * --ds command line option
+    * DJANGO_SETTINGS_MODULE pytest.ini option
+    * DJANGO_SETTINGS_MODULE
+
+    If configured via django.conf.settings.configure(), those settings
+    will be used instead.
+    """
+    _load_settings(early_config, parser.parse_known_args(args))
+
+
+def pytest_configure(config):
     # Register the marks
     config.addinivalue_line(
         'markers',
@@ -105,6 +110,9 @@ def pytest_configure(config):
         'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
         'a string specifying the module of a URL config, e.g. '
         '"my_app.test_urls".')
+
+    if pytest.__version__[:3] < "2.4":
+        _load_settings(config, config.option)
 
 
 ################ Autouse fixtures ################
