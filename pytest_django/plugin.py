@@ -81,19 +81,9 @@ def _load_settings(config, options):
             raise pytest.UsageError(*e.args)
 
 
-def pytest_load_initial_conftests(early_config, parser, args):
-    """Configure DJANGO_SETTINGS_MODULE and register our marks
-
-    The first specified value from the following will be used:
-
-    * --ds command line option
-    * DJANGO_SETTINGS_MODULE pytest.ini option
-    * DJANGO_SETTINGS_MODULE
-
-    If configured via django.conf.settings.configure(), those settings
-    will be used instead.
-    """
-    _load_settings(early_config, parser.parse_known_args(args))
+if pytest.__version__[:3] >= "2.4":
+    def pytest_load_initial_conftests(early_config, parser, args):
+        _load_settings(early_config, parser.parse_known_args(args))
 
 
 def pytest_configure(config):
