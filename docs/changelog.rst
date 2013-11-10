@@ -1,5 +1,11 @@
 Changelog
 =========
+2.4.0
+-----
+* Support for py.test 2.4 pytest_load_initial_conftests. This makes it possible
+  to import Django models in project conftest.py files, since pytest-django
+  will be initialized before the conftest.py is loaded.
+
 2.3.1
 -----
 * Support for Django 1.5 custom user models, thanks to Leonardo Santagada.
