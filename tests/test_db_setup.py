@@ -1,4 +1,5 @@
 import pytest
+from textwrap import dedent
 
 from django.conf import settings
 
@@ -16,15 +17,15 @@ def test_db_reuse(django_testdir):
     if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
         pytest.skip('Do not test db reuse since database does not support it')
 
-    create_test_module(django_testdir, '''
-import pytest
+    create_test_module(django_testdir, dedent("""
+        import pytest
 
-from .app.models import Item
+        from .app.models import Item
 
-@pytest.mark.django_db
-def test_db_can_be_accessed():
-    assert Item.objects.count() == 0
-''')
+        @pytest.mark.django_db
+        def test_db_can_be_accessed():
+            assert Item.objects.count() == 0
+    """))
 
     # Use --create-db on the first run to make sure we are not just re-using a
     # database from another test run

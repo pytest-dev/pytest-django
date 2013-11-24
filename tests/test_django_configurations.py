@@ -12,7 +12,7 @@ if sys.version_info < (2, 6):
 pytest.importorskip('configurations')
 
 
-BARE_SETTINGS = '''
+BARE_SETTINGS = """
 from configurations import Settings
 
 class MySettings(Settings):
@@ -25,7 +25,7 @@ class MySettings(Settings):
     }
 
     SECRET_KEY = 'foobar'
-'''
+"""
 
 
 def test_dc_env(testdir, monkeypatch):
