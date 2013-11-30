@@ -72,7 +72,7 @@ on what marks are and for notes on using_ them.
 Fixtures
 --------
 
-pytest-django provides some pytest fixtures to provide depencies for tests.
+pytest-django provides some pytest fixtures to provide dependencies for tests.
 More information on fixtures is available in the `py.test documentation
 <http://pytest.org/latest/fixture.html>`_.
 
