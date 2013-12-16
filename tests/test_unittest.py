@@ -3,7 +3,6 @@ import pytest
 from django.test import TestCase
 
 from .app.models import Item
-from .conftest import create_test_module
 from .compat import force_text
 
 
@@ -75,7 +74,7 @@ def test_sole_test(django_testdir):
     are collected, without the django_db marker.
     """
 
-    create_test_module(django_testdir, '''
+    django_testdir.create_test_module('''
 from django.test import TestCase
 from django.conf import settings
 
