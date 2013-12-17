@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - "2.5"
   - "2.6"
   - "2.7"
   - "3.2"
@@ -28,7 +27,7 @@ env:
 
 install:
   - pip install --use-mirrors pytest
-  - 'if [ "$TRAVIS_PYTHON_VERSION" != "2.5" ]; then pip install --use-mirrors django-configurations>=0.2.1; fi'
+  - pip install --use-mirrors django-configurations>=0.2.1
   - 'if [ "$DJANGO_VERSION" != "1.6b2" ]; then pip install --use-mirrors django==$DJANGO_VERSION; fi'
   - 'if [ "$DJANGO_VERSION" == "1.6b2" ]; then pip install "https://www.djangoproject.com/download/1.6b2/tarball/#egg=django"; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct --use-mirrors; fi'
@@ -64,20 +63,6 @@ matrix:
       env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: pypy
       env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    # python 2.5 + django 1.5
-    - python: "2.5"
-      env: DB=sqlite DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    - python: "2.5"
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    - python: "2.5"
-      env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    # python 2.5 + django 1.6
-    - python: "2.5"
-      env: DB=sqlite DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
-    - python: "2.5"
-      env: DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
-    - python: "2.5"
-      env: DB=postgres DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
     # python 3.2 + django 1.3
     - python: "3.2"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
