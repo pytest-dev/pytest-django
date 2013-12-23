@@ -1,4 +1,6 @@
 import subprocess
+import pytest
+
 from .compat import force_text
 
 DB_NAME = 'pytest_django_db_test'
@@ -33,6 +35,12 @@ def run_mysql(*args):
     return run_cmd(*args)
 
 
+def skip_if_sqlite():
+    from django.conf import settings
+
+    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+        pytest.skip('Do not test db reuse since database does not support it')
+
 def create_empty_production_database():
     drop_database(name=DB_NAME)
 
@@ -52,7 +60,12 @@ def create_empty_production_database():
     raise AssertionError('%s cannot be tested properly' % get_db_engine())
 
 
-def drop_database(name=TEST_DB_NAME):
+def drop_database(name=TEST_DB_NAME, suffix=None):
+    assert bool(name) ^ bool(suffix), 'name and suffix cannot be used together'
+
+    if suffix:
+        name = '%s_%s' % (name, suffix)
+
     if get_db_engine() == 'postgresql_psycopg2':
         r = run_cmd('psql', 'postgres', '-c', 'DROP DATABASE %s' % name)
         assert ('DROP DATABASE' in force_text(r.std_out) or
@@ -68,13 +81,18 @@ def drop_database(name=TEST_DB_NAME):
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
 
 
-def db_exists():
+def db_exists(db_suffix=None):
+    name = TEST_DB_NAME
+
+    if db_suffix:
+        name = '%s_%s' % (name, db_suffix)
+
     if get_db_engine() == 'postgresql_psycopg2':
-        r = run_cmd('psql', TEST_DB_NAME, '-c', 'SELECT 1')
+        r = run_cmd('psql', name, '-c', 'SELECT 1')
         return r.status_code == 0
 
     if get_db_engine() == 'mysql':
-        r = run_mysql(TEST_DB_NAME, '-e', 'SELECT 1')
+        r = run_mysql(name, '-e', 'SELECT 1')
         return r.status_code == 0
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())

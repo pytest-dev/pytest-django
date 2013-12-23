@@ -7,17 +7,17 @@ import sys
 import types
 
 
-def can_support_db_reuse(connection):
+def is_in_memory_db(connection):
     """Return whether it makes any sense to use REUSE_DB with the backend of a
     connection."""
     # This is a SQLite in-memory DB. Those are created implicitly when
     # you try to connect to them, so our test below doesn't work.
-    return connection.creation._get_test_db_name() != ':memory:'
+    return connection.settings_dict['NAME'] == ':memory:'
 
 
 def test_database_exists_from_previous_run(connection):
     # Check for sqlite memory databases
-    if not can_support_db_reuse(connection):
+    if is_in_memory_db(connection):
         return False
 
     # Try to open a cursor to the test database
@@ -34,7 +34,46 @@ def test_database_exists_from_previous_run(connection):
         connection.settings_dict['NAME'] = orig_db_name
 
 
-def create_test_db(self, verbosity=1, autoclobber=False):
+
+
+def _monkeypatch(obj, method_name, new_method):
+    assert hasattr(obj, method_name)
+
+    if sys.version_info < (3, 0):
+        wrapped_method = types.MethodType(new_method, obj, obj.__class__)
+    else:
+        wrapped_method = types.MethodType(new_method, obj)
+
+    setattr(obj, method_name, wrapped_method)
+
+
+def monkey_patch_creation_for_db_suffix(suffix=None):
+    from django.db import connections
+
+    if suffix is not None:
+        def _get_test_db_name(self):
+            """
+            Internal implementation - returns the name of the test DB that will be
+            created. Only useful when called from create_test_db() and
+            _create_test_db() and when no external munging is done with the 'NAME'
+            or 'TEST_NAME' settings.
+            """
+
+            if self.connection.settings_dict['TEST_NAME']:
+                original = self.connection.settings_dict['TEST_NAME']
+            original = 'test_' + self.connection.settings_dict['NAME']
+
+            if suffix:
+                return '%s_%s' % (original, suffix)
+
+            return original
+
+        for connection in connections.all():
+
+            _monkeypatch(connection.creation, '_get_test_db_name', _get_test_db_name)
+
+
+def create_test_db_with_reuse(self, verbosity=1, autoclobber=False):
     """
     This method is a monkey patched version of create_test_db that
     will not actually create a new database, but just reuse the
@@ -61,17 +100,6 @@ def create_test_db(self, verbosity=1, autoclobber=False):
 def monkey_patch_creation_for_db_reuse():
     from django.db import connections
 
-    for alias in connections:
-        connection = connections[alias]
-        creation = connection.creation
-
+    for connection in connections.all():
         if test_database_exists_from_previous_run(connection):
-            # Make sure our monkey patch is still valid in the future
-            assert hasattr(creation, 'create_test_db')
-
-            if sys.version_info < (3, 0):
-                creation.create_test_db = types.MethodType(
-                    create_test_db, creation, creation.__class__)
-            else:
-                creation.create_test_db = types.MethodType(create_test_db,
-                                                           creation)
+            _monkeypatch(connection.creation, 'create_test_db', create_test_db_with_reuse)

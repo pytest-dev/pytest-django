@@ -7,7 +7,8 @@ import os
 import pytest
 
 from . import live_server_helper
-from .db_reuse import monkey_patch_creation_for_db_reuse
+from .db_reuse import (monkey_patch_creation_for_db_reuse,
+                       monkey_patch_creation_for_db_suffix)
 from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
@@ -26,13 +27,20 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
 
     from django.core import management
 
+    # xdist
+    if hasattr(request.config, 'slaveinput'):
+        db_suffix = request.config.slaveinput['slaveid']
+    else:
+        db_suffix = None
+
+    monkey_patch_creation_for_db_suffix(db_suffix)
+
     # Disable south's syncdb command
     commands = management.get_commands()
     if commands['syncdb'] == 'south':
         management._commands['syncdb'] = 'django.core'
 
     with _django_cursor_wrapper:
-
         # Monkey patch Django's setup code to support database re-use
         if request.config.getvalue('reuse_db'):
             if not request.config.getvalue('create_db'):

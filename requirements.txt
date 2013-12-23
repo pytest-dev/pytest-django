@@ -1,3 +1,4 @@
 -e .
 django
 django-configurations
+pytest-xdist

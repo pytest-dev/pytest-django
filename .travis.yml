@@ -26,13 +26,13 @@ env:
   - DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
 
 install:
-  - pip install --use-mirrors pytest
-  - pip install --use-mirrors django-configurations>=0.2.1
+  - pip install pytest
+  - pip install django-configurations>=0.2.1
   - 'pip install django==$DJANGO_VERSION'
-  - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct --use-mirrors; fi'
-  - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION --use-mirrors; fi'
-  - 'if [ "$DB" == mysql ]; then pip install mysql-python --use-mirrors; fi'
-  - python setup.py develop
+  - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct; fi'
+  - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION; fi'
+  - 'if [ "$DB" == mysql ]; then pip install mysql-python; fi'
+  - pip install -r requirements.txt
 
 before_script:
   - psql -c 'create database pytest_django;' -U postgres
@@ -54,7 +54,7 @@ matrix:
     - python: pypy
       env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
+      env: DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
     # pypy + mysql
     - python: pypy
       env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
@@ -80,7 +80,7 @@ matrix:
     - python: "3.2"
       env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
     # python 3.3 + django 1.3
     - python: "3.3"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
@@ -99,4 +99,4 @@ matrix:
     - python: "3.3"
       env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.6b2 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5

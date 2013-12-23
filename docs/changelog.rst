@@ -7,6 +7,10 @@ Changelog
   strategy as for pytest itself is used: No code will be changed to prevent
   Python 2.5 from working, but it will not be actively tested.
 
+* pytest-xdist support: it is now possible to run tests in parallell. Just use
+  pytest-xdist as normal (pass -n to py.test). One database will be created for
+  each subprocess so that tests run independent from eachother.
+
 2.4.0
 -----
 * Support for py.test 2.4 pytest_load_initial_conftests. This makes it possible
