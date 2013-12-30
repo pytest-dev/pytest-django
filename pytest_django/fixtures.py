@@ -86,8 +86,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
         _django_cursor_wrapper.enable()
         case = TestCase(methodName='__init__')
         case._pre_setup()
-        request.addfinalizer(case._post_teardown)
         request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(case._post_teardown)
 
 
 @pytest.fixture(scope='function')
