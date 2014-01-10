@@ -1,7 +1,7 @@
 Changelog
 =========
-2.5.0 (in development)
-----------------------
+2.5.0
+-----
 * Python 2.5 compatibility dropped. py.test 2.5 dropped support for Python 2.5,
   therefore it will be hard to properly support in pytest-django. The same
   strategy as for pytest itself is used: No code will be changed to prevent
