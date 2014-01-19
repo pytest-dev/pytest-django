@@ -145,9 +145,15 @@ def _django_cursor_wrapper(request):
     """
     if django_settings_is_configured():
 
-        import django.db.backends.util
+        # util -> utils rename in Django 1.7
+        try:
+            import django.db.backends.utils
+            utils_module = django.db.backends.utils
+        except ImportError:
+            import django.db.backends.util
+            utils_module = django.db.backends.util
 
-        manager = CursorManager(django.db.backends.util)
+        manager = CursorManager(utils_module)
         manager.disable()
     else:
         manager = CursorManager()
