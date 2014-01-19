@@ -52,7 +52,8 @@ class LiveServer(object):
 
     def stop(self):
         """Stop the server"""
-        self.thread.terminate()
+        terminate = getattr(self.thread, 'terminate', lambda: None)
+        terminate()
         self.thread.join()
 
     @property
