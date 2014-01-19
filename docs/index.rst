@@ -36,16 +36,6 @@ Quick Start
 3. (Optionally) If you put your tests under a tests directory (the standard Django application layout), and your files are not named ``test_FOO.py``, see the FAQ :ref:`faq-tests-not-being-picked-up`.
 
 
-Requirements
-============
-
-The current supported versions of Python, Django and pytest are:
-
- * Python 2.6-2.7
- * Django 1.3-1.6
- * py.test 2.3.4+
-
-
 Bugs? Feature suggestions?
 ============================
 Report issues and feature requests at the `github issue tracker <http://github.com/pelme/pytest_django/issues>`_.

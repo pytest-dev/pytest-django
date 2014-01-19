@@ -1,5 +1,13 @@
 Changelog
 =========
+2.6.0
+-----
+* Experimental support for Django 1.7 / Django master as of 2013-11-19.
+
+  pytest-django is now automatically tested against the latest git version of
+  Django. The support is experimental since Django 1.7 is not yet released, but
+  the goal is to always be up to date with the latest Django master
+
 2.5.0
 -----
 * Python 2.5 compatibility dropped. py.test 2.5 dropped support for Python 2.5,
