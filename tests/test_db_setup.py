@@ -57,7 +57,7 @@ def test_db_can_be_accessed():
     assert not mark_exists()
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (2, 7), reason='xdist is flaky in 3.2')
+@pytest.mark.skipif(sys.version_info[:2] == (3, 2), reason='xdist is flaky in 3.2')
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite()
 
