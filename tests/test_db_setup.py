@@ -1,3 +1,7 @@
+import sys
+
+import pytest
+
 from .db_helpers import mark_exists, mark_database, drop_database, db_exists, skip_if_sqlite
 
 
@@ -53,6 +57,7 @@ def test_db_can_be_accessed():
     assert not mark_exists()
 
 
+@pytest.mark.skipif(sys.version_info[:2] == (2, 7), 'xdist is flaky in 3.2')
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite()
 
