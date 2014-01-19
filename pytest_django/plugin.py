@@ -124,6 +124,7 @@ def _django_runner(request):
     """
     if django_settings_is_configured():
         import django
+        # Django >= 1.7: Call django.setup() to initialize Django
         setup = getattr(django, 'setup', lambda: None)
         setup()
 

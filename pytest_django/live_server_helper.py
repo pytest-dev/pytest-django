@@ -52,6 +52,7 @@ class LiveServer(object):
 
     def stop(self):
         """Stop the server"""
+        # .terminate() was added in Django 1.7
         terminate = getattr(self.thread, 'terminate', lambda: None)
         terminate()
         self.thread.join()
