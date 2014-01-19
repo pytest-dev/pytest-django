@@ -33,17 +33,28 @@ class LiveServer(object):
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
+        try:
+            from django.test.testcases import _StaticFilesHandler
+            static_handler_kwargs = {'static_handler': _StaticFilesHandler}
+        except ImportError:
+            static_handler_kwargs = {}
+
         host, possible_ports = parse_addr(addr)
         self.thread = LiveServerThread(host, possible_ports,
-                                       connections_override)
+                                       connections_override=connections_override,
+                                       **static_handler_kwargs)
         self.thread.daemon = True
         self.thread.start()
         self.thread.is_ready.wait()
+
         if self.thread.error:
             raise self.thread.error
 
     def stop(self):
         """Stop the server"""
+        # .terminate() was added in Django 1.7
+        terminate = getattr(self.thread, 'terminate', lambda: None)
+        terminate()
         self.thread.join()
 
     @property

@@ -14,21 +14,27 @@ env:
   - DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
   - DB=sqlite DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
   - DB=sqlite DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+  - DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
   - DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
   - DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
   - DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+  - DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
   - DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
   - DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
   - DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+  - DB=postgres DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+
 
 install:
   - pip install pytest
   - pip install django-configurations>=0.2.1
-  - 'pip install django==$DJANGO_VERSION'
+  - 'if [ "$DJANGO_VERSION" != "master" ]; then pip install django==$DJANGO_VERSION; fi'
+  - 'if [ "$DJANGO_VERSION" == "master" ]; then pip install -e git+https://github.com/django/django@master#egg=Django; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION; fi'
   - 'if [ "$DB" == mysql ]; then pip install mysql-python; fi'
@@ -100,3 +106,13 @@ matrix:
       env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
       env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+
+    # Django 1.7 and Python 2.6
+    - python: "2.6"
+      env: DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+    - python: "2.6"
+      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+    - python: "2.6"
+      env: DB=postgres DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
