@@ -123,6 +123,10 @@ def _django_runner(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
+        import django
+        setup = getattr(django, 'setup', lambda: None)
+        setup()
+
         from django.test.simple import DjangoTestSuiteRunner
 
         runner = DjangoTestSuiteRunner(interactive=False)
