@@ -127,9 +127,11 @@ def _django_runner(request):
         setup = getattr(django, 'setup', lambda: None)
         setup()
 
-        from django.test.simple import DjangoTestSuiteRunner
+        from django.test.utils import get_runner
+        from django.conf import settings
 
-        runner = DjangoTestSuiteRunner(interactive=False)
+        runner_class = get_runner(settings)
+        runner = runner_class(interactive=False)
         runner.setup_test_environment()
         request.addfinalizer(runner.teardown_test_environment)
         return runner
