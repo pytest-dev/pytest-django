@@ -61,7 +61,8 @@ def monkey_patch_creation_for_db_suffix(suffix=None):
 
             if self.connection.settings_dict['TEST_NAME']:
                 original = self.connection.settings_dict['TEST_NAME']
-            original = 'test_' + self.connection.settings_dict['NAME']
+            else:
+                original = 'test_' + self.connection.settings_dict['NAME']
 
             if suffix:
                 return '%s_%s' % (original, suffix)
