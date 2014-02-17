@@ -20,7 +20,8 @@ on what marks are and for notes on using_ them.
    will ensure the database is setup correctly for the test. Each test
    will run in its own transaction which will be rolled back at the end
    of the test. This behavior is the same as Django's standard
-   `django.test.TestCase`_ class.
+   `django.test.TestCase`_ class. Note that you do not need to decorate your
+   unittest classes inheriting TestCase with this decorator; this is only for functions.
 
 .. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
 
