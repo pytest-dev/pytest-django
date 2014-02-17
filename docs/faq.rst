@@ -30,8 +30,8 @@ Activate a specific locale in your project's ``conftest.py``::
 
 My tests are not being picked up when I run py.test from the root directory. Why not?
 -------------------------------------------------------------------------------------
- By default, py.test looks for tests in files named ``test*.py``. If you have your
- tests in files with other names, they will not be collected. It is common to put tests under
+ By default, py.test looks for tests in files named ``test_*.py`` (note that this is not the same as ``test*.py``). 
+ If you have your tests in files with other names, they will not be collected. It is common to put tests under
  ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini`` file in your
  project root with the contents::
 
