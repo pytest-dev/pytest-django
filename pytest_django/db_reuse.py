@@ -93,13 +93,16 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False):
     # See https://code.djangoproject.com/ticket/17760
     if hasattr(self.connection.features, 'confirm'):
         self.connection.features.confirm()
+        
+    self.connection.settings_dict['TEST_REUSE']=True #to check if destroy or not
 
     return test_database_name
 
 
-def monkey_patch_creation_for_db_reuse():
+def monkey_patch_creation_for_db_reuse(reuse_db,create_db):
     from django.db import connections
 
     for connection in connections.all():
-        if test_database_exists_from_previous_run(connection):
-            _monkeypatch(connection.creation, 'create_test_db', create_test_db_with_reuse)
+        if reuse_db and not create_db or connection.settings_dict.get('TEST_REUSE',False):
+            if test_database_exists_from_previous_run(connection):
+                _monkeypatch(connection.creation, 'create_test_db', create_test_db_with_reuse)

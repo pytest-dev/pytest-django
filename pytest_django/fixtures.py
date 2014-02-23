@@ -42,13 +42,18 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
 
     with _django_cursor_wrapper:
         # Monkey patch Django's setup code to support database re-use
-        if request.config.getvalue('reuse_db'):
-            if not request.config.getvalue('create_db'):
-                monkey_patch_creation_for_db_reuse()
-            _django_runner.teardown_databases = lambda db_cfg: None
-
+        monkey_patch_creation_for_db_reuse(request.config.getvalue('reuse_db'),
+                                           request.config.getvalue('create_db'))
         # Create the database
         db_cfg = _django_runner.setup_databases()
+        #rewrite db_cfg - remove those with REUSE
+        _old_dbs,mirror = db_cfg
+        _new_dbs = []
+        for connection,old_name,destroy in _old_dbs:
+            if not connection.settings_dict.get('TEST_REUSE'):
+                _new_dbs.append((connection,old_name,destroy))
+        db_cfg = _new_dbs,mirror 
+        
 
     def teardown_database():
         with _django_cursor_wrapper:
