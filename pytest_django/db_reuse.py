@@ -119,6 +119,6 @@ def monkey_patch_create_with_template():
     from django.db import connections
     
     for connection in connections.all():
-        if "TEST_WITH_TEMPLATE" in connection.setting_dict:
+        if "TEST_WITH_TEMPLATE" in connection.settings_dict:
             _monkeypatch(connection.creation,'sql_table_creation_suffix',_sql_table_creation_suffix)
     
