@@ -47,6 +47,16 @@ def _monkeypatch(obj, method_name, new_method):
     setattr(obj, method_name, wrapped_method)
 
 
+def _get_db_name(db_settings, suffix):
+    if db_settings['TEST_NAME']:
+        name = db_settings['TEST_NAME']
+    else:
+        name = 'test_' + db_settings['NAME']
+    if suffix:
+        name = '%s_%s' % (name, suffix)
+    return name
+
+
 def monkey_patch_creation_for_db_suffix(suffix=None):
     from django.db import connections
 
@@ -58,15 +68,8 @@ def monkey_patch_creation_for_db_suffix(suffix=None):
             _create_test_db() and when no external munging is done with the 'NAME'
             or 'TEST_NAME' settings.
             """
-
-            if self.connection.settings_dict['TEST_NAME']:
-                original = self.connection.settings_dict['TEST_NAME']
-            original = 'test_' + self.connection.settings_dict['NAME']
-
-            if suffix:
-                return '%s_%s' % (original, suffix)
-
-            return original
+            db_name = _get_db_name(self.connection.settings_dict, suffix)
+            return db_name
 
         for connection in connections.all():
 
