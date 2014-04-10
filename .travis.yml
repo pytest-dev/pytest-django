@@ -16,11 +16,17 @@ env:
   - DB=sqlite DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
   - DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
-  - DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-  - DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+  - DB=mysql_innodb DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+  - DB=mysql_innodb DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_innodb DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_innodb DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_innodb DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+  - DB=mysql_myisam DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+  - DB=mysql_myisam DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_myisam DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_myisam DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+  - DB=mysql_myisam DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
   - DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
   - DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
@@ -37,7 +43,7 @@ install:
   - 'if [ "$DJANGO_VERSION" == "master" ]; then pip install -e git+https://github.com/django/django@master#egg=Django; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct; fi'
   - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION; fi'
-  - 'if [ "$DB" == mysql ]; then pip install mysql-python; fi'
+  - 'if [ "$DB" == mysql_innodb -o "$DB" == mysql_myisam ]; then pip install mysql-python; fi'
   - pip install -r requirements.txt
 
 before_script:
@@ -61,63 +67,100 @@ matrix:
       env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: pypy
       env: DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+
     # pypy + mysql
     - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+      env: DB=mysql_innodb DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+
+    - python: pypy
+      env: DB=mysql_myisam DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+    - python: pypy
+      env: DB=mysql_myisam DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+    - python: pypy
+      env: DB=mysql_myisam DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+
     # python 3.2 + django 1.3
     - python: "3.2"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+      env: DB=mysql_innodb DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+    - python: "3.2"
+      env: DB=mysql_myisam DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: "3.2"
       env: DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+
     # python 3.2 + django 1.4
     - python: "3.2"
       env: DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+    - python: "3.2"
+      env: DB=mysql_myisam DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: "3.2"
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+
     # python 3.2 + mysql
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
     - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+    - python: "3.2"
+      env: DB=mysql_myisam DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    - python: "3.2"
+      env: DB=mysql_myisam DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+    - python: "3.2"
+      env: DB=mysql_myisam DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
     # python 3.3 + django 1.3
     - python: "3.3"
       env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+      env: DB=mysql_innodb DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+    - python: "3.3"
+      env: DB=mysql_myisam DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
     - python: "3.3"
       env: DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
+
     # python 3.3 + django 1.4
     - python: "3.3"
       env: DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+    - python: "3.3"
+      env: DB=mysql_myisam DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
       env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
+
     # python 3.3 + mysql
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
     - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+
+    - python: "3.3"
+      env: DB=mysql_myisam DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
+    - python: "3.3"
+      env: DB=mysql_myisam DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
+    - python: "3.3"
+      env: DB=mysql_myisam DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
     # Django 1.7 and Python 2.6
     - python: "2.6"
       env: DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
     - python: "2.6"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+      env: DB=mysql_innodb DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+    - python: "2.6"
+      env: DB=mysql_myisam DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
 
     - python: "2.6"
       env: DB=postgres DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
