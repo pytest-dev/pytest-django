@@ -21,10 +21,13 @@ __all__ = ['_django_db_setup', 'db', 'transactional_db',
 
 
 @pytest.fixture(scope='session')
-def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
+def _django_db_setup(request,
+                     _django_test_environment,
+                     _django_cursor_wrapper):
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
+    from .compat import setup_databases, teardown_databases
     from django.core import management
 
     # xdist
@@ -45,16 +48,16 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
         if request.config.getvalue('reuse_db'):
             if not request.config.getvalue('create_db'):
                 monkey_patch_creation_for_db_reuse()
-            _django_runner.teardown_databases = lambda db_cfg: None
 
         # Create the database
-        db_cfg = _django_runner.setup_databases()
+        db_cfg = setup_databases(verbosity=0, interactive=False)
 
     def teardown_database():
         with _django_cursor_wrapper:
-            _django_runner.teardown_databases(db_cfg)
+            teardown_databases(db_cfg)
 
-    request.addfinalizer(teardown_database)
+    if not request.config.getvalue('reuse_db'):
+        request.addfinalizer(teardown_database)
 
 
 ################ User visible fixtures ################

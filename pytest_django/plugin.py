@@ -52,6 +52,7 @@ def pytest_addoption(parser):
     parser.addini(SETTINGS_MODULE_ENV,
                   'Django settings module to use by pytest-django.')
 
+
 def _load_settings(config, options):
     # Configure DJANGO_SETTINGS_MODULE
     ds = (options.ds or
@@ -109,11 +110,9 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True, scope='session')
-def _django_runner(request):
-    """Create the django runner, internal to pytest-django
-
-    This does important things like setting up the local memory email
-    backend etc.
+def _django_test_environment(request):
+    """
+    Ensure that Django is loaded and has its testing environment setup
 
     XXX It is a little dodgy that this is an autouse fixture.  Perhaps
         an email fixture should be requested in order to be able to
@@ -123,17 +122,12 @@ def _django_runner(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
-        import django
-        # Django >= 1.7: Call django.setup() to initialize Django
-        setup = getattr(django, 'setup', lambda: None)
+        from .compat import (setup, setup_test_environment,
+                             teardown_test_environment)
         setup()
 
-        from django.test.simple import DjangoTestSuiteRunner
-
-        runner = DjangoTestSuiteRunner(interactive=False)
-        runner.setup_test_environment()
-        request.addfinalizer(runner.teardown_test_environment)
-        return runner
+        setup_test_environment()
+        request.addfinalizer(teardown_test_environment)
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -181,7 +175,7 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, _django_cursor_wrapper):
     """Setup a django unittest, internal to pytest-django"""
     if django_settings_is_configured() and is_django_unittest(request.node):
-        request.getfuncargvalue('_django_runner')
+        request.getfuncargvalue('_django_test_environment')
         request.getfuncargvalue('_django_db_setup')
         _django_cursor_wrapper.enable()
         request.addfinalizer(_django_cursor_wrapper.disable)
