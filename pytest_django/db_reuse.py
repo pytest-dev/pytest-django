@@ -48,7 +48,7 @@ def _monkeypatch(obj, method_name, new_method):
 
 
 def _get_db_name(db_settings, suffix):
-    if db_settings['TEST_NAME']:
+    if db_settings.get('TEST_NAME'):
         name = db_settings['TEST_NAME']
     else:
         name = 'test_' + db_settings['NAME']

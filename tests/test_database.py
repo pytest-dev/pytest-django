@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-import django.db
+from django.db import transaction, connection
 import pytest
 
 from .app.models import Item
@@ -12,17 +12,22 @@ def noop_transactions():
     Return True if transactions are disabled, False if they are
     enabled.
     """
-    # A rollback will only work if transactions are enabled.
-    # Otherwise the created objects will still exist.
-    with django.db.transaction.commit_manually():
-        Item.objects.create(name='transaction_noop_test')
-        django.db.transaction.rollback()
-    try:
-        Item.objects.get(name='transaction_noop_test')
-    except Exception:
-        return False
+
+    # Newer versions of Django simply runs standard tests in an atomic block.
+    if hasattr(connection, 'in_atomic_block'):
+        return connection.in_atomic_block
     else:
-        return True
+        with transaction.commit_manually():
+            Item.objects.create(name='transaction_noop_test')
+            transaction.rollback()
+
+        try:
+            item = Item.objects.get(name='transaction_noop_test')
+        except Item.DoesNotExist:
+            return False
+        else:
+            item.delete()
+            return True
 
 
 def test_noaccess():
