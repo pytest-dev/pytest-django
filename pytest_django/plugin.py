@@ -122,8 +122,10 @@ def _django_test_environment(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
+        from django.conf import settings
         from .compat import (setup, setup_test_environment,
                              teardown_test_environment)
+        settings.DEBUG = False
         setup()
 
         setup_test_environment()
