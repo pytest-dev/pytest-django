@@ -13,4 +13,5 @@ _build
 /bin/
 /include/
 /lib/
+/src/
 .cache
