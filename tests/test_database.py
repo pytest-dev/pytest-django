@@ -1,6 +1,8 @@
 from __future__ import with_statement
 
 from django.db import transaction, connection
+from django.test.testcases import connections_support_transactions
+
 import pytest
 
 from .app.models import Item
@@ -68,9 +70,15 @@ class TestDatabaseFixtures:
         assert Item.objects.count() == 0
 
     def test_transactions_disabled(self, db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert noop_transactions()
 
     def test_transactions_enabled(self, transactional_db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert not noop_transactions()
 
     @pytest.fixture
@@ -79,6 +87,9 @@ class TestDatabaseFixtures:
         Item.objects.create(name='spam')
 
     def test_mydb(self, mydb):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         # Check the fixture had access to the db
         item = Item.objects.get(name='spam')
         assert item
@@ -111,12 +122,21 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_transactions_disabled(self):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert noop_transactions()
 
     @pytest.mark.django_db(transaction=False)
     def test_transactions_disabled_explicit(self):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert noop_transactions()
 
     @pytest.mark.django_db(transaction=True)
     def test_transactions_enabled(self):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert not noop_transactions()
