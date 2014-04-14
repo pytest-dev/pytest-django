@@ -8,6 +8,9 @@ Changelog
   Django. The support is experimental since Django 1.7 is not yet released, but
   the goal is to always be up to date with the latest Django master
 
+* Support for MySQL with MyISAM tables. Thanks to Zach Kanzler and Julen Ruiz
+  Aizpuru for fixing this. This fixes issue #8 #64.
+
 2.5.0
 -----
 * Python 2.5 compatibility dropped. py.test 2.5 dropped support for Python 2.5,
