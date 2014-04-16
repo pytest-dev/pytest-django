@@ -3,7 +3,9 @@ import pytest
 
 from .compat import force_text
 
-DB_NAME = 'pytest_django_db_test'
+from django.conf import settings
+
+DB_NAME = settings.DATABASES['default']['NAME'] + '_db_test'
 TEST_DB_NAME = 'test_' + DB_NAME
 
 

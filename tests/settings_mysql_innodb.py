@@ -3,7 +3,7 @@ from tests.settings_base import *  # noqa
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pytest_django',
+        'NAME': 'pytest_django' + db_suffix,
         'HOST': 'localhost',
         'USER': 'root',
         'OPTIONS': {
