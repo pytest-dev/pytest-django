@@ -89,7 +89,7 @@ def commands(uid, env):
     if env.settings == 'postgres':
         yield 'sh -c "dropdb %(name)s; createdb %(name)s || exit 0"' % {'name': db_name}
 
-    yield 'py.test'
+    yield 'py.test {posargs}'
 
 
 def testenv_name(env):
