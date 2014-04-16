@@ -6,7 +6,7 @@ pytest-django is a plugin for `pytest <http://pytest.org/>`_ that provides a set
 
 * Authors: Ben Firshman, Andreas Pelme and `contributors <https://github.com/pelme/pytest_django/contributors>`_
 * Licence: BSD
-* Compatibility: Django 1.3-1.6 (experimental support for 1.7), python 2.5-2.7, 3.2-3.3 or PyPy, pytest >= 2.3.4
+* Compatibility: Django 1.3-1.7 (Django master is compatible at the time of each release), python 2.5-2.7, 3.2-3.3 or PyPy, pytest >= 2.3.4
 * Project URL: https://github.com/pelme/pytest_django
 * Documentation: http://pytest-django.rtfd.org/
 

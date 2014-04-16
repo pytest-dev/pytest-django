@@ -1,12 +1,13 @@
 Changelog
 =========
-2.6.0
+2.5.1
 -----
-* Experimental support for Django 1.7 / Django master as of 2014-01-19.
 
-  pytest-django is now automatically tested against the latest git version of
-  Django. The support is experimental since Django 1.7 is not yet released, but
-  the goal is to always be up to date with the latest Django master
+This is a pure bugfix/support release with no new features:
+
+* Added support for Django 1.7 beta and Django master as of 2014-04-16.
+  pytest-django is now automatically tested against the latest git master
+  version of Django.
 
 * Support for MySQL with MyISAM tables. Thanks to Zach Kanzler and Julen Ruiz
   Aizpuru for fixing this. This fixes issue #8 #64.
