@@ -1,5 +1,8 @@
 .PHONY: docs test clean
 
+testenv: bin/py.test
+
+
 bin/python:
 	virtualenv .
 
