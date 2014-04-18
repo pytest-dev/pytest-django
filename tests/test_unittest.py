@@ -75,21 +75,20 @@ def test_sole_test(django_testdir):
     """
 
     django_testdir.create_test_module('''
-from django.test import TestCase
-from django.conf import settings
+        from django.test import TestCase
+        from django.conf import settings
 
-from .app.models import Item
+        from .app.models import Item
 
-class TestFoo(TestCase):
-    def test_foo(self):
-        # Make sure we are actually using the test database
-        db_name = settings.DATABASES['default']['NAME']
-        assert db_name.startswith('test_') or db_name == ':memory:'
+        class TestFoo(TestCase):
+            def test_foo(self):
+                # Make sure we are actually using the test database
+                db_name = settings.DATABASES['default']['NAME']
+                assert db_name.startswith('test_') or db_name == ':memory:'
 
-        # Make sure it is usable
-        assert Item.objects.count() == 0
-
-''')
+                # Make sure it is usable
+                assert Item.objects.count() == 0
+    ''')
 
     result = django_testdir.runpytest('-v')
     result.stdout.fnmatch_lines([

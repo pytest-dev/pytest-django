@@ -50,7 +50,7 @@ def test_dc_ini(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
     monkeypatch.setenv('DJANGO_CONFIGURATION', 'DO_NOT_USE')
 
-    testdir.makeini("""\
+    testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
        DJANGO_CONFIGURATION = MySettings
