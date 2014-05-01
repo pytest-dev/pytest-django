@@ -11,11 +11,12 @@ env:
   - TESTENV=python2.7-master-mysql_myisam
   - TESTENV=python2.7-master-sqlite
   - TESTENV=python3.2-master-sqlite
-  - TESTENV=python3.3-1.5-sqlite
-  - TESTENV=python3.3-1.6-sqlite
-  - TESTENV=python3.3-1.7-sqlite
-  - TESTENV=python3.3-master-postgres
   - TESTENV=python3.3-master-sqlite
+  - TESTENV=python3.4-1.5-sqlite
+  - TESTENV=python3.4-1.6-sqlite
+  - TESTENV=python3.4-1.7-sqlite
+  - TESTENV=python3.4-master-postgres
+  - TESTENV=python3.4-master-sqlite
 install:
   - pip install tox
 script: tox -e $TESTENV

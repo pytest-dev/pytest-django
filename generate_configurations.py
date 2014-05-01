@@ -9,7 +9,7 @@ from collections import namedtuple
 TestEnv = namedtuple('TestEnv', ['python_version', 'django_version', 'settings'])
 
 
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3', 'pypy']
+PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3', 'python3.4', 'pypy']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
 SETTINGS = ['sqlite', 'mysql_myisam', 'mysql_innodb', 'postgres']
 DJANGO_REQUIREMENTS = {
