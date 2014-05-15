@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.6.2
+-----
+
+* Fixed a bug that caused doctests to runs. Thanks to @jjmurre for the patch
+
 2.6.1
 -----
 This is a bugfix/support release with no new features:
