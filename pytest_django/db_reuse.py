@@ -34,8 +34,6 @@ def test_database_exists_from_previous_run(connection):
         connection.settings_dict['NAME'] = orig_db_name
 
 
-
-
 def _monkeypatch(obj, method_name, new_method):
     assert hasattr(obj, method_name)
 
@@ -48,6 +46,9 @@ def _monkeypatch(obj, method_name, new_method):
 
 
 def _get_db_name(db_settings, suffix):
+    if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
+        return ':memory:'
+
     if db_settings.get('TEST_NAME'):
         name = db_settings['TEST_NAME']
     else:
