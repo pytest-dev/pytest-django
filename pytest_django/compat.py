@@ -1,12 +1,14 @@
 # In Django 1.6, the old test runner was deprecated, and the useful bits were
 # moved out of the test runner
 
-try:
-    from django.test.runner import DiscoverRunner as DjangoTestRunner
-except ImportError:
-    from django.test.simple import DjangoTestSuiteRunner as DjangoTestRunner
+def get_runner():
+    from django.conf import settings
+    parts = settings.TEST_RUNNER.split('.')
+    runner_path, runner_class = '.'.join(parts[:-1]), parts[-1]
+    module = __import__(runner_path, fromlist=parts[:-2])
+    return getattr(module, runner_class)
 
-_runner = DjangoTestRunner(interactive=False)
+_runner = get_runner()(interactive=False)
 
 
 try:
