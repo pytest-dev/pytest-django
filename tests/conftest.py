@@ -19,13 +19,16 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
 
 
 @pytest.fixture(scope='function')
-def django_testdir(testdir, monkeypatch):
+def django_testdir(request, testdir, monkeypatch):
     if get_db_engine() in ('mysql', 'postgresql_psycopg2'):
         # Django requires the production database to exists..
         create_empty_production_database()
 
-    db_settings = copy.deepcopy(settings.DATABASES)
-    db_settings['default']['NAME'] = DB_NAME
+    if hasattr(request.node.cls, 'db_settings'):
+        db_settings = request.node.cls.db_settings
+    else:
+        db_settings = copy.deepcopy(settings.DATABASES)
+        db_settings['default']['NAME'] = DB_NAME
 
     test_settings = dedent('''
         # Pypy compatibility

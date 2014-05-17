@@ -5,6 +5,10 @@ import pytest
 from .db_helpers import mark_exists, mark_database, drop_database, db_exists, skip_if_sqlite
 
 
+skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
+                                      reason='xdist is flaky with Python 3.2')
+
+
 def test_db_reuse(django_testdir):
     """
     Test the re-use db functionality. This test requires a PostgreSQL server
@@ -57,7 +61,7 @@ def test_db_reuse(django_testdir):
     assert not mark_exists()
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (3, 2), reason='xdist is flaky in 3.2')
+@skip_on_python32
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite()
 
@@ -103,3 +107,30 @@ def test_xdist_with_reuse(django_testdir):
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--create-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
+
+
+class TestSqliteWithXdist:
+
+    pytestmark = skip_on_python32
+
+    db_settings = {'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/should-not-be-used',
+    }}
+
+    def test_sqlite_in_memory_used(self, django_testdir):
+
+        django_testdir.create_test_module('''
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_a():
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                assert conn.settings_dict['NAME'] == ':memory:'
+        ''')
+
+        result = django_testdir.runpytest('--tb=short', '-vv', '-n1')
+        result.stdout.fnmatch_lines(['*PASSED*test_a*'])
