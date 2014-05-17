@@ -6,6 +6,9 @@ Changelog
 
 * Fixed a bug that caused doctests to runs. Thanks to @jjmurre for the patch
 
+* Fixed issue #88 - make sure to use SQLite in memory database when running
+  with pytest-xdist.
+
 2.6.1
 -----
 This is a bugfix/support release with no new features:
