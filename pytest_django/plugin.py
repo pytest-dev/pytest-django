@@ -56,13 +56,13 @@ def pytest_addoption(parser):
 def _load_settings(config, options):
     # Configure DJANGO_SETTINGS_MODULE
     ds = (options.ds or
-          config.getini(SETTINGS_MODULE_ENV) or
-          os.environ.get(SETTINGS_MODULE_ENV))
+          os.environ.get(SETTINGS_MODULE_ENV) or
+          config.getini(SETTINGS_MODULE_ENV))
 
     # Configure DJANGO_CONFIGURATION
     dc = (options.dc or
-          config.getini(CONFIGURATION_ENV) or
-          os.environ.get(CONFIGURATION_ENV))
+          os.environ.get(CONFIGURATION_ENV) or
+          config.getini(CONFIGURATION_ENV))
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
