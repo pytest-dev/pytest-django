@@ -25,11 +25,15 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
+    from django.conf import settings
     from django.core import management
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
-        db_suffix = request.config.slaveinput['slaveid']
+        if hasattr(settings, 'XDIST_DISABLE_SUFFIX') and settings.XDIST_DISABLE_SUFFIX:
+            db_suffix = None
+        else:
+            db_suffix = request.config.slaveinput['slaveid']
     else:
         db_suffix = None
 
