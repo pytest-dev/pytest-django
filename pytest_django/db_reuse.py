@@ -3,6 +3,7 @@
 The code in this module is heavily inspired by django-nose:
 https://github.com/jbalogh/django-nose/
 """
+import os.path
 import sys
 import types
 
@@ -21,8 +22,16 @@ def test_database_exists_from_previous_run(connection):
         return False
 
     # Try to open a cursor to the test database
+    test_db_name = connection.creation._get_test_db_name()
+
+    # When using a real SQLite backend (via TEST_NAME), check if the file
+    # exists, because it gets created automatically.
+    if connection.settings_dict['ENGINE'] == 'django.db.backends.sqlite3':
+        if not os.path.exists(test_db_name):
+            return False
+
     orig_db_name = connection.settings_dict['NAME']
-    connection.settings_dict['NAME'] = connection.creation._get_test_db_name()
+    connection.settings_dict['NAME'] = test_db_name
 
     try:
         connection.cursor()
