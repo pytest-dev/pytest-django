@@ -92,7 +92,7 @@ def test_sole_test(django_testdir):
 
     result = django_testdir.runpytest('-v')
     result.stdout.fnmatch_lines([
-        "*TestFoo.test_foo PASSED*",
+        "*TestFoo*test_foo PASSED*",
     ])
     assert result.ret == 0
 
