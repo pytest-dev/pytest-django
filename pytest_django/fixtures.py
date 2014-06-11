@@ -12,7 +12,8 @@ from .db_reuse import (monkey_patch_creation_for_db_reuse,
 from .django_compat import is_django_unittest
 from .lazy_django import get_django_version, skip_if_no_django
 
-__all__ = ['_django_db_setup', 'db', 'transactional_db',
+__all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
+           'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper']
 
@@ -171,36 +172,62 @@ def client():
 
 
 @pytest.fixture()
-def admin_client(db):
+def django_user_model(db):
     """
-    A Django test client logged in as an admin user
-
+    Get the class of Django's user model.
     """
-    has_custom_user_model_support = get_django_version() >= (1, 5)
-
-    # When using Django >= 1.5 the username field is variable, so
-    # get 'username field' by using UserModel.USERNAME_FIELD
-    if has_custom_user_model_support:
+    try:
         from django.contrib.auth import get_user_model
-        UserModel = get_user_model()
-        username_field = UserModel.USERNAME_FIELD
-    else:
+    except ImportError:
+        assert get_django_version < (1, 5)
         from django.contrib.auth.models import User as UserModel
-        username_field = 'username'
+    else:
+        UserModel = get_user_model()
+    return UserModel
 
-    from django.test.client import Client
+
+@pytest.fixture()
+def django_username_field(django_user_model):
+    # When using Django >= 1.5 the username field is variable.
+    try:
+        return django_user_model.USERNAME_FIELD
+    except AttributeError:
+        assert get_django_version < (1, 5)
+        return 'username'
+
+
+@pytest.fixture()
+def admin_user(db, django_user_model, django_username_field):
+    """
+    A Django admin user.
+
+    This uses an existing user with username "admin", or creates a new one with
+    password "password".
+    """
+    UserModel = django_user_model
+    username_field = django_username_field
 
     try:
-        UserModel._default_manager.get(**{username_field: 'admin'})
+        user = UserModel._default_manager.get(**{username_field: 'admin'})
     except UserModel.DoesNotExist:
         extra_fields = {}
         if username_field != 'username':
             extra_fields[username_field] = 'admin'
-        UserModel._default_manager.create_superuser('admin', 'admin@example.com',
-                                                    'password', **extra_fields)
+        user = UserModel._default_manager.create_superuser(
+            'admin', 'admin@example.com', 'password', **extra_fields)
+    return user
+
+
+@pytest.fixture()
+def admin_client(db, admin_user):
+    """
+    A Django test client logged in as an admin user (via the ``admin_user``
+    fixture).
+    """
+    from django.test.client import Client
 
     client = Client()
-    client.login(username='admin', password='password')
+    client.login(username=admin_user.username, password='password')
     return client
 
 

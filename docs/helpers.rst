@@ -131,6 +131,25 @@ Example
 As an extra bonus this will automatically mark the database using the
 ``django_db`` mark.
 
+``admin_user`` - a admin user (superuser)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance of a superuser, with username "admin" and password "password" (in
+case there is no "admin" user yet).
+
+As an extra bonus this will automatically mark the database using the
+``django_db`` mark.
+
+``django_user_model``
+~~~~~~~~~~~~~~~~~~~~~
+
+The user model used by Django. This handles different versions of Django.
+
+``django_username_field``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The field name used for the username on the user model.
+
 ``db``
 ~~~~~~~
 
