@@ -6,11 +6,12 @@ testenv: bin/py.test
 bin/python:
 	virtualenv .
 
-bin/py.test: bin/python
+bin/py.test: bin/python requirements.txt
 	bin/pip install -Ur requirements.txt
+	touch $@
 
 test: bin/py.test
-	bin/pip install -Ur requirements.txt
+	bin/pip install -e .
 	bin/py.test
 
 bin/sphinx-build:
