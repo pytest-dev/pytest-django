@@ -8,19 +8,7 @@ import sys
 import types
 
 
-def is_in_memory_db(connection):
-    """Return whether it makes any sense to use REUSE_DB with the backend of a
-    connection."""
-    # This is a SQLite in-memory DB. Those are created implicitly when
-    # you try to connect to them, so our test below doesn't work.
-    return connection.settings_dict['NAME'] == ':memory:'
-
-
 def test_database_exists_from_previous_run(connection):
-    # Check for sqlite memory databases
-    if is_in_memory_db(connection):
-        return False
-
     # Try to open a cursor to the test database
     test_db_name = connection.creation._get_test_db_name()
 
@@ -32,6 +20,10 @@ def test_database_exists_from_previous_run(connection):
 
     orig_db_name = connection.settings_dict['NAME']
     connection.settings_dict['NAME'] = test_db_name
+
+    # With SQLite memory databases the db never exists.
+    if connection.settings_dict['NAME'] == ':memory:':
+        return False
 
     try:
         connection.cursor()
