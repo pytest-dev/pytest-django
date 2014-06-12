@@ -62,6 +62,45 @@ def test_db_reuse(django_testdir):
     assert not mark_exists()
 
 
+class TestSqlite:
+
+    db_name_17 = 'test_db_name_django17'
+    db_name_before_17 = 'test_db_name_before_django17'
+
+    # Provide both setting variants at the same time, as it might happen in
+    # real code.
+    db_settings = {'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db_name',
+        # Django > (1, 7)
+        'TEST': {'NAME': db_name_17},
+        # Django < (1, 7)
+        'TEST_NAME': db_name_before_17,
+    }}
+
+    def test_sqlite_test_name_used(self, django_testdir):
+
+        django_testdir.create_test_module('''
+            import pytest
+            from django.db import connections
+            from django import VERSION
+
+            @pytest.mark.django_db
+            def test_a():
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                print(conn.settings_dict)
+                if VERSION > (1,7):
+                    assert conn.settings_dict['NAME'] == '%s'
+                else:
+                    assert conn.settings_dict['NAME'] == '%s'
+        ''' % (self.db_name_17, self.db_name_before_17))
+
+        result = django_testdir.runpytest('--tb=short', '-v')
+        result.stdout.fnmatch_lines(['*test_a*PASSED*'])
+
+
 @skip_on_python32
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite_in_memory()
