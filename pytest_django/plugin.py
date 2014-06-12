@@ -74,13 +74,6 @@ def _load_settings(config, options):
             import configurations.importer
             configurations.importer.install()
 
-        from django.conf import settings
-        try:
-            settings.DATABASES
-        except ImportError:
-            e = sys.exc_info()[1]
-            raise pytest.UsageError(*e.args)
-
 
 if pytest.__version__[:3] >= "2.4":
     def pytest_load_initial_conftests(early_config, parser, args):

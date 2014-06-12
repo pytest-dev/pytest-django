@@ -69,13 +69,18 @@ def test_ds_option(testdir, monkeypatch):
 
 
 def test_ds_non_existent(testdir, monkeypatch):
-    # Make sure we do not fail with INTERNALERROR if an incorrect
-    # DJANGO_SETTINGS_MODULE is given.
+    """
+    Make sure we do not fail with INTERNALERROR if an incorrect
+    DJANGO_SETTINGS_MODULE is given.
+    """
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
-    result.stderr.fnmatch_lines(
-        ["*Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*):*"])
+    # NOTE: the error is on stdout, because it happens during the testrun.
+    result.stdout.fnmatch_lines(
+        ["*ERROR at setup of test_ds*",
+         "*UsageError: pytest_django: failed to load Django settings: "
+         "Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*): *"])
 
 
 def test_ds_after_user_conftest(testdir, monkeypatch):
