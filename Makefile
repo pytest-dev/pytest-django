@@ -2,6 +2,7 @@
 
 testenv: bin/py.test
 
+export DJANGO_SETTINGS_MODULE?=tests.settings_sqlite
 
 bin/python:
 	virtualenv .
@@ -11,7 +12,7 @@ bin/py.test: bin/python
 
 test: bin/py.test
 	bin/pip install -Ur requirements.txt
-	bin/py.test
+	bin/py.test tests
 
 bin/sphinx-build:
 	bin/pip install sphinx
