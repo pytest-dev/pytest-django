@@ -2,7 +2,8 @@ import sys
 
 import pytest
 
-from .db_helpers import mark_exists, mark_database, drop_database, db_exists, skip_if_sqlite
+from .db_helpers import (db_exists, drop_database, mark_database, mark_exists,
+                         skip_if_sqlite_in_memory)
 
 
 skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
@@ -15,7 +16,7 @@ def test_db_reuse(django_testdir):
     to be available and the environment variables PG_HOST, PG_DB, PG_USER to
     be defined.
     """
-    skip_if_sqlite()
+    skip_if_sqlite_in_memory()
 
     django_testdir.create_test_module('''
         import pytest
@@ -63,7 +64,7 @@ def test_db_reuse(django_testdir):
 
 @skip_on_python32
 def test_xdist_with_reuse(django_testdir):
-    skip_if_sqlite()
+    skip_if_sqlite_in_memory()
 
     drop_database('gw0')
     drop_database('gw1')
