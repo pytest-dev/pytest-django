@@ -1,10 +1,11 @@
 import os
 import subprocess
+
 import pytest
 
-from .compat import force_text
-
 from django.conf import settings
+
+from .compat import force_text
 
 DB_NAME = settings.DATABASES['default']['NAME'] + '_db_test'
 TEST_DB_NAME = 'test_' + DB_NAME
