@@ -2,6 +2,7 @@
 
 testenv: bin/py.test
 
+export DJANGO_SETTINGS_MODULE?=tests.settings_sqlite
 
 bin/python:
 	virtualenv .
