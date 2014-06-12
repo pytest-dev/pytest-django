@@ -55,13 +55,24 @@ def _monkeypatch(obj, method_name, new_method):
 
 
 def _get_db_name(db_settings, suffix):
-    if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
-        return ':memory:'
+    "This provides the default test db name that Django uses."
+    from django import VERSION as DJANGO_VERSION
 
-    if db_settings.get('TEST_NAME'):
-        name = db_settings['TEST_NAME']
-    else:
-        name = 'test_' + db_settings['NAME']
+    name = None
+    try:
+        if DJANGO_VERSION > (1,7):
+            name = db_settings['TEST']['NAME']
+        elif DJANGO_VERSION < (1,7):
+            name = db_settings['TEST_NAME']
+    except KeyError:
+        pass
+
+    if not name:
+        if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
+            return ':memory:'
+        else:
+            name = 'test_' + db_settings['NAME']
+
     if suffix:
         name = '%s_%s' % (name, suffix)
     return name
