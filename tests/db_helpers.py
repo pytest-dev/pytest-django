@@ -1,3 +1,4 @@
+import os
 import subprocess
 import pytest
 
@@ -60,6 +61,12 @@ def create_empty_production_database():
                 'database exists' in force_text(r.std_err))
         return
 
+    if get_db_engine() == 'sqlite3':
+        if DB_NAME == ':memory:':
+            raise AssertionError('sqlite in-memory database must not be created!')
+        open(DB_NAME, 'a').close()
+        return
+
     raise AssertionError('%s cannot be tested properly' % get_db_engine())
 
 
@@ -81,6 +88,13 @@ def drop_database(name=TEST_DB_NAME, suffix=None):
                 or r.status_code == 0)
         return
 
+    if get_db_engine() == 'sqlite3':
+        if name == ':memory:':
+            raise AssertionError('sqlite in-memory database cannot be dropped!')
+        if os.path.exists(name):
+            os.unlink(name)
+        return
+
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
 
 
@@ -98,6 +112,12 @@ def db_exists(db_suffix=None):
         r = run_mysql(name, '-e', 'SELECT 1')
         return r.status_code == 0
 
+    if get_db_engine() == 'sqlite3':
+        if TEST_DB_NAME == ':memory:':
+            raise AssertionError(
+                'sqlite in-memory database cannot be checked for existence!')
+        return os.path.exists(name)
+
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
 
 
@@ -109,6 +129,14 @@ def mark_database():
 
     if get_db_engine() == 'mysql':
         r = run_mysql(TEST_DB_NAME, '-e', 'CREATE TABLE mark_table(kaka int);')
+        assert r.status_code == 0
+        return
+
+    if get_db_engine() == 'sqlite3':
+        if TEST_DB_NAME == ':memory:':
+            raise AssertionError('sqlite in-memory database cannot be marked!')
+        r = run_cmd('sqlite3', TEST_DB_NAME,
+                    'CREATE TABLE mark_table(kaka int);')
         assert r.status_code == 0
         return
 
@@ -124,6 +152,13 @@ def mark_exists():
 
     if get_db_engine() == 'mysql':
         r = run_mysql(TEST_DB_NAME, '-e', 'SELECT 1 FROM mark_table')
+
+        return r.status_code == 0
+
+    if get_db_engine() == 'sqlite3':
+        if TEST_DB_NAME == ':memory:':
+            raise AssertionError('sqlite in-memory database cannot be checked for mark!')
+        r = run_cmd('sqlite3', TEST_DB_NAME, 'SELECT 1 FROM mark_table')
 
         return r.status_code == 0
 
