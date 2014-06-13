@@ -84,16 +84,16 @@ class TestSqlite:
     db_name_17 = '/tmp/test_db_name_django17'
     db_name_before_17 = '/tmp/test_db_name_before_django17'
 
-    # Provide both setting variants at the same time, as it might happen in
-    # real code.
     db_settings = {'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': '/tmp/db_name',
-        # Django > (1, 7)
-        'TEST': {'NAME': db_name_17},
-        # Django < (1, 7)
-        'TEST_NAME': db_name_before_17,
     }}
+    from django import VERSION
+    if VERSION > (1, 7):
+        db_settings['default']['TEST'] = {'NAME': db_name_17}
+    else:
+        db_settings['default']['TEST_NAME'] = db_name_before_17
+
 
     def test_sqlite_test_name_used(self, django_testdir):
 
