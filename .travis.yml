@@ -3,20 +3,21 @@ language: python
 python:
   - "3.3"
 env:
-  - TESTENV=pypy-master-sqlite
-  - TESTENV=python2.6-1.6-sqlite
-  - TESTENV=python2.7-1.3-sqlite
-  - TESTENV=python2.7-1.4-sqlite
+  - TESTENV=pypy-master-sqlite_file
+  - TESTENV=python2.6-1.6-sqlite_file
+  - TESTENV=python2.7-1.3-sqlite_file
+  - TESTENV=python2.7-1.4-sqlite_file
   - TESTENV=python2.7-master-mysql_innodb
   - TESTENV=python2.7-master-mysql_myisam
-  - TESTENV=python2.7-master-sqlite
-  - TESTENV=python3.2-master-sqlite
-  - TESTENV=python3.3-master-sqlite
-  - TESTENV=python3.4-1.5-sqlite
-  - TESTENV=python3.4-1.6-sqlite
-  - TESTENV=python3.4-1.7-sqlite
+  - TESTENV=python2.7-master-sqlite_file
+  - TESTENV=python3.2-master-sqlite_file
+  - TESTENV=python3.3-master-sqlite_file
+  - TESTENV=python3.4-1.5-sqlite_file
+  - TESTENV=python3.4-1.6-sqlite_file
+  - TESTENV=python3.4-1.7-sqlite_file
   - TESTENV=python3.4-master-postgres
   - TESTENV=python3.4-master-sqlite
+  - TESTENV=python3.4-master-sqlite_file
 install:
   - pip install tox
 script: tox -e $TESTENV
