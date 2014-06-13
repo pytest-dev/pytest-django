@@ -39,9 +39,12 @@ def test_testname():
     db_settings = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'pytest_django',
-        'TEST_NAME': 'test123',
         'HOST': 'localhost',
         'USER': '',
     }
+    if DJANGO_VERSION > (1,7):
+        db_settings['TEST'] = {'NAME': 'test123'}
+    else:
+        db_settings['TEST_NAME'] = 'test123'
     assert _get_db_name(db_settings, None) == 'test123'
     assert _get_db_name(db_settings, 'abc') == 'test123_abc'
