@@ -3,26 +3,27 @@
 The code in this module is heavily inspired by django-nose:
 https://github.com/jbalogh/django-nose/
 """
+import os.path
 import sys
 import types
 
 
-def is_in_memory_db(connection):
-    """Return whether it makes any sense to use REUSE_DB with the backend of a
-    connection."""
-    # This is a SQLite in-memory DB. Those are created implicitly when
-    # you try to connect to them, so our test below doesn't work.
-    return connection.settings_dict['NAME'] == ':memory:'
-
-
 def test_database_exists_from_previous_run(connection):
-    # Check for sqlite memory databases
-    if is_in_memory_db(connection):
-        return False
-
     # Try to open a cursor to the test database
+    test_db_name = connection.creation._get_test_db_name()
+
+    # When using a real SQLite backend (via TEST_NAME), check if the file
+    # exists, because it gets created automatically.
+    if connection.settings_dict['ENGINE'] == 'django.db.backends.sqlite3':
+        if not os.path.exists(test_db_name):
+            return False
+
     orig_db_name = connection.settings_dict['NAME']
-    connection.settings_dict['NAME'] = connection.creation._get_test_db_name()
+    connection.settings_dict['NAME'] = test_db_name
+
+    # With SQLite memory databases the db never exists.
+    if connection.settings_dict['NAME'] == ':memory:':
+        return False
 
     try:
         connection.cursor()
@@ -46,13 +47,24 @@ def _monkeypatch(obj, method_name, new_method):
 
 
 def _get_db_name(db_settings, suffix):
-    if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
-        return ':memory:'
+    "This provides the default test db name that Django uses."
+    from django import VERSION as DJANGO_VERSION
 
-    if db_settings.get('TEST_NAME'):
-        name = db_settings['TEST_NAME']
-    else:
-        name = 'test_' + db_settings['NAME']
+    name = None
+    try:
+        if DJANGO_VERSION > (1,7):
+            name = db_settings['TEST']['NAME']
+        elif DJANGO_VERSION < (1,7):
+            name = db_settings['TEST_NAME']
+    except KeyError:
+        pass
+
+    if not name:
+        if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
+            return ':memory:'
+        else:
+            name = 'test_' + db_settings['NAME']
+
     if suffix:
         name = '%s_%s' % (name, suffix)
     return name
