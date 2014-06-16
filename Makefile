@@ -3,7 +3,7 @@
 testenv: bin/py.test
 
 
-bin/python:
+bin/python bin/pip:
 	virtualenv .
 
 bin/py.test: bin/python requirements.txt
@@ -14,7 +14,7 @@ test: bin/py.test
 	bin/pip install -e .
 	bin/py.test
 
-bin/sphinx-build:
+bin/sphinx-build: bin/pip
 	bin/pip install sphinx
 
 docs: bin/sphinx-build
