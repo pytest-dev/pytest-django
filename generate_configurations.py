@@ -14,10 +14,10 @@ DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
 SETTINGS = ['sqlite', 'mysql_myisam', 'mysql_innodb', 'postgres']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
-    '1.4': 'Django==1.4.11',
-    '1.5': 'Django==1.5.6',
-    '1.6': 'Django==1.6.3',
-    '1.7': 'https://www.djangoproject.com/m/releases/1.7/Django-1.7b2.tar.gz',
+    '1.4': 'Django==1.4.13',
+    '1.5': 'Django==1.5.8',
+    '1.6': 'Django==1.6.5',
+    '1.7': 'https://www.djangoproject.com/m/releases/1.7/Django-1.7b4.tar.gz',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
