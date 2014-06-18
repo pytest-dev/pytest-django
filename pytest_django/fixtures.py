@@ -32,7 +32,10 @@ def _django_db_setup(request,
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
-        db_suffix = request.config.slaveinput['slaveid']
+        if request.config.getvalue('xdist_one_db'):
+            db_suffix = None
+        else:
+            db_suffix = request.config.slaveinput['slaveid']
     else:
         db_suffix = None
 

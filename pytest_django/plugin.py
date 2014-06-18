@@ -39,6 +39,9 @@ def pytest_addoption(parser):
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
                           'option will be ignored if not --reuse-db is given.')
+    group._addoption('--xdist-one-db',
+                     action='store_true', dest='xdist_one_db', default=False,
+                     help='Use only one database with xdist plugin.')
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
