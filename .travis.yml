@@ -1,123 +1,22 @@
+
 language: python
-
 python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
   - "3.3"
-  - "pypy"
-
-# Django 1.3 is only compatible with psycopg2 version <= 2.4.1
-# Django 1.4 is compatible with newer versions
 env:
-  - DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-  - DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=sqlite DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-  - DB=sqlite DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-  - DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-  - DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-  - DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-  - DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-  - DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-  - DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-  - DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-  - DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-  - DB=postgres DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-
-
+  - TESTENV=pypy-master-sqlite
+  - TESTENV=python2.6-1.6-sqlite
+  - TESTENV=python2.7-1.3-sqlite
+  - TESTENV=python2.7-1.4-sqlite
+  - TESTENV=python2.7-master-mysql_innodb
+  - TESTENV=python2.7-master-mysql_myisam
+  - TESTENV=python2.7-master-sqlite
+  - TESTENV=python3.2-master-sqlite
+  - TESTENV=python3.3-master-sqlite
+  - TESTENV=python3.4-1.5-sqlite
+  - TESTENV=python3.4-1.6-sqlite
+  - TESTENV=python3.4-1.7-sqlite
+  - TESTENV=python3.4-master-postgres
+  - TESTENV=python3.4-master-sqlite
 install:
-  - pip install pytest
-  - pip install django-configurations>=0.2.1
-  - 'if [ "$DJANGO_VERSION" != "master" ]; then pip install django==$DJANGO_VERSION; fi'
-  - 'if [ "$DJANGO_VERSION" == "master" ]; then pip install -e git+https://github.com/django/django@master#egg=Django; fi'
-  - 'if [ "$TRAVIS_PYTHON_VERSION" == "pypy" -a "$DB" == postgres ]; then pip install psycopg2ct; fi'
-  - 'if [ "$TRAVIS_PYTHON_VERSION" != "pypy" -a "$DB" == postgres ]; then pip install psycopg2==$PSYCOPG_VERSION; fi'
-  - 'if [ "$DB" == mysql ]; then pip install mysql-python; fi'
-  - pip install -r requirements.txt
-
-before_script:
-  - psql -c 'create database pytest_django;' -U postgres
-  - psql -c 'create database pytest_django_reuse;' -U postgres
-
-  - mysql -e 'create database pytest_django;'
-  - mysql -e 'create database pytest_django_reuse;'
-
-script: py.test --ds=tests.settings_$DB
-
-
-matrix:
-  exclude:
-    # pypy + postgres
-    - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    - python: pypy
-      env: DB=postgres DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-    # pypy + mysql
-    - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: pypy
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    # python 3.2 + django 1.3
-    - python: "3.2"
-      env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: "3.2"
-      env: DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    # python 3.2 + django 1.4
-    - python: "3.2"
-      env: DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: "3.2"
-      env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    # python 3.2 + mysql
-    - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-    - python: "3.2"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-    # python 3.3 + django 1.3
-    - python: "3.3"
-      env: DB=sqlite DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    - python: "3.3"
-      env: DB=postgres DJANGO_VERSION=1.3.5 PSYCOPG_VERSION=2.4.1
-    # python 3.3 + django 1.4
-    - python: "3.3"
-      env: DB=sqlite DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    - python: "3.3"
-      env: DB=postgres DJANGO_VERSION=1.4.3 PSYCOPG_VERSION=2.4.5
-    # python 3.3 + mysql
-    - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.5.2 PSYCOPG_VERSION=2.4.5
-    - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=1.6.1 PSYCOPG_VERSION=2.4.5
-    - python: "3.3"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-    # Django 1.7 and Python 2.6
-    - python: "2.6"
-      env: DB=sqlite DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-    - python: "2.6"
-      env: DB=mysql DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
-
-    - python: "2.6"
-      env: DB=postgres DJANGO_VERSION=master PSYCOPG_VERSION=2.4.5
+  - pip install tox
+script: tox -e $TESTENV

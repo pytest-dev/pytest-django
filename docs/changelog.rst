@@ -1,5 +1,25 @@
 Changelog
 =========
+
+2.6.2
+-----
+
+* Fixed a bug that caused doctests to runs. Thanks to @jjmurre for the patch
+
+* Fixed issue #88 - make sure to use SQLite in memory database when running
+  with pytest-xdist.
+
+2.6.1
+-----
+This is a bugfix/support release with no new features:
+
+* Added support for Django 1.7 beta and Django master as of 2014-04-16.
+  pytest-django is now automatically tested against the latest git master
+  version of Django.
+
+* Support for MySQL with MyISAM tables. Thanks to Zach Kanzler and Julen Ruiz
+  Aizpuru for fixing this. This fixes issue #8 #64.
+
 2.6.0
 -----
 * Experimental support for Django 1.7 / Django master as of 2014-01-19.
@@ -7,6 +27,12 @@ Changelog
   pytest-django is now automatically tested against the latest git version of
   Django. The support is experimental since Django 1.7 is not yet released, but
   the goal is to always be up to date with the latest Django master
+
+2.5.1
+-----
+Invalid release accidentally pushed to PyPI (identical to 2.6.1). Should not be
+used - use 2.6.1 or newer to avoid confusion.
+
 
 2.5.0
 -----

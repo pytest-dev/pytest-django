@@ -1,0 +1,4 @@
+This doctest should run without problems with py.test.
+
+>>> print('works')
+works

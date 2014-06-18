@@ -80,9 +80,9 @@ More information on fixtures is available in the `py.test documentation
 ``rf`` - ``RequestFactory``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.client.RequestFactory`_
+An instance of a `django.test.RequestFactory`_
 
-.. _django.test.client.RequestFactory: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#module-django.test.client
+.. _django.test.RequestFactory: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#django.test.RequestFactory
 
 Example
 """""""
@@ -101,7 +101,7 @@ Example
 
 An instance of a `django.test.Client`_
 
-.. _django.test.Client: https://docs.djangoproject.com/en/dev/topics/testing/overview/#module-django.test.client
+.. _django.test.Client: https://docs.djangoproject.com/en/dev/topics/testing/tools/#the-test-client
 
 Example
 """""""

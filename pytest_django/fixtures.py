@@ -21,19 +21,18 @@ __all__ = ['_django_db_setup', 'db', 'transactional_db',
 
 
 @pytest.fixture(scope='session')
-def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
+def _django_db_setup(request,
+                     _django_test_environment,
+                     _django_cursor_wrapper):
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
-    from django.conf import settings
+    from .compat import setup_databases, teardown_databases
     from django.core import management
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
-        if hasattr(settings, 'XDIST_DISABLE_SUFFIX') and settings.XDIST_DISABLE_SUFFIX:
-            db_suffix = None
-        else:
-            db_suffix = request.config.slaveinput['slaveid']
+        db_suffix = request.config.slaveinput['slaveid']
     else:
         db_suffix = None
 
@@ -49,16 +48,16 @@ def _django_db_setup(request, _django_runner, _django_cursor_wrapper):
         if request.config.getvalue('reuse_db'):
             if not request.config.getvalue('create_db'):
                 monkey_patch_creation_for_db_reuse()
-            _django_runner.teardown_databases = lambda db_cfg: None
 
         # Create the database
-        db_cfg = _django_runner.setup_databases()
+        db_cfg = setup_databases(verbosity=0, interactive=False)
 
     def teardown_database():
         with _django_cursor_wrapper:
-            _django_runner.teardown_databases(db_cfg)
+            teardown_databases(db_cfg)
 
-    request.addfinalizer(teardown_database)
+    if not request.config.getvalue('reuse_db'):
+        request.addfinalizer(teardown_database)
 
 
 ################ User visible fixtures ################
@@ -87,8 +86,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
         _django_cursor_wrapper.enable()
         case = TestCase(methodName='__init__')
         case._pre_setup()
-        request.addfinalizer(case._post_teardown)
         request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(case._post_teardown)
 
 
 @pytest.fixture(scope='function')
@@ -226,7 +225,7 @@ def _live_server_helper(request):
     """Helper to make live_server work, internal to pytest-django
 
     This helper will dynamically request the transactional_db fixture
-    for a tests which uses the live_server fixture.  This allows the
+    for a test which uses the live_server fixture.  This allows the
     server and test to access the database without having to mark
     this explicitly which is handy since it is usually required and
     matches the Django behaviour.

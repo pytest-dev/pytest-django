@@ -5,6 +5,10 @@ import pytest
 from .db_helpers import mark_exists, mark_database, drop_database, db_exists, skip_if_sqlite
 
 
+skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
+                                      reason='xdist is flaky with Python 3.2')
+
+
 def test_db_reuse(django_testdir):
     """
     Test the re-use db functionality. This test requires a PostgreSQL server
@@ -14,14 +18,14 @@ def test_db_reuse(django_testdir):
     skip_if_sqlite()
 
     django_testdir.create_test_module('''
-import pytest
+        import pytest
 
-from .app.models import Item
+        from .app.models import Item
 
-@pytest.mark.django_db
-def test_db_can_be_accessed():
-    assert Item.objects.count() == 0
-''')
+        @pytest.mark.django_db
+        def test_db_can_be_accessed():
+            assert Item.objects.count() == 0
+    ''')
 
     # Use --create-db on the first run to make sure we are not just re-using a
     # database from another test run
@@ -57,7 +61,7 @@ def test_db_can_be_accessed():
     assert not mark_exists()
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (3, 2), reason='xdist is flaky in 3.2')
+@skip_on_python32
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite()
 
@@ -65,30 +69,29 @@ def test_xdist_with_reuse(django_testdir):
     drop_database('gw1')
 
     django_testdir.create_test_module('''
-import pytest
+        import pytest
 
-from .app.models import Item
+        from .app.models import Item
 
-def _check(settings):
-    # Make sure that the database name looks correct
-    db_name = settings.DATABASES['default']['NAME']
-    assert db_name.endswith('_gw0') or db_name.endswith('_gw1')
+        def _check(settings):
+            # Make sure that the database name looks correct
+            db_name = settings.DATABASES['default']['NAME']
+            assert db_name.endswith('_gw0') or db_name.endswith('_gw1')
 
-    assert Item.objects.count() == 0
-    Item.objects.create(name='foo')
-    assert Item.objects.count() == 1
-
-
-@pytest.mark.django_db
-def test_a(settings):
-    _check(settings)
+            assert Item.objects.count() == 0
+            Item.objects.create(name='foo')
+            assert Item.objects.count() == 1
 
 
-@pytest.mark.django_db
-def test_b(settings):
-    _check(settings)
+        @pytest.mark.django_db
+        def test_a(settings):
+            _check(settings)
 
-''')
+
+        @pytest.mark.django_db
+        def test_b(settings):
+            _check(settings)
+    ''')
 
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
@@ -104,3 +107,30 @@ def test_b(settings):
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--create-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
+
+
+class TestSqliteWithXdist:
+
+    pytestmark = skip_on_python32
+
+    db_settings = {'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/should-not-be-used',
+    }}
+
+    def test_sqlite_in_memory_used(self, django_testdir):
+
+        django_testdir.create_test_module('''
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_a():
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                assert conn.settings_dict['NAME'] == ':memory:'
+        ''')
+
+        result = django_testdir.runpytest('--tb=short', '-vv', '-n1')
+        result.stdout.fnmatch_lines(['*PASSED*test_a*'])

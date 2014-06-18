@@ -3,6 +3,7 @@ import py
 
 import shutil
 import copy
+from textwrap import dedent
 
 
 pytest_plugins = 'pytester'
@@ -18,30 +19,33 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
 
 
 @pytest.fixture(scope='function')
-def django_testdir(testdir, monkeypatch):
+def django_testdir(request, testdir, monkeypatch):
     if get_db_engine() in ('mysql', 'postgresql_psycopg2'):
         # Django requires the production database to exists..
         create_empty_production_database()
 
-    db_settings = copy.deepcopy(settings.DATABASES)
-    db_settings['default']['NAME'] = DB_NAME
+    if hasattr(request.node.cls, 'db_settings'):
+        db_settings = request.node.cls.db_settings
+    else:
+        db_settings = copy.deepcopy(settings.DATABASES)
+        db_settings['default']['NAME'] = DB_NAME
 
-    test_settings = '''
-# Pypy compatibility
-try:
-    from psycopg2ct import compat
-except ImportError:
-    pass
-else:
-    compat.register()
+    test_settings = dedent('''
+        # Pypy compatibility
+        try:
+            from psycopg2ct import compat
+        except ImportError:
+            pass
+        else:
+            compat.register()
 
-DATABASES = %(db_settings)s
+        DATABASES = %(db_settings)s
 
-INSTALLED_APPS = [
-    'tpkg.app',
-]
-SECRET_KEY = 'foobar'
-''' % {'db_settings': repr(db_settings)}
+        INSTALLED_APPS = [
+            'tpkg.app',
+        ]
+        SECRET_KEY = 'foobar'
+    ''') % {'db_settings': repr(db_settings)}
 
     tpkg_path = testdir.mkpydir('tpkg')
     app_source = TESTS_DIR.dirpath('app')
@@ -55,7 +59,7 @@ SECRET_KEY = 'foobar'
 
     def create_test_module(test_code, filename='test_the_test.py'):
         tpkg_path = testdir.tmpdir / 'tpkg'
-        tpkg_path.join(filename).write(test_code)
+        tpkg_path.join(filename).write(dedent(test_code))
 
     def create_conftest(testdir, conftest_code):
         return create_test_module(testdir, conftest_code, 'conftest.py')
@@ -64,7 +68,3 @@ SECRET_KEY = 'foobar'
     testdir.create_conftest = create_conftest
 
     return testdir
-
-
-
-

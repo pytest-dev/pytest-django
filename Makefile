@@ -1,16 +1,20 @@
 .PHONY: docs test clean
 
-bin/python:
+testenv: bin/py.test
+
+
+bin/python bin/pip:
 	virtualenv .
 
-bin/py.test: bin/python
+bin/py.test: bin/python requirements.txt
 	bin/pip install -Ur requirements.txt
+	touch $@
 
 test: bin/py.test
-	bin/pip install -Ur requirements.txt
+	bin/pip install -e .
 	bin/py.test
 
-bin/sphinx-build:
+bin/sphinx-build: bin/pip
 	bin/pip install sphinx
 
 docs: bin/sphinx-build

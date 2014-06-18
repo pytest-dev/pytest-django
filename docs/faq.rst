@@ -5,16 +5,19 @@ FAQ
 I see an error saying "could not import myproject.settings"
 -----------------------------------------------------------
 
-py.test breaks your sys.path.  You need to either create a *setup.py* like this:
+py.test does not automatically add your project to the Python path, that is
+usually done when running tests via `manage.py test`.
+
+The easiest way to get your project code available on the Python path is to
+create a `setup.py` like this::
 
     from distutils.core import setup
     setup(name='myproj', version='1.0')
 
 And then install your project into your virtualenv with ``pip install -e .``.
 
-Alternatively, you can use py.test's *conftest.py* file, or a virtualenv hook to
-adjust the PYTHONPATH.
-
+Alternatively, when you create a `conftest.py` file in your project root, it
+will also implicitly add that directory to the python path.
 
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------

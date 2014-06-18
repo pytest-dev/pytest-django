@@ -10,6 +10,7 @@ import django
 import pytest
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
+from django.test.testcases import connections_support_transactions
 
 from .app.models import Item
 from .test_database import noop_transactions
@@ -87,6 +88,9 @@ class TestLiveServer:
         assert live_server.url == force_text(live_server)
 
     def test_transactions(self, live_server):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
         assert not noop_transactions()
 
     def test_db_changes_visibility(self, live_server):

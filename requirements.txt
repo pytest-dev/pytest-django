@@ -2,3 +2,6 @@
 django
 django-configurations
 pytest-xdist
+tox
+wheel
+twine
