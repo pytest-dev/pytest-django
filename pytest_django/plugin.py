@@ -17,10 +17,6 @@ from .fixtures import (_django_db_setup, db, transactional_db, client,
 from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
-(_django_db_setup, db, transactional_db, client, admin_client, rf,
- settings, live_server, _live_server_helper)
-
-
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 
