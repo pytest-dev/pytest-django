@@ -77,7 +77,7 @@ def monkey_patch_creation_for_db_suffix(suffix=None):
             _monkeypatch(connection.creation, '_get_test_db_name', _get_test_db_name)
 
 
-def create_test_db_with_reuse(self, verbosity=1, autoclobber=False):
+def create_test_db_with_reuse(self, verbosity=1, autoclobber=False, keepdb=False, serialize=False):
     """
     This method is a monkey patched version of create_test_db that
     will not actually create a new database, but just reuse the
