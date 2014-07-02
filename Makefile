@@ -1,5 +1,7 @@
 .PHONY: docs test clean
 
+export DJANGO_SETTINGS_MODULE?=tests.settings_sqlite
+
 testenv: bin/py.test
 
 
