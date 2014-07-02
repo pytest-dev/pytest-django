@@ -15,13 +15,11 @@ try:
 except ImportError:
     from django.test.simple import DjangoTestSuiteRunner as DjangoTestRunner
 
-class CustomTestRunner(DjangoTestRunner):
-    """ Dummy custom test runner implementation """
-    def setup_databases(self, **kwargs):
-        return super(CustomTestRunner, self).setup_databases(**kwargs)
 
-    def teardown_databases(self, old_config, **kwargs):
-        return super(CustomTestRunner, self).teardown(old_config, **kwargs)
+class CustomTestRunner(DjangoTestRunner):
+    def __init__(self, **kwargs):
+        print('Initializing CustomTestRunner')
+        super(CustomTestRunner, self).__init__(**kwargs)
 '''
 
 
@@ -39,5 +37,4 @@ def test_custom_runner(testdir, monkeypatch):
     """)
 
     result = testdir.runpytest('-sv')
-    result.stdout.fnmatch_lines(
-        ["<class 'tpkg.custom_runner.CustomTestRunner'>"])
+    assert 'Initializing CustomTestRunner' in result.stdout.str()
