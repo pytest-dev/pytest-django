@@ -9,8 +9,16 @@ import pytest
 if sys.version_info < (2, 6):
     pytest.skip('django-configurations is not supported on Python < 2.6')
 
+
 pytest.importorskip('configurations')
 
+try:
+    import configurations.importer
+    configurations
+except ImportError as e:
+    if 'LaxOptionParser' in e.args[0]:
+        pytest.skip('This version of django-configurations is incompatible with Django: '
+                    'https://github.com/jezdez/django-configurations/issues/65')
 
 BARE_SETTINGS = '''
 from configurations import Settings
