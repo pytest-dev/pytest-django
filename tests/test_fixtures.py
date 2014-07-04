@@ -6,7 +6,6 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
-import django
 import pytest
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
@@ -16,8 +15,8 @@ from .app.models import Item
 from .test_database import noop_transactions
 from .compat import force_text, urlopen
 
+from pytest_django.lazy_django import get_django_version
 
-django  # Avoid pyflakes complaints
 
 
 def test_client(client):
@@ -80,7 +79,8 @@ class TestSettings:
 
 class TestLiveServer:
     pytestmark = [
-        pytest.mark.skipif('django.VERSION[:2] < (1, 4)'),
+        pytest.mark.skipif(get_django_version() < (1, 4),
+                           reason="Django > 1.3 required"),
         pytest.mark.urls('tests.urls_liveserver'),
         ]
 
