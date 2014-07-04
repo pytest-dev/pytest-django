@@ -31,3 +31,6 @@ def django_settings_is_configured():
             "pytest_django: failed to load Django settings: %s" % (e.args))
 
     return settings.configured
+
+def get_django_version():
+    return __import__('django').VERSION
