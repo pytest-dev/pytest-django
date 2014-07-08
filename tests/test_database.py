@@ -109,6 +109,28 @@ class TestDatabaseFixtures:
         pass
 
 
+class TestDatabaseFixturesBothOrder:
+    @pytest.fixture
+    def fixture_with_db(self, db):
+        Item.objects.create(name='spam')
+
+    @pytest.fixture
+    def fixture_with_transdb(self, transactional_db):
+        Item.objects.create(name='spam')
+
+    def test_trans(self, fixture_with_transdb):
+        pass
+
+    def test_db(self, fixture_with_db):
+        pass
+
+    def test_db_trans(self, fixture_with_db, fixture_with_transdb):
+        pass
+
+    def test_trans_db(self, fixture_with_transdb, fixture_with_db):
+        pass
+
+
 class TestDatabaseMarker:
 
     @pytest.mark.django_db
