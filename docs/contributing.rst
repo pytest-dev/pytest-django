@@ -24,7 +24,7 @@ In a nutshell
 
 Here's what the contribution process looks like, in a bullet-points fashion:
 
-#. pytest-django is hosted on `GitHub`_, at https://github.com/pelme/pytest-django
+#. pytest-django is hosted on `GitHub`_, at https://github.com/pelme/pytest_django
 #. The best method to contribute back is to create an account there, then fork
    the project. You can use this fork as if it was your own project, and should
    push your changes to it.
