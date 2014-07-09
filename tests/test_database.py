@@ -9,13 +9,13 @@ from .app.models import Item
 
 
 def noop_transactions():
-    """Test whether transactions are disabled
+    """Test whether transactions are disabled.
 
     Return True if transactions are disabled, False if they are
     enabled.
     """
 
-    # Newer versions of Django simply runs standard tests in an atomic block.
+    # Newer versions of Django simply run standard tests in an atomic block.
     if hasattr(connection, 'in_atomic_block'):
         return connection.in_atomic_block
     else:
