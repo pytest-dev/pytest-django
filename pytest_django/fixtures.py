@@ -59,6 +59,39 @@ def _django_db_setup(request,
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
 
+def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
+    if is_django_unittest(request.node):
+        return
+
+    if transactional:
+        _django_cursor_wrapper.enable()
+
+        def flushdb():
+            """Flush the database and close database connections"""
+            # Django does this by default *before* each test
+            # instead of after.
+            from django.db import connections
+            from django.core.management import call_command
+
+            for db in connections:
+                call_command('flush', verbosity=0,
+                             interactive=False, database=db)
+            for conn in connections.all():
+                conn.close()
+
+        request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(flushdb)
+    else:
+        if 'live_server' in request.funcargnames:
+            return
+        from django.test import TestCase
+
+        _django_cursor_wrapper.enable()
+        _django_cursor_wrapper._is_transactional = False
+        case = TestCase(methodName='__init__')
+        case._pre_setup()
+        request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(case._post_teardown)
 
 ################ User visible fixtures ################
 
@@ -77,17 +110,9 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transaction_db`` was
     requested.
     """
-    if ('transactional_db' not in request.funcargnames and
-            'live_server' not in request.funcargnames and
-            not is_django_unittest(request.node)):
-
-        from django.test import TestCase
-
-        _django_cursor_wrapper.enable()
-        case = TestCase(methodName='__init__')
-        case._pre_setup()
-        request.addfinalizer(_django_cursor_wrapper.disable)
-        request.addfinalizer(case._post_teardown)
+    if 'transactional_db' in request.funcargnames:
+        return request.getfuncargvalue('transactional_db')
+    return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
 
 
 @pytest.fixture(scope='function')
@@ -102,24 +127,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transaction_db`` was
     requested.
     """
-    if not is_django_unittest(request.node):
-        _django_cursor_wrapper.enable()
-
-        def flushdb():
-            """Flush the database and close database connections"""
-            # Django does this by default *before* each test
-            # instead of after.
-            from django.db import connections
-            from django.core.management import call_command
-
-            for db in connections:
-                call_command('flush', verbosity=0,
-                             interactive=False, database=db)
-            for conn in connections.all():
-                conn.close()
-
-        request.addfinalizer(_django_cursor_wrapper.disable)
-        request.addfinalizer(flushdb)
+    return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
 
 
 @pytest.fixture()
