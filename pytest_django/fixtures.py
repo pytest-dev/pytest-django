@@ -103,11 +103,11 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     This database will be setup with the default fixtures and will
     have the transaction management disabled.  At the end of the test
     the transaction will be rolled back to undo any changes to the
-    database.  This is more limited then the ``transaction_db``
+    database.  This is more limited then the ``transactional_db``
     resource but faster.
 
-    If both this and ``transaction_db`` are requested then the
-    database setup will behave as only ``transaction_db`` was
+    If both this and ``transactional_db`` are requested then the
+    database setup will behave as only ``transactional_db`` was
     requested.
     """
     if 'transactional_db' in request.funcargnames:
@@ -124,7 +124,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
 
     If you want to use the database with transactions you must request
     this resource.  If both this and ``db`` are requested then the
-    database setup will behave as only ``transaction_db`` was
+    database setup will behave as only ``transactional_db`` was
     requested.
     """
     return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
