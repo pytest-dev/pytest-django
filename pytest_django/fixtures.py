@@ -28,7 +28,6 @@ def _django_db_setup(request,
     skip_if_no_django()
 
     from .compat import setup_databases, teardown_databases
-    from django.core import management
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
@@ -37,11 +36,6 @@ def _django_db_setup(request,
         db_suffix = None
 
     monkey_patch_creation_for_db_suffix(db_suffix)
-
-    # Disable south's syncdb command
-    commands = management.get_commands()
-    if commands['syncdb'] == 'south':
-        management._commands['syncdb'] = 'django.core'
 
     with _django_cursor_wrapper:
         # Monkey patch Django's setup code to support database re-use

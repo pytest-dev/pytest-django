@@ -54,12 +54,8 @@ This snippet should do the trick (replace ``yourproject.settings`` and make sure
     echo "export DJANGO_SETTINGS_MODULE=yourproject.settings" >> $VIRTUAL_ENV/bin/postactivate
 
 
-How do South and pytest-django play together?
-------------------------------------------------
-
-Django's own syncdb will always be used to create the test database, regardless of whether South is present or not.
-
-
+How does South and pytest-django play together?
+Djangos own syncdb will always be used to create the test database, regardless of wheter South is present or not.
 Does this work with the pytest-xdist plugin?
 --------------------------------------------
 
