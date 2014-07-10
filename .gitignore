@@ -15,3 +15,4 @@ _build
 /lib/
 /src/
 .cache
+.Python
