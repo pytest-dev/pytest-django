@@ -65,6 +65,7 @@ def requirements(env):
     yield 'pytest-xdist==1.10'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
+    yield 'south==1.0'
 
     if env.settings == 'postgres':
         # Django 1.3 does not work with recent psycopg2 versions
