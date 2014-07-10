@@ -1,6 +1,11 @@
 Changelog
 =========
 
+NEXT
+----
+
+* Fix interaction between ``db`` and ``transaction_db`` fixtures (#126).
+
 2.6.2
 -----
 

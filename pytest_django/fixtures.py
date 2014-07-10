@@ -59,50 +59,11 @@ def _django_db_setup(request,
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
 
+def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
+    if is_django_unittest(request.node):
+        return
 
-################ User visible fixtures ################
-
-
-@pytest.fixture(scope='function')
-def db(request, _django_db_setup, _django_cursor_wrapper):
-    """Require a django test database
-
-    This database will be setup with the default fixtures and will
-    have the transaction management disabled.  At the end of the test
-    the transaction will be rolled back to undo any changes to the
-    database.  This is more limited then the ``transaction_db``
-    resource but faster.
-
-    If both this and ``transaction_db`` are requested then the
-    database setup will behave as only ``transaction_db`` was
-    requested.
-    """
-    if ('transactional_db' not in request.funcargnames and
-            'live_server' not in request.funcargnames and
-            not is_django_unittest(request.node)):
-
-        from django.test import TestCase
-
-        _django_cursor_wrapper.enable()
-        case = TestCase(methodName='__init__')
-        case._pre_setup()
-        request.addfinalizer(_django_cursor_wrapper.disable)
-        request.addfinalizer(case._post_teardown)
-
-
-@pytest.fixture(scope='function')
-def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
-    """Require a django test database with transaction support
-
-    This will re-initialise the django database for each test and is
-    thus slower then the normal ``db`` fixture.
-
-    If you want to use the database with transactions you must request
-    this resource.  If both this and ``db`` are requested then the
-    database setup will behave as only ``transaction_db`` was
-    requested.
-    """
-    if not is_django_unittest(request.node):
+    if transactional:
         _django_cursor_wrapper.enable()
 
         def flushdb():
@@ -120,6 +81,53 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
 
         request.addfinalizer(_django_cursor_wrapper.disable)
         request.addfinalizer(flushdb)
+    else:
+        if 'live_server' in request.funcargnames:
+            return
+        from django.test import TestCase
+
+        _django_cursor_wrapper.enable()
+        _django_cursor_wrapper._is_transactional = False
+        case = TestCase(methodName='__init__')
+        case._pre_setup()
+        request.addfinalizer(_django_cursor_wrapper.disable)
+        request.addfinalizer(case._post_teardown)
+
+################ User visible fixtures ################
+
+
+@pytest.fixture(scope='function')
+def db(request, _django_db_setup, _django_cursor_wrapper):
+    """Require a django test database
+
+    This database will be setup with the default fixtures and will
+    have the transaction management disabled.  At the end of the test
+    the transaction will be rolled back to undo any changes to the
+    database.  This is more limited then the ``transactional_db``
+    resource but faster.
+
+    If both this and ``transactional_db`` are requested then the
+    database setup will behave as only ``transactional_db`` was
+    requested.
+    """
+    if 'transactional_db' in request.funcargnames:
+        return request.getfuncargvalue('transactional_db')
+    return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
+
+
+@pytest.fixture(scope='function')
+def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
+    """Require a django test database with transaction support
+
+    This will re-initialise the django database for each test and is
+    thus slower then the normal ``db`` fixture.
+
+    If you want to use the database with transactions you must request
+    this resource.  If both this and ``db`` are requested then the
+    database setup will behave as only ``transactional_db`` was
+    requested.
+    """
+    return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
 
 
 @pytest.fixture()
