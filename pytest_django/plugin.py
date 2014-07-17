@@ -73,6 +73,12 @@ def _load_settings(config, options):
             # Install the django-configurations importer
             import configurations.importer
             configurations.importer.install()
+        try:
+            from .compat import setup
+            setup()
+        except ImportError:
+            pass  # Ignore bad settings modules at this point
+
 
 
 if pytest.__version__[:3] >= "2.4":
