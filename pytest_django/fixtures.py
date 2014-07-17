@@ -103,7 +103,7 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     This database will be setup with the default fixtures and will
     have the transaction management disabled.  At the end of the test
     the transaction will be rolled back to undo any changes to the
-    database.  This is more limited then the ``transactional_db``
+    database.  This is more limited than the ``transactional_db``
     resource but faster.
 
     If both this and ``transactional_db`` are requested then the
@@ -120,7 +120,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     """Require a django test database with transaction support
 
     This will re-initialise the django database for each test and is
-    thus slower then the normal ``db`` fixture.
+    thus slower than the normal ``db`` fixture.
 
     If you want to use the database with transactions you must request
     this resource.  If both this and ``db`` are requested then the
