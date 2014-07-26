@@ -15,7 +15,6 @@ env:
   - TESTENV=python3.4-1.5-sqlite_file
   - TESTENV=python3.4-1.6-sqlite_file
   - TESTENV=python3.4-1.7-sqlite_file
-  - TESTENV=python3.4-master-custom_user_model
   - TESTENV=python3.4-master-postgres
   - TESTENV=python3.4-master-sqlite
   - TESTENV=python3.4-master-sqlite_file
