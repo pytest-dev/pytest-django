@@ -1,7 +1,7 @@
 """A py.test plugin which helps testing Django applications
 
 This plugin handles creating and destroying the test environment and
-test database and provides some useful text fixtues.
+test database and provides some useful text fixtures.
 """
 
 import os

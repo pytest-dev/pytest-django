@@ -10,7 +10,7 @@ from . import live_server_helper
 from .db_reuse import (monkey_patch_creation_for_db_reuse,
                        monkey_patch_creation_for_db_suffix)
 from .django_compat import is_django_unittest
-from .lazy_django import skip_if_no_django
+from .lazy_django import get_django_version, skip_if_no_django
 
 __all__ = ['_django_db_setup', 'db', 'transactional_db',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
@@ -142,22 +142,32 @@ def client():
 
 @pytest.fixture()
 def admin_client(db):
-    """A Django test client logged in as an admin user"""
-    try:
+    """
+    A Django test client logged in as an admin user
+
+    """
+    has_custom_user_model_support = get_django_version() >= (1, 5)
+
+    # When using Django >= 1.5 the username field is variable, so
+    # get 'username field' by using UserModel.USERNAME_FIELD
+    if has_custom_user_model_support:
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-    except ImportError:
-        from django.contrib.auth.models import User
+        UserModel = get_user_model()
+        username_field = UserModel.USERNAME_FIELD
+    else:
+        from django.contrib.auth.models import User as UserModel
+        username_field = 'username'
+
     from django.test.client import Client
 
     try:
-        User.objects.get(username='admin')
-    except User.DoesNotExist:
-        user = User.objects.create_user('admin', 'admin@example.com',
-                                        'password')
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
+        UserModel._default_manager.get(**{username_field: 'admin'})
+    except UserModel.DoesNotExist:
+        extra_fields = {}
+        if username_field != 'username':
+            extra_fields[username_field] = 'admin'
+        UserModel._default_manager.create_superuser('admin', 'admin@example.com',
+                                                    'password', **extra_fields)
 
     client = Client()
     client.login(username='admin', password='password')
