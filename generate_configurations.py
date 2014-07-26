@@ -11,7 +11,7 @@ TestEnv = namedtuple('TestEnv', ['python_version', 'django_version', 'settings']
 
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3', 'python3.4', 'pypy']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
-SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb', 'postgres']
+SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb', 'postgres', 'custom_user_model']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
     '1.4': 'Django==1.4.13',
@@ -55,6 +55,10 @@ def is_valid_env(env):
 
     # Django 1.7 dropped Python 2.6 support
     if env.python_version == 'python2.6' and env.django_version in ('1.7', 'master'):
+        return False
+
+    # Django 1.5+ supprts custom user models
+    if env.settings == 'custom_user_model' and env.django_version in ('1.3', '1.4'):
         return False
 
     return True
