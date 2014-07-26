@@ -57,7 +57,7 @@ def is_valid_env(env):
     if env.python_version == 'python2.6' and env.django_version in ('1.7', 'master'):
         return False
 
-    # Django 1.5+ supprts custom user models
+    # Django 1.5+ supports custom user models
     if env.settings == 'custom_user_model' and env.django_version in ('1.3', '1.4'):
         return False
 
