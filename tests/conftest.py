@@ -68,14 +68,10 @@ def django_testdir(request, testdir, monkeypatch):
         tpkg_path = testdir.tmpdir / 'tpkg'
         tpkg_path.join(filename).write(dedent(test_code))
 
-    def create_conftest(testdir, conftest_code):
-        return create_test_module(testdir, conftest_code, 'conftest.py')
-
     def create_app_file(code, filename):
         test_app_path.join(filename).write(dedent(code))
 
     testdir.create_test_module = create_test_module
-    testdir.create_conftest = create_conftest
     testdir.create_app_file = create_app_file
 
     return testdir
