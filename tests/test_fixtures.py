@@ -158,7 +158,7 @@ MIDDLEWARE_CLASSES = (
 )
 """)
 @pytest.mark.skipif(get_django_version() < (1, 5),
-                    reason="Django > 1.5 required")
+                    reason="Django >= 1.5 required")
 def test_custom_user_model(django_testdir):
     django_testdir.create_app_file("""
 from django.contrib.auth.models import AbstractUser
