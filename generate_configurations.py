@@ -14,7 +14,7 @@ TestEnv = namedtuple('TestEnv',
 # Python to run tox.
 RUN_PYTHON = '3.3'
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
-                   'python3.4', 'pypy']
+                   'python3.4', 'pypy', 'pypy3']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
