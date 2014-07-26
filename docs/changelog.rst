@@ -6,6 +6,8 @@ NEXT
 
 * Fix interaction between ``db`` and ``transaction_db`` fixtures (#126).
 
+* Fix admin client with custom user models (#124).
+
 2.6.2
 -----
 
