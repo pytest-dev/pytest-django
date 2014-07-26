@@ -163,12 +163,11 @@ def admin_client(db):
     try:
         UserModel._default_manager.get(**{username_field: 'admin'})
     except UserModel.DoesNotExist:
-        user = UserModel._default_manager.create_user('admin',
-                                                      'admin@example.com',
-                                                      'password')
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
+        extra_fields = {}
+        if username_field != 'username':
+            extra_fields[username_field] = 'admin'
+        UserModel._default_manager.create_superuser('admin', 'admin@example.com',
+                                                    'password', **extra_fields)
 
     client = Client()
     client.login(username='admin', password='password')

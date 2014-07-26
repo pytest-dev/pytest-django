@@ -18,7 +18,6 @@ from .compat import force_text, urlopen
 from pytest_django.lazy_django import get_django_version
 
 
-
 def test_client(client):
     assert isinstance(client, Client)
 
@@ -138,3 +137,68 @@ class TestLiveServer:
     def test_item_transactional_db(self, item_transactional_db, live_server):
         response_data = urlopen(live_server + '/item_count/').read()
         assert force_text(response_data) == 'Item count: 1'
+
+
+@pytest.mark.extra_settings("""
+AUTH_USER_MODEL = 'app.MyCustomUser'
+INSTALLED_APPS = [
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'tpkg.app',
+]
+ROOT_URLCONF = 'tpkg.app.urls'
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
+""")
+@pytest.mark.skipif(get_django_version() < (1, 5),
+                    reason="Django > 1.5 required")
+def test_custom_user_model(django_testdir):
+    django_testdir.create_app_file("""
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+class MyCustomUser(AbstractUser):
+    identifier = models.CharField(unique=True, max_length=100)
+
+    USERNAME_FIELD = 'identifier'
+    """, 'models.py')
+    django_testdir.create_app_file("""
+try:
+    from django.conf.urls import patterns  # Django >1.4
+except ImportError:
+    from django.conf.urls.defaults import patterns  # Django 1.3
+
+urlpatterns = patterns(
+    '',
+    (r'admin-required/', 'tpkg.app.views.admin_required_view'),
+)
+    """, 'urls.py')
+    django_testdir.create_app_file("""
+from django.http import HttpResponse
+from django.template import Template
+from django.template.context import Context
+
+
+def admin_required_view(request):
+    if request.user.is_staff:
+        return HttpResponse(Template('You are an admin').render(Context()))
+    return HttpResponse(Template('Access denied').render(Context()))
+
+    """, 'views.py')
+    django_testdir.makepyfile("""
+from tests.compat import force_text
+from tpkg.app.models import MyCustomUser
+
+def test_custom_user_model(admin_client):
+    resp = admin_client.get('/admin-required/')
+    assert force_text(resp.content) == 'You are an admin'
+    """)
+    result = django_testdir.runpytest('-s')
+    result.stdout.fnmatch_lines(['*1 passed*'])
