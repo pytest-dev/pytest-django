@@ -10,6 +10,7 @@ import pytest
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
+from django.test.signals import setting_changed
 
 from .app.models import Item
 from .test_database import noop_transactions
@@ -74,6 +75,25 @@ class TestSettings:
     def test_deleted_again(self, settings):
         assert hasattr(settings, 'SECRET_KEY')
         assert hasattr(real_settings, 'SECRET_KEY')
+
+    @pytest.mark.skipif(get_django_version() < (1, 4),
+                        reason='Django > 1.3 required')
+    def test_signals(self, settings, capsys):
+        key, value = 'SPAM', 'ham'
+        marker = 'Done!'
+
+        def assert_signal(**kwargs):
+            assert kwargs['sender'] == settings._wrapped.__class__
+            assert kwargs['setting'] == key
+            assert kwargs['value'] == value
+            print(marker)
+
+        setting_changed.connect(assert_signal)
+        setattr(settings, key, value)
+        assert marker in capsys.readouterr()[0]
+        value = None
+        delattr(settings, key)
+        assert marker in capsys.readouterr()[0]
 
 
 class TestLiveServer:
