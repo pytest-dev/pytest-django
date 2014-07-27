@@ -71,6 +71,12 @@ def _load_settings_from_env(config, options):
             # Install the django-configurations importer
             import configurations.importer
             configurations.importer.install()
+        try:
+            from .compat import setup
+            setup()
+        except ImportError:
+            pass  # Ignore bad settings modules at this point
+
 
         # Forcefully load django settings, throws ImportError or ImproperlyConfigured
         # if settings cannot be loaded

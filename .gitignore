@@ -5,6 +5,7 @@ build/
 _build
 .tox
 .DS_Store
+.ropeproject
 *~
 .env
 /.coverage.*
