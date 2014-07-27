@@ -59,6 +59,7 @@ def _django_db_setup(request,
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
 
+
 def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     if is_django_unittest(request.node):
         return

@@ -5,7 +5,6 @@ test database and provides some useful text fixtures.
 """
 
 import os
-import sys
 
 import pytest
 

@@ -92,7 +92,7 @@ def parse_addr(specified_address):
         for port_range in port_ranges.split(','):
             # A port range can be of either form: '8000' or '8000-8010'.
             extremes = list(map(int, port_range.split('-')))
-            assert len(extremes) in [1, 2]
+            assert len(extremes) in (1, 2)
             if len(extremes) == 1:
                 # Port range of the form '8000'
                 possible_ports.append(extremes[0])
@@ -104,4 +104,4 @@ def parse_addr(specified_address):
         raise Exception(
             'Invalid address ("%s") for live server.' % specified_address)
 
-    return (host, possible_ports)
+    return host, possible_ports

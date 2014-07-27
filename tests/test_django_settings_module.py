@@ -51,7 +51,7 @@ def test_ds_ini(testdir, monkeypatch):
 
 def test_ds_option(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
-    testdir.makeini("""\
+    testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """)
