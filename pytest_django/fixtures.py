@@ -184,11 +184,13 @@ def rf():
     return RequestFactory()
 
 
-class BaseWrapper(object):
+class BaseSettingsWrapper(object):
 
     def __init__(self, monkeypatch, wrapped_object):
-        super(BaseWrapper, self).__setattr__('monkeypatch', monkeypatch)
-        super(BaseWrapper, self).__setattr__('wrapped_object', wrapped_object)
+        super(BaseSettingsWrapper, self).__setattr__('monkeypatch',
+                                                     monkeypatch)
+        super(BaseSettingsWrapper, self).__setattr__('wrapped_object',
+                                                     wrapped_object)
 
     def __getattr__(self, attr):
         return getattr(self.wrapped_object, attr)
@@ -201,29 +203,46 @@ class BaseWrapper(object):
         self.monkeypatch.delattr(self.wrapped_object, attr)
 
 
-class OverrideSettingsWrapper(BaseWrapper):
+class BaseOverrideSettingsWrapper(BaseSettingsWrapper):
+    """
+    Base version, which works with Django 1.4 override_settings.
+    """
 
     def __init__(self, monkeypatch, wrapped_object):
-        super(OverrideSettingsWrapper, self).__init__(monkeypatch,
-                                                      wrapped_object)
+        super(BaseOverrideSettingsWrapper, self).__init__(monkeypatch,
+                                                          wrapped_object)
+        wrapper = self.get_wrapper()
+        super(BaseSettingsWrapper, self).__setattr__('wrapper', wrapper)
+        super(BaseSettingsWrapper, self).__setattr__('_default_settings',
+                                                     wrapper.wrapped)
+
+    def get_wrapper(self):
         from django.test.utils import override_settings
 
-        wrapper = override_settings()
-        wrapper.enable()
-        super(BaseWrapper, self).__setattr__('wrapper', wrapper)
-        super(BaseWrapper, self).__setattr__('_default_settings', wrapper.wrapped)
+        return override_settings()
 
     def __setattr__(self, attr, value):
         self.wrapper.options[attr] = value
         self.wrapper.enable()
 
+    def finalize(self):
+        self.wrapper.wrapped = self._default_settings
+        self.wrapper.disable()
+
+
+class OverrideSettingsWrapper(BaseOverrideSettingsWrapper):
+    """
+    Uses with Django's 1.5+ override_settings class.
+    """
+
+    def get_wrapper(self):
+        wrapper = super(OverrideSettingsWrapper, self).get_wrapper()
+        wrapper.enable()
+        return wrapper
+
     def __delattr__(self, attr):
         setattr(self, attr, None)
         super(OverrideSettingsWrapper, self).__delattr__(attr)
-
-    def disable(self):
-        self.wrapper.wrapped = self._default_settings
-        self.wrapper.disable()
 
 
 @pytest.fixture()
@@ -233,11 +252,17 @@ def settings(request, monkeypatch):
 
     from django.conf import settings as django_settings
 
-    if get_django_version() >= (1, 4):
-        fixture = OverrideSettingsWrapper(monkeypatch, django_settings)
-        request.addfinalizer(fixture.disable)
+    django_version = get_django_version()
+
+    if django_version >= (1, 4):
+        if django_version >= (1, 5):
+            fixture_class = OverrideSettingsWrapper
+        else:
+            fixture_class = BaseOverrideSettingsWrapper
+        fixture = fixture_class(monkeypatch, django_settings)
+        request.addfinalizer(fixture.finalize)
     else:
-        fixture = BaseWrapper(monkeypatch, django_settings)
+        fixture = BaseSettingsWrapper(monkeypatch, django_settings)
     return fixture
 
 
