@@ -10,7 +10,6 @@ import pytest
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
-from django.test.signals import setting_changed
 
 from .app.models import Item
 from .test_database import noop_transactions
@@ -87,6 +86,8 @@ class TestSettings:
             assert kwargs['setting'] == key
             assert kwargs['value'] == value
             print(marker)
+
+        from django.test.signals import setting_changed
 
         setting_changed.connect(assert_signal)
         setattr(settings, key, value)
