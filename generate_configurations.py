@@ -17,7 +17,7 @@ DJANGO_REQUIREMENTS = {
     '1.4': 'Django==1.4.13',
     '1.5': 'Django==1.5.8',
     '1.6': 'Django==1.6.5',
-    '1.7': 'https://www.djangoproject.com/download/1.7c1/tarball/',
+    '1.7': 'https://www.djangoproject.com/download/1.7c2/tarball/',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
