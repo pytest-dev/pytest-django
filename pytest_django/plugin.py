@@ -42,9 +42,9 @@ def pytest_namespace():
             base_methods = [name for name, member in inspect.getmembers(TestCase)
                             if is_assert(name)]
 
-            names = {name: member
-                     for name, member in inspect.getmembers(obj)
-                     if is_assert(name) and name not in base_methods}
+            names = dict((name, member)
+                         for name, member in inspect.getmembers(obj)
+                         if is_assert(name) and name not in base_methods)
 
             return {'django': names}
     except pytest.UsageError:
