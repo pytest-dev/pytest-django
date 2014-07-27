@@ -3,9 +3,8 @@
 This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
-
+import inspect
 import os
-import sys
 
 import pytest
 
@@ -26,6 +25,31 @@ CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 
 
 ################ pytest hooks ################
+
+
+def pytest_namespace():
+    """Make unittest assert methods available.
+    This is useful for things such floating point checks with assertAlmostEqual.
+    """
+    try:
+        if django_settings_is_configured():
+            from django.test import SimpleTestCase
+            from unittest import TestCase
+
+            obj = SimpleTestCase('run')
+            is_assert = lambda x: x.startswith('assert') and '_' not in x
+
+            base_methods = [name for name, member in inspect.getmembers(TestCase)
+                            if is_assert(name)]
+
+            names = {name: member
+                     for name, member in inspect.getmembers(obj)
+                     if is_assert(name) and name not in base_methods}
+
+            return {'django': names}
+    except pytest.UsageError:
+        return {}
+    return {}
 
 
 def pytest_addoption(parser):

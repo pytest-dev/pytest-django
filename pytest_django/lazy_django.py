@@ -28,7 +28,7 @@ def django_settings_is_configured():
     except (ImproperlyConfigured, ImportError):
         e = sys.exc_info()[1]
         raise pytest.UsageError(
-            "pytest_django: failed to load Django settings: %s" % (e.args))
+            "pytest_django: failed to load Django settings: %s" % e.args)
 
     return settings.configured
 
