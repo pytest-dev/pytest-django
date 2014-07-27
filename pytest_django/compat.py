@@ -25,10 +25,3 @@ except ImportError:
 
 
 del _runner
-
-
-try:
-    from django import setup
-except ImportError:
-    # Emulate Django 1.7 django.setup() with get_models
-    from django.db.models import get_models as setup

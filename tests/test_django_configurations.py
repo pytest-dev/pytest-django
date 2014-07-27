@@ -81,7 +81,7 @@ def test_dc_option(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
     monkeypatch.setenv('DJANGO_CONFIGURATION', 'DO_NOT_USE_env')
 
-    testdir.makeini("""\
+    testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
        DJANGO_CONFIGURATION = DO_NOT_USE_ini

@@ -26,7 +26,6 @@ CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 
 ################ pytest hooks ################
 
-
 def pytest_namespace():
     """Make unittest assert methods available.
     This is useful for things such floating point checks with assertAlmostEqual.
@@ -77,7 +76,7 @@ def pytest_addoption(parser):
                   'Django settings module to use by pytest-django.')
 
 
-def _load_settings(config, options):
+def _load_settings_from_env(config, options):
     # Configure DJANGO_SETTINGS_MODULE
     ds = (options.ds or
           config.getini(SETTINGS_MODULE_ENV) or
@@ -98,12 +97,29 @@ def _load_settings(config, options):
             import configurations.importer
             configurations.importer.install()
 
+        # Forcefully load django settings, throws ImportError or ImproperlyConfigured
+        # if settings cannot be loaded
+        from django.conf import settings
+        settings.DATABASES
+
+        _setup_django()
+
+
+def _setup_django():
+    import django
+    if hasattr(django, 'setup'):
+        django.setup()
+    else:
+        # Emulate Django 1.7 django.setup() with get_models
+        from django.db.models import get_models
+        get_models()
 
 if pytest.__version__[:3] >= "2.4":
     def pytest_load_initial_conftests(early_config, parser, args):
-        _load_settings(early_config, parser.parse_known_args(args))
+        _load_settings_from_env(early_config, parser.parse_known_args(args))
 
 
+@pytest.mark.trylast
 def pytest_configure(config):
     # Register the marks
     config.addinivalue_line(
@@ -120,10 +136,10 @@ def pytest_configure(config):
         '"my_app.test_urls".')
 
     if pytest.__version__[:3] < "2.4":
-        _load_settings(config, config.option)
+        _load_settings_from_env(config, config.option)
 
-
-################ Autouse fixtures ################
+    if django_settings_is_configured():
+        _setup_django()
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -140,11 +156,8 @@ def _django_test_environment(request):
     """
     if django_settings_is_configured():
         from django.conf import settings
-        from .compat import (setup, setup_test_environment,
-                             teardown_test_environment)
+        from .compat import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
-        setup()
-
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 

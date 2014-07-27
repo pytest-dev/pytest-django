@@ -26,7 +26,7 @@ on what marks are and for notes on using_ them.
 
    In order for a test to have access to the database it must either
    be marked using the ``django_db`` mark or request one of the ``db``
-   or ``transcational_db`` fixtures.  Otherwise the test will fail
+   or ``transactional_db`` fixtures.  Otherwise the test will fail
    when trying to access the database.
 
    :type transaction: bool
@@ -151,7 +151,7 @@ database access themselves.  A test function would normally use the
 ~~~~~~~~~~~~~~~
 
 This fixture runs a live Django server in a background thread.  The
-server's URL can be retreived using the ``live_server.url`` attribute
+server's URL can be retrieved using the ``live_server.url`` attribute
 or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
@@ -168,6 +168,6 @@ Example
 
 ::
 
-    def test_with_secific_settings(settings):
+    def test_with_specific_settings(settings):
         settings.USE_TZ = True
         assert settings.USE_TZ

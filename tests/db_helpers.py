@@ -7,8 +7,12 @@ from django.conf import settings
 
 from .compat import force_text
 
-DB_NAME = settings.DATABASES['default']['NAME'] + '_db_test'
-TEST_DB_NAME = 'test_' + DB_NAME
+DB_NAME = settings.DATABASES['default']['NAME']
+if DB_NAME != ':memory:':
+    DB_NAME += '_db_test'
+    TEST_DB_NAME = 'test_' + DB_NAME
+else:
+    TEST_DB_NAME = DB_NAME
 
 
 def get_db_engine():
@@ -45,6 +49,7 @@ def skip_if_sqlite_in_memory():
     if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3' \
             and settings.DATABASES['default']['NAME'] == ':memory:':
         pytest.skip('Do not test db reuse since database does not support it')
+
 
 def create_empty_production_database():
     drop_database(name=DB_NAME)

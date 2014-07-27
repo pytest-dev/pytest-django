@@ -55,9 +55,11 @@ This snippet should do the trick (replace ``yourproject.settings`` and make sure
 
 
 How do South and pytest-django play together?
-------------------------------------------------
+---------------------------------------------
 
-Django's own syncdb will always be used to create the test database, regardless of whether South is present or not.
+pytest-django detects South and applies its monkey-patch, which gets fixed
+to handle initial data properly (which South would skip otherwise, because
+of a bug).
 
 
 Does this work with the pytest-xdist plugin?

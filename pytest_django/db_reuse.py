@@ -52,9 +52,9 @@ def _get_db_name(db_settings, suffix):
 
     name = None
     try:
-        if DJANGO_VERSION > (1,7):
+        if DJANGO_VERSION > (1, 7):
             name = db_settings['TEST']['NAME']
-        elif DJANGO_VERSION < (1,7):
+        elif DJANGO_VERSION < (1, 7):
             name = db_settings['TEST_NAME']
     except KeyError:
         pass
