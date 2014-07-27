@@ -9,6 +9,8 @@ NEXT
 * Fix admin client with custom user models (#124). Big thanks to Benjamin
   Hedrich and Dmitry Dygalo for patch and tests.
 
+* Improve the settings fixture compatibility with Django behavior (#136).
+
 2.6.2
 -----
 
