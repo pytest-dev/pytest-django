@@ -12,6 +12,7 @@ from .db_helpers import (db_exists, drop_database, mark_database, mark_exists,
 skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
                                       reason='xdist is flaky with Python 3.2')
 
+
 def test_db_reuse_simple(django_testdir):
     "A test for all backends to check that `--reuse-db` works."
     django_testdir.create_test_module('''
@@ -96,7 +97,6 @@ class TestSqlite:
         db_settings['default']['TEST'] = {'NAME': db_name_17}
     else:
         db_settings['default']['TEST_NAME'] = db_name_before_17
-
 
     def test_sqlite_test_name_used(self, django_testdir):
 

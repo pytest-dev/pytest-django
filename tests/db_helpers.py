@@ -50,6 +50,7 @@ def skip_if_sqlite_in_memory():
             and settings.DATABASES['default']['NAME'] == ':memory:':
         pytest.skip('Do not test db reuse since database does not support it')
 
+
 def create_empty_production_database():
     drop_database(name=DB_NAME)
 

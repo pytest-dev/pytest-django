@@ -179,8 +179,8 @@ generate the html coverage report::
 Your coverage report is now ready in the ``htmlcov`` directory.
 
 
-Continous integration
----------------------
+Continuous integration
+----------------------
 
 `Travis`_ is used to automatically run all tests against all supported versions
 of Python, Django and different database backends.

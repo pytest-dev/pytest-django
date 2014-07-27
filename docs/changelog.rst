@@ -52,9 +52,9 @@ used - use 2.6.1 or newer to avoid confusion.
   strategy as for pytest itself is used: No code will be changed to prevent
   Python 2.5 from working, but it will not be actively tested.
 
-* pytest-xdist support: it is now possible to run tests in parallell. Just use
+* pytest-xdist support: it is now possible to run tests in parallel. Just use
   pytest-xdist as normal (pass -n to py.test). One database will be created for
-  each subprocess so that tests run independent from eachother.
+  each subprocess so that tests run independent from each other.
 
 2.4.0
 -----
@@ -84,7 +84,7 @@ used - use 2.6.1 or newer to avoid confusion.
 -----
 
 * Python 3 support. pytest-django now supports Python 3.2 and 3.3 in addition
-  to 2.5-2.7. Big thanks to Rafal Stozek for making this happend!
+  to 2.5-2.7. Big thanks to Rafal Stozek for making this happen!
 
 2.1.0
 -----
@@ -114,7 +114,7 @@ tests which needs database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 
-Most of the interals has been rewritten, exploiting py.test's new
+Most of the internals have been rewritten, exploiting py.test's new
 fixtures API. This release would not be possible without Floris
 Bruynooghe who did the port to the new fixture API and fixed a number of
 bugs.
@@ -189,4 +189,4 @@ way for easier additions of new and exciting features in the future!
 * Added documentation
 * Uploaded to PyPI for easy installation
 * Added the ``transaction_test_case`` decorator for tests that needs real transactions
-* Added initial implemantion for live server support via a funcarg (no docs yet, it might change!)
+* Added initial implementation for live server support via a funcarg (no docs yet, it might change!)
