@@ -81,7 +81,7 @@ used - use 2.6.1 or newer to avoid confusion.
 -----
 
 * Python 3 support. pytest-django now supports Python 3.2 and 3.3 in addition
-  to 2.5-2.7. Big thanks to Rafal Stozek for making this happened!
+  to 2.5-2.7. Big thanks to Rafal Stozek for making this happen!
 
 2.1.0
 -----
@@ -111,7 +111,7 @@ tests which needs database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 
-Most of the internals has been rewritten, exploiting py.test's new
+Most of the internals have been rewritten, exploiting py.test's new
 fixtures API. This release would not be possible without Floris
 Bruynooghe who did the port to the new fixture API and fixed a number of
 bugs.
