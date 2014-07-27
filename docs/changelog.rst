@@ -9,6 +9,9 @@ NEXT
 * Fix admin client with custom user models (#124). Big thanks to Benjamin
   Hedrich and Dmitry Dygalo for patch and tests.
 
+* Fix usage of South migrations, which were unconditionally disabled previously
+  (#22).
+
 2.6.2
 -----
 

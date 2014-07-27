@@ -1,6 +1,9 @@
 import sys
+from textwrap import dedent
 
 import pytest
+
+from pytest_django.lazy_django import get_django_version
 
 from .db_helpers import (db_exists, drop_database, mark_database, mark_exists,
                          skip_if_sqlite_in_memory)
@@ -191,3 +194,109 @@ class TestSqliteWithXdist:
 
         result = django_testdir.runpytest('--tb=short', '-vv', '-n1')
         result.stdout.fnmatch_lines(['*PASSED*test_a*'])
+
+
+def test_initial_data(django_testdir_initial):
+    """Test that initial data gets loaded."""
+    django_testdir_initial.create_test_module('''
+        import pytest
+
+        from .app.models import Item
+
+        @pytest.mark.django_db
+        def test_inner_south():
+            assert [x.name for x in Item.objects.all()] \
+                == ["mark_initial_data"]
+    ''')
+
+    result = django_testdir_initial.runpytest('--tb=short', '-v')
+    result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+
+
+# NOTE: South tries to monkey-patch management._commands, which has been
+#       replaced by lru_cache and would cause an AttributeError.
+@pytest.mark.skipif(get_django_version() >= (1, 7),
+                    reason='South fails with Django 1.7.')
+@pytest.mark.skipif(sys.version_info[:2] == (3, 4),
+                    reason='South fails on Python 3.4.')
+class TestSouth:
+    """Test interaction with initial_data and South."""
+
+    @pytest.mark.extra_settings(dedent("""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'app.south_migrations',
+        }
+        """))
+    def test_initial_data_south(self, django_testdir_initial, settings):
+        django_testdir_initial.create_test_module('''
+            import pytest
+
+            from .app.models import Item
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                assert [x.name for x in Item.objects.all()] \
+                    == ["mark_initial_data"]
+        ''')
+
+        result = django_testdir_initial.runpytest('--tb=short', '-v')
+        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+
+    @pytest.mark.extra_settings(dedent("""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """))
+    def test_initial_south_migrations(self, django_testdir_initial, settings):
+        testdir = django_testdir_initial
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+            ''')
+
+        testdir.mkpydir('tpkg/app/south_migrations')
+        p = testdir.tmpdir.join(
+            "tpkg/app/south_migrations/0001_initial").new(ext="py")
+        p.write(dedent("""
+            from south.v2 import SchemaMigration
+
+            class Migration(SchemaMigration):
+                def forwards(self, orm):
+                    print("mark_south_migration_forwards")
+            """), ensure=True)
+
+        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+
+    @pytest.mark.extra_settings(dedent("""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = False
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """))
+    def test_south_no_migrations(self, django_testdir_initial, settings):
+        testdir = django_testdir_initial
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+        ''')
+
+        testdir.mkpydir('tpkg/app/south_migrations')
+        p = testdir.tmpdir.join(
+            "tpkg/app/south_migrations/0001_initial").new(ext="py")
+        p.write('raise Exception("This should not get imported.")',
+                ensure=True)
+
+        result = testdir.runpytest('--tb=short', '-v')
+        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
