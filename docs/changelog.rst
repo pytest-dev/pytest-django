@@ -12,6 +12,12 @@ NEXT
 * Fix usage of South migrations, which were unconditionally disabled previously
   (#22).
 
+* Fixed #119, #134: Call ``django.setup()`` in Django >=1.7 directly after
+  settings is loaded to ensure proper loading of Django applications. Thanks to
+  Ionel Cristian Mărieș, Daniel Hahler, Tymur Maryokhin, Kirill SIbirev, Paul
+  Collins, Aymeric Augustin, Jannis Leidel, Baptiste Mispelon and Anatoly
+  Bubenkoff for report, discussion and feedback.
+
 2.6.2
 -----
 
