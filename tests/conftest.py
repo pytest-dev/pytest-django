@@ -21,8 +21,10 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
 
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
-    if get_db_engine() in ('mysql', 'postgresql_psycopg2', 'sqlite3'):
-        # Django requires the production database to exists..
+    db_engine = get_db_engine()
+    if db_engine in ('mysql', 'postgresql_psycopg2') \
+            or (db_engine == 'sqlite3' and DB_NAME != ':memory:'):
+        # Django requires the production database to exist.
         create_empty_production_database()
 
     if hasattr(request.node.cls, 'db_settings'):
@@ -65,17 +67,25 @@ def django_testdir(request, testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.db_test_settings')
 
     def create_test_module(test_code, filename='test_the_test.py'):
-        tpkg_path = testdir.tmpdir / 'tpkg'
         tpkg_path.join(filename).write(dedent(test_code))
-
-    def create_conftest(testdir, conftest_code):
-        return create_test_module(testdir, conftest_code, 'conftest.py')
 
     def create_app_file(code, filename):
         test_app_path.join(filename).write(dedent(code))
 
     testdir.create_test_module = create_test_module
-    testdir.create_conftest = create_conftest
     testdir.create_app_file = create_app_file
 
     return testdir
+
+
+@pytest.fixture
+def django_testdir_initial(django_testdir):
+    """A django_testdir fixture which provides initial_data."""
+    django_testdir.makefile('.json', initial_data="""
+        [{
+            "pk": 1,
+            "model": "app.item",
+            "fields": { "name": "mark_initial_data" }
+        }]""")
+
+    return django_testdir

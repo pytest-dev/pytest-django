@@ -34,11 +34,11 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing',
-                 'Programming Language :: Python :: 2.5',
                  'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.2',
                  'Programming Language :: Python :: 3.3',
+                 'Programming Language :: Python :: 3.4',
                 ],
     # the following makes a plugin available to py.test
     entry_points={'pytest11': ['django = pytest_django.plugin']})

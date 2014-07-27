@@ -18,7 +18,7 @@ pytest-django is a plugin for `py.test <http://pytest.org/>`_ that provides a se
 Why would I use this instead of Django's manage.py test command?
 ================================================================
 
-Running the test suite with py.test offers some features that are not present in Djangos standard test mechanism:
+Running the test suite with py.test offers some features that are not present in Django's standard test mechanism:
 
  * Less boilerplate: no need to import unittest, create a subclass with methods. Just write tests as regular functions.
  * `Manage test dependencies with fixtures <http://pytest.org/latest/fixture.html>`_

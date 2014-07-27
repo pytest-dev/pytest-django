@@ -17,7 +17,7 @@ DJANGO_REQUIREMENTS = {
     '1.4': 'Django==1.4.13',
     '1.5': 'Django==1.5.8',
     '1.6': 'Django==1.6.5',
-    '1.7': 'https://www.djangoproject.com/download/1.7c1/tarball/',
+    '1.7': 'https://www.djangoproject.com/download/1.7c2/tarball/',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
@@ -65,6 +65,7 @@ def requirements(env):
     yield 'pytest-xdist==1.10'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
+    yield 'south==1.0'
 
     if env.settings == 'postgres':
         # Django 1.3 does not work with recent psycopg2 versions
