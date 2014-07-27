@@ -184,30 +184,42 @@ def rf():
     return RequestFactory()
 
 
-class MonkeyPatchWrapper(object):
+class BaseWrapper(object):
+
     def __init__(self, monkeypatch, wrapped_object):
+        super(BaseWrapper, self).__setattr__('monkeypatch', monkeypatch)
+        super(BaseWrapper, self).__setattr__('wrapped_object', wrapped_object)
+
+    def __getattr__(self, attr):
+        return getattr(self.wrapped_object, attr)
+
+    def __setattr__(self, attr, value):
+        self.monkeypatch.setattr(self.wrapped_object, attr, value,
+                                 raising=False)
+
+    def __delattr__(self, attr):
+        self.monkeypatch.delattr(self.wrapped_object, attr)
+
+
+class OverrideSettingsWrapper(BaseWrapper):
+
+    def __init__(self, monkeypatch, wrapped_object):
+        super(OverrideSettingsWrapper, self).__init__(monkeypatch,
+                                                      wrapped_object)
         from django.test.utils import override_settings
 
         wrapper = override_settings()
         wrapper.enable()
-        super(MonkeyPatchWrapper, self).__setattr__('wrapper', wrapper)
-        super(MonkeyPatchWrapper, self).__setattr__('_default_settings',
-                                                    wrapper.wrapped)
-        super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
-        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object',
-                                                    wrapped_object)
-
-    def __getattr__(self, attr):
-        return getattr(self.wrapped_object, attr)
+        super(BaseWrapper, self).__setattr__('wrapper', wrapper)
+        super(BaseWrapper, self).__setattr__('_default_settings', wrapper.wrapped)
 
     def __setattr__(self, attr, value):
         self.wrapper.options[attr] = value
         self.wrapper.enable()
 
     def __delattr__(self, attr):
-        self.wrapper.options[attr] = None
-        self.wrapper.enable()
-        self.monkeypatch.delattr(self.wrapped_object, attr)
+        setattr(self, attr, None)
+        super(OverrideSettingsWrapper, self).__delattr__(attr)
 
     def disable(self):
         self.wrapper.wrapped = self._default_settings
@@ -220,8 +232,12 @@ def settings(request, monkeypatch):
     skip_if_no_django()
 
     from django.conf import settings as django_settings
-    fixture = MonkeyPatchWrapper(monkeypatch, django_settings)
-    request.addfinalizer(fixture.disable)
+
+    if get_django_version() >= (1, 4):
+        fixture = OverrideSettingsWrapper(monkeypatch, django_settings)
+        request.addfinalizer(fixture.disable)
+    else:
+        fixture = BaseWrapper(monkeypatch, django_settings)
     return fixture
 
 
