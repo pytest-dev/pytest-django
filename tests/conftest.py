@@ -65,7 +65,6 @@ def django_testdir(request, testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.db_test_settings')
 
     def create_test_module(test_code, filename='test_the_test.py'):
-        tpkg_path = testdir.tmpdir / 'tpkg'
         tpkg_path.join(filename).write(dedent(test_code))
 
     def create_app_file(code, filename):
