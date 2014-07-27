@@ -14,23 +14,15 @@ def skip_if_no_django():
 
 
 def django_settings_is_configured():
-    if not os.environ.get('DJANGO_SETTINGS_MODULE') \
-            and not 'django' in sys.modules:
+    # Avoid importing Django if it has not yet been imported
+    if not os.environ.get('DJANGO_SETTINGS_MODULE') and 'django' not in sys.modules:
         return False
 
+    # If DJANGO_SETTINGS_MODULE is defined at this point, Django should always be loaded
     from django.conf import settings
-    if settings.configured:
-        return True
+    assert settings.configured is True
+    return True
 
-    from django.core.exceptions import ImproperlyConfigured
-    try:
-        settings.DATABASES
-    except (ImproperlyConfigured, ImportError):
-        e = sys.exc_info()[1]
-        raise pytest.UsageError(
-            "pytest_django: failed to load Django settings: %s" % (e.args))
-
-    return settings.configured
 
 
 def get_django_version():
