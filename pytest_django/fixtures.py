@@ -186,6 +186,13 @@ def rf():
 
 class MonkeyPatchWrapper(object):
     def __init__(self, monkeypatch, wrapped_object):
+        from django.test.utils import override_settings
+
+        wrapper = override_settings()
+        wrapper.enable()
+        super(MonkeyPatchWrapper, self).__setattr__('wrapper', wrapper)
+        super(MonkeyPatchWrapper, self).__setattr__('_default_settings',
+                                                    wrapper.wrapped)
         super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
         super(MonkeyPatchWrapper, self).__setattr__('wrapped_object',
                                                     wrapped_object)
@@ -194,11 +201,17 @@ class MonkeyPatchWrapper(object):
         return getattr(self.wrapped_object, attr)
 
     def __setattr__(self, attr, value):
-        self.monkeypatch.setattr(self.wrapped_object, attr, value,
-                                 raising=False)
+        self.wrapper.options[attr] = value
+        self.wrapper.enable()
 
     def __delattr__(self, attr):
+        self.wrapper.options[attr] = None
+        self.wrapper.enable()
         self.monkeypatch.delattr(self.wrapped_object, attr)
+
+    def disable(self):
+        self.wrapper.wrapped = self._default_settings
+        self.wrapper.disable()
 
 
 @pytest.fixture()
@@ -207,7 +220,9 @@ def settings(request, monkeypatch):
     skip_if_no_django()
 
     from django.conf import settings as django_settings
-    return MonkeyPatchWrapper(monkeypatch, django_settings)
+    fixture = MonkeyPatchWrapper(monkeypatch, django_settings)
+    request.addfinalizer(fixture.disable)
+    return fixture
 
 
 @pytest.fixture(scope='session')
