@@ -14,5 +14,6 @@ _build
 /include/
 /lib/
 /src/
+/share/
 .cache
 .Python
