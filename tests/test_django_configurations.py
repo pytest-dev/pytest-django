@@ -2,12 +2,7 @@
 
 If these tests fail you probably forgot to install django-configurations.
 """
-import sys
 import pytest
-
-# importing configurations fails on 2.5, even though it might be installed
-if sys.version_info < (2, 6):
-    pytest.skip('django-configurations is not supported on Python < 2.6')
 
 
 pytest.importorskip('configurations')
