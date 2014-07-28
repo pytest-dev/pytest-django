@@ -12,7 +12,7 @@ def _get_actual_assertions_names():
     Returns list with names of all assertion helpers in Django.
     """
     from django.test import TestCase as DjangoTestCase
-    from unittest import TestCase as DefaultTestCase
+    from django.utils.unittest import TestCase as DefaultTestCase
 
     obj = DjangoTestCase('run')
     is_assert = lambda x: x.startswith('assert') and '_' not in x
