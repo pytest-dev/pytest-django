@@ -30,3 +30,13 @@ def test_django_asserts_available():
 
     for name in expected_assertions:
         assert hasattr(pytest.django, name)
+
+
+def test_sanity(admin_client):
+    from pytest.django import assertContains
+
+    response = admin_client.get('/admin-required/')
+
+    assertContains(response, 'You are an admin')
+    with pytest.raises(AssertionError):
+        assertContains(response, 'Access denied')
