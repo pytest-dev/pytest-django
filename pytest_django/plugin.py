@@ -53,11 +53,7 @@ DJANGO_ASSERTS = {
 ################ pytest hooks ################
 
 
-def pytest_namespace():
-    """Make unittest assert methods available.
-    This is useful for things such floating point checks with assertAlmostEqual.
-    """
-
+def populate_namespace():
     def _wrapper(name):
 
         def assertion_func(*args, **kwargs):
@@ -72,6 +68,17 @@ def pytest_namespace():
         asserts[name] = _wrapper(name)
 
     return {'django': asserts}
+
+
+def pytest_namespace():
+    """Make unittest assert methods available.
+    This is useful for things such floating point checks with assertAlmostEqual.
+    """
+    try:
+        django_settings_is_configured()
+    except AssertionError:
+        return populate_namespace()
+    return {}
 
 
 def pytest_addoption(parser):
