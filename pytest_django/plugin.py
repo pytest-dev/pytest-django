@@ -44,10 +44,16 @@ DJANGO_ASSERTS = {
              'assertXMLEqual', 'assertXMLNotEqual'),
     (1, 7): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
-             'assertInHTML', 'assertJSONEqual', 'assertNotContains', 'assertNumQueries',
-             'assertQuerysetEqual', 'assertRaisesMessage', 'assertRedirects',
-             'assertTemplateNotUsed', 'assertTemplateUsed', 'assertXMLEqual',
-             'assertXMLNotEqual'),
+             'assertInHTML', 'assertJSONEqual', 'assertNotContains',
+             'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
+             'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
+             'assertXMLEqual', 'assertXMLNotEqual'),
+    (1, 8): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+             'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
+             'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
+             'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
+             'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual')
 }
 
 ################ pytest hooks ################
