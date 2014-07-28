@@ -24,6 +24,5 @@ def django_settings_is_configured():
     return True
 
 
-
 def get_django_version():
     return __import__('django').VERSION
