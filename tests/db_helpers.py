@@ -69,7 +69,8 @@ def create_empty_production_database():
 
     if get_db_engine() == 'sqlite3':
         if DB_NAME == ':memory:':
-            raise AssertionError('sqlite in-memory database must not be created!')
+            raise AssertionError(
+                'sqlite in-memory database must not be created!')
         open(DB_NAME, 'a').close()
         return
 
@@ -96,7 +97,8 @@ def drop_database(name=TEST_DB_NAME, suffix=None):
 
     if get_db_engine() == 'sqlite3':
         if name == ':memory:':
-            raise AssertionError('sqlite in-memory database cannot be dropped!')
+            raise AssertionError(
+                'sqlite in-memory database cannot be dropped!')
         if os.path.exists(name):
             os.unlink(name)
         return
@@ -163,7 +165,8 @@ def mark_exists():
 
     if get_db_engine() == 'sqlite3':
         if TEST_DB_NAME == ':memory:':
-            raise AssertionError('sqlite in-memory database cannot be checked for mark!')
+            raise AssertionError(
+                'sqlite in-memory database cannot be checked for mark!')
         r = run_cmd('sqlite3', TEST_DB_NAME, 'SELECT 1 FROM mark_table')
 
         return r.status_code == 0

@@ -80,7 +80,8 @@ def test_ds_non_existent(testdir, monkeypatch):
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
     result.stderr.fnmatch_lines(
-        ["*ImportError: Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*): *"])
+        ["*ImportError: Could not import settings 'DOES_NOT_EXIST'"
+         " (Is it on sys.path?*): *"])
 
 
 def test_ds_after_user_conftest(testdir, monkeypatch):
@@ -244,7 +245,8 @@ def test_django_setup(django_testdir):
     django_testdir.create_app_file("""
         from django.apps import apps
 
-        print ('IMPORT: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
+        print ('IMPORT: populating=%r,ready=%r' % (
+            apps._lock.locked(), apps.ready))
         SOME_THING = 1234
         """, 'models.py')
 
@@ -254,7 +256,8 @@ def test_django_setup(django_testdir):
         from tpkg.app.models import SOME_THING
 
         def test_anything():
-            print ('TEST: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
+            print ('TEST: populating=%r,ready=%r' % (
+                apps._lock.locked(), apps.ready))
         """)
 
     result = django_testdir.runpytest('-s', '--tb=line')

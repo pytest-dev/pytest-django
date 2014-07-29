@@ -1,5 +1,4 @@
 import sys
-from textwrap import dedent
 
 import pytest
 
@@ -164,7 +163,8 @@ def test_xdist_with_reuse(django_testdir):
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--create-db')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db',
+                                      '--create-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
 

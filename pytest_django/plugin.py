@@ -9,23 +9,23 @@ import os
 import pytest
 
 from .django_compat import is_django_unittest
-from .fixtures import (_django_db_setup, db, transactional_db, client,
-                       django_user_model, django_username_field,
-                       admin_user, admin_client, rf, settings, live_server,
-                       _live_server_helper)
+from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
+                       admin_user, client, db, django_user_model,
+                       django_username_field, live_server, rf, settings,
+                       transactional_db)
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
-from .lazy_django import skip_if_no_django, django_settings_is_configured
-
-
-(_django_db_setup, db, transactional_db, client, admin_user, admin_client, rf,
- settings, live_server, _live_server_helper)
+# Silence linters for imported fixtures.
+(_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
+ django_user_model, django_username_field, live_server, rf, settings,
+ transactional_db)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 
 
-################ pytest hooks ################
+# ############### pytest hooks ################
 
 def pytest_addoption(parser):
     group = parser.getgroup('django')
@@ -73,8 +73,8 @@ def _load_settings_from_env(config, options):
             import configurations.importer
             configurations.importer.install()
 
-        # Forcefully load django settings, throws ImportError or ImproperlyConfigured
-        # if settings cannot be loaded
+        # Forcefully load django settings, throws ImportError or
+        # ImproperlyConfigured if settings cannot be loaded.
         from django.conf import settings
         settings.DATABASES
 
@@ -217,7 +217,7 @@ def _django_set_urlconf(request):
         request.addfinalizer(restore)
 
 
-################ Helper Functions ################
+# ############### Helper Functions ################
 
 
 class CursorManager(object):

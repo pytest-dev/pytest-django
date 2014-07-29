@@ -12,8 +12,8 @@ try:
     configurations
 except ImportError as e:
     if 'LaxOptionParser' in e.args[0]:
-        pytest.skip('This version of django-configurations is incompatible with Django: '
-                    'https://github.com/jezdez/django-configurations/issues/65')
+        pytest.skip('This version of django-configurations is incompatible with Django: '  # noqa
+                    'https://github.com/jezdez/django-configurations/issues/65')  # noqa
 
 BARE_SETTINGS = '''
 from configurations import Settings

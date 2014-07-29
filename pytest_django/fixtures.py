@@ -18,8 +18,7 @@ __all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
            '_live_server_helper']
 
 
-################ Internal Fixtures ################
-
+# ############### Internal Fixtures ################
 
 @pytest.fixture(scope='session')
 def _django_db_setup(request,
@@ -91,6 +90,7 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
         request.addfinalizer(_django_cursor_wrapper.disable)
         request.addfinalizer(case._post_teardown)
 
+
 def _handle_south():
     from django.conf import settings
     if 'south' in settings.INSTALLED_APPS:
@@ -109,7 +109,9 @@ def _handle_south():
             # initial data.
             # Ref: http://south.aeracode.org/ticket/1395#comment:3
             import south.hacks.django_1_0
-            from django.core.management.commands.flush import Command as FlushCommand
+            from django.core.management.commands.flush import (
+                Command as FlushCommand)
+
             class SkipFlushCommand(FlushCommand):
                 def handle_noargs(self, **options):
                     # Reinstall the initial_data fixture.
@@ -125,8 +127,8 @@ def _handle_south():
 
             patch_for_test_db_setup()
 
-################ User visible fixtures ################
 
+# ############### User visible fixtures ################
 
 @pytest.fixture(scope='function')
 def db(request, _django_db_setup, _django_cursor_wrapper):
@@ -164,7 +166,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
 
 @pytest.fixture()
 def client():
-    """A Django test client instance"""
+    """A Django test client instance."""
     skip_if_no_django()
 
     from django.test.client import Client
@@ -175,7 +177,7 @@ def client():
 @pytest.fixture()
 def django_user_model(db):
     """
-    Get the class of Django's user model.
+    The class of Django's user model.
     """
     try:
         from django.contrib.auth import get_user_model
@@ -190,7 +192,7 @@ def django_user_model(db):
 @pytest.fixture()
 def django_username_field(django_user_model):
     """
-    Get the fieldname for the username used with Django's user model.
+    The fieldname for the username used with Django's user model.
     """
     try:
         return django_user_model.USERNAME_FIELD

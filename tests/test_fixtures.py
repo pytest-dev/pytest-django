@@ -1,4 +1,4 @@
-"""Test for user-visible fixtures
+"""Tests for user-visible fixtures.
 
 Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
