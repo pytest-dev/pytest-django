@@ -8,11 +8,11 @@ from django.conf import settings
 from .compat import force_text
 
 DB_NAME = settings.DATABASES['default']['NAME']
-if DB_NAME != ':memory:':
+if DB_NAME == ':memory:':
+    TEST_DB_NAME = DB_NAME
+else:
     DB_NAME += '_db_test'
     TEST_DB_NAME = 'test_' + DB_NAME
-else:
-    TEST_DB_NAME = DB_NAME
 
 
 def get_db_engine():
