@@ -35,6 +35,15 @@ def test_admin_client_no_db_marker(admin_client):
     assert force_text(resp.content) == 'You are an admin'
 
 
+@pytest.mark.django_db
+def test_admin_user(admin_user, django_user_model):
+    assert isinstance(admin_user, django_user_model)
+
+
+def test_admin_user_no_db_marker(admin_user, django_user_model):
+    assert isinstance(admin_user, django_user_model)
+
+
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
 

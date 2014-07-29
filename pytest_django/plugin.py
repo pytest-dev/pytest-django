@@ -10,13 +10,14 @@ import pytest
 
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, db, transactional_db, client,
-                       admin_client, rf, settings, live_server,
+                       django_user_model, django_username_field,
+                       admin_user, admin_client, rf, settings, live_server,
                        _live_server_helper)
 
 from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
-(_django_db_setup, db, transactional_db, client, admin_client, rf,
+(_django_db_setup, db, transactional_db, client, admin_user, admin_client, rf,
  settings, live_server, _live_server_helper)
 
 
