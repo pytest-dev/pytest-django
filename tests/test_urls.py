@@ -1,5 +1,6 @@
 import pytest
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from .compat import force_text, is_valid_path
 
 
@@ -13,3 +14,7 @@ def test_urls():
 def test_urls_client(client):
     response = client.get('/overridden_url/')
     assert force_text(response.content) == 'Overridden urlconf works!'
+
+
+def test_original_urls():
+    reverse('admin-required')

@@ -9,6 +9,11 @@ try:
 except ImportError:
     from urllib.request import urlopen  # noqa
 
+try:
+    from django.conf.urls import patterns, url  # Django >1.4
+except ImportError:
+    from django.conf.urls.defaults import patterns, url  # Django 1.3
+
 
 try:
     from django.core.urlresolvers import is_valid_path
