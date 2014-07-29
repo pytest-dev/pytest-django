@@ -8,13 +8,14 @@ from textwrap import dedent
 # https://xkcd.com/1205/
 
 
-TestEnv = namedtuple('TestEnv',
-                     ['python_version', 'django_version', 'settings'])
+TestEnv = namedtuple('TestEnv', ['python_version', 'pytest_version',
+                                 'django_version', 'settings'])
 
 # Python to run tox.
 RUN_PYTHON = '3.3'
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'pypy', 'pypy3']
+PYTEST_VERSIONS = ['2.5.2', '2.6.0']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
@@ -68,7 +69,7 @@ def is_valid_env(env):
 
 
 def requirements(env):
-    yield 'pytest==2.5.2'
+    yield 'pytest==%s' % (env.pytest_version)
     yield 'pytest-xdist==1.10'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
@@ -123,10 +124,12 @@ def tox_testenv_config(uid, env):
 
 
 def generate_all_envs():
-    products = itertools.product(PYTHON_VERSIONS, DJANGO_VERSIONS, SETTINGS)
+    products = itertools.product(PYTHON_VERSIONS, PYTEST_VERSIONS,
+                                 DJANGO_VERSIONS, SETTINGS)
 
-    for idx, (python_version, django_version, settings) in enumerate(products):
-        env = TestEnv(python_version, django_version, settings)
+    for idx, (python_version, pytest_version, django_version, settings) \
+            in enumerate(products):
+        env = TestEnv(python_version, pytest_version, django_version, settings)
 
         if is_valid_env(env):
             yield env
@@ -147,6 +150,7 @@ def generate_unique_envs(envs):
                     break
 
     find_and_add(PYTHON_VERSIONS, lambda env: env.python_version)
+    find_and_add(PYTEST_VERSIONS, lambda env: env.pytest_version)
     find_and_add(DJANGO_VERSIONS, lambda env: env.django_version)
     find_and_add(SETTINGS, lambda env: env.settings)
 
@@ -199,8 +203,8 @@ def make_travis_yml(envs):
         script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
-    checkenvs = '\n'.join('  - TESTENV=checkqa-%s' % \
-        python for python in PYTHON_VERSIONS)
+    checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
+                          python for python in PYTHON_VERSIONS)
 
     return contents % {
         'testenvs': testenvs,
