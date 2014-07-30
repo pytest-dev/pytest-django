@@ -262,16 +262,13 @@ class TestSouth:
             ''')
 
         testdir.mkpydir('tpkg/app/south_migrations')
-        p = testdir.tmpdir.join(
-            "tpkg/app/south_migrations/0001_initial").new(ext="py")
-        p.write(dedent("""
+        testdir.create_app_file("""
             from south.v2 import SchemaMigration
 
             class Migration(SchemaMigration):
                 def forwards(self, orm):
                     print("mark_south_migration_forwards")
-            """), ensure=True)
-
+            """, 'south_migrations/0001_initial.py')
         result = testdir.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
