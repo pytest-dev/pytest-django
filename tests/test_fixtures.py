@@ -6,16 +6,18 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
+from textwrap import dedent
+
 import pytest
+
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
+from pytest_django.lazy_django import get_django_version
 
 from .app.models import Item
-from .test_database import noop_transactions
 from .compat import force_text, urlopen
-
-from pytest_django.lazy_django import get_django_version
+from .test_database import noop_transactions
 
 
 def test_client(client):
@@ -90,7 +92,7 @@ class TestLiveServer:
         pytest.mark.skipif(get_django_version() < (1, 4),
                            reason="Django > 1.3 required"),
         pytest.mark.urls('tests.urls_liveserver'),
-        ]
+    ]
 
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
@@ -148,66 +150,67 @@ class TestLiveServer:
         assert force_text(response_data) == 'Item count: 1'
 
 
-@pytest.mark.extra_settings("""
-AUTH_USER_MODEL = 'app.MyCustomUser'
-INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'tpkg.app',
-]
-ROOT_URLCONF = 'tpkg.app.urls'
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-)
-""")
+@pytest.mark.extra_settings(dedent("""
+    AUTH_USER_MODEL = 'app.MyCustomUser'
+    INSTALLED_APPS = [
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'tpkg.app',
+    ]
+    ROOT_URLCONF = 'tpkg.app.urls'
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+    )
+    """))
 @pytest.mark.skipif(get_django_version() < (1, 5),
                     reason="Django >= 1.5 required")
 def test_custom_user_model(django_testdir):
-    django_testdir.create_app_file("""
-from django.contrib.auth.models import AbstractUser
-from django.db import models
+    django_testdir.create_app_file(dedent("""
+        from django.contrib.auth.models import AbstractUser
+        from django.db import models
 
-class MyCustomUser(AbstractUser):
-    identifier = models.CharField(unique=True, max_length=100)
+        class MyCustomUser(AbstractUser):
+            identifier = models.CharField(unique=True, max_length=100)
 
-    USERNAME_FIELD = 'identifier'
-    """, 'models.py')
-    django_testdir.create_app_file("""
-try:
-    from django.conf.urls import patterns  # Django >1.4
-except ImportError:
-    from django.conf.urls.defaults import patterns  # Django 1.3
+            USERNAME_FIELD = 'identifier'
+        """), 'models.py')
+    django_testdir.create_app_file(dedent("""
+        try:
+            from django.conf.urls import patterns  # Django >1.4
+        except ImportError:
+            from django.conf.urls.defaults import patterns  # Django 1.3
 
-urlpatterns = patterns(
-    '',
-    (r'admin-required/', 'tpkg.app.views.admin_required_view'),
-)
-    """, 'urls.py')
-    django_testdir.create_app_file("""
-from django.http import HttpResponse
-from django.template import Template
-from django.template.context import Context
+        urlpatterns = patterns(
+            '',
+            (r'admin-required/', 'tpkg.app.views.admin_required_view'),
+        )
+        """), 'urls.py')
+    django_testdir.create_app_file(dedent("""
+        from django.http import HttpResponse
+        from django.template import Template
+        from django.template.context import Context
 
 
-def admin_required_view(request):
-    if request.user.is_staff:
-        return HttpResponse(Template('You are an admin').render(Context()))
-    return HttpResponse(Template('Access denied').render(Context()))
+        def admin_required_view(request):
+            if request.user.is_staff:
+                return HttpResponse(
+                    Template('You are an admin').render(Context()))
+            return HttpResponse(
+                    Template('Access denied').render(Context()))
+        """), 'views.py')
+    django_testdir.makepyfile(dedent("""
+        from tests.compat import force_text
+        from tpkg.app.models import MyCustomUser
 
-    """, 'views.py')
-    django_testdir.makepyfile("""
-from tests.compat import force_text
-from tpkg.app.models import MyCustomUser
-
-def test_custom_user_model(admin_client):
-    resp = admin_client.get('/admin-required/')
-    assert force_text(resp.content) == 'You are an admin'
-    """)
+        def test_custom_user_model(admin_client):
+            resp = admin_client.get('/admin-required/')
+            assert force_text(resp.content) == 'You are an admin'
+        """))
     result = django_testdir.runpytest('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
