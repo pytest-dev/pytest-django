@@ -35,7 +35,7 @@ def django_testdir(request, testdir, monkeypatch):
 
     extra_settings = request.node.get_marker('extra_settings') or ''
     if extra_settings:
-        extra_settings = extra_settings.args[0]
+        extra_settings = dedent(extra_settings.args[0])
     test_settings = dedent('''
         # Pypy compatibility
         try:
