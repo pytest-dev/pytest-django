@@ -222,42 +222,40 @@ def test_debug_false(testdir, monkeypatch):
 @pytest.mark.skipif(not hasattr(django, 'setup'),
                     reason="This Django version does not support app loading")
 @pytest.mark.extra_settings("""
-INSTALLED_APPS = [
-    'tpkg.app.apps.TestApp',
-]
-
-""")
+    INSTALLED_APPS = [
+        'tpkg.app.apps.TestApp',
+    ]
+    """)
 def test_django_setup(django_testdir):
     django_testdir.create_app_file("""
-from django.apps import apps, AppConfig
+        from django.apps import apps, AppConfig
 
-from django.contrib.auth.models import AbstractUser
-from django.db import models
+        from django.contrib.auth.models import AbstractUser
+        from django.db import models
 
 
-class TestApp(AppConfig):
-    name = 'tpkg.app'
+        class TestApp(AppConfig):
+            name = 'tpkg.app'
 
-    def ready(self):
-        print ('READY(): populating=%r' % apps._lock.locked())
-
-""", 'apps.py')
+            def ready(self):
+                print ('READY(): populating=%r' % apps._lock.locked())
+        """, 'apps.py')
 
     django_testdir.create_app_file("""
-from django.apps import apps
+        from django.apps import apps
 
-print ('IMPORT: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
-SOME_THING = 1234
-""", 'models.py')
+        print ('IMPORT: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
+        SOME_THING = 1234
+        """, 'models.py')
 
     django_testdir.create_app_file("", '__init__.py')
     django_testdir.makepyfile("""
-from django.apps import apps
-from tpkg.app.models import SOME_THING
+        from django.apps import apps
+        from tpkg.app.models import SOME_THING
 
-def test_anything():
-    print ('TEST: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
-""")
+        def test_anything():
+            print ('TEST: populating=%r,ready=%r' % (apps._lock.locked(), apps.ready))
+        """)
 
     result = django_testdir.runpytest('-s', '--tb=line')
     result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])

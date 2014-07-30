@@ -222,13 +222,13 @@ def test_initial_data(django_testdir_initial):
 class TestSouth:
     """Test interaction with initial_data and South."""
 
-    @pytest.mark.extra_settings(dedent("""
+    @pytest.mark.extra_settings("""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
             'app': 'app.south_migrations',
         }
-        """))
+        """)
     def test_initial_data_south(self, django_testdir_initial, settings):
         django_testdir_initial.create_test_module('''
             import pytest
@@ -244,13 +244,13 @@ class TestSouth:
         result = django_testdir_initial.runpytest('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
-    @pytest.mark.extra_settings(dedent("""
+    @pytest.mark.extra_settings("""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
             'app': 'tpkg.app.south_migrations',
         }
-        """))
+        """)
     def test_initial_south_migrations(self, django_testdir_initial, settings):
         testdir = django_testdir_initial
         testdir.create_test_module('''
@@ -262,26 +262,23 @@ class TestSouth:
             ''')
 
         testdir.mkpydir('tpkg/app/south_migrations')
-        p = testdir.tmpdir.join(
-            "tpkg/app/south_migrations/0001_initial").new(ext="py")
-        p.write(dedent("""
+        testdir.create_app_file("""
             from south.v2 import SchemaMigration
 
             class Migration(SchemaMigration):
                 def forwards(self, orm):
                     print("mark_south_migration_forwards")
-            """), ensure=True)
-
+            """, 'south_migrations/0001_initial.py')
         result = testdir.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
-    @pytest.mark.extra_settings(dedent("""
+    @pytest.mark.extra_settings("""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = False
         SOUTH_MIGRATION_MODULES = {
             'app': 'tpkg.app.south_migrations',
         }
-        """))
+        """)
     def test_south_no_migrations(self, django_testdir_initial, settings):
         testdir = django_testdir_initial
         testdir.create_test_module('''
