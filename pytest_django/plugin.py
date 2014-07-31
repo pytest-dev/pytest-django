@@ -3,7 +3,6 @@
 This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
-
 import os
 
 import pytest
@@ -14,7 +13,8 @@ from .fixtures import (_django_db_setup, db, transactional_db, client,
                        admin_user, admin_client, rf, settings, live_server,
                        _live_server_helper)
 
-from .lazy_django import skip_if_no_django, django_settings_is_configured
+from .lazy_django import skip_if_no_django, django_settings_is_configured, \
+    get_django_version
 
 
 (_django_db_setup, db, transactional_db, client, admin_user, admin_client, rf,
@@ -23,9 +23,70 @@ from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
-
+DJANGO_ASSERTS = {
+    (1, 3): ('assertContains', 'assertFormError', 'assertNotContains',
+             'assertNumQueries', 'assertQuerysetEqual', 'assertRedirects',
+             'assertTemplateNotUsed', 'assertTemplateUsed'),
+    (1, 4): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertHTMLEqual', 'assertHTMLNotEqual', 'assertNotContains',
+             'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
+             'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed'),
+    (1, 5): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertHTMLEqual', 'assertHTMLNotEqual', 'assertInHTML',
+             'assertJSONEqual', 'assertNotContains', 'assertNumQueries',
+             'assertQuerysetEqual', 'assertRaisesMessage', 'assertRedirects',
+             'assertTemplateNotUsed', 'assertTemplateUsed', 'assertXMLEqual',
+             'assertXMLNotEqual'),
+    (1, 6): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+             'assertInHTML', 'assertJSONEqual', 'assertNotContains',
+             'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
+             'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
+             'assertXMLEqual', 'assertXMLNotEqual'),
+    (1, 7): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+             'assertInHTML', 'assertJSONEqual', 'assertNotContains',
+             'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
+             'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
+             'assertXMLEqual', 'assertXMLNotEqual'),
+    (1, 8): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+             'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
+             'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
+             'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
+             'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual')
+}
 
 ################ pytest hooks ################
+
+
+def populate_namespace():
+    def _wrapper(name):
+
+        def assertion_func(*args, **kwargs):
+            from django.test import TestCase as DjangoTestCase
+
+            getattr(DjangoTestCase('run'), name)(*args, **kwargs)
+
+        return assertion_func
+
+    asserts = {}
+    for name in DJANGO_ASSERTS[get_django_version()[:2]]:
+        asserts[name] = _wrapper(name)
+
+    return {'django': asserts}
+
+
+def pytest_namespace():
+    """Make unittest assert methods available.
+    This is useful for things such floating point checks with assertAlmostEqual.
+    """
+    try:
+        django_settings_is_configured()
+    except AssertionError:
+        return populate_namespace()
+    return {}
+
 
 def pytest_addoption(parser):
     group = parser.getgroup('django')
