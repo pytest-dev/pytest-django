@@ -226,7 +226,7 @@ def pytest_runtest_setup(item):
 @pytest.fixture(autouse=True, scope='session')
 def _django_test_environment(request):
     """
-    Ensure that Django is loaded and has its testing environment setup
+    Ensure that Django is loaded and has its testing environment setup.
 
     XXX It is a little dodgy that this is an autouse fixture.  Perhaps
         an email fixture should be requested in order to be able to
@@ -245,7 +245,7 @@ def _django_test_environment(request):
 
 @pytest.fixture(autouse=True, scope='session')
 def _django_cursor_wrapper(request):
-    """The django cursor wrapper, internal to pytest-django
+    """The django cursor wrapper, internal to pytest-django.
 
     This will globally disable all database access. The object
     returned has a .enable() and a .disable() method which can be used
@@ -270,7 +270,7 @@ def _django_cursor_wrapper(request):
 
 @pytest.fixture(autouse=True)
 def _django_db_marker(request):
-    """Implement the django_db marker, internal to pytest-django
+    """Implement the django_db marker, internal to pytest-django.
 
     This will dynamically request the ``db`` or ``transactional_db``
     fixtures as required by the django_db marker.
@@ -286,7 +286,7 @@ def _django_db_marker(request):
 
 @pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, _django_cursor_wrapper):
-    """Setup a django unittest, internal to pytest-django"""
+    """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
         request.getfuncargvalue('_django_test_environment')
         request.getfuncargvalue('_django_db_setup')
@@ -303,7 +303,7 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
 
 @pytest.fixture(autouse=True, scope='function')
 def _django_clear_outbox(request):
-    """Clear the django outbox, internal to pytest-django"""
+    """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail
         mail.outbox = []
@@ -311,7 +311,7 @@ def _django_clear_outbox(request):
 
 @pytest.fixture(autouse=True, scope='function')
 def _django_set_urlconf(request):
-    """Apply the @pytest.mark.urls marker, internal to pytest-django"""
+    """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker = request.keywords.get('urls', None)
     if marker:
         skip_if_no_django()
@@ -333,7 +333,7 @@ def _django_set_urlconf(request):
 
 
 class CursorManager(object):
-    """Manager for django.db.backends.util.CursorWrapper
+    """Manager for django.db.backends.util.CursorWrapper.
 
     This is the object returned by _django_cursor_wrapper.
 
@@ -353,14 +353,15 @@ class CursorManager(object):
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
         pytest.fail('Database access not allowed, '
-                    'use the "django_db" mark to enable')
+                    'use the "django_db" mark to enable it.')
 
     def enable(self):
-        """Enable access to the django database"""
+        """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dbutil.CursorWrapper = self._real_wrapper
 
     def disable(self):
+        """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dbutil.CursorWrapper = self._blocking_wrapper
 
@@ -375,7 +376,7 @@ class CursorManager(object):
 
 
 def validate_django_db(marker):
-    """This function validates the django_db marker
+    """Validate the django_db marker.
 
     It checks the signature and creates the `transaction` attribute on
     the marker which will have the correct value.
@@ -386,7 +387,7 @@ def validate_django_db(marker):
 
 
 def validate_urls(marker):
-    """This function validates the urls marker
+    """Validate the urls marker.
 
     It checks the signature and creates the `urls` attribute on the
     marker which will have the correct value.
