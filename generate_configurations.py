@@ -1,17 +1,23 @@
 from __future__ import print_function
 
+import itertools
+from collections import namedtuple
+from textwrap import dedent
+
 # https://xkcd.com/1319/
 # https://xkcd.com/1205/
 
-import itertools
-from collections import namedtuple
 
-TestEnv = namedtuple('TestEnv', ['python_version', 'django_version', 'settings'])
+TestEnv = namedtuple('TestEnv',
+                     ['python_version', 'django_version', 'settings'])
 
-
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3', 'python3.4', 'pypy']
+# Python to run tox.
+RUN_PYTHON = '3.3'
+PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
+                   'python3.4', 'pypy']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
-SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb', 'postgres']
+SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
+            'postgres']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
     '1.4': 'Django==1.4.13',
@@ -21,18 +27,18 @@ DJANGO_REQUIREMENTS = {
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
-TESTENV_TEMPLATE = """
-[testenv:%(testenv_name)s]
-commands =
-%(commands)s
-basepython = %(python_version)s
-deps =
-%(deps)s
-setenv =
-     DJANGO_SETTINGS_MODULE = tests.settings_%(settings)s
-     PYTHONPATH = {toxinidir}
-     UID = %(uid)s
-"""
+TOX_TESTENV_TEMPLATE = dedent("""
+    [testenv:%(testenv_name)s]
+    commands =
+    %(commands)s
+    basepython = %(python_version)s
+    deps =
+    %(deps)s
+    setenv =
+         DJANGO_SETTINGS_MODULE = tests.settings_%(settings)s
+         PYTHONPATH = {toxinidir}
+         UID = %(uid)s
+    """)
 
 
 def is_valid_env(env):
@@ -54,7 +60,8 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', 'master'):
+    if env.python_version == 'python2.6' \
+            and env.django_version in ('1.7', 'master'):
         return False
 
     return True
@@ -85,10 +92,12 @@ def commands(uid, env):
 
     # The sh trickery always exits with 0
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
-        yield 'sh -c "mysql -u root -e \'drop database if exists %(name)s; create database %(name)s\'" || exit 0' % {'name': db_name}
+        yield 'sh -c "mysql -u root -e \'drop database if exists %(name)s;' \
+            ' create database %(name)s\'" || exit 0' % {'name': db_name}
 
     if env.settings == 'postgres':
-        yield 'sh -c "dropdb %(name)s; createdb %(name)s || exit 0"' % {'name': db_name}
+        yield 'sh -c "dropdb %(name)s;' \
+            ' createdb %(name)s || exit 0"' % {'name': db_name}
 
     yield 'py.test {posargs}'
 
@@ -97,12 +106,12 @@ def testenv_name(env):
     return '-'.join(env)
 
 
-def testenv_config(uid, env):
+def tox_testenv_config(uid, env):
     cmds = '\n'.join('    %s' % r for r in commands(uid, env))
 
     deps = '\n'.join('    %s' % r for r in requirements(env))
 
-    return TESTENV_TEMPLATE % {
+    return TOX_TESTENV_TEMPLATE % {
         'testenv_name': testenv_name(env),
         'python_version': env.python_version,
         'django_version': env.django_version,
@@ -145,33 +154,58 @@ def generate_unique_envs(envs):
 
 
 def make_tox_ini(envs):
-    contents = ['''
-[testenv]
-whitelist_externals =
-    sh
-''']
+    contents = [dedent('''
+        [testenv]
+        whitelist_externals =
+            sh
+        ''')]
 
-    for idx, env in enumerate(envs):
-        contents.append(testenv_config(idx, env))
+    # Add checkqa-testenvs for different PYTHON_VERSIONS.
+    # flake8 is configured in setup.cfg.
+    idx = 0
+    for python_version in PYTHON_VERSIONS:
+        idx = idx + 1
+        contents.append(dedent("""
+            [testenv:checkqa-%(python_version)s]
+            commands =
+                flake8 --version
+                flake8 --show-source --statistics pytest_django tests
+            basepython = %(python_version)s
+            deps =
+                flake8
+            setenv =
+                UID = %(uid)s""" % {
+            'python_version': python_version,
+            'uid': idx,
+        }))
+
+    for env in envs:
+        idx = idx + 1
+        contents.append(tox_testenv_config(idx, env))
 
     return '\n'.join(contents)
 
 
 def make_travis_yml(envs):
-    contents = """
-language: python
-python:
-  - "3.3"
-env:
-%(testenvs)s
-install:
-  - pip install tox
-script: tox -e $TESTENV
-"""
+    contents = dedent("""
+        language: python
+        python:
+          - "%(RUN_PYTHON)s"
+        env:
+        %(testenvs)s
+        %(checkenvs)s
+        install:
+          - pip install tox
+        script: tox -e $TESTENV
+        """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
+    checkenvs = '\n'.join('  - TESTENV=checkqa-%s' % \
+        python for python in PYTHON_VERSIONS)
 
     return contents % {
-        'testenvs': testenvs
+        'testenvs': testenvs,
+        'checkenvs': checkenvs,
+        'RUN_PYTHON': RUN_PYTHON,
     }
 
 

@@ -1,4 +1,5 @@
 import sys
+
 import pytest
 
 
@@ -33,16 +34,16 @@ class LiveServer(object):
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
+        liveserver_kwargs = {'connections_override': connections_override}
         try:
             from django.test.testcases import _StaticFilesHandler
-            static_handler_kwargs = {'static_handler': _StaticFilesHandler}
+            liveserver_kwargs['static_handler'] = _StaticFilesHandler
         except ImportError:
-            static_handler_kwargs = {}
+            pass
 
         host, possible_ports = parse_addr(addr)
         self.thread = LiveServerThread(host, possible_ports,
-                                       connections_override=connections_override,
-                                       **static_handler_kwargs)
+                                       **liveserver_kwargs)
         self.thread.daemon = True
         self.thread.start()
         self.thread.is_ready.wait()
@@ -66,7 +67,7 @@ class LiveServer(object):
             return self.url
 
         def __add__(self, other):
-            return unicode(self) + other
+            return unicode(self) + other  # noqa: pyflakes on python3
     else:
         def __str__(self):
             return self.url
