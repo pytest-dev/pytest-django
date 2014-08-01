@@ -16,6 +16,10 @@ create a `setup.py` like this::
 
 And then install your project into your virtualenv with ``pip install -e .``.
 
+You can also use the `pytest-pythonpath
+<https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin to explicitly add paths to
+the Python path.
+
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
