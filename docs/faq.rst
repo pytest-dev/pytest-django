@@ -16,9 +16,6 @@ create a `setup.py` like this::
 
 And then install your project into your virtualenv with ``pip install -e .``.
 
-Alternatively, when you create a `conftest.py` file in your project root, it
-will also implicitly add that directory to the python path.
-
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
