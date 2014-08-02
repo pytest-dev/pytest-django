@@ -3,6 +3,7 @@ python:
   - "3.3"
 env:
   - TESTENV=pypy-master-sqlite_file
+  - TESTENV=pypy3-master-sqlite_file
   - TESTENV=python2.6-1.6-sqlite_file
   - TESTENV=python2.7-1.3-sqlite_file
   - TESTENV=python2.7-1.4-sqlite_file
@@ -23,6 +24,7 @@ env:
   - TESTENV=checkqa-python3.3
   - TESTENV=checkqa-python3.4
   - TESTENV=checkqa-pypy
+  - TESTENV=checkqa-pypy3
 install:
   - pip install tox
 script: tox -e $TESTENV
