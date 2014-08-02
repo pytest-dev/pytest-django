@@ -3,7 +3,6 @@
 This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
-
 import os
 
 import pytest
@@ -212,7 +211,10 @@ def _django_set_urlconf(request):
         clear_url_caches()
 
         def restore():
+            import django.core.urlresolvers
+
             django.conf.settings.ROOT_URLCONF = original_urlconf
+            django.core.urlresolvers._urlconfs.value = original_urlconf
 
         request.addfinalizer(restore)
 
