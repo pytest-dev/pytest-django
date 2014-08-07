@@ -1,9 +1,8 @@
 from __future__ import with_statement
 
-from django.db import transaction, connection
-from django.test.testcases import connections_support_transactions
-
 import pytest
+from django.db import connection, transaction
+from django.test.testcases import connections_support_transactions
 
 from .app.models import Item
 

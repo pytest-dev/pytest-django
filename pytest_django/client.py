@@ -1,6 +1,6 @@
 from django.core.handlers.wsgi import WSGIRequest
-from django.test.client import FakePayload
 from django.test.client import RequestFactory as VanillaRequestFactory
+from django.test.client import FakePayload
 
 
 class PytestDjangoRequestFactory(VanillaRequestFactory):
