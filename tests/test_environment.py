@@ -3,6 +3,7 @@ from __future__ import with_statement
 import pytest
 from django.core import mail
 from django.db import connection
+
 from .app.models import Item
 
 

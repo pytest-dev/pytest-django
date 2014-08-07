@@ -1,22 +1,17 @@
-import pytest
-import py
-
-import shutil
 import copy
+import shutil
 from textwrap import dedent
 
+import py
+import pytest
+from django.conf import settings
+
+from .db_helpers import (create_empty_production_database, DB_NAME,
+                         get_db_engine)
 
 pytest_plugins = 'pytester'
 
 TESTS_DIR = py.path.local(__file__)
-
-
-from django.conf import settings
-
-
-# Trigger loading of Django settings, which might raise pytest.UsageError.
-from .db_helpers import (create_empty_production_database, get_db_engine,
-                         DB_NAME)
 
 
 def pytest_configure(config):

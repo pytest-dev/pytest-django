@@ -2,7 +2,6 @@ import os
 import subprocess
 
 import pytest
-
 from django.conf import settings
 
 from .compat import force_text
