@@ -229,7 +229,7 @@ class TestSouth:
             'app': 'app.south_migrations',
         }
         """)
-    def test_initial_data_south(self, django_testdir_initial, settings):
+    def test_initial_data_south(self, django_testdir_initial):
         django_testdir_initial.create_test_module('''
             import pytest
 
@@ -251,7 +251,7 @@ class TestSouth:
             'app': 'tpkg.app.south_migrations',
         }
         """)
-    def test_initial_south_migrations(self, django_testdir_initial, settings):
+    def test_initial_south_migrations(self, django_testdir_initial):
         testdir = django_testdir_initial
         testdir.create_test_module('''
             import pytest
@@ -279,7 +279,7 @@ class TestSouth:
             'app': 'tpkg.app.south_migrations',
         }
         """)
-    def test_south_no_migrations(self, django_testdir_initial, settings):
+    def test_south_no_migrations(self, django_testdir_initial):
         testdir = django_testdir_initial
         testdir.create_test_module('''
             import pytest
