@@ -84,6 +84,27 @@ class TestSettings:
         assert hasattr(settings, 'SECRET_KEY')
         assert hasattr(real_settings, 'SECRET_KEY')
 
+    @pytest.mark.skipif(get_django_version() < (1, 4),
+                        reason='Django > 1.3 required')
+    def test_signals(self, settings, capsys):
+        key, value = 'SPAM', 'ham'
+        marker = 'Done!'
+
+        def assert_signal(**kwargs):
+            assert kwargs['sender'] == settings._wrapped.__class__
+            assert kwargs['setting'] == key
+            assert kwargs['value'] == value
+            print(marker)
+
+        from django.test.signals import setting_changed
+
+        setting_changed.connect(assert_signal)
+        setattr(settings, key, value)
+        assert marker in capsys.readouterr()[0]
+        value = None
+        delattr(settings, key)
+        assert marker in capsys.readouterr()[0]
+
 
 class TestLiveServer:
     pytestmark = [
