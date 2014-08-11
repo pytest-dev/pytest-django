@@ -222,7 +222,7 @@ def test_initial_data(django_testdir_initial):
 class TestSouth:
     """Test interaction with initial_data and South."""
 
-    @pytest.mark.extra_settings("""
+    @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
@@ -244,7 +244,7 @@ class TestSouth:
         result = django_testdir_initial.runpytest('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
-    @pytest.mark.extra_settings("""
+    @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
@@ -272,7 +272,7 @@ class TestSouth:
         result = testdir.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
-    @pytest.mark.extra_settings("""
+    @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = False
         SOUTH_MIGRATION_MODULES = {

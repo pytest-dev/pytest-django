@@ -148,7 +148,7 @@ class TestLiveServer:
         assert force_text(response_data) == 'Item count: 1'
 
 
-@pytest.mark.extra_settings("""
+@pytest.mark.django_project(extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
     INSTALLED_APPS = [
         'django.contrib.auth',

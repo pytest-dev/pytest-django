@@ -222,11 +222,11 @@ def test_debug_false(testdir, monkeypatch):
 
 @pytest.mark.skipif(not hasattr(django, 'setup'),
                     reason="This Django version does not support app loading")
-@pytest.mark.extra_settings("""
+@pytest.mark.django_project(extra_settings="""
     INSTALLED_APPS = [
         'tpkg.app.apps.TestApp',
     ]
-    """)
+""")
 def test_django_setup(django_testdir):
     django_testdir.create_app_file("""
         from django.apps import apps, AppConfig

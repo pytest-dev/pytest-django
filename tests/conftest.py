@@ -19,8 +19,24 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
                          DB_NAME)
 
 
+def pytest_configure(config):
+    config.addinivalue_line('markers', 'django_project: options for the django_testdir fixture')
+
+
+def _marker_apifun(extra_settings='', create_manage_py=False, project_root=None):
+    return {
+        'extra_settings': extra_settings,
+        'create_manage_py': create_manage_py,
+        'project_root': project_root,
+    }
+
+
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
+    marker = request.node.get_marker('django_project')
+
+    options = _marker_apifun(**(marker.kwargs if marker else {}))
+
     db_engine = get_db_engine()
     if db_engine in ('mysql', 'postgresql_psycopg2') \
             or (db_engine == 'sqlite3' and DB_NAME != ':memory:'):
@@ -33,9 +49,6 @@ def django_testdir(request, testdir, monkeypatch):
         db_settings = copy.deepcopy(settings.DATABASES)
         db_settings['default']['NAME'] = DB_NAME
 
-    extra_settings = request.node.get_marker('extra_settings') or ''
-    if extra_settings:
-        extra_settings = dedent(extra_settings.args[0])
     test_settings = dedent('''
         # Pypy compatibility
         try:
@@ -53,18 +66,31 @@ def django_testdir(request, testdir, monkeypatch):
         SECRET_KEY = 'foobar'
 
         %(extra_settings)s
-    ''') % {'db_settings': repr(db_settings), 'extra_settings': extra_settings}
+    ''') % {
+        'db_settings': repr(db_settings),
+        'extra_settings': dedent(options['extra_settings'])}
 
-    tpkg_path = testdir.mkpydir('tpkg')
+    if options['project_root']:
+        project_root = testdir.mkdir(options['project_root'])
+    else:
+        project_root = testdir.tmpdir
+
+    tpkg_path = project_root.mkdir('tpkg')
+
+    if options['create_manage_py']:
+        project_root.ensure('manage.py')
+
+    tpkg_path.ensure('__init__.py')
+
     app_source = TESTS_DIR.dirpath('app')
     test_app_path = tpkg_path.join('app')
 
     # Copy the test app to make it available in the new test run
     shutil.copytree(py.builtin._totext(app_source),
                     py.builtin._totext(test_app_path))
-    tpkg_path.join("db_test_settings.py").write(test_settings)
+    tpkg_path.join("the_settings.py").write(test_settings)
 
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.db_test_settings')
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.the_settings')
 
     def create_test_module(test_code, filename='test_the_test.py'):
         tpkg_path.join(filename).write(dedent(test_code), ensure=True)
@@ -74,6 +100,7 @@ def django_testdir(request, testdir, monkeypatch):
 
     testdir.create_test_module = create_test_module
     testdir.create_app_file = create_app_file
+    testdir.project_root = project_root
 
     return testdir
 
