@@ -65,6 +65,14 @@ def django_testdir(request, testdir, monkeypatch):
         ]
         SECRET_KEY = 'foobar'
 
+        MIDDLEWARE_CLASSES = (
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+        )
+
         %(extra_settings)s
     ''') % {
         'db_settings': repr(db_settings),
