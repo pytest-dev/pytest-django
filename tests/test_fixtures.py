@@ -12,8 +12,8 @@ from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 
 from .app.models import Item
-from .test_database import noop_transactions
 from .compat import force_text, urlopen
+from .test_database import noop_transactions
 
 from pytest_django.lazy_django import get_django_version
 
