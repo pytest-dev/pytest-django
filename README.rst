@@ -2,58 +2,40 @@
    :alt: Build Status
    :target: https://travis-ci.org/pelme/pytest_django
 
-pytest-django is a plugin for `pytest <http://pytest.org/>`_ that provides a set of useful tools for testing `Django <http://www.djangoproject.com/>`_ applications and projects.
+Welcome to pytest-django!
+=========================
 
-* Authors: Ben Firshman, Andreas Pelme and `contributors <https://github.com/pelme/pytest_django/contributors>`_
+pytest-django allows you to test your Django project with the `pytest
+testing tool <http://pytest.org/>`_.
+
+* `Quick start / tutorial <http://pytest-django.rtfd.org/FIXTHIS>`_
+* `Contribution docs <http://pytest-django.rtfd.org/FIXTHIS>`_
+* Full documentation: http://pytest-django.rtfd.org/
+* Version compatibility:
+
+  * Django: 1.3-1.7 and latest master branch (compatible at the time of each release)
+  * Python: CPython 2.6-2.7,3.2-3.4 or PyPy 2,3
+  * pytest: 2.5.x,2.6.x
+
 * Licence: BSD
-* Compatibility: Django 1.3-1.7 (Django master is compatible at the time of each release), python 2.6-2.7, 3.2-3.4 or PyPy 2 or PyPy 3, pytest >= 2.5
-* Project URL: https://github.com/pelme/pytest_django
-* Documentation: http://pytest-django.rtfd.org/
+* Project maintainers: Andreas Pelme, FIXTHIS and
+* `All contributors <https://github.com/pelme/pytest_django/contributors>`_
+* Github repository: https://github.com/pelme/pytest_django
+* `Issue tracker <http://github.com/pelme/pytest_django/issues>`_
+* `Python Package Index (PyPI) <FIXTHIS>`_
 
+Why would I use this instead of Django's `manage.py test` command?
+------------------------------------------------------------------
 
-Quick Start
-===========
-1. ``pip install pytest-django``
-2. Make sure ``DJANGO_SETTINGS_MODULE`` is defined and and run tests with the ``py.test`` command.
-3. (Optionally) If you put your tests under a tests directory (the standard Django application layout), and your files are not named ``test_FOO.py``, `see the FAQ <http://pytest-django.readthedocs.org/en/latest/faq.html#my-tests-are-not-being-picked-up-when-i-run-pytest-from-the-root-directory-why-not>`_
+Running your test suite with pytest-django allows you to tap into the features
+that are already present in pytest. Here are some advantages:
 
-
-Documentation
-==============
-
-`Documentation is available on Read the Docs. <http://pytest-django.readthedocs.org/en/latest/index.html>`_
-
-
-Why would I use this instead of Django's manage.py test command?
-================================================================
-
-Running the test suite with pytest offers some features that are not present in Djangos standard test mechanism:
-
- * Less boilerplate: no need to import unittest, create a subclass with methods. Just write tests as regular functions.
- * `Manage test dependencies with fixtures <http://pytest.org/latest/fixture.html>`_
+ * `Manage test dependencies with pytest fixtures. <http://pytest.org/latest/fixture.html>`_
+ * Less boilerplate tests: no need to import unittest, create a subclass with methods. Write tests as regular functions.
  * Database re-use: no need to re-create the test database for every test run.
- * Run tests in multiple processes for increased speed
- * There are a lot of other nice plugins available for pytest.
- * Easy switching: Existing unittest-style tests will still work without any modifications.
-
-See the `pytest documentation <http://pytest.org/latest/>`_ for more information on pytest.
+ * Run tests in multiple processes for increased speed (with the pytest-xdist plugin).
+ * Make use of other `pytest plugins <http://pytest.org/FIXTHIS/>`_.
+ * Works with both worlds: Existing unittest-style TestCase's still work without any modifications.
 
 
-Contributing
-============
-
-Read the `contributing page <http://pytest-django.readthedocs.org/en/latest/contributing.html>`_ from the documentation.
-
-To run the project's tests::
-
-    make test
-
-To build the project's docs::
-
-    make docs
-
-
-Bugs? Feature suggestions?
-============================
-
-Report issues and feature requests at the `github issue tracker <http://github.com/pelme/pytest_django/issues>`_.
+See the `pytest documentation <http://pytest.org/latest/>`_ for more information on pytest itself.
