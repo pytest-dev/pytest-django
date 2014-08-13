@@ -20,10 +20,14 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
 
 
 def pytest_configure(config):
-    config.addinivalue_line('markers', 'django_project: options for the django_testdir fixture')
+    config.addinivalue_line(
+        'markers',
+        'django_project: options for the django_testdir fixture')
 
 
-def _marker_apifun(extra_settings='', create_manage_py=False, project_root=None):
+def _marker_apifun(extra_settings='',
+                   create_manage_py=False,
+                   project_root=None):
     return {
         'extra_settings': extra_settings,
         'create_manage_py': create_manage_py,
