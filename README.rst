@@ -5,12 +5,14 @@
 Welcome to pytest-django!
 =========================
 
-pytest-django allows you to test your Django project with the `pytest
-testing tool <http://pytest.org/>`_.
+pytest-django allows you to test your Django project/applications with the
+`pytest testing tool <http://pytest.org/>`_.
 
-* `Quick start / tutorial <http://pytest-django.rtfd.org/FIXTHIS>`_
-* `Contribution docs <http://pytest-django.rtfd.org/FIXTHIS>`_
-* Full documentation: http://pytest-django.rtfd.org/
+* `Quick start / tutorial
+  <http://pytest-django.readthedocs.org/en/latest/tutorial.html>`_
+* Full documentation: http://pytest-django.readthedocs.org/en/latest/
+* `Contribution docs
+  <http://pytest-django.readthedocs.org/en/latest/contributing.html>`_
 * Version compatibility:
 
   * Django: 1.3-1.7 and latest master branch (compatible at the time of each release)
@@ -18,11 +20,11 @@ testing tool <http://pytest.org/>`_.
   * pytest: 2.5.x,2.6.x
 
 * Licence: BSD
-* Project maintainers: Andreas Pelme, FIXTHIS and
+* Project maintainers: Andreas Pelme, Floris Bruynooghe and Daniel Hahler
 * `All contributors <https://github.com/pelme/pytest_django/contributors>`_
 * Github repository: https://github.com/pelme/pytest_django
 * `Issue tracker <http://github.com/pelme/pytest_django/issues>`_
-* `Python Package Index (PyPI) <FIXTHIS>`_
+* `Python Package Index (PyPI) <https://pypi.python.org/pypi/pytest-django/>`_
 
 Why would I use this instead of Django's `manage.py test` command?
 ------------------------------------------------------------------
@@ -34,8 +36,7 @@ that are already present in pytest. Here are some advantages:
  * Less boilerplate tests: no need to import unittest, create a subclass with methods. Write tests as regular functions.
  * Database re-use: no need to re-create the test database for every test run.
  * Run tests in multiple processes for increased speed (with the pytest-xdist plugin).
- * Make use of other `pytest plugins <http://pytest.org/FIXTHIS/>`_.
+ * Make use of other `pytest plugins <http://pytest.org/latest/plugins.html>`_.
  * Works with both worlds: Existing unittest-style TestCase's still work without any modifications.
-
 
 See the `pytest documentation <http://pytest.org/latest/>`_ for more information on pytest itself.
