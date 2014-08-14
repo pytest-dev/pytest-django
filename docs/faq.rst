@@ -24,11 +24,15 @@ the Python path.
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
-Activate a specific locale in your project's ``conftest.py``::
+Create a `pytest fixture <http://pytest.org/latest/fixture.html>`_ that is
+automatically run before each test case. To run all tests with the english
+locale, put the following code in your project's `conftest.py
+<http://pytest.org/latest/plugins.html>`_ file::
 
     from django.utils.translation import activate
 
-    def pytest_runtest_setup(item):
+    @pytest.fixture(autouse=True)
+    def set_default_language():
         activate('en')
 
 .. _faq-tests-not-being-picked-up:
