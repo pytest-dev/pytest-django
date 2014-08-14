@@ -69,3 +69,16 @@ process created by xdist gets its own separate database that is used for the
 tests. This ensures that each test can run independently, regardless of wheter
 transactions are tested or not.
 
+.. _faq-getting-help:
+
+How/where can I get help with pytest/pytest-django?
+---------------------------------------------------
+
+Usage questions can be asked on StackOverflow with the `pytest tag
+<http://stackoverflow.com/search?q=pytest>`_`.
+
+If you think you've found a bug or something that is wrong in the
+documentation, feel free to `open an issue on the Github project for
+pytest-django <https://github.com/pelme/pytest_django/issues/>`_.
+
+Direct help can be found in the #pylib IRC channel on irc.freenode.org.
