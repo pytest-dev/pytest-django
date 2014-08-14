@@ -58,6 +58,8 @@ pytest-django detects South and applies its monkey-patch, which gets fixed
 to handle initial data properly (which South would skip otherwise, because
 of a bug).
 
+The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control wheter or not
+migrations are used to construct the test database.
 
 Does this work with the pytest-xdist plugin?
 --------------------------------------------
