@@ -1,11 +1,12 @@
 FAQ
 ===
 
+.. _faq-import-error:
 
 I see an error saying "could not import myproject.settings"
 -----------------------------------------------------------
 
-py.test does not automatically add your project to the Python path, that is
+pytest-django does not automatically add your project to the Python path, that is
 usually done when running tests via `manage.py test`.
 
 The easiest way to get your project code available on the Python path is to
