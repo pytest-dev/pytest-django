@@ -61,9 +61,11 @@ of a bug).
 The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control wheter or not
 migrations are used to construct the test database.
 
-Does this work with the pytest-xdist plugin?
---------------------------------------------
+Does pytest-django work with the pytest-xdist plugin?
+-----------------------------------------------------
 
-Yes, pytest-django supports running tests in parallel with pytest-xdist. Each
-process created by xdist gets its own database that is used for the tests. This
-ensures that each test can run independently.
+Yes. pytest-django supports running tests in parallel with pytest-xdist. Each
+process created by xdist gets its own separate database that is used for the
+tests. This ensures that each test can run independently, regardless of wheter
+transactions are tested or not.
+
