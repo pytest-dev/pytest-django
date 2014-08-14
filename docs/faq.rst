@@ -12,8 +12,8 @@ usually done when running tests via `manage.py test`.
 The easiest way to get your project code available on the Python path is to
 create a `setup.py` like this::
 
-    from distutils.core import setup
-    setup(name='myproj', version='1.0')
+    import setuptools
+    setuptools.setup(name='myproj', version='1.0')
 
 And then install your project into your virtualenv with ``pip install -e .``.
 
