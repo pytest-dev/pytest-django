@@ -37,28 +37,19 @@ locale, put the following code in your project's `conftest.py
 
 .. _faq-tests-not-being-picked-up:
 
-My tests are not being picked up when I run py.test from the root directory. Why not?
+My tests are not being found. Why not?
 -------------------------------------------------------------------------------------
- By default, py.test looks for tests in files named ``test_*.py`` (note that this is not the same as ``test*.py``).
- If you have your tests in files with other names, they will not be collected. It is common to put tests under
- ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini`` file in your
- project root with the contents::
+ By default, py.test looks for tests in files named ``test_*.py`` (note that
+ this is not the same as ``test*.py``).  If you have your tests in files with
+ other names, they will not be collected. It is common to put tests under
+ ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini``
+ file in your project root with the contents::
 
     [pytest]
     python_files=*.py
 
-
-.. _faq-django-settings-module:
-
-How can I avoid having to type DJANGO_SETTINGS_MODULE=... to run the tests?
----------------------------------------------------------------------------
-
-If you are using virtualenvwrapper, use a postactivate script to set ``DJANGO_SETTINGS_MODULE`` when your project's virtualenv is activated.
-
-This snippet should do the trick (replace ``yourproject.settings`` and make sure your virtualenv is active)::
-
-    echo "export DJANGO_SETTINGS_MODULE=yourproject.settings" >> $VIRTUAL_ENV/bin/postactivate
-
+When debugging test collection problems, the `--collectonly` flag and `-rs`
+(report skipped tests) can be helpful.
 
 How do South and pytest-django play together?
 ---------------------------------------------
