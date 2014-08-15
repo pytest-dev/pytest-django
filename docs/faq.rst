@@ -6,20 +6,12 @@ FAQ
 I see an error saying "could not import myproject.settings"
 -----------------------------------------------------------
 
-pytest-django does not automatically add your project to the Python path, that is
-usually done when running tests via `manage.py test`.
+pytest-django tries to automatically add your project to the Python path by
+looking for a ``manage.py`` file and adding its path to the Python path.
 
-The easiest way to get your project code available on the Python path is to
-create a `setup.py` like this::
-
-    import setuptools
-    setuptools.setup(name='myproj', version='1.0')
-
-And then install your project into your virtualenv with ``pip install -e .``.
-
-You can also use the `pytest-pythonpath
-<https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin to explicitly add paths to
-the Python path.
+If this for some reason fails for you, you have to manage your Python paths
+explicilty. See the documentation on :ref:`managing_the_python_path_explicilty`
+for more information.
 
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
