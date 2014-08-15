@@ -130,7 +130,10 @@ def _parse_django_find_project_ini(x):
         return x
 
     x = x.lower()
-    possible_values = {'true': True, 'false': False}
+    possible_values = {'true': True,
+                       'false': False,
+                       '1': True,
+                       '0': False}
 
     if x not in possible_values:
         raise AssertionError('%s is not a valid value for '
