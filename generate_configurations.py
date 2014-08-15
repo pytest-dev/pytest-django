@@ -162,7 +162,7 @@ def make_tox_ini(envs):
         [testenv]
         whitelist_externals =
             sh
-        ''')]
+        ''').lstrip()]
 
     # Add checkqa-testenvs for different PYTHON_VERSIONS.
     # flake8 is configured in setup.cfg.
