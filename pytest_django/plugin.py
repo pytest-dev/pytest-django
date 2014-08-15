@@ -135,11 +135,12 @@ def _parse_django_find_project_ini(x):
                        '1': True,
                        '0': False}
 
-    if x not in possible_values:
-        raise AssertionError('%s is not a valid value for '
-                             'django_find_project. It must be true or false.')
-
-    return possible_values[x]
+    try:
+        return possible_values[x]
+    except KeyError:
+        raise ValueError('%s is not a valid value for django_find_project. '
+                         'It must be one of %s.'
+                         % (x, ', '.join(possible_values.keys())))
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
