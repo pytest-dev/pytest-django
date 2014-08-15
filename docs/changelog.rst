@@ -27,6 +27,12 @@ Bugfixes
   Collins, Aymeric Augustin, Jannis Leidel, Baptiste Mispelon and Anatoly
   Bubenkoff for report, discussion and feedback.
 
+* `The `live_server`` fixture can now serve static files also for Django>=1.7
+  if the ``django.contrib.staticfiles`` app is installed. (#140).
+
+* ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` environment variable is read instead
+  of ``DJANGO_TEST_LIVE_SERVER_ADDRESS``. (#140)
+
 2.6.2
 -----
 

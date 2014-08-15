@@ -3,6 +3,7 @@
 from __future__ import with_statement
 
 import os
+import warnings
 
 import pytest
 
@@ -288,11 +289,21 @@ def live_server(request):
           the other way around) transactional database access will be
           needed as data inside a transaction is not shared between
           the live server and test code.
+
+          Static assets will be served for all versions of Django.
+          Except for django >= 1.7, if ``django.contrib.staticfiles`` is not
+          installed.
     """
     skip_if_no_django()
     addr = request.config.getvalue('liveserver')
     if not addr:
+        addr = os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS')
+    if not addr:
         addr = os.getenv('DJANGO_TEST_LIVE_SERVER_ADDRESS')
+        if addr:
+            warnings.warn('Please use DJANGO_LIVE_TEST_SERVER_ADDRESS'
+                          ' instead of DJANGO_TEST_LIVE_SERVER_ADDRESS.',
+                          DeprecationWarning)
     if not addr:
         addr = 'localhost:8081,8100-8200'
     server = live_server_helper.LiveServer(addr)

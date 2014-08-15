@@ -5,6 +5,6 @@ except ImportError:
 
 
 try:
-    from urllib2 import urlopen  # noqa
+    from urllib2 import urlopen, HTTPError  # noqa
 except ImportError:
-    from urllib.request import urlopen  # noqa
+    from urllib.request import urlopen, HTTPError  # noqa
