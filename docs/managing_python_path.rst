@@ -15,7 +15,8 @@ Automatic finding of Django projects
 ------------------------------------
 
 By default, pytest-django tries to find Django projects by automatically
-finding the project ``manage.py`` file and adding its directory to the Python path.
+finding the project's ``manage.py`` file and adding its directory to the Python
+path.
 
 Finding the ``manage.py`` file uses the same algorithm as pytest uses to find
 ``pytest.ini``: Each test root directories parents will be searched for ``manage.py``
@@ -54,17 +55,24 @@ content will get you started::
     import setuptools
     setuptools.setup(name='myproj', version='1.0')
 
-To then install your project, run::
-
-    pip install --editable .
-
-Your code should then be importable from any Python application. You can add
-``-e .`` to your requirements file to have your own package be installed
-automatically when you set up your environment. This ``setup.py`` file is not
+This ``setup.py`` file is not
 sufficient to distribute your package to PyPI or more general packaging, but it
 should help you get started. Please refer to the `Python Packaging User Guide
 <http://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html#creating-your-own-project>`_
 for more information on packaing Python applications.`
+
+To then install your project, run::
+
+    pip install --editable .
+
+Your code should then be importable from any Python application. You can also
+add this directly to your project's requirements.txt file like this::
+
+    # requirements.txt
+    -e .
+    django>=1.7
+    pytest-django
+
 
 Using pytest-pythonpath
 ~~~~~~~~~~~~~~~~~~~~~~~

@@ -4,8 +4,8 @@ Getting started with pytest and pytest-django
 Introduction
 ------------
 
-pytest and pytest-django is compatible with standard Django test suites and
-Nose test suites and should be able to pick up and run existing tests without
+pytest and pytest-django are compatible with standard Django test suites and
+Nose test suites. They should be able to pick up and run existing tests without
 any or little configuration. This section describes how to get started quickly.
 
 Talks, articles and blog posts
