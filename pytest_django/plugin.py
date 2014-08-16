@@ -54,7 +54,7 @@ def pytest_addoption(parser):
                   'Django settings module to use by pytest-django.')
 
     parser.addini('django_find_project',
-                  'Automatically find and add a Django project it to the '
+                  'Automatically find and add a Django project to the '
                   'Python path.',
                   default=True)
 
