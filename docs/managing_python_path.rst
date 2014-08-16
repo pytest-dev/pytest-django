@@ -56,9 +56,9 @@ content will get you started::
     import setuptools
     setuptools.setup(name='myproj', version='1.0')
 
-This ``setup.py`` file is not
-sufficient to distribute your package to PyPI or more general packaging, but it
-should help you get started. Please refer to the `Python Packaging User Guide
+This ``setup.py`` file is not sufficient to distribute your package to PyPI or
+more general packaging, but it should help you get started. Please refer to the
+`Python Packaging User Guide
 <http://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html#creating-your-own-project>`_
 for more information on packaing Python applications.`
 
