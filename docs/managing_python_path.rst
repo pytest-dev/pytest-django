@@ -11,14 +11,14 @@ However, when Python is started via the ``py.test`` command, some extra care is
 needed to have the Python path setup properly. There are two ways to handle
 this problem, described below.
 
-Automatic finding of Django projects
-------------------------------------
+Automatic looking for of Django projects
+----------------------------------------
 
 By default, pytest-django tries to find Django projects by automatically
-finding the project's ``manage.py`` file and adding its directory to the Python
-path.
+looking for the project's ``manage.py`` file and adding its directory to the
+Python path.
 
-Finding the ``manage.py`` file uses the same algorithm as pytest uses to find
+Looking for the ``manage.py`` file uses the same algorithm as pytest uses to find
 ``pytest.ini``: Each test root directories parents will be searched for ``manage.py``
 files, and it will stop when the first file is found.
 
