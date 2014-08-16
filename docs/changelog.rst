@@ -10,6 +10,16 @@ Features
 * New fixtures: ``admin_user``, ``django_user_model`` and
   ``django_username_field`` (#109).
 
+* Automatic discovery of Django projects to make it easier for new users. This
+  change is slightly backward incompatible, if you encounter problems with it,
+  the old behaviour can be restored by adding this to ``pytest.ini``,
+  ``setup.cfg`` or ``tox.ini``::
+
+    [pytest]
+    django_find_project = false
+
+  Please see the :ref:`managing_python_path` section for more information.
+
 Bugfixes
 ^^^^^^^^
 
