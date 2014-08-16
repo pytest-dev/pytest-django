@@ -34,7 +34,7 @@ Managing the Python path explicilty
 -----------------------------------
 
 First, disable the automatic Django project finder. Add this to
-``pytest.ini``::
+``pytest.ini``, ``setup.cfg`` or ``tox.ini``::
 
     [pytest]
     django_find_project = false
