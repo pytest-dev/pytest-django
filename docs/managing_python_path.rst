@@ -1,4 +1,4 @@
-.. _managing_the_python_path:
+.. _managing_python_path:
 
 Managing the Python path
 ========================
