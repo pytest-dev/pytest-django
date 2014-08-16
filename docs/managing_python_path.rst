@@ -62,7 +62,7 @@ more general packaging, but it should help you get started. Please refer to the
 <http://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html#creating-your-own-project>`_
 for more information on packaing Python applications.`
 
-To then install your project, run::
+To install the project afterwards::
 
     pip install --editable .
 
