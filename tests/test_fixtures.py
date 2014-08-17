@@ -89,7 +89,6 @@ class TestLiveServer:
     pytestmark = [
         pytest.mark.skipif(get_django_version() < (1, 4),
                            reason="Django > 1.3 required"),
-        pytest.mark.urls('tests.urls_liveserver'),
     ]
 
     def test_url(self, live_server):

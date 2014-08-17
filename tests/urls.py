@@ -5,5 +5,6 @@ except ImportError:
 
 urlpatterns = patterns(
     '',
-    (r'admin-required/', 'tests.views.admin_required_view'),
+    (r'^item_count/$', 'tests.views.item_count'),
+    (r'^admin-required/$', 'tests.views.admin_required_view'),
 )
