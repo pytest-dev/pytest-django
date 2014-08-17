@@ -11,11 +11,10 @@ from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 
-from .app.models import Item
-from .compat import force_text, urlopen, HTTPError
-from .test_database import noop_transactions
-
 from pytest_django.lazy_django import get_django_version
+from pytest_django_test.app.models import Item
+from pytest_django_test.compat import force_text, HTTPError, urlopen
+from pytest_django_test.db_helpers import noop_transactions
 
 
 def test_client(client):
@@ -156,24 +155,16 @@ class TestLiveServer:
         assert force_text(response_data) == 'bla\n'
 
     @pytest.mark.django_project(extra_settings="""
-        import os
-
-        ROOT_URLCONF = 'tests.urls'
         INSTALLED_APPS = [
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
             'django.contrib.sites',
-            'tests.app',
+            'django.contrib.staticfiles',
+            'tpkg.app',
         ]
 
         STATIC_URL = '/static/'
-        SECRET_KEY = 'foobar'
-
-        SITE_ID = 1234  # Needed for 1.3 compatibility
-
-        # extra settings
-        INSTALLED_APPS += ['django.contrib.staticfiles',]
         """)
     def test_serve_static_with_staticfiles_app(self, django_testdir, settings):
         """
@@ -263,7 +254,7 @@ def test_custom_user_model(django_testdir):
                     Template('Access denied').render(Context()))
         """, 'views.py')
     django_testdir.makepyfile("""
-        from tests.compat import force_text
+        from pytest_django_test.compat import force_text
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):

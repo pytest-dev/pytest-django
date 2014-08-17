@@ -4,7 +4,7 @@ import pytest
 from django.core import mail
 from django.db import connection
 
-from .app.models import Item
+from pytest_django_test.app.models import Item
 
 
 # It doesn't matter which order all the _again methods are run, we just need

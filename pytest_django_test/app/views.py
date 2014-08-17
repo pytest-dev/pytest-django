@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.template import Template
 from django.template.context import Context
 
-from .app.models import Item
+from .models import Item
 
 
 def admin_required_view(request):

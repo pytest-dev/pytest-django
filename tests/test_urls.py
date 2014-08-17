@@ -1,7 +1,9 @@
 import pytest
 from django.conf import settings
 
-from .compat import force_text
+from pytest_django_test.compat import force_text
+
+pytestmark = pytest.mark.urls('pytest_django_test.urls_overridden')
 
 try:
     from django.core.urlresolvers import is_valid_path
@@ -22,13 +24,11 @@ except ImportError:
             return False
 
 
-@pytest.mark.urls('tests.urls_overridden')
 def test_urls():
-    assert settings.ROOT_URLCONF == 'tests.urls_overridden'
+    assert settings.ROOT_URLCONF == 'pytest_django_test.urls_overridden'
     assert is_valid_path('/overridden_url/')
 
 
-@pytest.mark.urls('tests.urls_overridden')
 def test_urls_client(client):
     response = client.get('/overridden_url/')
     assert force_text(response.content) == 'Overridden urlconf works!'

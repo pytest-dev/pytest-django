@@ -1,12 +1,12 @@
 import os
 
-ROOT_URLCONF = 'tests.urls'
+ROOT_URLCONF = 'pytest_django_test.urls'
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'tests.app',
+    'pytest_django_test.app',
 ]
 
 STATIC_URL = '/static/'

@@ -2,10 +2,10 @@ import sys
 
 import pytest
 
-from .db_helpers import (db_exists, drop_database, mark_database, mark_exists,
-                         skip_if_sqlite_in_memory)
-
 from pytest_django.lazy_django import get_django_version
+from pytest_django_test.db_helpers import (db_exists, drop_database,
+                                           mark_database, mark_exists,
+                                           skip_if_sqlite_in_memory)
 
 skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
                                       reason='xdist is flaky with Python 3.2')

@@ -6,12 +6,12 @@ import py
 import pytest
 from django.conf import settings
 
-from .db_helpers import (create_empty_production_database, DB_NAME,
-                         get_db_engine)
+from pytest_django_test.db_helpers import (create_empty_production_database,
+                                           DB_NAME, get_db_engine)
 
 pytest_plugins = 'pytester'
 
-TESTS_DIR = py.path.local(__file__)
+REPOSITORY_ROOT = py.path.local(__file__).join('..')
 
 
 def pytest_configure(config):
@@ -63,6 +63,7 @@ def django_testdir(request, testdir, monkeypatch):
             'tpkg.app',
         ]
         SECRET_KEY = 'foobar'
+        SITE_ID = 1234  # Needed for 1.3 compatibility
 
         MIDDLEWARE_CLASSES = (
             'django.contrib.sessions.middleware.SessionMiddleware',
@@ -89,7 +90,7 @@ def django_testdir(request, testdir, monkeypatch):
 
     tpkg_path.ensure('__init__.py')
 
-    app_source = TESTS_DIR.dirpath('app')
+    app_source = REPOSITORY_ROOT.dirpath('pytest_django_test/app')
     test_app_path = tpkg_path.join('app')
 
     # Copy the test app to make it available in the new test run

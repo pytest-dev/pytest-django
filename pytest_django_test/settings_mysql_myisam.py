@@ -1,4 +1,4 @@
-from tests.settings_base import *  # noqa
+from pytest_django_test.settings_base import *  # noqa
 
 DATABASES = {
     'default': {
@@ -7,7 +7,7 @@ DATABASES = {
         'HOST': 'localhost',
         'USER': 'root',
         'OPTIONS': {
-            'init_command': 'SET storage_engine=InnoDB'
+            'init_command': 'SET storage_engine=MyISAM'
         }
     },
 }

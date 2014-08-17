@@ -2,9 +2,14 @@ import os
 import subprocess
 
 import pytest
+
 from django.conf import settings
+from django.db import connection
+from django.db import transaction
 
 from .compat import force_text
+from .app.models import Item
+
 
 DB_NAME = settings.DATABASES['default']['NAME']
 if DB_NAME == ':memory:':
@@ -171,3 +176,27 @@ def mark_exists():
         return r.status_code == 0
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
+
+
+def noop_transactions():
+    """Test whether transactions are disabled.
+
+    Return True if transactions are disabled, False if they are
+    enabled.
+    """
+
+    # Newer versions of Django simply run standard tests in an atomic block.
+    if hasattr(connection, 'in_atomic_block'):
+        return connection.in_atomic_block
+    else:
+        with transaction.commit_manually():
+            Item.objects.create(name='transaction_noop_test')
+            transaction.rollback()
+
+        try:
+            item = Item.objects.get(name='transaction_noop_test')
+        except Item.DoesNotExist:
+            return False
+        else:
+            item.delete()
+            return True

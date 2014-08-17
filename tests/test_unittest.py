@@ -1,8 +1,8 @@
 import pytest
 from django.test import TestCase
 
-from .app.models import Item
-from .compat import force_text
+from pytest_django_test.app.models import Item
+from pytest_django_test.compat import force_text
 
 
 class TestFixtures(TestCase):
@@ -60,11 +60,11 @@ class TestUrls(TestCase):
     """
     Make sure overriding ``urls`` works.
     """
-    urls = 'tests.urls_unittest'
+    urls = 'pytest_django_test.urls_overridden'
 
     def test_urls(self):
-        resp = self.client.get('/test_url/')
-        self.assertEqual(force_text(resp.content), 'Test URL works!')
+        resp = self.client.get('/overridden_url/')
+        self.assertEqual(force_text(resp.content), 'Overridden urlconf works!')
 
 
 def test_sole_test(django_testdir):

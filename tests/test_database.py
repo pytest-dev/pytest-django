@@ -4,7 +4,7 @@ import pytest
 from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
-from .app.models import Item
+from pytest_django_test.app.models import Item
 
 
 def noop_transactions():
