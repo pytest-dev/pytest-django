@@ -67,7 +67,7 @@ Do you have problems with pytest not finding your code? See the FAQ
 Next steps
 ----------
 
-The :ref:`usage` section describes more ways to interract with your test suites.
+The :ref:`usage` section describes more ways to interact with your test suites.
 
 pytest-django also provides some :ref:`helpers` to make it easier to write
 Django tests.
