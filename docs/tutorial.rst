@@ -15,11 +15,11 @@ Talks, articles and blog posts
 
  * Talk from EuroPython 2013: `Testing Django application with py.test, by Andreas Pelme <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
 
- * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <http://pydanny.com/pytest-no-boilerplate-testing.html>_`
+ * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <http://pydanny.com/pytest-no-boilerplate-testing.html>`_
 
  * Blog post: `Django Projects to Django Apps: Converting the Unit Tests, by
    John Costa
-   <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.`
+   <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.
 
 For general information and tutorials on pytest, see the `pytest tutorial page <http://pytest.org/latest/getting-started.html>`_.
 
@@ -67,7 +67,7 @@ Do you have problems with pytest not finding your code? See the FAQ
 Next steps
 ----------
 
-The :ref:`usage` section describes more ways to interract with your test suites.
+The :ref:`usage` section describes more ways to interact with your test suites.
 
 pytest-django also provides some :ref:`helpers` to make it easier to write
 Django tests.

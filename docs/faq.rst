@@ -67,7 +67,7 @@ How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------
 
 Usage questions can be asked on StackOverflow with the `pytest tag
-<http://stackoverflow.com/search?q=pytest>`_`.
+<http://stackoverflow.com/search?q=pytest>`_.
 
 If you think you've found a bug or something that is wrong in the
 documentation, feel free to `open an issue on the Github project for
