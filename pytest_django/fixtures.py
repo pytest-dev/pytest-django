@@ -94,39 +94,43 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
 
 def _handle_south():
     from django.conf import settings
-    if 'south' in settings.INSTALLED_APPS:
-        # Handle south.
-        from django.core import management
 
-        try:
-            # if `south` >= 0.7.1 we can use the test helper
-            from south.management.commands import patch_for_test_db_setup
-        except ImportError:
-            # if `south` < 0.7.1 make sure it's migrations are disabled
-            management.get_commands()
-            management._commands['syncdb'] = 'django.core'
-        else:
-            # Monkey-patch south.hacks.django_1_0.SkipFlushCommand to load
-            # initial data.
-            # Ref: http://south.aeracode.org/ticket/1395#comment:3
-            import south.hacks.django_1_0
-            from django.core.management.commands.flush import (
-                Command as FlushCommand)
+    # NOTE: Django 1.7 does not have `management._commands` anymore, which
+    # is used by South's `patch_for_test_db_setup` and the code below.
+    if 'south' not in settings.INSTALLED_APPS or get_django_version() > (1, 7):
+        return
 
-            class SkipFlushCommand(FlushCommand):
-                def handle_noargs(self, **options):
+    from django.core import management
+
+    try:
+        # if `south` >= 0.7.1 we can use the test helper
+        from south.management.commands import patch_for_test_db_setup
+    except ImportError:
+        # if `south` < 0.7.1 make sure it's migrations are disabled
+        management.get_commands()
+        management._commands['syncdb'] = 'django.core'
+    else:
+        # Monkey-patch south.hacks.django_1_0.SkipFlushCommand to load
+        # initial data.
+        # Ref: http://south.aeracode.org/ticket/1395#comment:3
+        import south.hacks.django_1_0
+        from django.core.management.commands.flush import (
+            Command as FlushCommand)
+
+        class SkipFlushCommand(FlushCommand):
+            def handle_noargs(self, **options):
+                # Reinstall the initial_data fixture.
+                from django.core.management import call_command
+                # `load_initial_data` got introduces with Django 1.5.
+                load_initial_data = options.get('load_initial_data', None)
+                if load_initial_data or load_initial_data is None:
                     # Reinstall the initial_data fixture.
-                    from django.core.management import call_command
-                    # `load_initial_data` got introduces with Django 1.5.
-                    load_initial_data = options.get('load_initial_data', None)
-                    if load_initial_data or load_initial_data is None:
-                        # Reinstall the initial_data fixture.
-                        call_command('loaddata', 'initial_data', **options)
-                    # no-op to avoid calling flush
-                    return
-            south.hacks.django_1_0.SkipFlushCommand = SkipFlushCommand
+                    call_command('loaddata', 'initial_data', **options)
+                # no-op to avoid calling flush
+                return
+        south.hacks.django_1_0.SkipFlushCommand = SkipFlushCommand
 
-            patch_for_test_db_setup()
+        patch_for_test_db_setup()
 
 
 # ############### User visible fixtures ################
