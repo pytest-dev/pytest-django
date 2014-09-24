@@ -25,7 +25,7 @@ In a nutshell
 Here's what the contribution process looks like, in a bullet-points fashion:
 
 #. pytest-django is hosted on `GitHub`_, at
-   https://github.com/pelme/pytest_django
+   https://github.com/pytest-dev/pytest-django
 #. The best method to contribute back is to create an account there and fork
    the project. You can use this fork as if it was your own project, and should
    push your changes to it.
@@ -229,8 +229,8 @@ double cookie points. Seriously. You rock.
   project. Many thanks for allowing us to steal it!
 
 
-.. _fork: https://github.com/pelme/pytest_django
-.. _issue tracker: https://github.com/pelme/pytest_django/issues
+.. _fork: https://github.com/pytest-dev/pytest-django
+.. _issue tracker: https://github.com/pytest-dev/pytest-django/issues
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _GitHub : http://www.github.com
@@ -242,5 +242,5 @@ double cookie points. Seriously. You rock.
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
 .. _Travis: https://travis-ci.org/
-.. _pytest-django Travis: https://travis-ci.org/pelme/pytest_django
+.. _pytest-django Travis: https://travis-ci.org/pytest-dev/pytest-django
 .. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html

@@ -95,7 +95,7 @@ class TestDatabaseFixtures:
 
     def test_fixture_clean(self, both_dbs):
         # Relies on the order: test_mydb created an object
-        # See https://github.com/pelme/pytest_django/issues/17
+        # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture

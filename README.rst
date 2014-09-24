@@ -1,6 +1,6 @@
-.. image:: https://secure.travis-ci.org/pelme/pytest_django.png?branch=master
+.. image:: https://secure.travis-ci.org/pytest-dev/pytest-django.png?branch=master
    :alt: Build Status
-   :target: https://travis-ci.org/pelme/pytest_django
+   :target: https://travis-ci.org/pytest-dev/pytest-django
 
 Welcome to pytest-django!
 =========================
@@ -21,9 +21,9 @@ pytest-django allows you to test your Django project/applications with the
 
 * Licence: BSD
 * Project maintainers: Andreas Pelme, Floris Bruynooghe and Daniel Hahler
-* `All contributors <https://github.com/pelme/pytest_django/contributors>`_
-* Github repository: https://github.com/pelme/pytest_django
-* `Issue tracker <http://github.com/pelme/pytest_django/issues>`_
+* `All contributors <https://github.com/pytest-dev/pytest-django/contributors>`_
+* Github repository: https://github.com/pytest-dev/pytest-django
+* `Issue tracker <http://github.com/pytest-dev/pytest-django/issues>`_
 * `Python Package Index (PyPI) <https://pypi.python.org/pypi/pytest-django/>`_
 
 Why would I use this instead of Django's `manage.py test` command?

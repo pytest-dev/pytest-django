@@ -71,6 +71,6 @@ Usage questions can be asked on StackOverflow with the `pytest tag
 
 If you think you've found a bug or something that is wrong in the
 documentation, feel free to `open an issue on the Github project for
-pytest-django <https://github.com/pelme/pytest_django/issues/>`_.
+pytest-django <https://github.com/pytest-dev/pytest-django/issues/>`_.
 
 Direct help can be found in the #pylib IRC channel on irc.freenode.org.

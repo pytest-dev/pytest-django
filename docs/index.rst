@@ -39,7 +39,7 @@ Quick Start
 
 Bugs? Feature suggestions?
 ============================
-Report issues and feature requests at the `github issue tracker <http://github.com/pelme/pytest_django/issues>`_.
+Report issues and feature requests at the `github issue tracker <http://github.com/pytest-dev/pytest-django/issues>`_.
 
 Indices and tables
 ==================
