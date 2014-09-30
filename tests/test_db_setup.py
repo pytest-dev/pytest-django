@@ -297,6 +297,9 @@ class TestSouth:
         }
         """)
     def test_initial_south_migrations(self, django_testdir_initial):
+        """
+        Test initial data with existing South migrations.
+        """
         testdir = django_testdir_initial
         testdir.create_test_module('''
             import pytest
@@ -306,15 +309,10 @@ class TestSouth:
                 pass
             ''')
 
-        testdir.mkpydir('tpkg/app/south_migrations')
-        testdir.create_app_file("""
-            from south.v2 import SchemaMigration
+        testdir.create_initial_south_migration()
 
-            class Migration(SchemaMigration):
-                def forwards(self, orm):
-                    print("mark_south_migration_forwards")
-            """, 'south_migrations/0001_initial.py')
         result = testdir.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
     @pytest.mark.django_project(extra_settings="""
@@ -340,7 +338,7 @@ class TestSouth:
         p.write('raise Exception("This should not get imported.")',
                 ensure=True)
 
-        result = testdir.runpytest('--tb=short', '-v')
+        result = testdir.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
 
