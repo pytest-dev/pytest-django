@@ -267,6 +267,35 @@ class TestSouth:
             'app': 'tpkg.app.south_migrations',
         }
         """)
+    def test_initial_data_south_with_migrations(self, django_testdir_initial):
+        """
+        If migrations exists, there should be an error if they do not create
+        the DB table.
+        """
+        django_testdir_initial.create_test_module('''
+            import pytest
+
+            from .app.models import Item
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                assert [x.name for x in Item.objects.all()] \
+                    == ["mark_initial_data"]
+        ''')
+        django_testdir_initial.mkpydir('tpkg/app/south_migrations')
+
+        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines([
+            '*OperationalError: Problem installing fixture *'
+            ' Could not load app.Item(pk=1): no such table: app_item*'])
+
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
     def test_initial_south_migrations(self, django_testdir_initial):
         testdir = django_testdir_initial
         testdir.create_test_module('''
