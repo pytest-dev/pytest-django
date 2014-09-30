@@ -341,6 +341,39 @@ class TestSouth:
         result = testdir.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
+    def test_south_migrations_python_files_star(self, django_testdir_initial):
+        """
+        Test for South migrations and tests imported via `*.py`.
+
+        This is meant to reproduce
+        https://github.com/pytest-dev/pytest-django/issues/158, but does not
+        fail.
+        """
+        testdir = django_testdir_initial
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+        ''', 'test.py')
+        testdir.create_initial_south_migration()
+
+        pytest_ini = testdir.create_test_module("""
+            [pytest]
+            python_files=*.py""", 'pytest.ini')
+
+        result = testdir.runpytest('--tb=short', '-v', '-s', '-c', pytest_ini)
+        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+
 
 class TestNativeMigrations(object):
     """ Tests for Django 1.7 Migrations """
