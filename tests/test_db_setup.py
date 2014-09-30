@@ -242,10 +242,10 @@ class TestSouth:
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
-            'app': 'app.south_migrations',
+            'app': 'tpkg.app.south_migrations',
         }
         """)
-    def test_initial_data_south(self, django_testdir_initial):
+    def test_initial_data_south_no_migrations(self, django_testdir_initial):
         django_testdir_initial.create_test_module('''
             import pytest
 
@@ -257,7 +257,7 @@ class TestSouth:
                     == ["mark_initial_data"]
         ''')
 
-        result = django_testdir_initial.runpytest('--tb=short', '-v')
+        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
     @pytest.mark.django_project(extra_settings="""
