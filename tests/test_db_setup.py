@@ -258,7 +258,10 @@ class TestSouth:
         ''')
 
         result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -285,9 +288,9 @@ class TestSouth:
         django_testdir_initial.mkpydir('tpkg/app/south_migrations')
 
         result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        # Can be OperationalError or DatabaseError (Django 1.4).
         result.stdout.fnmatch_lines([
-            '*OperationalError: Problem installing fixture *'
-            ' Could not load app.Item(pk=1): no such table: app_item*'])
+            '*Error:* no such table: app_item*'])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -312,8 +315,11 @@ class TestSouth:
         testdir.create_initial_south_migration()
 
         result = testdir.runpytest('--tb=short', '-v', '-s')
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
-        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*mark_south_migration_forwards*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -339,7 +345,10 @@ class TestSouth:
                 ensure=True)
 
         result = testdir.runpytest('--tb=short', '-v', '-s')
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -371,8 +380,10 @@ class TestSouth:
             python_files=*.py""", 'pytest.ini')
 
         result = testdir.runpytest('--tb=short', '-v', '-s', '-c', pytest_ini)
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
-        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test.py::test_inner_south*",
+            "*mark_south_migration_forwards*",
+            "*PASSED*"])
 
 
 class TestNativeMigrations(object):
