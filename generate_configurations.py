@@ -15,16 +15,16 @@ TestEnv = namedtuple('TestEnv', ['python_version', 'pytest_version',
 RUN_PYTHON = '3.3'
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.5.2', '2.6.1']
+PYTEST_VERSIONS = ['2.5.2', '2.6.3']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
-    '1.4': 'Django==1.4.13',
-    '1.5': 'Django==1.5.8',
-    '1.6': 'Django==1.6.5',
-    '1.7': 'https://www.djangoproject.com/download/1.7c2/tarball/',
+    '1.4': 'Django==1.4.15',
+    '1.5': 'Django==1.5.10',
+    '1.6': 'Django==1.6.7',
+    '1.7': 'Django==1.7',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
