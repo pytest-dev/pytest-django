@@ -80,9 +80,7 @@ def test_ds_non_existent(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
-    result.stderr.fnmatch_lines(
-        ["*ImportError: Could not import settings 'DOES_NOT_EXIST'"
-         " (Is it on sys.path?*): *"])
+    result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
 
 
 def test_ds_after_user_conftest(testdir, monkeypatch):
