@@ -1,6 +1,15 @@
 Changelog
 =========
 
+NEXT
+-----
+
+Features
+^^^^^^^^
+
+* pytest's verbosity is being used for Django's code to setup/teardown the test
+  database (#172).
+
 2.7.0
 -----
 
