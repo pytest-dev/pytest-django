@@ -113,18 +113,6 @@ def _add_django_project_to_path(args):
     return PROJECT_NOT_FOUND
 
 
-def _setup_django():
-    import django
-
-    if hasattr(django, 'setup'):
-        django.setup()
-    else:
-        # Emulate Django 1.7 django.setup() with get_models
-        from django.db.models import get_models
-
-        get_models()
-
-
 def _parse_django_find_project_ini(x):
     if x in (True, False):
         return x
@@ -194,14 +182,6 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
-
-        _setup_django()
-
-
-@pytest.mark.trylast
-def pytest_configure():
-    if django_settings_is_configured():
-        _setup_django()
 
 
 @pytest.fixture(autouse=True, scope='session')

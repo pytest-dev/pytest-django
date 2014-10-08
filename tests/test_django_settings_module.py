@@ -260,6 +260,6 @@ def test_django_setup_sequence(django_testdir):
         """)
 
     result = django_testdir.runpytest('-s', '--tb=line')
-    result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
+    result.stdout.fnmatch_lines(['*IMPORT: populating=False,ready=False*'])
     result.stdout.fnmatch_lines(['*READY(): populating=True*'])
     result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])

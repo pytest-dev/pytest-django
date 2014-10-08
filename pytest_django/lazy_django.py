@@ -24,8 +24,30 @@ def django_settings_is_configured():
     # always be loaded.
     from django.conf import settings
     assert settings.configured is True
+    setup_django()
     return True
 
 
 def get_django_version():
     return __import__('django').VERSION
+
+
+_django_setup_done = False
+
+
+def setup_django():
+    global _django_setup_done
+    import django
+
+    if _django_setup_done:
+        return
+
+    if hasattr(django, 'setup'):
+        django.setup()
+    else:
+        # Emulate Django 1.7 django.setup() with get_models
+        from django.db.models import get_models
+
+        get_models()
+
+    _django_setup_done = True
