@@ -149,11 +149,21 @@ def test_xdist_with_reuse(django_testdir):
         @pytest.mark.django_db
         def test_b(settings):
             _check(settings)
+
+        @pytest.mark.django_db
+        def test_c(settings):
+            _check(settings)
+
+        @pytest.mark.django_db
+        def test_d(settings):
+            _check(settings)
     ''')
 
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_c*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
     assert db_exists('gw0')
     assert db_exists('gw1')
@@ -161,11 +171,15 @@ def test_xdist_with_reuse(django_testdir):
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_c*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
     result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db',
                                       '--create-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_c*'])
+    result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
 
 class TestSqliteWithXdist:
