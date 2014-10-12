@@ -159,7 +159,7 @@ def test_xdist_with_reuse(django_testdir):
             _check(settings)
     ''')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--tb=short')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
@@ -168,14 +168,13 @@ def test_xdist_with_reuse(django_testdir):
     assert db_exists('gw0')
     assert db_exists('gw1')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--tb=short')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
     result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db',
-                                      '--create-db')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--create-db', '--tb=short')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
@@ -229,9 +228,9 @@ def test_initial_data(django_testdir_initial):
 # NOTE: South tries to monkey-patch management._commands, which has been
 #       replaced by lru_cache and would cause an AttributeError.
 @pytest.mark.skipif(get_django_version() >= (1, 7),
-                    reason='South fails with Django 1.7.')
-@pytest.mark.skipif(sys.version_info[:2] == (3, 4),
-                    reason='South fails on Python 3.4.')
+                    reason='South does not support Django 1.7+')
+@pytest.mark.skipif(sys.version_info[0] == 3,
+                    reason='South is not properly supported on Python 3')
 class TestSouth:
     """Test interaction with initial_data and South."""
 

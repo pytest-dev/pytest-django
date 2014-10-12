@@ -8,8 +8,18 @@ from textwrap import dedent
 # https://xkcd.com/1205/
 
 
-TestEnv = namedtuple('TestEnv', ['python_version', 'pytest_version',
-                                 'django_version', 'settings'])
+TestEnvBase = namedtuple('TestEnvBase', ['python_version', 'pytest_version',
+                                         'django_version', 'settings'])
+
+class TestEnv(TestEnvBase):
+    def is_py2(self):
+        return self.python_version.startswith('python2') or self.python_version == 'pypy'
+
+    def is_py3(self):
+        return self.python_version.startswith('python3') or self.python_version == 'pypy3'
+
+    def is_pypy(self):
+        return self.python_version.startswith('pypy')
 
 # Python to run tox.
 RUN_PYTHON = '3.4'
@@ -42,14 +52,12 @@ TOX_TESTENV_TEMPLATE = dedent("""
 
 
 def is_valid_env(env):
-    pypy = env.python_version.startswith('pypy')
-    py3 = env.python_version.startswith('python3') or env.python_version == 'pypy3'
 
     # Stable database adapters for PyPy+Postgres/MySQL are hard to come by..
-    if pypy and env.settings in ('postgres', 'mysql_myisam', 'mysql_innodb'):
+    if env.is_pypy() and env.settings in ('postgres', 'mysql_myisam', 'mysql_innodb'):
         return False
 
-    if py3:
+    if env.is_py3():
         # Django <1.5 does not support Python 3
         if env.django_version in ('1.3', '1.4'):
             return False
@@ -59,8 +67,7 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' \
-            and env.django_version in ('1.7', 'master'):
+    if env.python_version == 'python2.6' and env.django_version in ('1.7', 'master'):
         return False
 
     return True
@@ -71,7 +78,9 @@ def requirements(env):
     yield 'pytest-xdist==1.11'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
-    yield 'south==1.0'
+
+    if env.is_py2():
+        yield 'south==1.0'
 
     if env.settings == 'postgres':
         # Django 1.3 does not work with recent psycopg2 versions
