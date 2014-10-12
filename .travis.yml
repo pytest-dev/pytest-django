@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.3"
+  - "3.4"
 env:
   - TESTENV=pypy-2.6.3-master-sqlite_file
   - TESTENV=pypy3-2.6.3-master-sqlite_file
