@@ -159,7 +159,7 @@ def test_xdist_with_reuse(django_testdir):
             _check(settings)
     ''')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--tb=short')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
@@ -168,13 +168,14 @@ def test_xdist_with_reuse(django_testdir):
     assert db_exists('gw0')
     assert db_exists('gw1')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--tb=short')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
     result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db', '--create-db', '--tb=short')
+    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db',
+                                      '--create-db')
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
