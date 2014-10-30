@@ -1,6 +1,5 @@
 # Note that all functions here assume django is available.  So ensure
 # this is the case before you call them.
-import sys
 
 
 def is_django_unittest(item):
