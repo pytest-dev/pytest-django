@@ -124,3 +124,11 @@ def django_testdir_initial(django_testdir):
         }]""")
 
     return django_testdir
+
+
+def pytest_collection_modifyitems(items):
+    from test_django_compat import TestSimple
+    from pytest_django import django_compat
+    for item in items:
+        if hasattr(item, 'cls') and item.cls == TestSimple:
+            assert django_compat.is_django_unittest(item)
