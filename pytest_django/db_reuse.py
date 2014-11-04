@@ -106,3 +106,22 @@ def monkey_patch_creation_for_db_reuse(reuse_db,create_db):
         if reuse_db and not create_db or connection.settings_dict.get('TEST_REUSE',False):
             if test_database_exists_from_previous_run(connection):
                 _monkeypatch(connection.creation, 'create_test_db', create_test_db_with_reuse)
+
+def monkey_patch_create_with_template():
+    """
+    Monkeypatch create sql to do 'CREATE DATABASE test_xxx WITH TEMPLATE xxx' instead of just 'CREATE DATABASE test_xxx'
+    Useful when testing with PostgreSQL and barebone of existing database 
+    """ 
+    def _sql_table_creation_suffix(self):
+        try:
+            return " WITH TEMPLATE=%s"%self.connection.settings_dict['TEST_WITH_TEMPLATE'] 
+        except KeyError:
+            return ""
+
+
+    from django.db import connections
+    
+    for connection in connections.all():
+        if "TEST_WITH_TEMPLATE" in connection.settings_dict:
+            _monkeypatch(connection.creation,'sql_table_creation_suffix',_sql_table_creation_suffix)
+    
