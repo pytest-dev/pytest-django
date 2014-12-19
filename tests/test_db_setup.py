@@ -10,6 +10,7 @@ from pytest_django_test.db_helpers import (db_exists, drop_database,
 skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
                                       reason='xdist is flaky with Python 3.2')
 
+
 def test_db_reuse_simple(django_testdir):
     "A test for all backends to check that `--reuse-db` works."
     django_testdir.create_test_module('''
@@ -363,7 +364,9 @@ class TestNativeMigrations(object):
                     migrations.CreateModel(
                         name='Item',
                         fields=[
-                            ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True)),
+                            ('id', models.AutoField(serialize=False,
+                                                    auto_created=True,
+                                                    primary_key=True)),
                             ('name', models.CharField(max_length=100)),
                         ],
                         options={
