@@ -10,7 +10,6 @@ from pytest_django_test.db_helpers import (db_exists, drop_database,
 skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
                                       reason='xdist is flaky with Python 3.2')
 
-
 def test_db_reuse_simple(django_testdir):
     "A test for all backends to check that `--reuse-db` works."
     django_testdir.create_test_module('''
@@ -310,3 +309,71 @@ class TestSouth:
 
         result = testdir.runpytest('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+
+
+class TestNativeMigrations(object):
+    """ Tests for Django 1.7 Migrations """
+
+    @pytest.mark.skipif(get_django_version() < (1, 7),
+                        reason=('Django < 1.7 doesn\'t have migrations'))
+    def test_no_migrations(self, django_testdir_initial):
+        testdir = django_testdir_initial
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_migrations():
+                pass
+        ''')
+
+        testdir.mkpydir('tpkg/app/migrations')
+        p = testdir.tmpdir.join(
+            "tpkg/app/migrations/0001_initial").new(ext="py")
+        p.write('raise Exception("This should not get imported.")',
+                ensure=True)
+
+        result = testdir.runpytest('--nomigrations', '--tb=short', '-v')
+        result.stdout.fnmatch_lines(['*test_inner_migrations*PASSED*'])
+
+    @pytest.mark.skipif(get_django_version() < (1, 7),
+                        reason=('Django < 1.7 doesn\'t have migrations'))
+    def test_migrations_run(self, django_testdir):
+        testdir = django_testdir
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_migrations():
+                pass
+            ''')
+
+        testdir.mkpydir('tpkg/app/migrations')
+        testdir.tmpdir.join("tpkg/app/migrations/__init__").new(ext="py")
+        testdir.create_app_file("""
+            from django.db import migrations, models
+
+            def print_it(apps, schema_editor):
+                print("mark_migrations_run")
+
+            class Migration(migrations.Migration):
+
+                dependencies = []
+
+                operations = [
+                    migrations.CreateModel(
+                        name='Item',
+                        fields=[
+                            ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True)),
+                            ('name', models.CharField(max_length=100)),
+                        ],
+                        options={
+                        },
+                        bases=(models.Model,),
+                    ),
+                    migrations.RunPython(
+                        print_it,
+                    ),
+                ]
+            """, 'migrations/0001_initial.py')
+        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines(['*mark_migrations_run*'])

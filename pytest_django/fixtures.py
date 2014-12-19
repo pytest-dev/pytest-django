@@ -40,6 +40,9 @@ def _django_db_setup(request,
 
     _handle_south()
 
+    if request.config.getvalue('nomigrations'):
+        _disable_native_migrations()
+
     with _django_cursor_wrapper:
         # Monkey patch Django's setup code to support database re-use
         if request.config.getvalue('reuse_db'):
@@ -127,6 +130,16 @@ def _handle_south():
             south.hacks.django_1_0.SkipFlushCommand = SkipFlushCommand
 
             patch_for_test_db_setup()
+
+
+def _disable_native_migrations():
+    from django import get_version
+
+    if get_version() > '1.7':
+        from django.conf import settings
+        from .migrations import DisableMigrations
+
+        settings.MIGRATION_MODULES = DisableMigrations()
 
 
 # ############### User visible fixtures ################
