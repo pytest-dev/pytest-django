@@ -303,7 +303,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'users',
             },
             bases=None,
-            managers=None,
         ),
     ]
     """, 'migrations/0001_initial.py')  # noqa
