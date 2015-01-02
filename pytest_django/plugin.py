@@ -232,20 +232,20 @@ def _django_cursor_wrapper(request):
     returned has a .enable() and a .disable() method which can be used
     to temporarily enable database access.
     """
-    if django_settings_is_configured():
+    if not django_settings_is_configured():
+        return None
 
-        # util -> utils rename in Django 1.7
-        try:
-            import django.db.backends.utils
-            utils_module = django.db.backends.utils
-        except ImportError:
-            import django.db.backends.util
-            utils_module = django.db.backends.util
+    # util -> utils rename in Django 1.7
+    try:
+        import django.db.backends.utils
+        utils_module = django.db.backends.utils
+    except ImportError:
+        import django.db.backends.util
+        utils_module = django.db.backends.util
 
-        manager = CursorManager(utils_module)
-        manager.disable()
-    else:
-        manager = CursorManager()
+    manager = CursorManager(utils_module)
+    manager.disable()
+    request.addfinalizer(manager.restore)
     return manager
 
 
@@ -315,10 +315,13 @@ class CursorManager(object):
     no-op.
     """
 
-    def __init__(self, dbutil=None):
+    def __init__(self, dbutil):
         self._dbutil = dbutil
-        if dbutil:
-            self._orig_wrapper = dbutil.CursorWrapper
+        self._history = []
+        self._real_wrapper = dbutil.CursorWrapper
+
+    def _save_active_wrapper(self):
+        return self._history.append(self._dbutil.CursorWrapper)
 
     def _blocking_wrapper(*args, **kwargs):
         __tracebackhide__ = True
@@ -328,18 +331,21 @@ class CursorManager(object):
 
     def enable(self):
         """Enable access to the django database"""
-        if self._dbutil:
-            self._dbutil.CursorWrapper = self._orig_wrapper
+        self._save_active_wrapper()
+        self._dbutil.CursorWrapper = self._real_wrapper
 
     def disable(self):
-        if self._dbutil:
-            self._dbutil.CursorWrapper = self._blocking_wrapper
+        self._save_active_wrapper()
+        self._dbutil.CursorWrapper = self._blocking_wrapper
+
+    def restore(self):
+        self._dbutil.CursorWrapper = self._history.pop()
 
     def __enter__(self):
         self.enable()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.disable()
+        self.restore()
 
 
 def validate_django_db(marker):
