@@ -268,7 +268,7 @@ def _django_db_marker(request):
 @pytest.fixture(autouse=True)
 def _django_setup_unittest(request, _django_cursor_wrapper):
     """Setup a django unittest, internal to pytest-django"""
-    if django_settings_is_configured() and is_django_unittest(request.node):
+    if django_settings_is_configured() and is_django_unittest(request):
         request.getfuncargvalue('_django_test_environment')
         request.getfuncargvalue('_django_db_setup')
         _django_cursor_wrapper.enable()
