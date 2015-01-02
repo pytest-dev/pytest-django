@@ -9,6 +9,7 @@ import os
 import contextlib
 
 import pytest
+import new
 
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
@@ -204,6 +205,21 @@ def pytest_configure():
         _setup_django()
 
 
+def pytest_runtest_setup(item):
+
+    if django_settings_is_configured() and is_django_unittest(item):
+        cls = item.cls
+
+        if hasattr(cls, '__real_setUpClass'):
+            return
+
+        cls.__real_setUpClass = cls.setUpClass
+        cls.__real_tearDownClass = cls.tearDownClass
+
+        cls.setUpClass = new.instancemethod(lambda cls: None, cls)
+        cls.tearDownClass = new.instancemethod(lambda cls: None, cls)
+
+
 @pytest.fixture(autouse=True, scope='session')
 def _django_test_environment(request):
     """
@@ -265,14 +281,21 @@ def _django_db_marker(request):
             request.getfuncargvalue('db')
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, _django_cursor_wrapper):
     """Setup a django unittest, internal to pytest-django"""
     if django_settings_is_configured() and is_django_unittest(request):
         request.getfuncargvalue('_django_test_environment')
         request.getfuncargvalue('_django_db_setup')
+
         _django_cursor_wrapper.enable()
-        request.addfinalizer(_django_cursor_wrapper.disable)
+        request.node.cls.__real_setUpClass()
+
+        def teardown():
+            request.node.cls.__real_tearDownClass()
+            _django_cursor_wrapper.restore()
+
+        request.addfinalizer(teardown)
 
 
 @pytest.fixture(autouse=True, scope='function')
