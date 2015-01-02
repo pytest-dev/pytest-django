@@ -9,7 +9,7 @@ import os
 import contextlib
 
 import pytest
-import new
+import types
 
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
@@ -216,8 +216,8 @@ def pytest_runtest_setup(item):
         cls.__real_setUpClass = cls.setUpClass
         cls.__real_tearDownClass = cls.tearDownClass
 
-        cls.setUpClass = new.instancemethod(lambda cls: None, cls)
-        cls.tearDownClass = new.instancemethod(lambda cls: None, cls)
+        cls.setUpClass = types.MethodType(lambda cls: None, cls)
+        cls.tearDownClass = types.MethodType(lambda cls: None, cls)
 
 
 @pytest.fixture(autouse=True, scope='session')
