@@ -275,7 +275,7 @@ import django.core.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0005_alter_user_last_login_null'),
+        ('auth', '0001_initial'),
     ]
 
     operations = [
