@@ -31,10 +31,10 @@ SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
-    '1.4': 'Django==1.4.15',
-    '1.5': 'Django==1.5.10',
-    '1.6': 'Django==1.6.7',
-    '1.7': 'Django==1.7',
+    '1.4': 'Django==1.4.17',
+    '1.5': 'Django==1.5.12',
+    '1.6': 'Django==1.6.9',
+    '1.7': 'Django==1.7.2',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
