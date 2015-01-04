@@ -96,6 +96,25 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     result.stdout.fnmatch_lines(['*1 passed*'])
 
 
+def test_ds_in_pytest_configure(testdir, monkeypatch):
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    pkg = testdir.mkpydir('tpkg')
+    settings = pkg.join('settings_ds.py')
+    settings.write(BARE_SETTINGS)
+    testdir.makeconftest("""
+        import os
+
+        from django.conf import settings
+
+        def pytest_configure():
+            if not settings.configured:
+                os.environ.setdefault('DJANGO_SETTINGS_MODULE',
+                                      'tpkg.settings_ds')
+    """)
+    r = testdir.runpytest()
+    assert r.ret == 0
+
+
 def test_django_settings_configure(testdir, monkeypatch):
     """
     Make sure Django can be configured without setting
