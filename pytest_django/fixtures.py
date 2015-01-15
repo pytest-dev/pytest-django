@@ -135,7 +135,7 @@ def _handle_south():
 def _disable_native_migrations():
     from django import get_version
 
-    if get_version() > '1.7':
+    if get_version() >= '1.7':
         from django.conf import settings
         from .migrations import DisableMigrations
 
