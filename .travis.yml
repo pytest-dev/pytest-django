@@ -2,24 +2,23 @@ language: python
 python:
   - "3.4"
 env:
-  - TESTENV=pypy-2.6.3-master-sqlite_file
-  - TESTENV=pypy3-2.6.3-master-sqlite_file
-  - TESTENV=python2.6-2.6.3-1.6-sqlite_file
-  - TESTENV=python2.7-2.6.3-1.3-sqlite_file
-  - TESTENV=python2.7-2.6.3-1.4-sqlite_file
-  - TESTENV=python2.7-2.6.3-master-mysql_innodb
-  - TESTENV=python2.7-2.6.3-master-mysql_myisam
-  - TESTENV=python2.7-2.6.3-master-sqlite_file
-  - TESTENV=python3.2-2.6.3-master-sqlite_file
-  - TESTENV=python3.3-2.6.3-master-sqlite_file
-  - TESTENV=python3.4-2.5.2-master-sqlite_file
-  - TESTENV=python3.4-2.6.3-1.5-sqlite_file
-  - TESTENV=python3.4-2.6.3-1.6-sqlite_file
-  - TESTENV=python3.4-2.6.3-1.7-sqlite_file
-  - TESTENV=python3.4-2.6.3-1.8-sqlite_file
-  - TESTENV=python3.4-2.6.3-master-postgres
-  - TESTENV=python3.4-2.6.3-master-sqlite
-  - TESTENV=python3.4-2.6.3-master-sqlite_file
+  - TESTENV=pypy-2.6.4-master-sqlite_file
+  - TESTENV=pypy3-2.6.4-master-sqlite_file
+  - TESTENV=python2.6-2.6.4-1.6-sqlite_file
+  - TESTENV=python2.7-2.6.4-1.3-sqlite_file
+  - TESTENV=python2.7-2.6.4-1.4-sqlite_file
+  - TESTENV=python2.7-2.6.4-master-mysql_innodb
+  - TESTENV=python2.7-2.6.4-master-mysql_myisam
+  - TESTENV=python2.7-2.6.4-master-sqlite_file
+  - TESTENV=python3.2-2.6.4-master-sqlite_file
+  - TESTENV=python3.3-2.6.4-master-sqlite_file
+  - TESTENV=python3.4-2.6.4-1.5-sqlite_file
+  - TESTENV=python3.4-2.6.4-1.6-sqlite_file
+  - TESTENV=python3.4-2.6.4-1.7-sqlite_file
+  - TESTENV=python3.4-2.6.4-1.8-sqlite_file
+  - TESTENV=python3.4-2.6.4-master-postgres
+  - TESTENV=python3.4-2.6.4-master-sqlite
+  - TESTENV=python3.4-2.6.4-master-sqlite_file
   - TESTENV=checkqa-python2.6
   - TESTENV=checkqa-python2.7
   - TESTENV=checkqa-python3.2
