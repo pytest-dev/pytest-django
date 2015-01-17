@@ -16,6 +16,7 @@ env:
   - TESTENV=python3.4-2.6.3-1.5-sqlite_file
   - TESTENV=python3.4-2.6.3-1.6-sqlite_file
   - TESTENV=python3.4-2.6.3-1.7-sqlite_file
+  - TESTENV=python3.4-2.6.3-1.8-sqlite_file
   - TESTENV=python3.4-2.6.3-master-postgres
   - TESTENV=python3.4-2.6.3-master-sqlite
   - TESTENV=python3.4-2.6.3-master-sqlite_file
