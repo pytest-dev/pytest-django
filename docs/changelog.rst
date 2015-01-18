@@ -10,6 +10,10 @@ Features
 * pytest's verbosity is being used for Django's code to setup/teardown the test
   database (#172).
 
+* Added a new option `--nomigrations` to avoid running Django 1.7+ migrations
+  when constructing the test database. Huge thanks to Renan Ivo for complete
+  patch, tests and documentation.
+
 2.7.0
 -----
 
