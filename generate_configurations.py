@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from __future__ import print_function
 
 import itertools
@@ -25,16 +26,17 @@ class TestEnv(TestEnvBase):
 RUN_PYTHON = '3.4'
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.5.2', '2.6.3']
-DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
+PYTEST_VERSIONS = ['2.6.4']
+DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
-    '1.3': 'Django==1.3.7',
-    '1.4': 'Django==1.4.17',
-    '1.5': 'Django==1.5.12',
-    '1.6': 'Django==1.6.9',
-    '1.7': 'Django==1.7.2',
+    '1.3': 'Django>=1.3,<1.4',
+    '1.4': 'Django>=1.4,<1.5',
+    '1.5': 'Django>=1.5,<1.6',
+    '1.6': 'Django>=1.6,<1.7',
+    '1.7': 'Django>=1.7,<1.8',
+    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.zip',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
@@ -67,7 +69,7 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', 'master'):
+    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', 'master'):
         return False
 
     return True
