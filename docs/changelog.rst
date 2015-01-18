@@ -1,7 +1,7 @@
 Changelog
 =========
 
-NEXT
+2.8.0
 -----
 
 Features
@@ -13,6 +13,9 @@ Features
 * Added a new option `--nomigrations` to avoid running Django 1.7+ migrations
   when constructing the test database. Huge thanks to Renan Ivo for complete
   patch, tests and documentation.
+
+Bug fixes
+^^^^^^^^^
 
 * Fixed compatibility issues related to Django 1.8's
   `setUpClass`/`setUpTestData`. Django 1.8 is now a fully supported version.
