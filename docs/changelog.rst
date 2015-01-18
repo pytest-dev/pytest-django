@@ -16,6 +16,7 @@ Features
 
 * Fixed compatibility issues related to Django 1.8's
   `setUpClass`/`setUpTestData`. Django 1.8 is now a fully supported version.
+  Django master as of 2014-01-18 (the Django 1.9 branch) is also supported.
 
 2.7.0
 -----
