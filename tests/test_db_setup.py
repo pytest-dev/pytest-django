@@ -209,6 +209,9 @@ class TestSqliteWithXdist:
         result.stdout.fnmatch_lines(['*PASSED*test_a*'])
 
 
+@pytest.mark.skipif(get_django_version() >= (1, 9),
+                    reason=('Django 1.9 requires migration and has no concept '
+                            'of initial data fixtures'))
 def test_initial_data(django_testdir_initial):
     """Test that initial data gets loaded."""
     django_testdir_initial.create_test_module('''
