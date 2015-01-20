@@ -157,11 +157,11 @@ used - use 2.6.1 or newer to avoid confusion.
 -----
 
 This release is *backward incompatible*. The biggest change is the need
-to add the ``pytest.mark.django_db`` to tests which needs database
+to add the ``pytest.mark.django_db`` to tests which require database
 access.
 
 Finding such tests is generally very easy: just run your test suite, the
-tests which needs database access will fail. Add ``pytestmark =
+tests which need database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 
