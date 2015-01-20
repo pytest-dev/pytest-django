@@ -131,6 +131,7 @@ class TestDatabaseFixturesBothOrder:
 
 
 class TestDatabaseMarker:
+    "Tests for the django_db marker."
 
     @pytest.mark.django_db
     def test_access(self):
@@ -138,7 +139,7 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_clean_db(self):
-        # Relies on the order: test_access created an object
+        # Relies on the order: test_access created an object.
         assert Item.objects.count() == 0
 
     @pytest.mark.django_db
