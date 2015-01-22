@@ -50,22 +50,22 @@ def test_dc_env(testdir, monkeypatch):
 
 
 def test_dc_ini(testdir, monkeypatch):
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
-    monkeypatch.setenv('DJANGO_CONFIGURATION', 'DO_NOT_USE')
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
+    monkeypatch.setenv('DJANGO_CONFIGURATION', 'MySettings')
 
     testdir.makeini("""
        [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
-       DJANGO_CONFIGURATION = MySettings
+       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+       DJANGO_CONFIGURATION = DO_NOT_USE_ini
     """)
     pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_ini.py')
+    settings = pkg.join('settings_env.py')
     settings.write(BARE_SETTINGS)
     testdir.makepyfile("""
         import os
 
         def test_ds():
-            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
+            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """)
     result = testdir.runpytest()

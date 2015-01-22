@@ -36,10 +36,11 @@ def test_ds_env(testdir, monkeypatch):
 
 
 def test_ds_ini(testdir, monkeypatch):
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
+    "DSM env should override ini."
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_ini')
     testdir.makeini("""\
        [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """)
     pkg = testdir.mkpydir('tpkg')
     settings = pkg.join('settings_ini.py')
