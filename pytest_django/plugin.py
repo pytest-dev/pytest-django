@@ -172,13 +172,13 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     # Configure DJANGO_SETTINGS_MODULE
     ds = (options.ds or
-          early_config.getini(SETTINGS_MODULE_ENV) or
-          os.environ.get(SETTINGS_MODULE_ENV))
+          os.environ.get(SETTINGS_MODULE_ENV) or
+          early_config.getini(SETTINGS_MODULE_ENV))
 
     # Configure DJANGO_CONFIGURATION
     dc = (options.dc or
-          early_config.getini(CONFIGURATION_ENV) or
-          os.environ.get(CONFIGURATION_ENV))
+          os.environ.get(CONFIGURATION_ENV) or
+          early_config.getini(CONFIGURATION_ENV))
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
