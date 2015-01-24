@@ -75,9 +75,9 @@ def monkey_patch_creation_for_db_suffix(suffix=None):
 
     if suffix is not None:
         def _get_test_db_name(self):
-            """
-            Internal implementation - returns the name of the test DB that will
-            be created. Only useful when called from create_test_db() and
+            """Internal: return the name of the test DB that will be created.
+
+            This is only useful when called from create_test_db() and
             _create_test_db() and when no external munging is done with the
             'NAME' or 'TEST_NAME' settings.
             """

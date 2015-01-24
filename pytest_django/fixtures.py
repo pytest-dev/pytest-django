@@ -190,9 +190,7 @@ def client():
 
 @pytest.fixture()
 def django_user_model(db):
-    """
-    The class of Django's user model.
-    """
+    """The class of Django's user model."""
     try:
         from django.contrib.auth import get_user_model
     except ImportError:
@@ -205,9 +203,7 @@ def django_user_model(db):
 
 @pytest.fixture()
 def django_username_field(django_user_model):
-    """
-    The fieldname for the username used with Django's user model.
-    """
+    """The fieldname for the username used with Django's user model."""
     try:
         return django_user_model.USERNAME_FIELD
     except AttributeError:
@@ -217,8 +213,7 @@ def django_username_field(django_user_model):
 
 @pytest.fixture()
 def admin_user(db, django_user_model, django_username_field):
-    """
-    A Django admin user.
+    """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
     password "password".
@@ -239,10 +234,7 @@ def admin_user(db, django_user_model, django_username_field):
 
 @pytest.fixture()
 def admin_client(db, admin_user):
-    """
-    A Django test client logged in as an admin user (via the ``admin_user``
-    fixture).
-    """
+    """A Django test client logged in as an admin user."""
     from django.test.client import Client
 
     client = Client()
@@ -326,7 +318,7 @@ def live_server(request):
 
 @pytest.fixture(autouse=True, scope='function')
 def _live_server_helper(request):
-    """Helper to make live_server work, internal to pytest-django
+    """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
     for a test which uses the live_server fixture.  This allows the
