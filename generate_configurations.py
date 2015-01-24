@@ -113,6 +113,8 @@ def commands(uid, env):
 
 
 def testenv_name(env):
+    if len(PYTEST_VERSIONS) == 1:
+        env = [getattr(env, x) for x in env._fields if x != 'pytest_version']
     return '-'.join(env)
 
 
