@@ -1,6 +1,6 @@
 .PHONY: docs test clean isort
 
-export DJANGO_SETTINGS_MODULE?=tests.settings_sqlite
+export DJANGO_SETTINGS_MODULE?=pytest_django_test.settings_sqlite_file
 
 testenv: bin/py.test
 
