@@ -6,8 +6,6 @@ If these tests fail you probably forgot to run "python setup.py develop".
 import django
 import pytest
 
-from pytest_django.lazy_django import django_settings_is_configured
-
 
 BARE_SETTINGS = '''
 # At least one database must be configured
@@ -267,16 +265,20 @@ def test_django_setup_sequence(django_testdir):
     result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
 
 
-def test_django_settings_is_configured():
-    assert django_settings_is_configured() is False
-
-
-def test_no_ds_but_django_imported(testdir):
+def test_no_ds_but_django_imported(testdir, monkeypatch):
     """pytest-django should not bail out, if "django" has been imported
     somewhere, e.g. via pytest-splinter."""
+
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+
     testdir.makepyfile("""
         import os
         import django
+
+        from pytest_django.lazy_django import django_settings_is_configured
+
+        def test_django_settings_is_configured():
+            assert django_settings_is_configured() is False
 
         def test_env():
             assert 'DJANGO_SETTINGS_MODULE' not in os.environ
