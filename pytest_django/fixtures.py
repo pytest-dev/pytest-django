@@ -83,8 +83,6 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
         request.addfinalizer(_django_cursor_wrapper.disable)
         request.addfinalizer(flushdb)
     else:
-        if 'live_server' in request.funcargnames:
-            return
         from django.test import TestCase
 
         _django_cursor_wrapper.enable()
@@ -158,7 +156,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transactional_db`` was
     requested.
     """
-    if 'transactional_db' in request.funcargnames:
+    if 'transactional_db' in request.funcargnames \
+            or 'live_server' in request.funcargnames:
         return request.getfuncargvalue('transactional_db')
     return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
 
