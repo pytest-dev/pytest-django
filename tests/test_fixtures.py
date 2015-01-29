@@ -118,15 +118,11 @@ class TestLiveServer:
 
     @pytest.fixture
     def item(self):
-        # This has not requested database access so should fail.
-        # Unfortunately the _live_server_helper autouse fixture makes this
-        # test work.
-        with pytest.raises(pytest.fail.Exception):
-            Item.objects.create(name='foo')
+        # This has not requested database access explicitly, but the
+        # live_server fixture auto-uses the transactional_db fixture.
+        Item.objects.create(name='foo')
 
-    @pytest.mark.xfail
     def test_item(self, item, live_server):
-        # test should fail/pass in setup
         pass
 
     @pytest.fixture
