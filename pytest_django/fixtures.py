@@ -64,32 +64,44 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     if is_django_unittest(request):
         return
 
+    if not transactional and 'live_server' in request.funcargnames:
+        # Do nothing, we get called with transactional=True, too.
+        return
+
+    django_case = None
+
+    _django_cursor_wrapper.enable()
+    request.addfinalizer(_django_cursor_wrapper.disable)
+
     if transactional:
-        _django_cursor_wrapper.enable()
+        from django import get_version
 
-        def flushdb():
-            """Flush the database and close database connections"""
-            # Django does this by default *before* each test
-            # instead of after.
-            from django.db import connections
-            from django.core.management import call_command
+        if get_version() >= '1.5':
+            from django.test import TransactionTestCase as django_case
 
-            for db in connections:
-                call_command('flush', verbosity=0,
-                             interactive=False, database=db)
-            for conn in connections.all():
-                conn.close()
+        else:
+            # Django before 1.5 flushed the DB during setUp.
+            # Use pytest-django's old behavior with it.
+            def flushdb():
+                """Flush the database and close database connections"""
+                # Django does this by default *before* each test
+                # instead of after.
+                from django.db import connections
+                from django.core.management import call_command
 
-        request.addfinalizer(_django_cursor_wrapper.disable)
-        request.addfinalizer(flushdb)
+                for db in connections:
+                    call_command('flush', verbosity=0,
+                                 interactive=False, database=db)
+                for conn in connections.all():
+                    conn.close()
+            request.addfinalizer(flushdb)
+
     else:
-        from django.test import TestCase
+        from django.test import TestCase as django_case
 
-        _django_cursor_wrapper.enable()
-        _django_cursor_wrapper._is_transactional = False
-        case = TestCase(methodName='__init__')
+    if django_case:
+        case = django_case(methodName='__init__')
         case._pre_setup()
-        request.addfinalizer(_django_cursor_wrapper.disable)
         request.addfinalizer(case._post_teardown)
 
 
