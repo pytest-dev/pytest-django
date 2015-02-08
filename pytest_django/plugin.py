@@ -4,12 +4,13 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 
-import os
-
 import contextlib
-
-import pytest
+import os
+import sys
 import types
+
+import py
+import pytest
 
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
@@ -61,9 +62,6 @@ def pytest_addoption(parser):
                   'Automatically find and add a Django project to the '
                   'Python path.',
                   default=True)
-
-import py
-import sys
 
 
 def _exists(path, ignore=EnvironmentError):
