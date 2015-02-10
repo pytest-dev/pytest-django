@@ -82,7 +82,7 @@ def requirements(env):
     yield 'django-configurations==0.8'
 
     if env.is_py2():
-        yield 'south==1.0'
+        yield 'south==1.0.2'
 
     if env.settings == 'postgres':
         # Django 1.3 does not work with recent psycopg2 versions
