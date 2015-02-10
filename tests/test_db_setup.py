@@ -246,7 +246,7 @@ def test_initial_data(django_testdir_initial):
 @pytest.mark.skipif(sys.version_info[0] == 3,
                     reason='South is not properly supported on Python 3')
 class TestSouth:
-    """Test interaction with initial_data and South."""
+    """Test interaction with South, with and without initial_data."""
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -301,6 +301,36 @@ class TestSouth:
         result = testdir.runpytest('--tb=short', '-v', '-s')
         assert result.ret != 0
         result.stderr.fnmatch_lines(['*no such table: app_item*'])
+        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
+    def test_south_migrations(self, django_testdir):
+        """South migration with a normal testdir (no initial data)."""
+        testdir = django_testdir
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+            ''')
+
+        testdir.mkpydir('tpkg/app/south_migrations')
+        testdir.create_app_file("""
+            from south.v2 import SchemaMigration
+
+            class Migration(SchemaMigration):
+                def forwards(self, orm):
+                    print("mark_south_migration_forwards")
+            """, 'south_migrations/0001_initial.py')
+        result = testdir.runpytest('--tb=short', '-v', '-s')
+        assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
     @pytest.mark.django_project(extra_settings="""

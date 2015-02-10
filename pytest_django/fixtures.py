@@ -103,7 +103,7 @@ def _handle_south():
             # if `south` >= 0.7.1 we can use the test helper
             from south.management.commands import patch_for_test_db_setup
         except ImportError:
-            # if `south` < 0.7.1 make sure it's migrations are disabled
+            # if `south` < 0.7.1 make sure its migrations are disabled
             management.get_commands()
             management._commands['syncdb'] = 'django.core'
         else:
