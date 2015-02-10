@@ -217,6 +217,9 @@ def make_travis_yml(envs):
         env:
         %(testenvs)s
         %(checkenvs)s
+        matrix:
+          allow_failures:
+        %(allow_failures)s
         install:
           - pip install tox
         script: tox -e $TESTENV
@@ -224,10 +227,14 @@ def make_travis_yml(envs):
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
                           python for python in PYTHON_VERSIONS)
+    allow_failures = '\n'.join('    - env: TESTENV=%s' %
+                               testenv_name(env) for env in envs
+                               if env.django_version == 'master')
 
     return contents % {
         'testenvs': testenvs,
         'checkenvs': checkenvs,
+        'allow_failures': allow_failures,
         'RUN_PYTHON': RUN_PYTHON,
     }
 
