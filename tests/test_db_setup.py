@@ -311,9 +311,8 @@ class TestSouth:
         }
         """)
     def test_initial_south_migrations(self, django_testdir_initial):
-        """
-        Test initial data with existing South migrations.
-        """
+        """This should fail, because it has no real migration that
+        would create the table, and so no initial data can be loaded."""
         testdir = django_testdir_initial
         testdir.create_test_module('''
             import pytest
@@ -326,12 +325,9 @@ class TestSouth:
         testdir.create_initial_south_migration()
 
         result = testdir.runpytest('--tb=short', '-v', '-s')
-        assert result.ret == 0
-        result.stdout.fnmatch_lines_random([
-            "tpkg/test_the_test.py::test_inner_south*",
-            "*mark_south_migration_forwards*",
-            "*PASSED*",
-            "*Destroying test database for alias 'default'...*"])
+        assert result.ret != 0
+        result.stderr.fnmatch_lines(['*no such table: app_item*'])
+        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
