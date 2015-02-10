@@ -189,6 +189,7 @@ class TestLiveServer:
             """)
         result = django_testdir.runpytest('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
+        assert result.ret == 0
 
     @pytest.mark.skipif(get_django_version() < (1, 7),
                         reason="Django >= 1.7 required")
@@ -305,3 +306,4 @@ class Migration(migrations.Migration):
 
     result = django_testdir.runpytest('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
