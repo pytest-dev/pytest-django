@@ -220,6 +220,9 @@ def make_travis_yml(envs):
         matrix:
           allow_failures:
         %(allow_failures)s
+        before_install:
+          # Wrap "pip" with "travis_retry" to retry on network failures.
+          - pip() { travis_retry command pip "$@"; }
         install:
           - pip install tox
         script: tox -e $TESTENV
