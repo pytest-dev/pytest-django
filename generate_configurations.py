@@ -209,6 +209,8 @@ def make_tox_ini(envs, default_envs):
 
 def make_travis_yml(envs):
     contents = dedent("""
+        # Use container-based environment (faster startup, allows caches).
+        sudo: false
         language: python
         python:
           - "%(RUN_PYTHON)s"
