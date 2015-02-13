@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import codecs
+import os
+
 from setuptools import setup
 
 
@@ -26,7 +27,7 @@ setup(
     url='http://pytest-django.readthedocs.org/',
     packages=['pytest_django'],
     long_description=read('README.rst'),
-    install_requires=['pytest>=2.3.4'],
+    install_requires=['pytest>=2.5'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
@@ -34,11 +35,11 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing',
-                 'Programming Language :: Python :: 2.5',
                  'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.2',
                  'Programming Language :: Python :: 3.3',
+                 'Programming Language :: Python :: 3.4',
                 ],
     # the following makes a plugin available to py.test
     entry_points={'pytest11': ['django = pytest_django.plugin']})

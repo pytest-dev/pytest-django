@@ -1,12 +1,15 @@
 # In Django 1.6, the old test runner was deprecated, and the useful bits were
-# moved out of the test runner
+# moved out of the test runner.
+
+import pytest
 
 try:
     from django.test.runner import DiscoverRunner as DjangoTestRunner
 except ImportError:
     from django.test.simple import DjangoTestSuiteRunner as DjangoTestRunner
 
-_runner = DjangoTestRunner(interactive=False)
+_runner = DjangoTestRunner(verbosity=pytest.config.option.verbose,
+                           interactive=False)
 
 
 try:
@@ -25,10 +28,3 @@ except ImportError:
 
 
 del _runner
-
-
-try:
-    from django import setup
-except ImportError:
-    # Emulate Django 1.7 django.setup() with get_models
-    from django.db.models import get_models as setup

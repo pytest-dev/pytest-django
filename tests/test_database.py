@@ -1,21 +1,20 @@
 from __future__ import with_statement
 
-from django.db import transaction, connection
+import pytest
+from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
-import pytest
-
-from .app.models import Item
+from pytest_django_test.app.models import Item
 
 
 def noop_transactions():
-    """Test whether transactions are disabled
+    """Test whether transactions are disabled.
 
     Return True if transactions are disabled, False if they are
     enabled.
     """
 
-    # Newer versions of Django simply runs standard tests in an atomic block.
+    # Newer versions of Django simply run standard tests in an atomic block.
     if hasattr(connection, 'in_atomic_block'):
         return connection.in_atomic_block
     else:
@@ -96,7 +95,7 @@ class TestDatabaseFixtures:
 
     def test_fixture_clean(self, both_dbs):
         # Relies on the order: test_mydb created an object
-        # See https://github.com/pelme/pytest_django/issues/17
+        # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
@@ -106,6 +105,28 @@ class TestDatabaseFixtures:
 
     def test_fin(self, fin):
         # Check finalizer has db access (teardown will fail if not)
+        pass
+
+
+class TestDatabaseFixturesBothOrder:
+    @pytest.fixture
+    def fixture_with_db(self, db):
+        Item.objects.create(name='spam')
+
+    @pytest.fixture
+    def fixture_with_transdb(self, transactional_db):
+        Item.objects.create(name='spam')
+
+    def test_trans(self, fixture_with_transdb):
+        pass
+
+    def test_db(self, fixture_with_db):
+        pass
+
+    def test_db_trans(self, fixture_with_db, fixture_with_transdb):
+        pass
+
+    def test_trans_db(self, fixture_with_transdb, fixture_with_db):
         pass
 
 

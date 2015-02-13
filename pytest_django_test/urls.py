@@ -5,5 +5,6 @@ except ImportError:
 
 urlpatterns = patterns(
     '',
-    (r'admin-required/', 'tests.views.admin_required_view'),
+    (r'^item_count/$', 'pytest_django_test.app.views.item_count'),
+    (r'^admin-required/$', 'pytest_django_test.app.views.admin_required_view'),
 )

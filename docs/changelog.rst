@@ -1,6 +1,68 @@
 Changelog
 =========
 
+2.8.0
+-----
+
+Features
+^^^^^^^^
+
+* pytest's verbosity is being used for Django's code to setup/teardown the test
+  database (#172).
+
+* Added a new option `--nomigrations` to avoid running Django 1.7+ migrations
+  when constructing the test database. Huge thanks to Renan Ivo for complete
+  patch, tests and documentation.
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed compatibility issues related to Django 1.8's
+  `setUpClass`/`setUpTestData`. Django 1.8 is now a fully supported version.
+  Django master as of 2014-01-18 (the Django 1.9 branch) is also supported.
+
+2.7.0
+-----
+
+Features
+^^^^^^^^
+
+* New fixtures: ``admin_user``, ``django_user_model`` and
+  ``django_username_field`` (#109).
+
+* Automatic discovery of Django projects to make it easier for new users. This
+  change is slightly backward incompatible, if you encounter problems with it,
+  the old behaviour can be restored by adding this to ``pytest.ini``,
+  ``setup.cfg`` or ``tox.ini``::
+
+    [pytest]
+    django_find_project = false
+
+  Please see the :ref:`managing_python_path` section for more information.
+
+Bugfixes
+^^^^^^^^
+
+* Fix interaction between ``db`` and ``transaction_db`` fixtures (#126).
+
+* Fix admin client with custom user models (#124). Big thanks to Benjamin
+  Hedrich and Dmitry Dygalo for patch and tests.
+
+* Fix usage of South migrations, which were unconditionally disabled previously
+  (#22).
+
+* Fixed #119, #134: Call ``django.setup()`` in Django >=1.7 directly after
+  settings is loaded to ensure proper loading of Django applications. Thanks to
+  Ionel Cristian Mărieș, Daniel Hahler, Tymur Maryokhin, Kirill SIbirev, Paul
+  Collins, Aymeric Augustin, Jannis Leidel, Baptiste Mispelon and Anatoly
+  Bubenkoff for report, discussion and feedback.
+
+* `The `live_server`` fixture can now serve static files also for Django>=1.7
+  if the ``django.contrib.staticfiles`` app is installed. (#140).
+
+* ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` environment variable is read instead
+  of ``DJANGO_TEST_LIVE_SERVER_ADDRESS``. (#140)
+
 2.6.2
 -----
 
@@ -41,9 +103,9 @@ used - use 2.6.1 or newer to avoid confusion.
   strategy as for pytest itself is used: No code will be changed to prevent
   Python 2.5 from working, but it will not be actively tested.
 
-* pytest-xdist support: it is now possible to run tests in parallell. Just use
+* pytest-xdist support: it is now possible to run tests in parallel. Just use
   pytest-xdist as normal (pass -n to py.test). One database will be created for
-  each subprocess so that tests run independent from eachother.
+  each subprocess so that tests run independent from each other.
 
 2.4.0
 -----
@@ -73,7 +135,7 @@ used - use 2.6.1 or newer to avoid confusion.
 -----
 
 * Python 3 support. pytest-django now supports Python 3.2 and 3.3 in addition
-  to 2.5-2.7. Big thanks to Rafal Stozek for making this happend!
+  to 2.5-2.7. Big thanks to Rafal Stozek for making this happen!
 
 2.1.0
 -----
@@ -103,7 +165,7 @@ tests which needs database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 
-Most of the interals has been rewritten, exploiting py.test's new
+Most of the internals have been rewritten, exploiting py.test's new
 fixtures API. This release would not be possible without Floris
 Bruynooghe who did the port to the new fixture API and fixed a number of
 bugs.
@@ -178,4 +240,4 @@ way for easier additions of new and exciting features in the future!
 * Added documentation
 * Uploaded to PyPI for easy installation
 * Added the ``transaction_test_case`` decorator for tests that needs real transactions
-* Added initial implemantion for live server support via a funcarg (no docs yet, it might change!)
+* Added initial implementation for live server support via a funcarg (no docs yet, it might change!)

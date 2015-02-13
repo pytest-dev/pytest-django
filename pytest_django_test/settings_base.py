@@ -1,12 +1,12 @@
 import os
 
-ROOT_URLCONF = 'tests.urls'
+ROOT_URLCONF = 'pytest_django_test.urls'
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'tests.app',
+    'pytest_django_test.app',
 ]
 
 STATIC_URL = '/static/'
@@ -22,3 +22,11 @@ if uid:
     db_suffix = '_%s' % uid
 else:
     db_suffix = ''
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)

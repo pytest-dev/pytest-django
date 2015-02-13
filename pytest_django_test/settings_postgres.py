@@ -1,4 +1,4 @@
-from tests.settings_base import *  # noqa
+from pytest_django_test.settings_base import *  # noqa
 
 # PyPy compatibility
 try:

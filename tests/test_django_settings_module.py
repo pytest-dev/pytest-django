@@ -3,6 +3,10 @@
 If these tests fail you probably forgot to run "python setup.py develop".
 """
 
+import django
+import pytest
+
+
 BARE_SETTINGS = '''
 # At least one database must be configured
 DATABASES = {
@@ -51,7 +55,7 @@ def test_ds_ini(testdir, monkeypatch):
 
 def test_ds_option(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
-    testdir.makeini("""\
+    testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """)
@@ -69,13 +73,27 @@ def test_ds_option(testdir, monkeypatch):
 
 
 def test_ds_non_existent(testdir, monkeypatch):
-    # Make sure we do not fail with INTERNALERROR if an incorrect
-    # DJANGO_SETTINGS_MODULE is given.
+    """
+    Make sure we do not fail with INTERNALERROR if an incorrect
+    DJANGO_SETTINGS_MODULE is given.
+    """
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
-    result.stderr.fnmatch_lines(
-        ["*Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*):*"])
+    result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
+
+
+def test_ds_after_user_conftest(testdir, monkeypatch):
+    """
+    Test that the settings module can be imported, after pytest has adjusted
+    the sys.path.
+    """
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'settings_after_conftest')
+    testdir.makepyfile('def test_ds(): pass')
+    testdir.makepyfile(settings_after_conftest="SECRET_KEY='secret'")
+    # testdir.makeconftest("import sys; print(sys.path)")
+    result = testdir.runpytest('-v')
+    result.stdout.fnmatch_lines(['*1 passed*'])
 
 
 def test_django_settings_configure(testdir, monkeypatch):
@@ -196,5 +214,52 @@ def test_debug_false(testdir, monkeypatch):
         def test_debug_is_false():
             assert settings.DEBUG is False
     """)
+
     r = testdir.runpytest()
     assert r.ret == 0
+
+
+@pytest.mark.skipif(not hasattr(django, 'setup'),
+                    reason="This Django version does not support app loading")
+@pytest.mark.django_project(extra_settings="""
+    INSTALLED_APPS = [
+        'tpkg.app.apps.TestApp',
+    ]
+""")
+def test_django_setup_sequence(django_testdir):
+    django_testdir.create_app_file("""
+        from django.apps import apps, AppConfig
+
+        from django.contrib.auth.models import AbstractUser
+        from django.db import models
+
+
+        class TestApp(AppConfig):
+            name = 'tpkg.app'
+
+            def ready(self):
+                print ('READY(): populating=%r' % apps._lock.locked())
+        """, 'apps.py')
+
+    django_testdir.create_app_file("""
+        from django.apps import apps
+
+        print ('IMPORT: populating=%r,ready=%r' % (
+            apps._lock.locked(), apps.ready))
+        SOME_THING = 1234
+        """, 'models.py')
+
+    django_testdir.create_app_file("", '__init__.py')
+    django_testdir.makepyfile("""
+        from django.apps import apps
+        from tpkg.app.models import SOME_THING
+
+        def test_anything():
+            print ('TEST: populating=%r,ready=%r' % (
+                apps._lock.locked(), apps.ready))
+        """)
+
+    result = django_testdir.runpytest('-s', '--tb=line')
+    result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
+    result.stdout.fnmatch_lines(['*READY(): populating=True*'])
+    result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])

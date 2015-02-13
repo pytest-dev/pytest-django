@@ -2,15 +2,17 @@
 
 If these tests fail you probably forgot to install django-configurations.
 """
-import sys
 import pytest
-
-# importing configurations fails on 2.5, even though it might be installed
-if sys.version_info < (2, 6):
-    pytest.skip('django-configurations is not supported on Python < 2.6')
 
 pytest.importorskip('configurations')
 
+try:
+    import configurations.importer
+    configurations
+except ImportError as e:
+    if 'LaxOptionParser' in e.args[0]:
+        pytest.skip('This version of django-configurations is incompatible with Django: '  # noqa
+                    'https://github.com/jezdez/django-configurations/issues/65')  # noqa
 
 BARE_SETTINGS = '''
 from configurations import Settings
@@ -73,7 +75,7 @@ def test_dc_option(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
     monkeypatch.setenv('DJANGO_CONFIGURATION', 'DO_NOT_USE_env')
 
-    testdir.makeini("""\
+    testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
        DJANGO_CONFIGURATION = DO_NOT_USE_ini

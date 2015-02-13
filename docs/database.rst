@@ -104,7 +104,7 @@ database will automatically be re-created.
 ``--create-db`` - force re creation of the test database
 --------------------------------------------------------
 When used with ``--reuse-db``, this option will re-create the database,
-regardless of wheter it exists or not.
+regardless of whether it exists or not.
 
 Example work flow with ``--reuse-db`` and ``--create-db``.
 -----------------------------------------------------------
@@ -120,3 +120,11 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
 
 * When you alter your database schema, run ``py.test --create-db``, to force
   re-creation of the test database.
+
+``--nomigrations`` - Disable Django 1.7+ migrations
+--------------------------------------------------------------
+
+Using ``--nomigrations`` will `disable Django 1.7+ migrations <https://gist.github.com/NotSqrt/5f3c76cd15e40ef62d09>`_
+and create the database inspecting all app models (the default behavior of
+Django until version 1.6). It may be faster when there are several migrations
+to run in the database setup.
