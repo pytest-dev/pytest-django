@@ -209,12 +209,20 @@ def make_tox_ini(envs, default_envs):
 
 def make_travis_yml(envs):
     contents = dedent("""
+        # Use container-based environment (faster startup, allows caches).
+        sudo: false
         language: python
         python:
           - "%(RUN_PYTHON)s"
         env:
         %(testenvs)s
         %(checkenvs)s
+        matrix:
+          allow_failures:
+        %(allow_failures)s
+        before_install:
+          # Wrap "pip" with "travis_retry" to retry on network failures.
+          - pip() { travis_retry command pip "$@"; }
         install:
           - pip install tox
         script: tox -e $TESTENV
@@ -222,10 +230,14 @@ def make_travis_yml(envs):
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
                           python for python in PYTHON_VERSIONS)
+    allow_failures = '\n'.join('    - env: TESTENV=%s' %
+                               testenv_name(env) for env in envs
+                               if env.django_version == 'master')
 
     return contents % {
         'testenvs': testenvs,
         'checkenvs': checkenvs,
+        'allow_failures': allow_failures,
         'RUN_PYTHON': RUN_PYTHON,
     }
 

@@ -1,3 +1,5 @@
+# Use container-based environment (faster startup, allows caches).
+sudo: false
 language: python
 python:
   - "3.4"
@@ -26,6 +28,21 @@ env:
   - TESTENV=checkqa-python3.4
   - TESTENV=checkqa-pypy
   - TESTENV=checkqa-pypy3
+matrix:
+  allow_failures:
+    - env: TESTENV=pypy-master-sqlite_file
+    - env: TESTENV=pypy3-master-sqlite_file
+    - env: TESTENV=python2.7-master-mysql_innodb
+    - env: TESTENV=python2.7-master-mysql_myisam
+    - env: TESTENV=python2.7-master-sqlite_file
+    - env: TESTENV=python3.2-master-sqlite_file
+    - env: TESTENV=python3.3-master-sqlite_file
+    - env: TESTENV=python3.4-master-postgres
+    - env: TESTENV=python3.4-master-sqlite
+    - env: TESTENV=python3.4-master-sqlite_file
+before_install:
+  # Wrap "pip" with "travis_retry" to retry on network failures.
+  - pip() { travis_retry command pip "$@"; }
 install:
   - pip install tox
 script: tox -e $TESTENV
