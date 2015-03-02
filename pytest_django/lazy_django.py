@@ -22,8 +22,6 @@ def django_settings_is_configured():
 
     # If DJANGO_SETTINGS_MODULE is defined at this point, Django is assumed to
     # always be loaded.
-    from django.conf import settings
-    assert settings.configured is True
     return True
 
 
