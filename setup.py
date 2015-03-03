@@ -25,6 +25,7 @@ setup(
     maintainer="Andreas Pelme",
     maintainer_email="andreas@pelme.se",
     url='http://pytest-django.readthedocs.org/',
+    license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
     install_requires=['pytest>=2.5'],
