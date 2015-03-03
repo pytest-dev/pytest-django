@@ -242,10 +242,10 @@ class TestSouth:
         INSTALLED_APPS += [ 'south', ]
         SOUTH_TESTS_MIGRATE = True
         SOUTH_MIGRATION_MODULES = {
-            'app': 'app.south_migrations',
+            'app': 'tpkg.app.south_migrations',
         }
         """)
-    def test_initial_data_south(self, django_testdir_initial):
+    def test_initial_data_south_no_migrations(self, django_testdir_initial):
         django_testdir_initial.create_test_module('''
             import pytest
 
@@ -257,8 +257,40 @@ class TestSouth:
                     == ["mark_initial_data"]
         ''')
 
-        result = django_testdir_initial.runpytest('--tb=short', '-v')
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
+
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
+    def test_initial_data_south_with_migrations(self, django_testdir_initial):
+        """
+        If migrations exists, there should be an error if they do not create
+        the DB table.
+        """
+        django_testdir_initial.create_test_module('''
+            import pytest
+
+            from .app.models import Item
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                assert [x.name for x in Item.objects.all()] \
+                    == ["mark_initial_data"]
+        ''')
+        django_testdir_initial.mkpydir('tpkg/app/south_migrations')
+
+        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        # Can be OperationalError or DatabaseError (Django 1.4).
+        result.stdout.fnmatch_lines([
+            '*Error:* no such table: app_item*'])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -268,6 +300,9 @@ class TestSouth:
         }
         """)
     def test_initial_south_migrations(self, django_testdir_initial):
+        """
+        Test initial data with existing South migrations.
+        """
         testdir = django_testdir_initial
         testdir.create_test_module('''
             import pytest
@@ -277,16 +312,14 @@ class TestSouth:
                 pass
             ''')
 
-        testdir.mkpydir('tpkg/app/south_migrations')
-        testdir.create_app_file("""
-            from south.v2 import SchemaMigration
+        testdir.create_initial_south_migration()
 
-            class Migration(SchemaMigration):
-                def forwards(self, orm):
-                    print("mark_south_migration_forwards")
-            """, 'south_migrations/0001_initial.py')
         result = testdir.runpytest('--tb=short', '-v', '-s')
-        result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*mark_south_migration_forwards*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
@@ -311,8 +344,46 @@ class TestSouth:
         p.write('raise Exception("This should not get imported.")',
                 ensure=True)
 
-        result = testdir.runpytest('--tb=short', '-v')
-        result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
+        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py::test_inner_south*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
+
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
+    def test_south_migrations_python_files_star(self, django_testdir_initial):
+        """
+        Test for South migrations and tests imported via `*.py`.
+
+        This is meant to reproduce
+        https://github.com/pytest-dev/pytest-django/issues/158, but does not
+        fail.
+        """
+        testdir = django_testdir_initial
+        testdir.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+        ''', 'test.py')
+        testdir.create_initial_south_migration()
+
+        pytest_ini = testdir.create_test_module("""
+            [pytest]
+            python_files=*.py""", 'pytest.ini')
+
+        result = testdir.runpytest('--tb=short', '-v', '-s', '-c', pytest_ini)
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test.py::test_inner_south*",
+            "*mark_south_migration_forwards*",
+            "*PASSED*"])
 
 
 class TestNativeMigrations(object):

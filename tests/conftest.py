@@ -101,10 +101,14 @@ def django_testdir(request, testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.the_settings')
 
     def create_test_module(test_code, filename='test_the_test.py'):
-        tpkg_path.join(filename).write(dedent(test_code), ensure=True)
+        r = tpkg_path.join(filename)
+        r.write(dedent(test_code), ensure=True)
+        return r
 
     def create_app_file(code, filename):
-        test_app_path.join(filename).write(dedent(code), ensure=True)
+        r = test_app_path.join(filename)
+        r.write(dedent(code), ensure=True)
+        return r
 
     testdir.create_test_module = create_test_module
     testdir.create_app_file = create_app_file
@@ -122,5 +126,38 @@ def django_testdir_initial(django_testdir):
             "model": "app.item",
             "fields": { "name": "mark_initial_data" }
         }]""")
+
+    def _create_initial_south_migration():
+        """
+        Create initial South migration for pytest_django_test/app/models.py.
+        """
+        django_testdir.mkpydir('tpkg/app/south_migrations')
+        django_testdir.create_app_file("""
+            from south.v2 import SchemaMigration
+            from south.db import db
+
+            class Migration(SchemaMigration):
+                def forwards(self, orm):
+                    db.create_table(u'app_item', (
+                        (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+                        ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+                    ))
+                    db.send_create_signal(u'app', ['Item'])
+                    print("mark_south_migration_forwards"),
+
+                def backwards(self, orm):
+                    db.delete_table(u'app_item')
+
+                models = {
+                    u'app.item': {
+                        'Meta': {'object_name': 'Item'},
+                        u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+                        'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+                    }
+                }
+
+                complete_apps = ['app']
+            """, 'south_migrations/0001_initial.py')
+    django_testdir.create_initial_south_migration = _create_initial_south_migration
 
     return django_testdir
