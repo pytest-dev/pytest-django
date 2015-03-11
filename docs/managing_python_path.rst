@@ -28,9 +28,9 @@ in your project, the automatic detection may not be correct. See
 :ref:`managing_the_python_path_explicilty` for more details on how to configure
 your environment in that case.
 
-.. _managing_the_python_path_explicilty:
+.. _managing_the_python_path_explicitly:
 
-Managing the Python path explicilty
+Managing the Python path explicitly
 -----------------------------------
 
 First, disable the automatic Django project finder. Add this to

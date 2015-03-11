@@ -10,7 +10,7 @@ pytest-django tries to automatically add your project to the Python path by
 looking for a ``manage.py`` file and adding its path to the Python path.
 
 If this for some reason fails for you, you have to manage your Python paths
-explicilty. See the documentation on :ref:`managing_the_python_path_explicilty`
+explicitly. See the documentation on :ref:`managing_the_python_path_explicitly`
 for more information.
 
 How can I make sure that all my tests run with a specific locale?
