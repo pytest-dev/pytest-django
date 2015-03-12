@@ -74,11 +74,11 @@ def _exists(path, ignore=EnvironmentError):
 PROJECT_FOUND = ('pytest-django found a Django project in %s '
                  '(it contains manage.py) and added it to the Python path.\n'
                  'If this is wrong, add "django_find_project = false" to '
-                 'pytest.ini and expliclity manage your Python path.')
+                 'pytest.ini and explicitly manage your Python path.')
 
 PROJECT_NOT_FOUND = ('pytest-django could not find a Django project '
                      '(no manage.py file could be found). You must '
-                     'expliclity add your Django project to the Python path '
+                     'explicitly add your Django project to the Python path '
                      'to have it picked up.')
 
 PROJECT_SCAN_DISABLED = ('pytest-django did not search for Django '
