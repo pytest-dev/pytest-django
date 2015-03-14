@@ -36,8 +36,8 @@ DJANGO_REQUIREMENTS = {
     '1.5': 'Django>=1.5,<1.6',
     '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
-    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.zip',
-    'master': 'https://github.com/django/django/archive/master.zip',
+    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.tar.gz',
+    'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
 TOX_TESTENV_TEMPLATE = dedent("""
