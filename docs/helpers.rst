@@ -77,6 +77,23 @@ on what marks are and for notes on using_ them.
          assert 'Success!' in client.get('/some_url_defined_in_test_urls/')
 
 
+``pytest.mark.ignore_template_errors`` - ignore invalid template variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+..py:function:: pytest.mark.ignore_template_errors
+
+  If you run py.test using the ``--fail-on-template-vars`` option,
+  tests will fail should your templates contain any invalid variables.
+  This marker will disable this feature by setting ``settings.TEMPLATE_STRING_IF_INVALID=None``
+  or the ``string_if_invalid`` template option in Django>=1.7
+
+  Example usage::
+
+     @pytest.mark.ignore_template_errors
+     def test_something(client):
+         client('some-url-with-invalid-template-vars')
+
+
 Fixtures
 --------
 
@@ -86,7 +103,7 @@ More information on fixtures is available in the `py.test documentation
 
 
 ``rf`` - ``RequestFactory``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a `django.test.RequestFactory`_
 

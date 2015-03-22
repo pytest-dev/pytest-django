@@ -28,6 +28,105 @@ def test_mail_again():
     test_mail()
 
 
+@pytest.mark.django_project(extra_settings="""
+    INSTALLED_APPS = [
+        'tpkg.app',
+    ]
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+    ROOT_URLCONF = 'tpkg.app.urls'
+    """)
+def test_invalid_template_variable(django_testdir):
+    django_testdir.create_app_file("""
+        try:
+            from django.conf.urls import patterns  # Django >1.4
+        except ImportError:
+            from django.conf.urls.defaults import patterns  # Django 1.3
+
+        urlpatterns = patterns(
+            '',
+            (r'invalid_template/', 'tpkg.app.views.invalid_template'),
+        )
+        """, 'urls.py')
+    django_testdir.create_app_file("""
+        from django.shortcuts import render
+
+
+        def invalid_template(request):
+            return render(request, 'invalid_template.html', {})
+        """, 'views.py')
+    django_testdir.create_app_file(
+        "<div>{{ invalid_var }}</div>",
+        'templates/invalid_template.html'
+    )
+    django_testdir.create_test_module('''
+        import pytest
+
+        def test_for_invalid_template(client):
+            client.get('/invalid_template/')
+
+        @pytest.mark.ignore_template_errors
+        def test_ignore(client):
+            client.get('/invalid_template/')
+        ''')
+    result = django_testdir.runpytest('-s', '--fail-on-template-vars')
+    result.stdout.fnmatch_lines_random([
+        "tpkg/test_the_test.py F.",
+        "Undefined template variable 'invalid_var' in 'invalid_template.html'",
+    ])
+
+
+@pytest.mark.django_project(extra_settings="""
+    INSTALLED_APPS = [
+        'tpkg.app',
+    ]
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+    ROOT_URLCONF = 'tpkg.app.urls'
+    """)
+def test_invalid_template_variable_opt_in(django_testdir):
+    django_testdir.create_app_file("""
+        try:
+            from django.conf.urls import patterns  # Django >1.4
+        except ImportError:
+            from django.conf.urls.defaults import patterns  # Django 1.3
+
+        urlpatterns = patterns(
+            '',
+            (r'invalid_template/', 'tpkg.app.views.invalid_template'),
+        )
+        """, 'urls.py')
+    django_testdir.create_app_file("""
+        from django.shortcuts import render
+
+
+        def invalid_template(request):
+            return render(request, 'invalid_template.html', {})
+        """, 'views.py')
+    django_testdir.create_app_file(
+        "<div>{{ invalid_var }}</div>",
+        'templates/invalid_template.html'
+    )
+    django_testdir.create_test_module('''
+        import pytest
+
+        def test_for_invalid_template(client):
+            client.get('/invalid_template/')
+
+        @pytest.mark.ignore_template_errors
+        def test_ignore(client):
+            client.get('/invalid_template/')
+        ''')
+    result = django_testdir.runpytest('-s')
+    result.stdout.fnmatch_lines_random([
+        "tpkg/test_the_test.py ..",
+    ])
+
+
 @pytest.mark.django_db
 def test_database_rollback():
     assert Item.objects.count() == 0
