@@ -325,9 +325,31 @@ class TestSouth:
         testdir.create_initial_south_migration()
 
         result = testdir.runpytest('--tb=short', '-v', '-s')
-        assert result.ret != 0
-        result.stderr.fnmatch_lines(['*no such table: app_item*'])
+        assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
+
+    @pytest.mark.django_project(extra_settings="""
+        INSTALLED_APPS += [ 'south', ]
+        SOUTH_TESTS_MIGRATE = True
+        SOUTH_MIGRATION_MODULES = {
+            'app': 'tpkg.app.south_migrations',
+        }
+        """)
+    def test_initial_without_south_migrations(self, django_testdir_initial):
+        """Using South, but without any migrations should still load the
+        initial data."""
+        django_testdir_initial.create_test_module('''
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner_south():
+                pass
+            ''')
+
+        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(['*PASSED*'])
+        assert 'mark_south_migration_forwards' not in result.stdout.str()
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
