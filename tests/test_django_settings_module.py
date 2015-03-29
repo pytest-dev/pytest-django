@@ -32,6 +32,7 @@ def test_ds_env(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_ini(testdir, monkeypatch):
@@ -51,6 +52,7 @@ def test_ds_ini(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_option(testdir, monkeypatch):
@@ -70,6 +72,7 @@ def test_ds_option(testdir, monkeypatch):
     """)
     result = testdir.runpytest('--ds=tpkg.settings_opt')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_non_existent(testdir, monkeypatch):
@@ -81,6 +84,7 @@ def test_ds_non_existent(testdir, monkeypatch):
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
     result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
+    assert result.ret != 0
 
 
 def test_ds_after_user_conftest(testdir, monkeypatch):
@@ -94,6 +98,7 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     # testdir.makeconftest("import sys; print(sys.path)")
     result = testdir.runpytest('-v')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_in_pytest_configure(testdir, monkeypatch):
@@ -211,6 +216,7 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_debug_false(testdir, monkeypatch):
@@ -282,6 +288,7 @@ def test_django_setup_sequence(django_testdir):
     result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
     result.stdout.fnmatch_lines(['*READY(): populating=True*'])
     result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
+    assert result.ret == 0
 
 
 def test_no_ds_but_django_imported(testdir, monkeypatch):
