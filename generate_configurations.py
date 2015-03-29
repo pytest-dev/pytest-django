@@ -227,8 +227,21 @@ def make_travis_yml(envs):
           allow_failures:
         %(allow_failures)s
         install:
-          - travis_retry pip install tox
-        script: travis_retry tox -e $TESTENV
+          # Create pip wrapper script, using travis_retry (a function) and
+          # inject it into tox.ini.
+          - mkdir -p bin
+          - PATH=$PWD/bin:$PATH
+          - printf '#!/bin/sh\\n' > bin/travis_retry_pip
+          - declare -f travis_retry >> bin/travis_retry_pip
+          - printf '\\necho "Using pip-wrapper.." >&2\\ntravis_retry pip "$@"' >> bin/travis_retry_pip
+          - chmod +x bin/travis_retry_pip
+          - sed -i.bak 's/^\[testenv\]/\\0\\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
+          - diff tox.ini tox.ini.bak && return 1 || true
+          - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
+          - diff tox.ini tox.ini.bak && return 1 || true
+
+          - pip install tox
+        script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
