@@ -150,11 +150,12 @@ def _disable_native_migrations():
 def db(request, _django_db_setup, _django_cursor_wrapper):
     """Require a django test database
 
-    This database will be setup with the default fixtures and will
-    have the transaction management disabled.  At the end of the test
-    the transaction will be rolled back to undo any changes to the
-    database.  This is more limited than the ``transactional_db``
-    resource but faster.
+    This database will be setup with the default fixtures and will have
+    the transaction management disabled. At the end of the test the outer
+    transaction that wraps the test itself will be rolled back to undo any
+    changes to the database (in case the backend supports transactions).
+    This is more limited than the ``transactional_db`` resource but
+    faster.
 
     If both this and ``transactional_db`` are requested then the
     database setup will behave as only ``transactional_db`` was
