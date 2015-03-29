@@ -220,12 +220,9 @@ def make_travis_yml(envs):
         matrix:
           allow_failures:
         %(allow_failures)s
-        before_install:
-          # Wrap "pip" with "travis_retry" to retry on network failures.
-          - pip() { travis_retry command pip "$@"; }
         install:
-          - pip install tox
-        script: tox -e $TESTENV
+          - travis_retry pip install tox
+        script: travis_retry tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %

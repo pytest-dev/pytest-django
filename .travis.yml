@@ -40,9 +40,6 @@ matrix:
     - env: TESTENV=python3.4-master-postgres
     - env: TESTENV=python3.4-master-sqlite
     - env: TESTENV=python3.4-master-sqlite_file
-before_install:
-  # Wrap "pip" with "travis_retry" to retry on network failures.
-  - pip() { travis_retry command pip "$@"; }
 install:
-  - pip install tox
-script: tox -e $TESTENV
+  - travis_retry pip install tox
+script: travis_retry tox -e $TESTENV
