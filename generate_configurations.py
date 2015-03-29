@@ -24,6 +24,7 @@ class TestEnv(TestEnvBase):
 
 # Python to run tox.
 RUN_PYTHON = '3.4'
+PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'pypy', 'pypy3']
 PYTEST_VERSIONS = ['2.6.4']
@@ -159,6 +160,10 @@ def generate_default_envs(envs):
                 if env_getter(env) == variation:
                     result.add(env)
                     break
+
+    # Add all Django versions for each main python version (2.x and 3.x).
+    find_and_add(itertools.product(PYTHON_MAIN_VERSIONS, DJANGO_VERSIONS),
+                 lambda env: (env.python_version, env.django_version))
 
     find_and_add(PYTHON_VERSIONS, lambda env: env.python_version)
     find_and_add(PYTEST_VERSIONS, lambda env: env.pytest_version)
