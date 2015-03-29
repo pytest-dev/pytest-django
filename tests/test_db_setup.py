@@ -29,6 +29,38 @@ def test_db_reuse_simple(django_testdir):
     result.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
 
 
+def test_db_order(django_testdir):
+    """Test order in which tests are being executed."""
+
+    django_testdir.create_test_module('''
+        import pytest
+
+        from .app.models import Item
+
+        @pytest.mark.django_db(transaction=True)
+        def test_run_second_decorator():
+            pass
+
+        def test_run_second_fixture(transactional_db):
+            pass
+
+        def test_run_first_fixture(db):
+            pass
+
+        @pytest.mark.django_db
+        def test_run_first_decorator():
+            pass
+    ''')
+    result = django_testdir.runpytest_subprocess('-v', '-s')
+    assert result.ret == 0
+    result.stdout.fnmatch_lines([
+        "*test_run_first_fixture*",
+        "*test_run_first_decorator*",
+        "*test_run_second_decorator*",
+        "*test_run_second_fixture*",
+    ])
+
+
 def test_db_reuse(django_testdir):
     """
     Test the re-use db functionality.
