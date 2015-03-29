@@ -255,9 +255,6 @@ def test_django_setup_sequence(django_testdir):
     django_testdir.create_app_file("""
         from django.apps import apps, AppConfig
 
-        from django.contrib.auth.models import AbstractUser
-        from django.db import models
-
 
         class TestApp(AppConfig):
             name = 'tpkg.app'
