@@ -175,7 +175,8 @@ def generate_default_envs(envs):
 
 def make_tox_ini(envs, default_envs):
     default_env_names = ([testenv_name(env) for env in default_envs] +
-                         ['checkqa-%s' % python_version for python_version in PYTHON_VERSIONS])
+                         ['checkqa-%s' % python_version for python_version in
+                          PYTHON_MAIN_VERSIONS])
 
     contents = [dedent('''
         [tox]
