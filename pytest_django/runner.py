@@ -10,14 +10,14 @@ class PyTestRunner(object):
     """
     option_list = (
         make_option('-t', '--top-level-directory',
-            action='store', dest='top_level', default=None,
-            help='Top level of project for unittest discovery.'),
+                    action='store', dest='top_level', default=None,
+                    help='Top level of project for unittest discovery.'),
         make_option('-p', '--pattern', action='store', dest='pattern',
-            default="test*.py",
-            help='The test matching pattern. Defaults to test*.py.'),
+                    default="test*.py",
+                    help='The test matching pattern. Defaults to test*.py.'),
         make_option('-k', '--keepdb',
-            action='store_true', dest='keepdb', default=False,
-            help='Preserves the test DB between runs.'),
+                    action='store_true', dest='keepdb', default=False,
+                    help='Preserves the test DB between runs.'),
     )
 
     def __init__(self, pattern=None, top_level=None, verbosity=1,
