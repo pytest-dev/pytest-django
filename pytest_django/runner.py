@@ -39,6 +39,9 @@ class PyTestRunner(object):
         self.ds = os.environ['DJANGO_SETTINGS_MODULE']
 
     def run_tests(self, test_labels, extra_tests=None, **kwargs):
+        """
+        Run py.test and returns the exitcode.
+        """
         if test_labels:
             # TODO: implement
             raise NotImplementedError('test_labels is not implemented.')
@@ -58,4 +61,4 @@ class PyTestRunner(object):
             argv.append('--nomigrations')
 
         # Run py.test
-        pytest.main(argv)
+        return pytest.main(argv)
