@@ -103,7 +103,7 @@ database will automatically be re-created.
 
 ``--create-db`` - force re creation of the test database
 --------------------------------------------------------
-When used with ``--reuse-db``, this option will re-create the database,
+When used with ``--create-db``, this option will re-create the database,
 regardless of whether it exists or not.
 
 Example work flow with ``--reuse-db`` and ``--create-db``.
