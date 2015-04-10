@@ -183,6 +183,12 @@ or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
 
+.. note::
+
+    Make sure ``live_server`` fixture is requested *before* any db-related fixtures
+    (those which use database so ``db``), otherwise the db transaction which is active inside of the main thread
+    will not be visible inside the background thread of ``live_server``.
+
 ``settings``
 ~~~~~~~~~~~~
 
