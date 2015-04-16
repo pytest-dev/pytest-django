@@ -16,7 +16,8 @@ def _get_actual_assertions_names():
 
     obj = DjangoTestCase('run')
     is_assert = lambda x: x.startswith('assert') and '_' not in x
-    base_methods = [name for name, member in inspect.getmembers(DefaultTestCase)
+    base_methods = [name for name, member in
+                    inspect.getmembers(DefaultTestCase)
                     if is_assert(name)]
 
     return [name for name, member in inspect.getmembers(obj)
@@ -26,7 +27,7 @@ def _get_actual_assertions_names():
 def test_django_asserts_available():
     django_assertions = _get_actual_assertions_names()
     expected_assertions = DJANGO_ASSERTS[get_django_version()[:2]]
-    assert not set(django_assertions) ^ set(expected_assertions)
+    assert set(django_assertions) == set(expected_assertions)
 
     for name in expected_assertions:
         assert hasattr(pytest.django, name)

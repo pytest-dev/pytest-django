@@ -12,8 +12,8 @@ from .fixtures import (_django_db_setup, db, transactional_db, client,
                        admin_client, rf, settings, live_server,
                        _live_server_helper)
 
-from .lazy_django import skip_if_no_django, django_settings_is_configured, \
-    get_django_version
+from .lazy_django import (skip_if_no_django, django_settings_is_configured,
+                          get_django_version)
 
 
 (_django_db_setup, db, transactional_db, client, admin_client, rf,
@@ -23,40 +23,50 @@ from .lazy_django import skip_if_no_django, django_settings_is_configured, \
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 DJANGO_ASSERTS = {
+    # from https://github.com/django/django/blob/stable/1.3.x/django/test/testcases.py#L244
     (1, 3): ('assertContains', 'assertFormError', 'assertNotContains',
              'assertNumQueries', 'assertQuerysetEqual', 'assertRedirects',
              'assertTemplateNotUsed', 'assertTemplateUsed'),
+    # from https://github.com/django/django/blob/stable/1.4.x/django/test/testcases.py#L448
     (1, 4): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertHTMLEqual', 'assertHTMLNotEqual', 'assertNotContains',
              'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
              'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed'),
+    # from https://github.com/django/django/blob/stable/1.5.x/django/test/testcases.py#L246
+    #  and https://github.com/django/django/blob/stable/1.5.x/django/test/testcases.py#L458
     (1, 5): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertHTMLEqual', 'assertHTMLNotEqual', 'assertInHTML',
              'assertJSONEqual', 'assertNotContains', 'assertNumQueries',
              'assertQuerysetEqual', 'assertRaisesMessage', 'assertRedirects',
              'assertTemplateNotUsed', 'assertTemplateUsed', 'assertXMLEqual',
              'assertXMLNotEqual'),
+    # from https://github.com/django/django/blob/stable/1.6.x/django/test/testcases.py#L156
+    #  and https://github.com/django/django/blob/stable/1.6.x/django/test/testcases.py#L725
     (1, 6): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
              'assertInHTML', 'assertJSONEqual', 'assertNotContains',
              'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
              'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
              'assertXMLEqual', 'assertXMLNotEqual'),
+    # from https://github.com/django/django/blob/stable/1.7.x/django/test/testcases.py#L162
+    #  and https://github.com/django/django/blob/stable/1.7.x/django/test/testcases.py#L718
     (1, 7): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
              'assertInHTML', 'assertJSONEqual', 'assertNotContains',
              'assertNumQueries', 'assertQuerysetEqual', 'assertRaisesMessage',
              'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
              'assertXMLEqual', 'assertXMLNotEqual'),
+    # from https://github.com/django/django/blob/stable/1.8.x/django/test/testcases.py#L142
+    #  and https://github.com/django/django/blob/stable/1.8.x/django/test/testcases.py#L747
     (1, 8): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
              'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
              'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
              'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
-             'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual')
+             'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual'),
 }
 
-################ pytest hooks ################
+# ############### pytest hooks ############### #
 
 
 def populate_namespace():
@@ -78,7 +88,7 @@ def populate_namespace():
 
 def pytest_namespace():
     """Make unittest assert methods available.
-    This is useful for things such floating point checks with assertAlmostEqual.
+    Useful for things such as floating point checks with assertAlmostEqual.
     """
     try:
         django_settings_is_configured()
@@ -133,8 +143,8 @@ def _load_settings_from_env(config, options):
             import configurations.importer
             configurations.importer.install()
 
-        # Forcefully load django settings, throws ImportError or ImproperlyConfigured
-        # if settings cannot be loaded
+        # Forcefully load django settings, throws ImportError or
+        # ImproperlyConfigured if settings cannot be loaded
         from django.conf import settings
         settings.DATABASES
 
@@ -277,7 +287,7 @@ def _django_set_urlconf(request):
         request.addfinalizer(restore)
 
 
-################ Helper Functions ################
+# ############### Helper Functions ############### #
 
 
 class CursorManager(object):
