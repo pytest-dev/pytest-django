@@ -1,4 +1,4 @@
-from tests.settings_base import *  # noqa
+from pytest_django_test.settings_base import *  # noqa
 
 # This is a SQLite configuration, which uses a file based database for
 # tests (via setting TEST_NAME / TEST['NAME']).

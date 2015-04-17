@@ -1,8 +1,47 @@
 Changelog
 =========
 
-NEXT
-----
+2.8.0
+-----
+
+Features
+^^^^^^^^
+
+* pytest's verbosity is being used for Django's code to setup/teardown the test
+  database (#172).
+
+* Added a new option `--nomigrations` to avoid running Django 1.7+ migrations
+  when constructing the test database. Huge thanks to Renan Ivo for complete
+  patch, tests and documentation.
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed compatibility issues related to Django 1.8's
+  `setUpClass`/`setUpTestData`. Django 1.8 is now a fully supported version.
+  Django master as of 2014-01-18 (the Django 1.9 branch) is also supported.
+
+2.7.0
+-----
+
+Features
+^^^^^^^^
+
+* New fixtures: ``admin_user``, ``django_user_model`` and
+  ``django_username_field`` (#109).
+
+* Automatic discovery of Django projects to make it easier for new users. This
+  change is slightly backward incompatible, if you encounter problems with it,
+  the old behaviour can be restored by adding this to ``pytest.ini``,
+  ``setup.cfg`` or ``tox.ini``::
+
+    [pytest]
+    django_find_project = false
+
+  Please see the :ref:`managing_python_path` section for more information.
+
+Bugfixes
+^^^^^^^^
 
 * Fix interaction between ``db`` and ``transaction_db`` fixtures (#126).
 
@@ -17,6 +56,12 @@ NEXT
   Ionel Cristian Mărieș, Daniel Hahler, Tymur Maryokhin, Kirill SIbirev, Paul
   Collins, Aymeric Augustin, Jannis Leidel, Baptiste Mispelon and Anatoly
   Bubenkoff for report, discussion and feedback.
+
+* `The `live_server`` fixture can now serve static files also for Django>=1.7
+  if the ``django.contrib.staticfiles`` app is installed. (#140).
+
+* ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` environment variable is read instead
+  of ``DJANGO_TEST_LIVE_SERVER_ADDRESS``. (#140)
 
 2.6.2
 -----
@@ -112,11 +157,11 @@ used - use 2.6.1 or newer to avoid confusion.
 -----
 
 This release is *backward incompatible*. The biggest change is the need
-to add the ``pytest.mark.django_db`` to tests which needs database
+to add the ``pytest.mark.django_db`` to tests which require database
 access.
 
 Finding such tests is generally very easy: just run your test suite, the
-tests which needs database access will fail. Add ``pytestmark =
+tests which need database access will fail. Add ``pytestmark =
 pytest.mark.django_db`` to the module/class or decorate them with
 ``@pytest.mark.django_db``.
 

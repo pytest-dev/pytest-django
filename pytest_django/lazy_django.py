@@ -4,6 +4,7 @@ Helpers to load Django lazily when Django settings can't be configured.
 
 import os
 import sys
+
 import pytest
 
 
@@ -15,12 +16,12 @@ def skip_if_no_django():
 
 def django_settings_is_configured():
     # Avoid importing Django if it has not yet been imported
-    if not os.environ.get('DJANGO_SETTINGS_MODULE') and 'django' not in sys.modules:
+    if not os.environ.get('DJANGO_SETTINGS_MODULE') \
+            and 'django.conf' not in sys.modules:
         return False
 
-    # If DJANGO_SETTINGS_MODULE is defined at this point, Django should always be loaded
-    from django.conf import settings
-    assert settings.configured is True
+    # If DJANGO_SETTINGS_MODULE is defined at this point, Django is assumed to
+    # always be loaded.
     return True
 
 

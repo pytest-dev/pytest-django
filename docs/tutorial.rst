@@ -1,40 +1,82 @@
-Getting started
-===============
+Getting started with pytest and pytest-django
+=============================================
 
-Andreas Pelme gave a talk at EuroPython 2013 on testing in Django with
-py.test. It shows the benefits of using py.test and how to get started:
-
-`Testing Django application with py.test (YouTube link) <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
-
-Installation
+Introduction
 ------------
 
-pytest-django is available directly from `PyPi <http://pypi.python.org/pypi/pytest-django>`_, and can be easily installed with ``pip``::
+pytest and pytest-django are compatible with standard Django test suites and
+Nose test suites. They should be able to pick up and run existing tests without
+any or little configuration. This section describes how to get started quickly.
+
+Talks, articles and blog posts
+------------------------------
+
+ * Talk from DjangoCon Europe 2014: `pytest: helps you write better Django apps, by Andreas Pelme <https://www.youtube.com/watch?v=aaArYVh6XSM>`_
+
+ * Talk from EuroPython 2013: `Testing Django application with py.test, by Andreas Pelme <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
+
+ * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <http://pydanny.com/pytest-no-boilerplate-testing.html>`_
+
+ * Blog post: `Django Projects to Django Apps: Converting the Unit Tests, by
+   John Costa
+   <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.
+
+For general information and tutorials on pytest, see the `pytest tutorial page <http://pytest.org/latest/getting-started.html>`_.
+
+
+Step 1: Installation
+--------------------
+
+pytest-django can be obtained directly from `PyPI
+<http://pypi.python.org/pypi/pytest-django>`_, and can be installed with
+``pip``::
 
     pip install pytest-django
 
-``pytest-django`` uses ``py.test``'s module system and can be used right away after installation, there is nothing more to configure.
+Installing pytest-django will also automatically install the latest version of
+pytest. ``pytest-django`` uses ``pytest``'s plugin system and can be used right away
+after installation, there is nothing more to configure.
 
-Usage
------
+Step 2: Point pytest to your Django settings
+--------------------------------------------
 
-Tests are invoked directly with the ``py.test`` command, instead of ``manage.py test``/``django-admin.py test``::
+You need to tell pytest which Django settings that should be used for test
+runs. The easiest way to achieve this is to create a pytest configuration file with this information.
+
+Create a filed called ``pytest.ini`` in your project root directory that contains::
+
+    [pytest]
+    DJANGO_SETTINGS_MODULE=yourproject.settings
+
+You can also specify your Django settings by setting the
+``DJANGO_SETTINGS_MODULE`` environment variable or specifying the
+``--ds=yourproject.settings`` command line flag when running the tests. See the
+full documentation on :ref:`configuring_django_settings`.
+
+Step 3: Run your test suite
+---------------------------
+
+Tests are invoked directly with the ``py.test`` command, instead of ``manage.py
+test``, that you might be used to::
 
     py.test
 
-Django needs the environment variable ``DJANGO_SETTINGS_MODULE`` set
-for tests runs to work.  This plugin allows you to specify this in
-multiple ways:
+Do you have problems with pytest not finding your code? See the FAQ
+:ref:`faq-import-error`.
 
-1. Using the ``--ds`` command line option.
-2. By writing a ``DJANGO_SETTINGS_MODULE`` setting in the ``[pytest]``
-   section of your `py.test configuration file
-   <http://pytest.org/latest/customize.html?#how-test-configuration-is-read-from-configuration-ini-files>`_
-3. By using the ``DJANGO_SETTINGS_MODULE`` environment variable.
+Next steps
+----------
 
-`py.test` will find tests in your project automatically, ``INSTALLED_APPS`` will not be consulted. This means that 3rd-party and django.contrib.* apps will not be picked up by the test runner.
+The :ref:`usage` section describes more ways to interact with your test suites.
 
-If you use virtualenv you can automatically use the environment
-variable.  See :ref:`faq-django-settings-module`.
+pytest-django also provides some :ref:`helpers` to make it easier to write
+Django tests.
 
-If you are interested in how to select specific tests, format tracebacks in different way, see `the excellent py.test documentation <http://pytest.org/>`_.
+Consult the `pytest documentation <http://pytest.org/>`_ for more information
+in pytest itself.
+
+Stuck? Need help?
+-----------------
+
+No problem, see the FAQ on :ref:`faq-getting-help` for information on how to
+get help.

@@ -1,3 +1,5 @@
+.. _helpers:
+
 Django helpers
 ==============
 
@@ -22,8 +24,6 @@ on what marks are and for notes on using_ them.
    of the test. This behavior is the same as Django's standard
    `django.test.TestCase`_ class.
 
-.. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
-
    In order for a test to have access to the database it must either
    be marked using the ``django_db`` mark or request one of the ``db``
    or ``transactional_db`` fixtures.  Otherwise the test will fail
@@ -38,8 +38,6 @@ on what marks are and for notes on using_ them.
      uses. When ``transaction=True``, the behavior will be the same as
      `django.test.TransactionTestCase`_
 
-.. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
-
    .. note::
 
       If you want access to the Django database *inside a fixture*
@@ -48,6 +46,16 @@ on what marks are and for notes on using_ them.
       fixture, the fixture itself will have to request the ``db`` or
       ``transactional_db`` fixture.  See below for a description of
       them.
+
+   .. note:: Automatic usage with ``django.test.TestCase``.
+
+     Test classes that subclass `django.test.TestCase`_ will have access to
+     the database always to make them compatible with existing Django tests.
+     Test classes that subclass Python's ``unittest.TestCase`` need to have the
+     marker applied in order to access the database.
+
+.. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
+.. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
 
 
 ``pytest.mark.urls`` - override the urlconf
@@ -130,6 +138,25 @@ Example
 
 As an extra bonus this will automatically mark the database using the
 ``django_db`` mark.
+
+``admin_user`` - a admin user (superuser)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance of a superuser, with username "admin" and password "password" (in
+case there is no "admin" user yet).
+
+As an extra bonus this will automatically mark the database using the
+``django_db`` mark.
+
+``django_user_model``
+~~~~~~~~~~~~~~~~~~~~~
+
+The user model used by Django. This handles different versions of Django.
+
+``django_username_field``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The field name used for the username on the user model.
 
 ``db``
 ~~~~~~~

@@ -1,11 +1,10 @@
 from __future__ import with_statement
 
-from django.db import transaction, connection
+import pytest
+from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
-import pytest
-
-from .app.models import Item
+from pytest_django_test.app.models import Item
 
 
 def noop_transactions():
@@ -96,7 +95,7 @@ class TestDatabaseFixtures:
 
     def test_fixture_clean(self, both_dbs):
         # Relies on the order: test_mydb created an object
-        # See https://github.com/pelme/pytest_django/issues/17
+        # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
@@ -132,6 +131,7 @@ class TestDatabaseFixturesBothOrder:
 
 
 class TestDatabaseMarker:
+    "Tests for the django_db marker."
 
     @pytest.mark.django_db
     def test_access(self):
@@ -139,7 +139,7 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_clean_db(self):
-        # Relies on the order: test_access created an object
+        # Relies on the order: test_access created an object.
         assert Item.objects.count() == 0
 
     @pytest.mark.django_db

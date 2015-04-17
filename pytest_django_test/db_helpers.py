@@ -4,15 +4,19 @@ import subprocess
 import pytest
 
 from django.conf import settings
+from django.db import connection
+from django.db import transaction
 
 from .compat import force_text
+from .app.models import Item
+
 
 DB_NAME = settings.DATABASES['default']['NAME']
-if DB_NAME != ':memory:':
+if DB_NAME == ':memory:':
+    TEST_DB_NAME = DB_NAME
+else:
     DB_NAME += '_db_test'
     TEST_DB_NAME = 'test_' + DB_NAME
-else:
-    TEST_DB_NAME = DB_NAME
 
 
 def get_db_engine():
@@ -69,7 +73,8 @@ def create_empty_production_database():
 
     if get_db_engine() == 'sqlite3':
         if DB_NAME == ':memory:':
-            raise AssertionError('sqlite in-memory database must not be created!')
+            raise AssertionError(
+                'sqlite in-memory database must not be created!')
         open(DB_NAME, 'a').close()
         return
 
@@ -96,7 +101,8 @@ def drop_database(name=TEST_DB_NAME, suffix=None):
 
     if get_db_engine() == 'sqlite3':
         if name == ':memory:':
-            raise AssertionError('sqlite in-memory database cannot be dropped!')
+            raise AssertionError(
+                'sqlite in-memory database cannot be dropped!')
         if os.path.exists(name):
             os.unlink(name)
         return
@@ -163,9 +169,34 @@ def mark_exists():
 
     if get_db_engine() == 'sqlite3':
         if TEST_DB_NAME == ':memory:':
-            raise AssertionError('sqlite in-memory database cannot be checked for mark!')
+            raise AssertionError(
+                'sqlite in-memory database cannot be checked for mark!')
         r = run_cmd('sqlite3', TEST_DB_NAME, 'SELECT 1 FROM mark_table')
 
         return r.status_code == 0
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
+
+
+def noop_transactions():
+    """Test whether transactions are disabled.
+
+    Return True if transactions are disabled, False if they are
+    enabled.
+    """
+
+    # Newer versions of Django simply run standard tests in an atomic block.
+    if hasattr(connection, 'in_atomic_block'):
+        return connection.in_atomic_block
+    else:
+        with transaction.commit_manually():
+            Item.objects.create(name='transaction_noop_test')
+            transaction.rollback()
+
+        try:
+            item = Item.objects.get(name='transaction_noop_test')
+        except Item.DoesNotExist:
+            return False
+        else:
+            item.delete()
+            return True

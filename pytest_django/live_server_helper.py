@@ -1,5 +1,8 @@
 import sys
+
 import pytest
+
+from .lazy_django import get_django_version
 
 
 def supported():
@@ -27,22 +30,30 @@ class LiveServer(object):
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
-            if (conn.settings_dict['ENGINE'] == 'django.db.backends.sqlite3'
-                    and conn.settings_dict['NAME'] == ':memory:'):
+            if (conn.settings_dict['ENGINE'] == 'django.db.backends.sqlite3' and
+                    conn.settings_dict['NAME'] == ':memory:'):
                 # Explicitly enable thread-shareability for this connection
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
-        try:
-            from django.test.testcases import _StaticFilesHandler
-            static_handler_kwargs = {'static_handler': _StaticFilesHandler}
-        except ImportError:
-            static_handler_kwargs = {}
+        liveserver_kwargs = {'connections_override': connections_override}
+        from django.conf import settings
+        if ('django.contrib.staticfiles' in settings.INSTALLED_APPS and
+                get_django_version() >= (1, 7)):
+            from django.contrib.staticfiles.handlers import (
+                StaticFilesHandler)
+            liveserver_kwargs['static_handler'] = StaticFilesHandler
+        else:
+            try:
+                from django.test.testcases import _StaticFilesHandler
+            except ImportError:
+                pass
+            else:
+                liveserver_kwargs['static_handler'] = _StaticFilesHandler
 
         host, possible_ports = parse_addr(addr)
         self.thread = LiveServerThread(host, possible_ports,
-                                       connections_override=connections_override,
-                                       **static_handler_kwargs)
+                                       **liveserver_kwargs)
         self.thread.daemon = True
         self.thread.start()
         self.thread.is_ready.wait()
@@ -66,7 +77,7 @@ class LiveServer(object):
             return self.url
 
         def __add__(self, other):
-            return unicode(self) + other
+            return unicode(self) + other  # noqa: pyflakes on python3
     else:
         def __str__(self):
             return self.url

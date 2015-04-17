@@ -1,3 +1,5 @@
+.. _configuring_django_settings:
+
 Configuring Django settings
 ===========================
 
