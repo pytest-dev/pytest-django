@@ -2,6 +2,7 @@
 import inspect
 
 import pytest
+import pytest_django
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django.plugin import DJANGO_ASSERTS
@@ -30,11 +31,11 @@ def test_django_asserts_available():
     assert set(django_assertions) == set(expected_assertions)
 
     for name in expected_assertions:
-        assert hasattr(pytest.django, name)
+        assert hasattr(pytest_django, name)
 
 
 def test_sanity(admin_client):
-    from pytest.django import assertContains
+    from pytest_django import assertContains
 
     response = admin_client.get('/admin-required/')
 
