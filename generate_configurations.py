@@ -156,6 +156,10 @@ def generate_default_envs(envs):
 
     def find_and_add(variations, env_getter):
         for variation in variations:
+            for existing in result:
+                if env_getter(existing) == variation:
+                    return
+
             for env in reversed(envs):
                 if env_getter(env) == variation:
                     result.add(env)
