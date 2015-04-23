@@ -245,7 +245,7 @@ def make_travis_yml(envs):
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
-                          python for python in PYTHON_VERSIONS)
+                          python for python in PYTHON_MAIN_VERSIONS)
     allow_failures = '\n'.join('    - env: TESTENV=%s' %
                                testenv_name(env) for env in envs
                                if env.django_version == 'master')

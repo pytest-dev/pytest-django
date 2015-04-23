@@ -25,13 +25,8 @@ env:
   - TESTENV=python3.4-master-postgres
   - TESTENV=python3.4-master-sqlite
   - TESTENV=python3.4-master-sqlite_file
-  - TESTENV=checkqa-python2.6
   - TESTENV=checkqa-python2.7
-  - TESTENV=checkqa-python3.2
-  - TESTENV=checkqa-python3.3
   - TESTENV=checkqa-python3.4
-  - TESTENV=checkqa-pypy
-  - TESTENV=checkqa-pypy3
 matrix:
   allow_failures:
     - env: TESTENV=pypy-master-sqlite_file
