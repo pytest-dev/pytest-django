@@ -300,7 +300,7 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
 
 
 @pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox(request):
+def _django_clear_outbox():
     """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail

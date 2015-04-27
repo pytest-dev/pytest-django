@@ -286,7 +286,7 @@ class MonkeyPatchWrapper(object):
 
 
 @pytest.fixture()
-def settings(request, monkeypatch):
+def settings(monkeypatch):
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
