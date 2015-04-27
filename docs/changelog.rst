@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Bug fixes
+^^^^^^^^^
+
+* document ``live_server`` and transactions problems (bubenkoff).
+
 2.8.0
 -----
 
