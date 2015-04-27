@@ -139,8 +139,8 @@ def generate_all_envs():
     products = itertools.product(PYTHON_VERSIONS, PYTEST_VERSIONS,
                                  DJANGO_VERSIONS, SETTINGS)
 
-    for idx, (python_version, pytest_version, django_version, settings) \
-            in enumerate(products):
+    for (python_version, pytest_version, django_version, settings) \
+            in products:
         env = TestEnv(python_version, pytest_version, django_version, settings)
 
         if is_valid_env(env):
