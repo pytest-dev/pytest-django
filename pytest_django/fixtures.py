@@ -50,7 +50,8 @@ def _django_db_setup(request,
                 monkey_patch_creation_for_db_reuse()
 
         # Create the database
-        db_cfg = setup_databases(verbosity=0, interactive=False)
+        db_cfg = setup_databases(verbosity=pytest.config.option.verbose,
+                                 interactive=False)
 
     def teardown_database():
         with _django_cursor_wrapper:
@@ -90,8 +91,8 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
                 from django.core.management import call_command
 
                 for db in connections:
-                    call_command('flush', verbosity=0,
-                                 interactive=False, database=db)
+                    call_command('flush', interactive=False, database=db,
+                                 verbosity=pytest.config.option.verbose)
                 for conn in connections.all():
                     conn.close()
             request.addfinalizer(flushdb)
