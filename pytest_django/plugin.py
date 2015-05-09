@@ -162,6 +162,9 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     options = parser.parse_known_args(args)
 
+    if options.version or options.help:
+        return
+
     django_find_project = _parse_django_find_project_ini(
         early_config.getini('django_find_project'))
 
@@ -200,12 +203,6 @@ def pytest_load_initial_conftests(early_config, parser, args):
         _setup_django()
 
 
-@pytest.mark.trylast
-def pytest_configure():
-    if django_settings_is_configured():
-        _setup_django()
-
-
 def pytest_runtest_setup(item):
 
     if django_settings_is_configured() and is_django_unittest(item):
@@ -234,6 +231,7 @@ def _django_test_environment(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
+        _setup_django()
         from django.conf import settings
         from .compat import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
