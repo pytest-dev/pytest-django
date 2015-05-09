@@ -6,4 +6,3 @@ tox
 wheel
 twine
 south
-isort
