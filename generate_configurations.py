@@ -110,7 +110,7 @@ def commands(uid, env):
         yield 'sh -c "dropdb %(name)s;' \
             ' createdb %(name)s || exit 0"' % {'name': db_name}
 
-    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs}' % env.settings
+    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs:tests}' % env.settings
 
 
 def testenv_name(env):
