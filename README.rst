@@ -26,6 +26,13 @@ pytest-django allows you to test your Django project/applications with the
 * `Issue tracker <http://github.com/pytest-dev/pytest-django/issues>`_
 * `Python Package Index (PyPI) <https://pypi.python.org/pypi/pytest-django/>`_
 
+Install pytest-django
+---------------------
+
+::
+
+    pip install pytest-django
+
 Why would I use this instead of Django's `manage.py test` command?
 ------------------------------------------------------------------
 
