@@ -10,7 +10,7 @@ pytest-django tries to automatically add your project to the Python path by
 looking for a ``manage.py`` file and adding its path to the Python path.
 
 If this for some reason fails for you, you have to manage your Python paths
-explicilty. See the documentation on :ref:`managing_the_python_path_explicilty`
+explicitly. See the documentation on :ref:`managing_the_python_path_explicitly`
 for more information.
 
 How can I make sure that all my tests run with a specific locale?
@@ -50,7 +50,7 @@ pytest-django detects South and applies its monkey-patch, which gets fixed
 to handle initial data properly (which South would skip otherwise, because
 of a bug).
 
-The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control wheter or not
+The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control whether
 migrations are used to construct the test database.
 
 Does pytest-django work with the pytest-xdist plugin?

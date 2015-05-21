@@ -50,39 +50,55 @@ def test_database_noaccess():
         Item.objects.count()
 
 
-def test_django_testrunner_verbosity_from_pytest(django_testdir):
-    """
-    Test that Django's code to setup and teardown the databases uses pytest's
-    verbosity level.
-    """
-    django_testdir.create_test_module('''
-        import pytest
+class TestrunnerVerbosity:
+    """Test that Django's code to setup and teardown the databases uses
+    pytest's verbosity level."""
 
-        @pytest.mark.django_db
-        def test_inner_testrunner():
-            pass
-        ''')
+    @pytest.fixture
+    def testdir(self, django_testdir):
+        print("testdir")
+        django_testdir.create_test_module('''
+            import pytest
 
-    # Not verbose by default.
-    result = django_testdir.runpytest('-s')
-    result.stdout.fnmatch_lines([
-        "tpkg/test_the_test.py ."])
+            @pytest.mark.django_db
+            def test_inner_testrunner():
+                pass
+            ''')
+        return django_testdir
 
-    # -v and -q results in verbosity 0.
-    result = django_testdir.runpytest('-s', '-v', '-q')
-    result.stdout.fnmatch_lines([
-        "tpkg/test_the_test.py ."])
+    def test_default(self, testdir):
+        """Not verbose by default."""
+        result = testdir.runpytest('-s')
+        result.stdout.fnmatch_lines([
+            "tpkg/test_the_test.py ."])
 
-    # Verbose output with '-v'.
-    result = django_testdir.runpytest('-s', '-v')
-    result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py:*",
-        "*PASSED*",
-        "*Destroying test database for alias 'default'...*"])
+    def test_vq_verbosity_0(self, testdir):
+        """-v and -q results in verbosity 0."""
+        result = testdir.runpytest('-s', '-v', '-q')
+        result.stdout.fnmatch_lines([
+            "tpkg/test_the_test.py ."])
 
-    # More verbose output with '-v -v'.
-    result = django_testdir.runpytest('-s', '-v', '-v')
-    result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py:*",
-        "*PASSED*",
-        "*Destroying test database for alias 'default' ('*')...*"])
+    def test_verbose_with_v(self, testdir):
+        """Verbose output with '-v'."""
+        result = testdir.runpytest('-s', '-v')
+        result.stdout.fnmatch_lines_random([
+            "tpkg/test_the_test.py:*",
+            "*PASSED*",
+            "*Destroying test database for alias 'default'...*"])
+
+    def test_more_verbose_with_vv(self, testdir):
+        """More verbose output with '-v -v'."""
+        result = testdir.runpytest('-s', '-v', '-v')
+        result.stdout.fnmatch_lines([
+            "tpkg/test_the_test.py:*Creating test database for alias*",
+            "*Creating table app_item*",
+            "*PASSED*Destroying test database for alias 'default' ('*')...*"])
+
+    def test_more_verbose_with_vv_and_reusedb(self, testdir):
+        """More verbose output with '-v -v', and --reuse-db."""
+        result = testdir.runpytest('-s', '-v', '-v', '--reuse-db')
+        result.stdout.fnmatch_lines([
+            "tpkg/test_the_test.py:*Creating test database for alias*",
+            "*PASSED*"])
+        assert ("*Destroying test database for alias 'default' ('*')...*"
+                not in result.stdout.str())

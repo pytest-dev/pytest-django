@@ -96,6 +96,75 @@ def test_sole_test(django_testdir):
     assert result.ret == 0
 
 
+class TestUnittestMethods:
+    "Test that setup/teardown methods of unittests are being called."
+    def test_django(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(self):
+                    print('\\nCALLED: setUpClass')
+
+                def setUp(self):
+                    print('\\nCALLED: setUp')
+
+                def tearDown(self):
+                    print('\\nCALLED: tearDown')
+
+                @classmethod
+                def tearDownClass(self):
+                    print('\\nCALLED: tearDownClass')
+
+                def test_pass(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "CALLED: setUpClass",
+            "CALLED: setUp",
+            "CALLED: tearDown",
+            "PASSED",
+            "CALLED: tearDownClass",
+        ])
+        assert result.ret == 0
+
+    def test_unittest(self, django_testdir):
+        django_testdir.create_test_module('''
+            from unittest import TestCase
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(self):
+                    print('\\nCALLED: setUpClass')
+
+                def setUp(self):
+                    print('\\nCALLED: setUp')
+
+                def tearDown(self):
+                    print('\\nCALLED: tearDown')
+
+                @classmethod
+                def tearDownClass(self):
+                    print('\\nCALLED: tearDownClass')
+
+                def test_pass(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "CALLED: setUpClass",
+            "CALLED: setUp",
+            "CALLED: tearDown",
+            "PASSED",
+            "CALLED: tearDownClass",
+        ])
+        assert result.ret == 0
+
+
 class TestCaseWithDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures('db')
 

@@ -32,13 +32,15 @@ def test_ds_env(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_ini(testdir, monkeypatch):
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE')
+    "DSM env should override ini."
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_ini')
     testdir.makeini("""\
        [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """)
     pkg = testdir.mkpydir('tpkg')
     settings = pkg.join('settings_ini.py')
@@ -51,6 +53,7 @@ def test_ds_ini(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_option(testdir, monkeypatch):
@@ -70,6 +73,7 @@ def test_ds_option(testdir, monkeypatch):
     """)
     result = testdir.runpytest('--ds=tpkg.settings_opt')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_ds_non_existent(testdir, monkeypatch):
@@ -81,6 +85,7 @@ def test_ds_non_existent(testdir, monkeypatch):
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
     result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
+    assert result.ret != 0
 
 
 def test_ds_after_user_conftest(testdir, monkeypatch):
@@ -94,6 +99,26 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     # testdir.makeconftest("import sys; print(sys.path)")
     result = testdir.runpytest('-v')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
+
+
+def test_ds_in_pytest_configure(testdir, monkeypatch):
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    pkg = testdir.mkpydir('tpkg')
+    settings = pkg.join('settings_ds.py')
+    settings.write(BARE_SETTINGS)
+    testdir.makeconftest("""
+        import os
+
+        from django.conf import settings
+
+        def pytest_configure():
+            if not settings.configured:
+                os.environ.setdefault('DJANGO_SETTINGS_MODULE',
+                                      'tpkg.settings_ds')
+    """)
+    r = testdir.runpytest()
+    assert r.ret == 0
 
 
 def test_django_settings_configure(testdir, monkeypatch):
@@ -192,6 +217,7 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0
 
 
 def test_debug_false(testdir, monkeypatch):
@@ -230,9 +256,6 @@ def test_django_setup_sequence(django_testdir):
     django_testdir.create_app_file("""
         from django.apps import apps, AppConfig
 
-        from django.contrib.auth.models import AbstractUser
-        from django.db import models
-
 
         class TestApp(AppConfig):
             name = 'tpkg.app'
@@ -263,3 +286,29 @@ def test_django_setup_sequence(django_testdir):
     result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
     result.stdout.fnmatch_lines(['*READY(): populating=True*'])
     result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
+    assert result.ret == 0
+
+
+def test_no_ds_but_django_imported(testdir, monkeypatch):
+    """pytest-django should not bail out, if "django" has been imported
+    somewhere, e.g. via pytest-splinter."""
+
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+
+    testdir.makepyfile("""
+        import os
+        import django
+
+        from pytest_django.lazy_django import django_settings_is_configured
+
+        def test_django_settings_is_configured():
+            assert django_settings_is_configured() is False
+
+        def test_env():
+            assert 'DJANGO_SETTINGS_MODULE' not in os.environ
+
+        def test_cfg(pytestconfig):
+            assert pytestconfig.option.ds is None
+    """)
+    r = testdir.runpytest('-s')
+    assert r.ret == 0

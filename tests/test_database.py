@@ -131,6 +131,7 @@ class TestDatabaseFixturesBothOrder:
 
 
 class TestDatabaseMarker:
+    "Tests for the django_db marker."
 
     @pytest.mark.django_db
     def test_access(self):
@@ -138,7 +139,7 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_clean_db(self):
-        # Relies on the order: test_access created an object
+        # Relies on the order: test_access created an object.
         assert Item.objects.count() == 0
 
     @pytest.mark.django_db
@@ -161,3 +162,43 @@ class TestDatabaseMarker:
             pytest.skip('transactions required for this test')
 
         assert not noop_transactions()
+
+
+def test_unittest_interaction(django_testdir):
+    "Test that (non-Django) unittests cannot access the DB."
+
+    django_testdir.create_test_module('''
+        import pytest
+        import unittest
+        from .app.models import Item
+
+        class TestCase_setupClass(unittest.TestCase):
+            @classmethod
+            def setUpClass(cls):
+                Item.objects.create(name='foo')
+
+            def test_db_access_1(self):
+                Item.objects.count() == 1
+
+        class TestCase_setUp(unittest.TestCase):
+            @classmethod
+            def setUp(cls):
+                Item.objects.create(name='foo')
+
+            def test_db_access_2(self):
+                Item.objects.count() == 1
+
+        class TestCase(unittest.TestCase):
+            def test_db_access_3(self):
+                Item.objects.count() == 1
+    ''')
+
+    result = django_testdir.runpytest('-v', '--reuse-db')
+    result.stdout.fnmatch_lines([
+        "*test_db_access_1 ERROR*",
+        "*test_db_access_2 FAILED*",
+        "*test_db_access_3 FAILED*",
+        "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
+        "*no such table: app_item*",
+        "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
+    ])

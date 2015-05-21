@@ -118,15 +118,11 @@ class TestLiveServer:
 
     @pytest.fixture
     def item(self):
-        # This has not requested database access so should fail.
-        # Unfortunately the _live_server_helper autouse fixture makes this
-        # test work.
-        with pytest.raises(pytest.fail.Exception):
-            Item.objects.create(name='foo')
+        # This has not requested database access explicitly, but the
+        # live_server fixture auto-uses the transactional_db fixture.
+        Item.objects.create(name='foo')
 
-    @pytest.mark.xfail
     def test_item(self, item, live_server):
-        # test should fail/pass in setup
         pass
 
     @pytest.fixture
@@ -193,6 +189,7 @@ class TestLiveServer:
             """)
         result = django_testdir.runpytest('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
+        assert result.ret == 0
 
     @pytest.mark.skipif(get_django_version() < (1, 7),
                         reason="Django >= 1.7 required")
@@ -309,3 +306,4 @@ class Migration(migrations.Migration):
 
     result = django_testdir.runpytest('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
+    assert result.ret == 0

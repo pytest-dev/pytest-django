@@ -24,9 +24,10 @@ class TestEnv(TestEnvBase):
 
 # Python to run tox.
 RUN_PYTHON = '3.4'
+PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.6.4']
+PYTEST_VERSIONS = ['2.7.0']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
@@ -36,8 +37,8 @@ DJANGO_REQUIREMENTS = {
     '1.5': 'Django>=1.5,<1.6',
     '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
-    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.zip',
-    'master': 'https://github.com/django/django/archive/master.zip',
+    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.tar.gz',
+    'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
 TOX_TESTENV_TEMPLATE = dedent("""
@@ -77,12 +78,12 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.11'
+    yield 'pytest-xdist==1.12'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
 
     if env.is_py2():
-        yield 'south==1.0'
+        yield 'south==1.0.2'
 
     if env.settings == 'postgres':
         # Django 1.3 does not work with recent psycopg2 versions
@@ -109,10 +110,12 @@ def commands(uid, env):
         yield 'sh -c "dropdb %(name)s;' \
             ' createdb %(name)s || exit 0"' % {'name': db_name}
 
-    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs}' % env.settings
+    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs:tests}' % env.settings
 
 
 def testenv_name(env):
+    if len(PYTEST_VERSIONS) == 1:
+        env = [getattr(env, x) for x in env._fields if x != 'pytest_version']
     return '-'.join(env)
 
 
@@ -136,8 +139,8 @@ def generate_all_envs():
     products = itertools.product(PYTHON_VERSIONS, PYTEST_VERSIONS,
                                  DJANGO_VERSIONS, SETTINGS)
 
-    for idx, (python_version, pytest_version, django_version, settings) \
-            in enumerate(products):
+    for (python_version, pytest_version, django_version, settings) \
+            in products:
         env = TestEnv(python_version, pytest_version, django_version, settings)
 
         if is_valid_env(env):
@@ -153,10 +156,18 @@ def generate_default_envs(envs):
 
     def find_and_add(variations, env_getter):
         for variation in variations:
+            for existing in result:
+                if env_getter(existing) == variation:
+                    return
+
             for env in reversed(envs):
                 if env_getter(env) == variation:
                     result.add(env)
                     break
+
+    # Add all Django versions for each main python version (2.x and 3.x).
+    find_and_add(itertools.product(PYTHON_MAIN_VERSIONS, DJANGO_VERSIONS),
+                 lambda env: (env.python_version, env.django_version))
 
     find_and_add(PYTHON_VERSIONS, lambda env: env.python_version)
     find_and_add(PYTEST_VERSIONS, lambda env: env.pytest_version)
@@ -168,7 +179,8 @@ def generate_default_envs(envs):
 
 def make_tox_ini(envs, default_envs):
     default_env_names = ([testenv_name(env) for env in default_envs] +
-                         ['checkqa-%s' % python_version for python_version in PYTHON_VERSIONS])
+                         ['checkqa-%s' % python_version for python_version in
+                          PYTHON_MAIN_VERSIONS])
 
     contents = [dedent('''
         [tox]
@@ -207,23 +219,45 @@ def make_tox_ini(envs, default_envs):
 
 def make_travis_yml(envs):
     contents = dedent("""
+        # Use container-based environment (faster startup, allows caches).
+        sudo: false
         language: python
         python:
           - "%(RUN_PYTHON)s"
         env:
         %(testenvs)s
         %(checkenvs)s
+        matrix:
+          allow_failures:
+        %(allow_failures)s
         install:
+          # Create pip wrapper script, using travis_retry (a function) and
+          # inject it into tox.ini.
+          - mkdir -p bin
+          - PATH=$PWD/bin:$PATH
+          - printf '#!/bin/sh\\n' > bin/travis_retry_pip
+          - declare -f travis_retry >> bin/travis_retry_pip
+          - printf '\\necho "Using pip-wrapper.." >&2\\ntravis_retry pip "$@"' >> bin/travis_retry_pip
+          - chmod +x bin/travis_retry_pip
+          - sed -i.bak 's/^\[testenv\]/\\0\\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
+          - diff tox.ini tox.ini.bak && return 1 || true
+          - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
+          - diff tox.ini tox.ini.bak && return 1 || true
+
           - pip install tox
         script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
-                          python for python in PYTHON_VERSIONS)
+                          python for python in PYTHON_MAIN_VERSIONS)
+    allow_failures = '\n'.join('    - env: TESTENV=%s' %
+                               testenv_name(env) for env in envs
+                               if env.django_version == 'master')
 
     return contents % {
         'testenvs': testenvs,
         'checkenvs': checkenvs,
+        'allow_failures': allow_failures,
         'RUN_PYTHON': RUN_PYTHON,
     }
 
