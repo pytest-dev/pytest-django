@@ -314,7 +314,7 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches
+        from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -323,6 +323,10 @@ def _django_set_urlconf(request):
 
         def restore():
             django.conf.settings.ROOT_URLCONF = original_urlconf
+            # Copy the pattern from
+            # https://github.com/django/django/blob/master/django/test/signals.py#L152
+            clear_url_caches()
+            set_urlconf(None)
 
         request.addfinalizer(restore)
 
