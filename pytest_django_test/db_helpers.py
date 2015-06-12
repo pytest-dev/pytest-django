@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sqlite3
 
 import pytest
 
@@ -147,9 +148,13 @@ def mark_database():
     if get_db_engine() == 'sqlite3':
         if TEST_DB_NAME == ':memory:':
             raise AssertionError('sqlite in-memory database cannot be marked!')
-        r = run_cmd('sqlite3', TEST_DB_NAME,
-                    'CREATE TABLE mark_table(kaka int);')
-        assert r.status_code == 0
+
+        conn = sqlite3.connect(TEST_DB_NAME)
+        try:
+            with conn:
+                conn.execute('CREATE TABLE mark_table(kaka int);')
+        finally:  # Close the DB even if an error is raised
+            conn.close()
         return
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
@@ -171,9 +176,16 @@ def mark_exists():
         if TEST_DB_NAME == ':memory:':
             raise AssertionError(
                 'sqlite in-memory database cannot be checked for mark!')
-        r = run_cmd('sqlite3', TEST_DB_NAME, 'SELECT 1 FROM mark_table')
 
-        return r.status_code == 0
+        conn = sqlite3.connect(TEST_DB_NAME)
+        try:
+            with conn:
+                conn.execute('SELECT 1 FROM mark_table')
+                return True
+        except sqlite3.OperationalError:
+            return False
+        finally:  # Close the DB even if an error is raised
+            conn.close()
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
 
