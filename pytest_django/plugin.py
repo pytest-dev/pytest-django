@@ -5,6 +5,8 @@ test database and provides some useful text fixtures.
 """
 
 import contextlib
+import inspect
+from functools import reduce
 import os
 import sys
 import types
@@ -27,6 +29,7 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
+INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
 
 
 # ############### pytest hooks ################
@@ -62,6 +65,12 @@ def pytest_addoption(parser):
                   'Automatically find and add a Django project to the '
                   'Python path.',
                   default=True)
+    group._addoption('--fail-on-template-vars',
+                     action='store_true', dest='itv', default=False,
+                     help='Fail for invalid variables in templates.')
+    parser.addini(INVALID_TEMPLATE_VARS_ENV,
+                  'Fail for invalid variables in templates.',
+                  default=False)
 
 
 def _exists(path, ignore=EnvironmentError):
@@ -169,6 +178,14 @@ def pytest_load_initial_conftests(early_config, parser, args):
         _django_project_scan_outcome = _add_django_project_to_path(args)
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
+
+    # Configure FAIL_INVALID_TEMPLATE_VARS
+    itv = (options.itv or
+           os.environ.get(INVALID_TEMPLATE_VARS_ENV) in ['true', 'True', '1'] or
+           early_config.getini(INVALID_TEMPLATE_VARS_ENV))
+
+    if itv:
+        os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
     ds = (options.ds or
@@ -326,6 +343,88 @@ def _django_set_urlconf(request):
 
         request.addfinalizer(restore)
 
+
+@pytest.fixture(autouse=True, scope='session')
+def _fail_for_invalid_template_variable(request):
+    """Fixture that fails for invalid variables in templates.
+
+    This fixture will fail each test that uses django template rendering
+    should a template contain an invalid template variable.
+    The fail message will include the name of the invalid variable and
+    in most cases the template name.
+
+    It does not raise an exception, but fails, as the stack trace doesn't
+    offer any helpful information to debug.
+    This behavior can be switched off using the marker:
+    ``ignore_template_errors``
+    """
+    class InvalidVarException(object):
+        """Custom handler for invalid strings in templates."""
+
+        def __init__(self):
+            self.fail = True
+
+        def __contains__(self, key):
+            """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
+            return key == '%s'
+
+        def _get_template(self):
+            from django.template import Template
+
+            stack = inspect.stack()
+            # finding the ``render`` needle in the stack
+            frame = reduce(
+                lambda x, y: y[3] == 'render' and 'base.py' in y[1] and y or x,
+                stack
+            )
+            # assert 0, stack
+            frame = frame[0]
+            # finding only the frame locals in all frame members
+            f_locals = reduce(
+                lambda x, y: y[0] == 'f_locals' and y or x,
+                inspect.getmembers(frame)
+            )[1]
+            # ``django.template.base.Template``
+            template = f_locals['self']
+            if isinstance(template, Template):
+                return template
+
+        def __mod__(self, var):
+            """Handle TEMPLATE_STRING_IF_INVALID % var."""
+            template = self._get_template()
+            if template:
+                msg = "Undefined template variable '%s' in '%s'" % (var, template.name)
+            else:
+                msg = "Undefined template variable '%s'" % var
+            if self.fail:
+                pytest.fail(msg, pytrace=False)
+            else:
+                return msg
+    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
+        if django_settings_is_configured():
+            import django
+            from django.conf import settings
+
+            if django.VERSION >= (1, 8) and settings.TEMPLATES:
+                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
+            else:
+                settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
+
+
+@pytest.fixture(autouse=True)
+def _template_string_if_invalid_marker(request):
+    """Apply the @pytest.mark.ignore_template_errors marker,
+     internal to pytest-django."""
+    marker = request.keywords.get('ignore_template_errors', None)
+    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
+        if marker and django_settings_is_configured():
+            import django
+            from django.conf import settings
+
+            if django.VERSION >= (1, 8) and settings.TEMPLATES:
+                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
+            else:
+                settings.TEMPLATE_STRING_IF_INVALID.fail = False
 
 # ############### Helper Functions ################
 
