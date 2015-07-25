@@ -50,3 +50,18 @@ def test_django_project_scan_disabled_invalid_settings(django_testdir,
     result.stderr.fnmatch_lines(['*ImportError*DOES_NOT_EXIST*'])
     result.stderr.fnmatch_lines(['*pytest-django did not search for '
                                  'Django projects*'])
+
+
+@pytest.mark.django_project(project_root='django_project_root',
+                            create_manage_py=True)
+def test_django_project_found_invalid_settings_version(django_testdir, monkeypatch):
+    """Invalid DSM should not cause an error with --help or --version."""
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
+
+    result = django_testdir.runpytest('django_project_root', '--version')
+    assert result.ret == 0
+    result.stderr.fnmatch_lines(['*This is pytest version*'])
+
+    result = django_testdir.runpytest('django_project_root', '--help')
+    assert result.ret == 0
+    result.stdout.fnmatch_lines(['*usage:*'])
