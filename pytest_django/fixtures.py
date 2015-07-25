@@ -159,7 +159,6 @@ def _disable_native_migrations():
 
 # ############### User visible fixtures ################
 
-@pytest.fixture(scope='function')
 def db(request, _django_db_setup, _django_cursor_wrapper):
     """Require a django test database
 
@@ -179,8 +178,11 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
         return request.getfuncargvalue('transactional_db')
     return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
 
+db = pytest.fixture(scope='function')(db)
 
-@pytest.fixture(scope='function')
+class_db=pytest.fixture(scope='class')(db)
+
+
 def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     """Require a django test database with transaction support
 
@@ -193,6 +195,10 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     requested.
     """
     return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
+
+transactional_db = pytest.fixture(scope='function')(transactional_db)
+
+transactional_class_db=pytest.fixture(scope='class')(transactional_db)
 
 
 @pytest.fixture()

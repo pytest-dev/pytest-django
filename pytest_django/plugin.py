@@ -291,10 +291,11 @@ def _django_db_marker(request):
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
+        cls_db = 'class_db' if marker.class_db else 'db'
         if marker.transaction:
-            request.getfuncargvalue('transactional_db')
+            request.getfuncargvalue('transactional_%s'%cls_db)
         else:
-            request.getfuncargvalue('db')
+            request.getfuncargvalue(cls_db)
 
 
 @pytest.fixture(autouse=True, scope='class')
