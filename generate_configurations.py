@@ -70,7 +70,16 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', 'master'):
+    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', '1.9', 'master'):
+        return False
+
+    # Django 1.9 dropped Python 3.2 and Python 3.3 support
+    if (env.python_version in ('python3.2', 'python3.3') and
+        env.django_version in ('1.7', '1.8', '1.9', 'master')):
+        return False
+
+    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4, 3.5
+    if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
         return False
 
     return True
