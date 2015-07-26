@@ -167,7 +167,7 @@ def generate_default_envs(envs):
         for variation in variations:
             for existing in result:
                 if env_getter(existing) == variation:
-                    return
+                    break
 
             for env in reversed(envs):
                 if env_getter(env) == variation:
