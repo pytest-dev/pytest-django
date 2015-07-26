@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Features
+^^^^^^^^
+
+* Added a new option `--no-foce-no-debug` to avoid forcing of DEBUG setting to False (bubenkoff)
+
 2.8.0
 -----
 

@@ -54,6 +54,9 @@ def pytest_addoption(parser):
     group._addoption('--nomigrations',
                      action='store_true', dest='nomigrations', default=False,
                      help='Disable Django 1.7 migrations on test setup')
+    group._addoption('--no-force-no-debug',
+                     action='store_true', dest='noforcenodebug', default=False,
+                     help='Disable forcing DEBUG setting to False on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -251,7 +254,8 @@ def _django_test_environment(request):
         _setup_django()
         from django.conf import settings
         from .compat import setup_test_environment, teardown_test_environment
-        settings.DEBUG = False
+        if not request.config.getvalue('noforcenodebug'):
+            settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
