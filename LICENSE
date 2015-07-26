@@ -1,6 +1,6 @@
-pytest_django is released under the BSD (3-clause) license
+pytest-django is released under the BSD (3-clause) license
 ----------------------------------------------------------
-Copyright (c) 2013, pytest_django authors (see AUTHORS file)
+Copyright (c) 2015, pytest-django authors (see AUTHORS file)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-This version of pytest_django is a fork of pytest_django created by Ben Firshman.
+This version of pytest-django is a fork of pytest_django created by Ben Firshman.
 ---------------------------------------------------------------------------------
 Copyright (c) 2009, Ben Firshman
 All rights reserved.
