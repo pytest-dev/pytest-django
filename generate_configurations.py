@@ -37,7 +37,7 @@ DJANGO_REQUIREMENTS = {
     '1.5': 'Django>=1.5,<1.6',
     '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
-    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.tar.gz',
+    '1.8': 'Django>=1.8,<1.9',
     'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
