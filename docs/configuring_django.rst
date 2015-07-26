@@ -74,15 +74,3 @@ This can be done from your project's ``conftest.py`` file::
     def pytest_configure():
         settings.configure(DATABASES=...)
 
-
-``DEBUG`` setting during the test run
--------------------------------------
-
-Default django test runner behavior is to force DEBUG setting to False. So does the ``pytest-django``.
-But sometimes, especially for functional tests, you might want to avoid this, to debug why certain page does not work.
-
-Command Line Option::
-
-    $ py.test --no-force-no-debug
-
-will make sure that DEBUG is not forced to False, so you can set it to True in your test settings.
