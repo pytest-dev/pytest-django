@@ -329,10 +329,13 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches
+        from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
+        set_urlconf(marker.urls)
+        # We have to override `ROOT_URLCONF` as Django's core handler
+        # calls set_urlconf anyway!
         django.conf.settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
 
