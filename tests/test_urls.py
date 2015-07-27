@@ -45,7 +45,6 @@ def test_urls_cache_is_cleared(testdir):
         urlpatterns = patterns('', url(r'first/$', fake_view, name='first'))
     """)
 
-
     testdir.makepyfile("""
         from django.core.urlresolvers import reverse, NoReverseMatch
         import pytest
@@ -54,11 +53,9 @@ def test_urls_cache_is_cleared(testdir):
         def test_something():
             reverse('first')
 
-
         def test_something_else():
             with pytest.raises(NoReverseMatch):
                 reverse('first')
-
     """)
 
     result = testdir.runpytest()
