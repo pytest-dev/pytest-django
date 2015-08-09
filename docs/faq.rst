@@ -40,7 +40,7 @@ My tests are not being found. Why not?
     [pytest]
     python_files=*.py
 
-When debugging test collection problems, the `--collectonly` flag and `-rs`
+When debugging test collection problems, the ``--collectonly`` flag and ``-rs``
 (report skipped tests) can be helpful.
 
 How do South and pytest-django play together?
