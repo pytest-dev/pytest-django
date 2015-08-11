@@ -95,7 +95,8 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
 
                 for db in connections:
                     call_command('flush', interactive=False, database=db,
-                                 verbosity=pytest.config.option.verbose)
+                                 verbosity=pytest.config.option.verbose,
+                                 allow_cascade=True)
                 for conn in connections.all():
                     conn.close()
             request.addfinalizer(flushdb)
