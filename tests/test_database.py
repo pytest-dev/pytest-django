@@ -4,6 +4,7 @@ import pytest
 from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
+from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 
 
@@ -49,6 +50,29 @@ def noaccess():
 def test_noaccess_fixture(noaccess):
     # Setup will fail if this test needs to fail
     pass
+
+
+@pytest.mark.skipif(get_django_version() < (1, 6),
+                    reason="shared_db_wrapper needs at least Django 1.6")
+class TestSharedDbWrapper(object):
+    """Tests for sharing data created with share_db_wrapper, order matters."""
+    @pytest.fixture(scope='class')
+    def shared_item(self, request, shared_db_wrapper):
+        with shared_db_wrapper(request):
+            return Item.objects.create(name='shared item')
+
+    def test_preparing_data(self, shared_item):
+        type(self)._shared_item_pk = shared_item.pk
+
+    def test_accessing_the_same_data(self, db, shared_item):
+        retrieved_item = Item.objects.get(name='shared item')
+        assert type(self)._shared_item_pk == retrieved_item.pk
+
+
+@pytest.mark.skipif(get_django_version() < (1, 6),
+                    reason="shared_db_wrapper needs at least Django 1.6")
+def test_shared_db_wrapper_not_leaking(db):
+    assert not Item.objects.filter(name='shared item').exists()
 
 
 class TestDatabaseFixtures:

@@ -2,7 +2,9 @@
 
 from __future__ import with_statement
 
+from contextlib import contextmanager
 import os
+import sys
 import warnings
 
 import pytest
@@ -13,7 +15,8 @@ from .db_reuse import (monkey_patch_creation_for_db_reuse,
 from .django_compat import is_django_unittest
 from .lazy_django import get_django_version, skip_if_no_django
 
-__all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
+__all__ = ['_django_db_setup', 'db', 'transactional_db', 'shared_db_wrapper',
+           'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper']
@@ -190,6 +193,62 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     requested.
     """
     return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
+
+
+@pytest.fixture(scope='session')
+def shared_db_wrapper(_django_db_setup, _django_cursor_wrapper):
+    """Wrapper for common database initialization code.
+
+    This fixture provides a context manager that let's you access the database
+    from a transaction spanning multiple tests.
+    """
+    from django.db import connection, transaction
+
+    if get_django_version() < (1, 6):
+        raise Exception('shared_db_wrapper is only supported on Django >= 1.6.')
+
+    class DummyException(Exception):
+        """Dummy for use with Atomic.__exit__."""
+
+    @contextmanager
+    def wrapper(request):
+        # We need to take the request
+        # to bind finalization to the place where this is used
+        if 'transactional_db' in request.funcargnames:
+            raise Exception(
+                'shared_db_wrapper cannot be used with `transactional_db`.')
+
+        with _django_cursor_wrapper:
+            if not connection.features.supports_transactions:
+                raise Exception(
+                    "shared_db_wrapper cannot be used when "
+                    "the database doesn't support transactions.")
+
+        exc_type, exc_value, traceback = DummyException, DummyException(), None
+        # Use atomic instead of calling .savepoint* directly.
+        # This way works for both top-level transactions and "subtransactions".
+        atomic = transaction.atomic()
+
+        def finalize():
+            # Only run __exit__ if there was no error running the wrapped function.
+            # Otherwise we've run it already.
+            if exc_type == DummyException:
+                # dummy exception makes `atomic` rollback the savepoint
+                atomic.__exit__(exc_type, exc_value, traceback)
+
+        try:
+            _django_cursor_wrapper.enable()
+            atomic.__enter__()
+            yield
+        except:
+            exc_type, exc_value, traceback = sys.exc_info()
+            atomic.__exit__(exc_type, exc_value, traceback)
+            raise
+        finally:
+            request.addfinalizer(finalize)
+            _django_cursor_wrapper.restore()
+
+    return wrapper
 
 
 @pytest.fixture()
