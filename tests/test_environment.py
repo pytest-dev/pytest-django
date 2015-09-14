@@ -188,8 +188,8 @@ class TestrunnerVerbosity:
             "*PASSED*Destroying test database for alias 'default' ('*')...*"])
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
-        """More verbose output with '-v -v', and --reuse-db."""
-        result = testdir.runpytest_subprocess('-s', '-v', '-v', '--reuse-db')
+        """More verbose output with '-v -v', and --create-db."""
+        result = testdir.runpytest_subprocess('-s', '-v', '-v', '--create-db')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py:*Creating test database for alias*",
             "*PASSED*"])
