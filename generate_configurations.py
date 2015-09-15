@@ -165,10 +165,14 @@ def generate_default_envs(envs):
 
     def find_and_add(variations, env_getter):
         for variation in variations:
-            for env in reversed(envs):
-                if env_getter(env) == variation:
-                    result.add(env)
+            for existing in result:
+                if env_getter(existing) == variation:
                     break
+            else:
+                for env in reversed(envs):
+                    if env_getter(env) == variation:
+                        result.add(env)
+                        break
 
     # Add all Django versions for each main python version (2.x and 3.x).
     find_and_add(itertools.product(PYTHON_MAIN_VERSIONS, DJANGO_VERSIONS),
