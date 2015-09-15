@@ -22,9 +22,14 @@ env:
   - TESTENV=python3.4-1.6-sqlite_file
   - TESTENV=python3.4-1.7-sqlite_file
   - TESTENV=python3.4-1.8-sqlite_file
-  - TESTENV=python3.4-master-postgres
-  - TESTENV=python3.4-master-sqlite
   - TESTENV=python3.4-master-sqlite_file
+  - TESTENV=python3.5-1.5-sqlite_file
+  - TESTENV=python3.5-1.6-sqlite_file
+  - TESTENV=python3.5-1.7-sqlite_file
+  - TESTENV=python3.5-1.8-sqlite_file
+  - TESTENV=python3.5-master-postgres
+  - TESTENV=python3.5-master-sqlite
+  - TESTENV=python3.5-master-sqlite_file
   - TESTENV=checkqa-python2.7
   - TESTENV=checkqa-python3.4
 matrix:
@@ -33,9 +38,10 @@ matrix:
     - env: TESTENV=python2.7-master-mysql_innodb
     - env: TESTENV=python2.7-master-mysql_myisam
     - env: TESTENV=python2.7-master-sqlite_file
-    - env: TESTENV=python3.4-master-postgres
-    - env: TESTENV=python3.4-master-sqlite
     - env: TESTENV=python3.4-master-sqlite_file
+    - env: TESTENV=python3.5-master-postgres
+    - env: TESTENV=python3.5-master-sqlite
+    - env: TESTENV=python3.5-master-sqlite_file
 install:
   # Create pip wrapper script, using travis_retry (a function) and
   # inject it into tox.ini.
