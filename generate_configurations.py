@@ -27,7 +27,7 @@ RUN_PYTHON = '3.4'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.7.2']
+PYTEST_VERSIONS = ['2.7.3']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
@@ -87,7 +87,7 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.12'
+    yield 'pytest-xdist==1.13.1'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
 
@@ -99,7 +99,7 @@ def requirements(env):
         if env.django_version == '1.3':
             yield 'psycopg2==2.4.1'
         else:
-            yield 'psycopg2==2.5.2'
+            yield 'psycopg2==2.6.1'
 
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
         yield 'mysql-python==1.2.5'
