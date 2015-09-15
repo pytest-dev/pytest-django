@@ -78,6 +78,10 @@ def is_valid_env(env):
         env.django_version in ('1.7', '1.8', '1.9', 'master')):
         return False
 
+    # Python 3.5 is only supported by Django 1.8+
+    if env.python_version == 'python3.5':
+        return env.django_version in ('1.8', '1.9', 'master')
+
     # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4+.
     if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
         return False
