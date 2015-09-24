@@ -140,12 +140,13 @@ def _setup_django_settings(_django_project_scan_outcome):
         import cbs
         cbs.apply(settings_class, settings_module.__dict__)
 
-    # Forcefully load django settings, throws ImportError or
-    # ImproperlyConfigured if settings cannot be loaded.
-    from django.conf import settings
+    if os.environ.get(SETTINGS_MODULE_ENV):
+        # Forcefully load django settings, throws ImportError or
+        # ImproperlyConfigured if settings cannot be loaded.
+        from django.conf import settings
 
-    with _handle_import_error(_django_project_scan_outcome):
-        settings.DATABASES
+        with _handle_import_error(_django_project_scan_outcome):
+            settings.DATABASES
 
 def _setup_django():
 
@@ -232,7 +233,8 @@ def pytest_load_initial_conftests(early_config, parser, args):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
     _reconfigure_environment(os.environ, options, early_config)
     _setup_django_settings(_django_project_scan_outcome)
-    _setup_django()
+    if django_settings_is_configured():
+        _setup_django()
 
 
 def pytest_runtest_setup(item):
