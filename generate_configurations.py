@@ -89,6 +89,7 @@ def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
     yield 'pytest-xdist==1.12'
     yield DJANGO_REQUIREMENTS[env.django_version]
+    yield 'django-classy_settings'
     yield 'django-configurations==0.8'
 
     if env.is_py2():
