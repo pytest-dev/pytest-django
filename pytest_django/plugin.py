@@ -148,6 +148,7 @@ def _setup_django_settings(_django_project_scan_outcome):
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
 
+
 def _setup_django():
 
     import django
@@ -193,7 +194,6 @@ def _reconfigure_environment(env, options, early_config):
         if dcbs:
             assert '.' not in dcbs, 'freestanding cbs clases are unsupported'
             env[SETTINGS_CLASS_ENV] = dcbs
-
 
 
 def pytest_load_initial_conftests(early_config, parser, args):

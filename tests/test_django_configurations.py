@@ -4,8 +4,8 @@ If these tests fail you probably forgot to install django-configurations.
 """
 import pytest
 
-def setup_module(mod):
 
+def setup_module(mod):
     pytest.importorskip('configurations')
 
     try:
