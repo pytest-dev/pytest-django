@@ -6,20 +6,14 @@ import pytest
 
 def setup_module(mod):
 
-    pytest.importorskip('configurations')
+    pytest.importorskip('cbs')
 
-    try:
-        import configurations.importer
-        configurations
-    except ImportError as e:
-        if 'LaxOptionParser' in e.args[0]:
-            pytest.skip('This version of django-configurations is incompatible with Django: '  # noqa
-                        'https://github.com/jezdez/django-configurations/issues/65')  # noqa
 
 BARE_SETTINGS = '''
-from configurations import Settings
+from cbs import BaseSettings
 
-class MySettings(Settings):
+class MySettings(BaseSettings):
+    PROJECT_NAME = 'tpkg'
     # At least one database must be configured
     DATABASES = {
         'default': {
@@ -34,7 +28,7 @@ class MySettings(Settings):
 
 def test_dc_env(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
-    monkeypatch.setenv('DJANGO_CONFIGURATION', 'MySettings')
+    monkeypatch.setenv('DJANGO_SETTINGS_CLASS', 'MySettings')
 
     pkg = testdir.mkpydir('tpkg')
     settings = pkg.join('settings_env.py')
@@ -44,7 +38,7 @@ def test_dc_env(testdir, monkeypatch):
 
         def test_settings():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
-            assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
+            assert os.environ['DJANGO_SETTINGS_CLASS'] == 'MySettings'
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
@@ -53,12 +47,12 @@ def test_dc_env(testdir, monkeypatch):
 
 def test_dc_ini(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
-    monkeypatch.setenv('DJANGO_CONFIGURATION', 'MySettings')
+    monkeypatch.setenv('DJANGO_SETTINGS_CLASS', 'MySettings')
 
     testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-       DJANGO_CONFIGURATION = DO_NOT_USE_ini
+       DJANGO_SETTINGS_CLASS = DO_NOT_USE_ini
     """)
     pkg = testdir.mkpydir('tpkg')
     settings = pkg.join('settings_env.py')
@@ -68,7 +62,7 @@ def test_dc_ini(testdir, monkeypatch):
 
         def test_ds():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
-            assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
+            assert os.environ['DJANGO_SETTINGS_CLASS'] == 'MySettings'
     """)
     result = testdir.runpytest()
     result.stdout.fnmatch_lines(['*1 passed*'])
@@ -77,12 +71,12 @@ def test_dc_ini(testdir, monkeypatch):
 
 def test_dc_option(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
-    monkeypatch.setenv('DJANGO_CONFIGURATION', 'DO_NOT_USE_env')
+    monkeypatch.setenv('DJANGO_SETTINGS_CLASS', 'DO_NOT_USE_env')
 
     testdir.makeini("""
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-       DJANGO_CONFIGURATION = DO_NOT_USE_ini
+       DJANGO_SETTINGS_CLASS = DO_NOT_USE_ini
     """)
     pkg = testdir.mkpydir('tpkg')
     settings = pkg.join('settings_opt.py')
@@ -92,8 +86,8 @@ def test_dc_option(testdir, monkeypatch):
 
         def test_ds():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
-            assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
+            assert os.environ['DJANGO_SETTINGS_CLASS'] == 'MySettings'
     """)
-    result = testdir.runpytest('--ds=tpkg.settings_opt', '--dc=MySettings')
+    result = testdir.runpytest('--ds=tpkg.settings_opt', '--dcbs=MySettings')
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0

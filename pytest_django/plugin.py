@@ -28,6 +28,7 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
+SETTINGS_CLASS_ENV = 'DJANGO_SETTINGS_CLASS'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
 
@@ -48,6 +49,9 @@ def pytest_addoption(parser):
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
+    group._addoption('--dcbs',
+                     action='store', type='string', dest='dcbs', default=None,
+                     help='Set DJANGO_SETTINGS_CLASS.')
     group._addoption('--dc',
                      action='store', type='string', dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
@@ -60,7 +64,8 @@ def pytest_addoption(parser):
                      help='Address and port for the live_server fixture.')
     parser.addini(SETTINGS_MODULE_ENV,
                   'Django settings module to use by pytest-django.')
-
+    parser.addini(SETTINGS_CLASS_ENV,
+                  'Django classy settings class to be used by pytest-django')
     parser.addini('django_find_project',
                   'Automatically find and add a Django project to the '
                   'Python path.',
@@ -124,7 +129,26 @@ def _add_django_project_to_path(args):
     return PROJECT_NOT_FOUND
 
 
+def _setup_django_settings(_django_project_scan_outcome):
+    if os.environ.get(CONFIGURATION_ENV):
+        # Install the django-configurations importer
+        import configurations.importer
+        configurations.importer.install()
+    if os.environ.get(SETTINGS_CLASS_ENV):
+        settings_module = __import__(os.environ[SETTINGS_MODULE_ENV], fromlist=['*'])
+        settings_class = getattr(settings_module, os.environ[SETTINGS_CLASS_ENV])
+        import cbs
+        cbs.apply(settings_class, settings_module.__dict__)
+
+    # Forcefully load django settings, throws ImportError or
+    # ImproperlyConfigured if settings cannot be loaded.
+    from django.conf import settings
+
+    with _handle_import_error(_django_project_scan_outcome):
+        settings.DATABASES
+
 def _setup_django():
+
     import django
 
     if hasattr(django, 'setup'):
@@ -152,6 +176,23 @@ def _parse_django_find_project_ini(x):
         raise ValueError('%s is not a valid value for django_find_project. '
                          'It must be one of %s.'
                          % (x, ', '.join(possible_values.keys())))
+
+
+def _reconfigure_environment(env, options, early_config):
+    # Configure DJANGO_SETTINGS_MODULE
+    def _v(name):
+        return env.get(name) or early_config.getini(name)
+    ds = options.ds or _v(SETTINGS_MODULE_ENV)
+    dc = options.dc or _v(CONFIGURATION_ENV)
+    dcbs = options.dcbs or _v(SETTINGS_CLASS_ENV)
+    if ds:
+        env[SETTINGS_MODULE_ENV] = ds
+        if dc:
+            env[CONFIGURATION_ENV] = dc
+        if dcbs:
+            assert '.' not in dcbs, 'freestanding cbs clases are unsupported'
+            env[SETTINGS_CLASS_ENV] = dcbs
+
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
@@ -189,35 +230,9 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     if itv:
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
-
-    # Configure DJANGO_SETTINGS_MODULE
-    ds = (options.ds or
-          os.environ.get(SETTINGS_MODULE_ENV) or
-          early_config.getini(SETTINGS_MODULE_ENV))
-
-    # Configure DJANGO_CONFIGURATION
-    dc = (options.dc or
-          os.environ.get(CONFIGURATION_ENV) or
-          early_config.getini(CONFIGURATION_ENV))
-
-    if ds:
-        os.environ[SETTINGS_MODULE_ENV] = ds
-
-        if dc:
-            os.environ[CONFIGURATION_ENV] = dc
-
-            # Install the django-configurations importer
-            import configurations.importer
-            configurations.importer.install()
-
-        # Forcefully load django settings, throws ImportError or
-        # ImproperlyConfigured if settings cannot be loaded.
-        from django.conf import settings
-
-        with _handle_import_error(_django_project_scan_outcome):
-            settings.DATABASES
-
-        _setup_django()
+    _reconfigure_environment(os.environ, options, early_config)
+    _setup_django_settings(_django_project_scan_outcome)
+    _setup_django()
 
 
 def pytest_runtest_setup(item):
