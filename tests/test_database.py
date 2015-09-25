@@ -163,6 +163,12 @@ class TestUseModel:
         self.test_unmanaged_missing()
 
 
+
+@pytest.mark.django_use_model(Unmanaged)
+def test_marked_test_not_get_hit():
+    assert True is False
+
+
 def test_unittest_interaction(django_testdir):
     "Test that (non-Django) unittests cannot access the DB."
 
