@@ -23,11 +23,11 @@ class TestEnv(TestEnvBase):
         return self.python_version.startswith('pypy')
 
 # Python to run tox.
-RUN_PYTHON = '3.4'
+RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
-                   'python3.4', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.7.2']
+                   'python3.4', 'python3.5', 'pypy', 'pypy3']
+PYTEST_VERSIONS = ['2.7.3', '2.8.0']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
@@ -78,7 +78,11 @@ def is_valid_env(env):
         env.django_version in ('1.7', '1.8', '1.9', 'master')):
         return False
 
-    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4, 3.5
+    # Python 3.5 is only supported by Django 1.8+
+    if env.python_version == 'python3.5':
+        return env.django_version in ('1.8', '1.9', 'master')
+
+    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4+.
     if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
         return False
 
@@ -87,7 +91,7 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.12'
+    yield 'pytest-xdist==1.13.1'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==0.8'
 
@@ -99,7 +103,7 @@ def requirements(env):
         if env.django_version == '1.3':
             yield 'psycopg2==2.4.1'
         else:
-            yield 'psycopg2==2.5.2'
+            yield 'psycopg2==2.6.1'
 
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
         yield 'mysql-python==1.2.5'
@@ -165,10 +169,14 @@ def generate_default_envs(envs):
 
     def find_and_add(variations, env_getter):
         for variation in variations:
-            for env in reversed(envs):
-                if env_getter(env) == variation:
-                    result.add(env)
+            for existing in result:
+                if env_getter(existing) == variation:
                     break
+            else:
+                for env in reversed(envs):
+                    if env_getter(env) == variation:
+                        result.add(env)
+                        break
 
     # Add all Django versions for each main python version (2.x and 3.x).
     find_and_add(itertools.product(PYTHON_MAIN_VERSIONS, DJANGO_VERSIONS),
