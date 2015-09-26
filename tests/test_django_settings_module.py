@@ -102,6 +102,8 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     assert result.ret == 0
 
 
+@pytest.mark.skipif(pytest.__version__ == '2.8.0',
+                    reason='https://github.com/pytest-dev/pytest/issues/1073')
 def test_ds_in_pytest_configure(testdir, monkeypatch):
     monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
     pkg = testdir.mkpydir('tpkg')
@@ -176,6 +178,8 @@ def test_django_settings_configure(testdir, monkeypatch):
     ])
 
 
+@pytest.mark.skipif(pytest.__version__ == '2.8.0',
+                    reason='https://github.com/pytest-dev/pytest/issues/1073')
 def test_settings_in_hook(testdir, monkeypatch):
     monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
     testdir.makeconftest("""
@@ -220,6 +224,8 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     assert result.ret == 0
 
 
+@pytest.mark.skipif(pytest.__version__ == '2.8.0',
+                    reason='https://github.com/pytest-dev/pytest/issues/1073')
 def test_debug_false(testdir, monkeypatch):
     monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
     testdir.makeconftest("""
