@@ -17,7 +17,7 @@ pytest-django allows you to test your Django project/applications with the
 
   * Django: 1.4-1.8 and latest master branch (compatible at the time of each release)
   * Python: CPython 2.6-2.7,3.2-3.4 or PyPy 2,3
-  * pytest: 2.6.x
+  * pytest: 2.7.x, 2.8.x
 
 * Licence: BSD
 * Project maintainers: Andreas Pelme, Floris Bruynooghe and Daniel Hahler
