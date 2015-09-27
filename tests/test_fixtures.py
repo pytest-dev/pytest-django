@@ -85,11 +85,6 @@ class TestSettings:
 
 
 class TestLiveServer:
-    pytestmark = [
-        pytest.mark.skipif(get_django_version() < (1, 4),
-                           reason="Django > 1.3 required"),
-    ]
-
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
 
@@ -227,10 +222,7 @@ def test_custom_user_model(django_testdir):
             USERNAME_FIELD = 'identifier'
         """, 'models.py')
     django_testdir.create_app_file("""
-        try:
-            from django.conf.urls import patterns  # Django >1.4
-        except ImportError:
-            from django.conf.urls.defaults import patterns  # Django 1.3
+        from django.conf.urls import patterns
 
         urlpatterns = patterns(
             '',

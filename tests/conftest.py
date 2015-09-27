@@ -63,7 +63,6 @@ def django_testdir(request, testdir, monkeypatch):
             'tpkg.app',
         ]
         SECRET_KEY = 'foobar'
-        SITE_ID = 1234  # Needed for 1.3 compatibility
 
         MIDDLEWARE_CLASSES = (
             'django.contrib.sessions.middleware.SessionMiddleware',

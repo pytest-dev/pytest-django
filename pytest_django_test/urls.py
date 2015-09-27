@@ -1,7 +1,4 @@
-try:
-    from django.conf.urls import patterns  # Django >1.4
-except ImportError:
-    from django.conf.urls.defaults import patterns  # Django 1.3
+from django.conf.urls import patterns
 
 urlpatterns = patterns(
     '',

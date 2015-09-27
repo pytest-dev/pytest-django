@@ -40,10 +40,7 @@ def test_mail_again():
     """)
 def test_invalid_template_variable(django_testdir):
     django_testdir.create_app_file("""
-        try:
-            from django.conf.urls import patterns  # Django >1.4
-        except ImportError:
-            from django.conf.urls.defaults import patterns  # Django 1.3
+        from django.conf.urls import patterns
 
         urlpatterns = patterns(
             '',
@@ -90,10 +87,7 @@ def test_invalid_template_variable(django_testdir):
     """)
 def test_invalid_template_variable_opt_in(django_testdir):
     django_testdir.create_app_file("""
-        try:
-            from django.conf.urls import patterns  # Django >1.4
-        except ImportError:
-            from django.conf.urls.defaults import patterns  # Django 1.3
+        from django.conf.urls import patterns
 
         urlpatterns = patterns(
             '',
