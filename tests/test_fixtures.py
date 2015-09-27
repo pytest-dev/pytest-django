@@ -222,11 +222,13 @@ def test_custom_user_model(django_testdir):
             USERNAME_FIELD = 'identifier'
         """, 'models.py')
     django_testdir.create_app_file("""
-        from django.conf.urls import patterns
+        from django.conf.urls import url
+        from pytest_django_test.compat import patterns
+        from tpkg.app import views
 
         urlpatterns = patterns(
             '',
-            (r'admin-required/', 'tpkg.app.views.admin_required_view'),
+            url(r'admin-required/', views.admin_required_view),
         )
         """, 'urls.py')
     django_testdir.create_app_file("""

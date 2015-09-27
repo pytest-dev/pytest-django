@@ -37,11 +37,14 @@ def test_mail_again():
     """)
 def test_invalid_template_variable(django_testdir):
     django_testdir.create_app_file("""
-        from django.conf.urls import patterns
+        from django.conf.urls import url
+        from pytest_django_test.compat import patterns
+
+        from tpkg.app import views
 
         urlpatterns = patterns(
             '',
-            (r'invalid_template/', 'tpkg.app.views.invalid_template'),
+            url(r'invalid_template/', views.invalid_template),
         )
         """, 'urls.py')
     django_testdir.create_app_file("""
@@ -81,11 +84,14 @@ def test_invalid_template_variable(django_testdir):
     """)
 def test_invalid_template_variable_opt_in(django_testdir):
     django_testdir.create_app_file("""
-        from django.conf.urls import patterns
+        from django.conf.urls import url
+        from pytest_django_test.compat import patterns
+
+        from tpkg.app import views
 
         urlpatterns = patterns(
             '',
-            (r'invalid_template/', 'tpkg.app.views.invalid_template'),
+            url(r'invalid_template/', views.invalid_template),
         )
         """, 'urls.py')
     django_testdir.create_app_file("""
