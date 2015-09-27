@@ -4,7 +4,7 @@ import pytest
 @pytest.mark.django_project(project_root='django_project_root',
                             create_manage_py=True)
 def test_django_project_found(django_testdir):
-    # XXX: Important: Do not chdir() to django_project_root since runpytest
+    # XXX: Important: Do not chdir() to django_project_root since runpytest_subprocess
     # will call "python /path/to/pytest.py", which will impliclity add cwd to
     # the path. By instead calling "python /path/to/pytest.py
     # django_project_root", we avoid impliclity adding the project to sys.path
@@ -16,7 +16,7 @@ def test_django_project_found(django_testdir):
         assert 1 + 1 == 2
     """)
 
-    result = django_testdir.runpytest('django_project_root')
+    result = django_testdir.runpytest_subprocess('django_project_root')
     assert result.ret == 0
 
     outcomes = result.parseoutcomes()
@@ -28,7 +28,7 @@ def test_django_project_found(django_testdir):
 def test_django_project_found_invalid_settings(django_testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
 
-    result = django_testdir.runpytest('django_project_root')
+    result = django_testdir.runpytest_subprocess('django_project_root')
     assert result.ret != 0
 
     result.stderr.fnmatch_lines(['*ImportError:*DOES_NOT_EXIST*'])
@@ -44,7 +44,7 @@ def test_django_project_scan_disabled_invalid_settings(django_testdir,
     django_find_project = false
     ''')
 
-    result = django_testdir.runpytest('django_project_root')
+    result = django_testdir.runpytest_subprocess('django_project_root')
     assert result.ret != 0
 
     result.stderr.fnmatch_lines(['*ImportError*DOES_NOT_EXIST*'])
@@ -58,10 +58,10 @@ def test_django_project_found_invalid_settings_version(django_testdir, monkeypat
     """Invalid DSM should not cause an error with --help or --version."""
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
 
-    result = django_testdir.runpytest('django_project_root', '--version')
+    result = django_testdir.runpytest_subprocess('django_project_root', '--version')
     assert result.ret == 0
     result.stderr.fnmatch_lines(['*This is pytest version*'])
 
-    result = django_testdir.runpytest('django_project_root', '--help')
+    result = django_testdir.runpytest_subprocess('django_project_root', '--help')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*usage:*'])

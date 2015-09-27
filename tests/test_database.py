@@ -193,7 +193,7 @@ def test_unittest_interaction(django_testdir):
                 Item.objects.count() == 1
     ''')
 
-    result = django_testdir.runpytest('-v', '--reuse-db')
+    result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
     result.stdout.fnmatch_lines([
         "*test_db_access_1 ERROR*",
         "*test_db_access_2 FAILED*",

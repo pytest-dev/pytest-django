@@ -65,7 +65,7 @@ def test_invalid_template_variable(django_testdir):
         def test_ignore(client):
             client.get('/invalid_template/')
         ''')
-    result = django_testdir.runpytest('-s', '--fail-on-template-vars')
+    result = django_testdir.runpytest_subprocess('-s', '--fail-on-template-vars')
     result.stdout.fnmatch_lines_random([
         "tpkg/test_the_test.py F.",
         "Undefined template variable 'invalid_var' in 'invalid_template.html'",
@@ -109,7 +109,7 @@ def test_invalid_template_variable_opt_in(django_testdir):
         def test_ignore(client):
             client.get('/invalid_template/')
         ''')
-    result = django_testdir.runpytest('-s')
+    result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines_random([
         "tpkg/test_the_test.py ..",
     ])
@@ -155,19 +155,19 @@ class TestrunnerVerbosity:
 
     def test_default(self, testdir):
         """Not verbose by default."""
-        result = testdir.runpytest('-s')
+        result = testdir.runpytest_subprocess('-s')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py ."])
 
     def test_vq_verbosity_0(self, testdir):
         """-v and -q results in verbosity 0."""
-        result = testdir.runpytest('-s', '-v', '-q')
+        result = testdir.runpytest_subprocess('-s', '-v', '-q')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py ."])
 
     def test_verbose_with_v(self, testdir):
         """Verbose output with '-v'."""
-        result = testdir.runpytest('-s', '-v')
+        result = testdir.runpytest_subprocess('-s', '-v')
         result.stdout.fnmatch_lines_random([
             "tpkg/test_the_test.py:*",
             "*PASSED*",
@@ -175,7 +175,7 @@ class TestrunnerVerbosity:
 
     def test_more_verbose_with_vv(self, testdir):
         """More verbose output with '-v -v'."""
-        result = testdir.runpytest('-s', '-v', '-v')
+        result = testdir.runpytest_subprocess('-s', '-v', '-v')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py:*Creating test database for alias*",
             "*Creating table app_item*",
@@ -183,7 +183,7 @@ class TestrunnerVerbosity:
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
         """More verbose output with '-v -v', and --reuse-db."""
-        result = testdir.runpytest('-s', '-v', '-v', '--reuse-db')
+        result = testdir.runpytest_subprocess('-s', '-v', '-v', '--reuse-db')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py:*Creating test database for alias*",
             "*PASSED*"])

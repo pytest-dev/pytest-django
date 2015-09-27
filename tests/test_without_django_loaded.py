@@ -20,7 +20,7 @@ def test_no_ds(testdir):
         def test_cfg(pytestconfig):
             assert pytestconfig.option.ds is None
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
 
 
@@ -42,7 +42,7 @@ def test_database(testdir):
         def test_transactional_db(transactional_db):
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*4 skipped*'])
 
@@ -55,7 +55,7 @@ def test_client(testdir):
         def test_admin_client(admin_client):
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*2 skipped*'])
 
@@ -65,7 +65,7 @@ def test_rf(testdir):
         def test_rf(rf):
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*1 skipped*'])
 
@@ -75,7 +75,7 @@ def test_settings(testdir):
         def test_settings(settings):
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*1 skipped*'])
 
@@ -85,7 +85,7 @@ def test_live_server(testdir):
         def test_live_server(live_server):
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*1 skipped*'])
 
@@ -98,6 +98,6 @@ def test_urls_mark(testdir):
         def test_urls():
             assert 0
     """)
-    r = testdir.runpytest()
+    r = testdir.runpytest_subprocess()
     assert r.ret == 0
     r.stdout.fnmatch_lines(['*1 skipped*'])

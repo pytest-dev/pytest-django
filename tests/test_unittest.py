@@ -89,7 +89,7 @@ def test_sole_test(django_testdir):
                 assert Item.objects.count() == 0
     ''')
 
-    result = django_testdir.runpytest('-v')
+    result = django_testdir.runpytest_subprocess('-v')
     result.stdout.fnmatch_lines([
         "*TestFoo*test_foo PASSED*",
     ])
@@ -121,7 +121,7 @@ class TestUnittestMethods:
                     pass
         ''')
 
-        result = django_testdir.runpytest('-v', '-s')
+        result = django_testdir.runpytest_subprocess('-v', '-s')
         result.stdout.fnmatch_lines([
             "CALLED: setUpClass",
             "CALLED: setUp",
@@ -154,7 +154,7 @@ class TestUnittestMethods:
                     pass
         ''')
 
-        result = django_testdir.runpytest('-v', '-s')
+        result = django_testdir.runpytest_subprocess('-v', '-s')
         result.stdout.fnmatch_lines([
             "CALLED: setUpClass",
             "CALLED: setUp",

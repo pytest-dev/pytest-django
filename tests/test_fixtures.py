@@ -182,7 +182,7 @@ class TestLiveServer:
                         live_server + '/static/a_file.txt').read()
                     assert force_text(response_data) == 'bla\\n'
             """)
-        result = django_testdir.runpytest('--tb=short', '-v')
+        result = django_testdir.runpytest_subprocess('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
         assert result.ret == 0
 
@@ -296,6 +296,6 @@ class Migration(migrations.Migration):
     ]
     """, 'migrations/0001_initial.py')  # noqa
 
-    result = django_testdir.runpytest('-s')
+    result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0
