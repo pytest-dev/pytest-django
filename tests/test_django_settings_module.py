@@ -132,6 +132,7 @@ def test_django_settings_configure(testdir, monkeypatch):
     monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
 
     p = testdir.makepyfile(run="""
+            import django
             from django.conf import settings
             settings.configure(SECRET_KEY='set from settings.configure()',
                                DATABASES={'default': {
@@ -140,6 +141,9 @@ def test_django_settings_configure(testdir, monkeypatch):
                                }},
                                INSTALLED_APPS=['django.contrib.auth',
                                                'django.contrib.contenttypes',])
+
+            if hasattr(django, 'setup'):
+                django.setup()
 
             import pytest
 
