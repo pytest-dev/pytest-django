@@ -60,6 +60,8 @@ def django_testdir(request, testdir, monkeypatch):
         DATABASES = %(db_settings)s
 
         INSTALLED_APPS = [
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
             'tpkg.app',
         ]
         SECRET_KEY = 'foobar'

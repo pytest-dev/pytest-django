@@ -29,9 +29,6 @@ def test_mail_again():
 
 
 @pytest.mark.django_project(extra_settings="""
-    INSTALLED_APPS = [
-        'tpkg.app',
-    ]
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
@@ -76,9 +73,6 @@ def test_invalid_template_variable(django_testdir):
 
 
 @pytest.mark.django_project(extra_settings="""
-    INSTALLED_APPS = [
-        'tpkg.app',
-    ]
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
