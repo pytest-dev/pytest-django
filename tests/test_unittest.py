@@ -56,17 +56,6 @@ class TestFixturesWithSetup(TestCase):
         assert Item.objects.count() == 3
 
 
-class TestUrls(TestCase):
-    """
-    Make sure overriding ``urls`` works.
-    """
-    urls = 'pytest_django_test.urls_overridden'
-
-    def test_urls(self):
-        resp = self.client.get('/overridden_url/')
-        self.assertEqual(force_text(resp.content), 'Overridden urlconf works!')
-
-
 def test_sole_test(django_testdir):
     """
     Make sure the database are configured when only Django TestCase classes
