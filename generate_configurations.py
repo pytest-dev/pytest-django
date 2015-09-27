@@ -28,7 +28,7 @@ PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
 PYTEST_VERSIONS = ['2.7.3', '2.8.0']
-DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
+DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
@@ -38,6 +38,7 @@ DJANGO_REQUIREMENTS = {
     '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
     '1.8': 'Django>=1.8,<1.9',
+    '1.9': 'Django==1.9a1',
     'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 

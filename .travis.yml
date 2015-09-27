@@ -13,6 +13,7 @@ env:
   - TESTENV=python2.7-2.8.0-1.6-sqlite_file
   - TESTENV=python2.7-2.8.0-1.7-sqlite_file
   - TESTENV=python2.7-2.8.0-1.8-sqlite_file
+  - TESTENV=python2.7-2.8.0-1.9-sqlite_file
   - TESTENV=python2.7-2.8.0-master-mysql_innodb
   - TESTENV=python2.7-2.8.0-master-mysql_myisam
   - TESTENV=python2.7-2.8.0-master-sqlite_file
@@ -22,6 +23,7 @@ env:
   - TESTENV=python3.4-2.8.0-1.6-sqlite_file
   - TESTENV=python3.4-2.8.0-1.7-sqlite_file
   - TESTENV=python3.4-2.8.0-1.8-sqlite_file
+  - TESTENV=python3.4-2.8.0-1.9-sqlite_file
   - TESTENV=python3.4-2.8.0-master-sqlite_file
   - TESTENV=python3.5-2.7.3-master-sqlite_file
   - TESTENV=python3.5-2.8.0-master-postgres
