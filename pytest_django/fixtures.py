@@ -148,13 +148,10 @@ def _handle_south():
 
 
 def _disable_native_migrations():
-    from django import get_version
+    from django.conf import settings
+    from .migrations import DisableMigrations
 
-    if get_version() >= '1.7':
-        from django.conf import settings
-        from .migrations import DisableMigrations
-
-        settings.MIGRATION_MODULES = DisableMigrations()
+    settings.MIGRATION_MODULES = DisableMigrations()
 
 
 # ############### User visible fixtures ################
