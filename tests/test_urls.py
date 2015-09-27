@@ -61,5 +61,5 @@ def test_urls_cache_is_cleared(testdir):
 
     """)
 
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     assert result.ret == 0
