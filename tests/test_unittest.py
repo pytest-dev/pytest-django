@@ -2,7 +2,6 @@ import pytest
 from django.test import TestCase
 
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import force_text
 
 
 class TestFixtures(TestCase):
