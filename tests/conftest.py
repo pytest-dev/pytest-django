@@ -74,6 +74,15 @@ def django_testdir(request, testdir, monkeypatch):
             'django.contrib.messages.middleware.MessageMiddleware',
         )
 
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {},
+            },
+        ]
+
         %(extra_settings)s
     ''') % {
         'db_settings': repr(db_settings),
