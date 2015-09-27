@@ -345,6 +345,7 @@ def _django_set_urlconf(request):
         original_urlconf = django.conf.settings.ROOT_URLCONF
         django.conf.settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
+        set_urlconf(None)
 
         def restore():
             django.conf.settings.ROOT_URLCONF = original_urlconf
