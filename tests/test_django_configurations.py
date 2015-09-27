@@ -44,7 +44,7 @@ def test_dc_env(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """)
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0
 
@@ -68,7 +68,7 @@ def test_dc_ini(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """)
-    result = testdir.runpytest()
+    result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0
 
@@ -92,6 +92,6 @@ def test_dc_option(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """)
-    result = testdir.runpytest('--ds=tpkg.settings_opt', '--dc=MySettings')
+    result = testdir.runpytest_subprocess('--ds=tpkg.settings_opt', '--dc=MySettings')
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0
