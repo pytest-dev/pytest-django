@@ -182,7 +182,7 @@ def test_xdist_with_reuse(django_testdir):
     result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
     result = django_testdir.runpytest_subprocess('-vv', '-n2', '-s', '--reuse-db',
-                                      '--create-db')
+                                                 '--create-db')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
