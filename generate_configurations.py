@@ -28,11 +28,10 @@ PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
 PYTEST_VERSIONS = ['2.7.3', '2.8.0']
-DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
+DJANGO_VERSIONS = ['1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
-    '1.3': 'Django>=1.3,<1.4',
     '1.4': 'Django>=1.4,<1.5',
     '1.5': 'Django>=1.5,<1.6',
     '1.6': 'Django>=1.6,<1.7',
@@ -63,7 +62,7 @@ def is_valid_env(env):
 
     if env.is_py3():
         # Django <1.5 does not support Python 3
-        if env.django_version in ('1.3', '1.4'):
+        if env.django_version == '1.4':
             return False
 
         # MySQL on Python 3 is not supported by Django
@@ -100,11 +99,7 @@ def requirements(env):
         yield 'south==1.0.2'
 
     if env.settings == 'postgres':
-        # Django 1.3 does not work with recent psycopg2 versions
-        if env.django_version == '1.3':
-            yield 'psycopg2==2.4.1'
-        else:
-            yield 'psycopg2==2.6.1'
+        yield 'psycopg2==2.6.1'
 
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
         yield 'mysql-python==1.2.5'

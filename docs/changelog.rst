@@ -1,6 +1,15 @@
 Changelog
 =========
 
+NEXT
+-----
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Drop support for Django 1.3. While pytest-django supports a wide range of
+  Django versions, extended for Django 1.3 was dropped in february 2013.
+
 2.8.0
 -----
 

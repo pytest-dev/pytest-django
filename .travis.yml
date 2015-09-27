@@ -7,7 +7,6 @@ env:
   - TESTENV=pypy-2.8.0-master-sqlite_file
   - TESTENV=pypy3-2.8.0-1.8-sqlite_file
   - TESTENV=python2.6-2.8.0-1.6-sqlite_file
-  - TESTENV=python2.7-2.8.0-1.3-sqlite_file
   - TESTENV=python2.7-2.8.0-1.4-sqlite_file
   - TESTENV=python2.7-2.8.0-1.5-sqlite_file
   - TESTENV=python2.7-2.8.0-1.6-sqlite_file
