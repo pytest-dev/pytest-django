@@ -4,6 +4,12 @@ Changelog
 NEXT
 -----
 
+Bug fixes
+^^^^^^^^^
+* Ensure urlconf is properly reset when using @pytest.mark.urls. Thanks to
+  Sarah Bird, David Szotten, Daniel Hahler and Yannick PÉROUX for patch and
+  discussions.
+
 Compatibility
 ^^^^^^^^^^^^^
 
