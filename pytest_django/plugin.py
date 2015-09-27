@@ -125,6 +125,9 @@ def _add_django_project_to_path(args):
 
 
 def _setup_django():
+    if 'django' not in sys.modules:
+        return
+
     import django
 
     if hasattr(django, 'setup'):
@@ -217,7 +220,14 @@ def pytest_load_initial_conftests(early_config, parser, args):
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
 
-        _setup_django()
+    _setup_django()
+
+
+@pytest.mark.trylast
+def pytest_configure():
+    # Allow Django settings to be configured in a user pytest_configure call,
+    # but make sure we call django.setup()
+    _setup_django()
 
 
 def pytest_runtest_setup(item):
