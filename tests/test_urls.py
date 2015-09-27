@@ -37,14 +37,14 @@ def test_urls_client(client):
 
 def test_urls_cache_is_cleared(testdir):
     testdir.makepyfile(myurls="""
-        from django.conf.urls import patterns, url
+        from django.conf.urls import url
+        from pytest_django_test.compat import patterns
 
         def fake_view(request):
             pass
 
         urlpatterns = patterns('', url(r'first/$', fake_view, name='first'))
     """)
-
 
     testdir.makepyfile("""
         from django.core.urlresolvers import reverse, NoReverseMatch
