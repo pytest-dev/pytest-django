@@ -199,6 +199,5 @@ def test_unittest_interaction(django_testdir):
         "*test_db_access_2 FAILED*",
         "*test_db_access_3 FAILED*",
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-        "*no such table: app_item*",
         "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
     ])
