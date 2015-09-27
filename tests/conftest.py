@@ -30,6 +30,15 @@ def _marker_apifun(extra_settings='',
     }
 
 
+@pytest.fixture
+def testdir(testdir):
+    # pytest 2.7.x compatibility
+    if not hasattr(testdir, 'runpytest_subprocess'):
+        testdir.runpytest_subprocess = testdir.runpytest
+
+    return testdir
+
+
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
     marker = request.node.get_marker('django_project')
