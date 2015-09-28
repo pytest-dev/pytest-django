@@ -171,6 +171,10 @@ def pytest_load_initial_conftests(early_config, parser, args):
         'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
         'a string specifying the module of a URL config, e.g. '
         '"my_app.test_urls".')
+    early_config.addinivalue_line(
+        'markers',
+        'django_use_model(model): force model creation, '
+        'even for unmanaged models. Model(s) are deleted at the end of scope')
 
     options = parser.parse_known_args(args)
 
@@ -305,6 +309,48 @@ def _django_db_marker(request):
             request.getfuncargvalue('transactional_db')
         else:
             request.getfuncargvalue('db')
+
+
+@pytest.fixture(autouse=True)
+def _django_use_model(request):
+    """Implement ``django_use_model`` marker.
+
+    Marker creates unmanaged models that normally aren't created.
+    Destroys it at the end of marked scope.
+
+    Note that you still need to use ``django_db`` marker before this one.
+    The test unit should be decorated:
+
+    @pytest.mark.django_db
+    @pytest.mark.django_use_model(model)
+
+    :model: ModelClass, one or many
+    """
+    marker = request.keywords.get('django_use_model', None)
+    if not marker:
+        return
+    from django.db import connection
+
+    model = request.getfuncargvalue('model')
+
+    if isinstance(model, (list, tuple)):
+        models = model
+    else:
+        models = (model,)
+
+    with contextlib.closing(connection.schema_editor()) as schema:
+        schema.deferred_sql = []
+        for model_class in models:
+            if not hasattr(model, '_meta'):
+                raise ValueError('"model" must be a valid model class')
+            schema.create_model(model_class)
+
+    def drop():
+        with contextlib.closing(connection.schema_editor()) as schema:
+            for model_class in models:
+                schema.delete_model(model_class)
+
+    request.addfinalizer(drop)
 
 
 @pytest.fixture(autouse=True, scope='class')
