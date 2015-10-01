@@ -119,6 +119,10 @@ def test_ds_in_pytest_configure(testdir, monkeypatch):
                 os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                                       'tpkg.settings_ds')
     """)
+    testdir.makepyfile("""
+        def test_pass():
+            pass
+    """)
     r = testdir.runpytest_subprocess()
     assert r.ret == 0
 
