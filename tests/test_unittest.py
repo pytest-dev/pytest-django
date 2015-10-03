@@ -175,7 +175,7 @@ class TestUnittestMethods:
         ''')
 
         result = django_testdir.runpytest_subprocess('-vvvv', '-s')
-        result.assert_outcomes(passed=6)
+        assert result.parseoutcomes()['passed'] == 6
         assert result.ret == 0
 
     def test_unittest(self, django_testdir):
