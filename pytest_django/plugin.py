@@ -259,12 +259,12 @@ def _restore_class_methods(cls):
      restore_tearDownClass) = _disabled_classmethods.pop(cls)
 
     try:
-        delattr(cls, 'setUpClass')
+        del cls.setUpClass
     except AttributeError:
-        pass
+        raise
 
     try:
-        delattr(cls, 'tearDownClass')
+        del cls.tearDownClass
     except AttributeError:
         pass
 
