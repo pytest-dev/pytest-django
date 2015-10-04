@@ -75,6 +75,36 @@ def test_shared_db_wrapper_not_leaking(db):
     assert not Item.objects.filter(name='shared item').exists()
 
 
+def test_nesting_shared_db_wrapper(db, shared_db_wrapper):
+    finalizers = []
+    request = type('FakeRequest', (object, ), {
+        'funcargnames': (),
+        'addfinalizer': lambda self, f: finalizers.append(f)
+    })()
+
+    with shared_db_wrapper(request):
+        item1 = Item.objects.create()
+
+    with shared_db_wrapper(request):
+        item2 = Item.objects.create()
+
+    # Each call to shared_db_wrapper should have added 1 finalizer
+    item1_fin, item2_fin = finalizers
+
+    # Make sure the data lives outside `with shared_db_wrapper`
+    assert Item.objects.filter(pk=item1.pk).exists()
+    assert Item.objects.filter(pk=item2.pk).exists()
+
+    # Check that finalizers remove the right data
+    item2_fin()
+    assert Item.objects.filter(pk=item1.pk).exists()
+    assert not Item.objects.filter(pk=item2.pk).exists()
+
+    item1_fin()
+    assert not Item.objects.filter(pk=item1.pk).exists()
+    assert not Item.objects.filter(pk=item2.pk).exists()
+
+
 class TestDatabaseFixtures:
     """Tests for the db and transactional_db fixtures"""
 
