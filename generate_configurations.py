@@ -49,7 +49,6 @@ TOX_TESTENV_TEMPLATE = dedent("""
     deps =
     %(deps)s
     setenv =
-         PYTHONPATH = {toxinidir}
          UID = %(uid)s
     """)
 
