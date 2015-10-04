@@ -96,6 +96,9 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
     will not actually create a new database, but just reuse the
     existing.
     """
+    from django import VERSION as DJANGO_VERSION
+    from django.core.management import call_command
+
     test_database_name = self._get_test_db_name()
     self.connection.settings_dict['NAME'] = test_database_name
 
@@ -110,6 +113,15 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
     # See https://code.djangoproject.com/ticket/17760
     if hasattr(self.connection.features, 'confirm'):
         self.connection.features.confirm()
+
+    if DJANGO_VERSION > (1, 7):
+        call_command(
+            'migrate',
+            verbosity=max(verbosity - 1, 0),
+            interactive=False,
+            database=self.connection.alias,
+            run_syncdb=True,
+        )
 
     return test_database_name
 
