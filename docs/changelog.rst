@@ -1,8 +1,11 @@
 Changelog
 =========
 
-NEXT
+2.9.0
 -----
+
+2.9.0 focus on compatibility with Django 1.9 and master as well as pytest 2.8.1
+and Python 3.5
 
 Features
 ^^^^^^^^
@@ -24,7 +27,6 @@ Bug fixes
 
 Compatibility
 ^^^^^^^^^^^^^
-
 * Drop support for Django 1.3. While pytest-django supports a wide range of
   Django versions, extended for Django 1.3 was dropped in february 2013.
 
