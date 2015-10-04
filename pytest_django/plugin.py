@@ -230,7 +230,7 @@ def pytest_configure():
     _setup_django()
 
 
-def method_is_defined_at_leaf(cls, method_name):
+def _method_is_defined_at_leaf(cls, method_name):
     return getattr(cls.__base__, method_name).__func__ is not getattr(cls, method_name).__func__
 
 
@@ -243,9 +243,9 @@ def _disable_class_methods(cls):
 
     _disabled_classmethods[cls] = (
         cls.setUpClass,
-        method_is_defined_at_leaf(cls, 'setUpClass'),
+        _method_is_defined_at_leaf(cls, 'setUpClass'),
         cls.tearDownClass,
-        method_is_defined_at_leaf(cls, 'tearDownClass'),
+        _method_is_defined_at_leaf(cls, 'tearDownClass'),
     )
 
     cls.setUpClass = types.MethodType(lambda cls: None, cls)
