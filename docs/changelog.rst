@@ -4,6 +4,12 @@ Changelog
 NEXT
 -----
 
+Features
+^^^^^^^^
+* `--fail-on-template-vars` - fail tests for invalid variables in templates.
+  Thanks to Johannes Hoppe for idea and implementation. Thanks Daniel Hahler
+  for review and feedback.
+
 Bug fixes
 ^^^^^^^^^
 * Ensure urlconf is properly reset when using @pytest.mark.urls. Thanks to
