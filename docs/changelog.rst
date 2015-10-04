@@ -8,7 +8,13 @@ Bug fixes
 ^^^^^^^^^
 * Ensure urlconf is properly reset when using @pytest.mark.urls. Thanks to
   Sarah Bird, David Szotten, Daniel Hahler and Yannick PÉROUX for patch and
-  discussions.
+  discussions. Fixes `issue #183
+  <https://github.com/pytest-dev/pytest-django/issues/183>`_.
+
+* Call `setUpClass()` in Django `TestCase` properly when test class is
+  inherited multiple places. Thanks to Benedikt Forchhammer for report and
+  initial test case. Fixes `issue
+  #265<https://github.com/pytest-dev/pytest-django/issues/265>`_.
 
 Compatibility
 ^^^^^^^^^^^^^

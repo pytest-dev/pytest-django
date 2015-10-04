@@ -230,19 +230,55 @@ def pytest_configure():
     _setup_django()
 
 
-def pytest_runtest_setup(item):
+def _method_is_defined_at_leaf(cls, method_name):
+    return getattr(cls.__base__, method_name).__func__ is not getattr(cls, method_name).__func__
 
+
+_disabled_classmethods = {}
+
+
+def _disable_class_methods(cls):
+    if cls in _disabled_classmethods:
+        return
+
+    _disabled_classmethods[cls] = (
+        cls.setUpClass,
+        _method_is_defined_at_leaf(cls, 'setUpClass'),
+        cls.tearDownClass,
+        _method_is_defined_at_leaf(cls, 'tearDownClass'),
+    )
+
+    cls.setUpClass = types.MethodType(lambda cls: None, cls)
+    cls.tearDownClass = types.MethodType(lambda cls: None, cls)
+
+
+def _restore_class_methods(cls):
+    (setUpClass,
+     restore_setUpClass,
+     tearDownClass,
+     restore_tearDownClass) = _disabled_classmethods.pop(cls)
+
+    try:
+        del cls.setUpClass
+    except AttributeError:
+        raise
+
+    try:
+        del cls.tearDownClass
+    except AttributeError:
+        pass
+
+    if restore_setUpClass:
+        cls.setUpClass = setUpClass
+
+    if restore_tearDownClass:
+        cls.tearDownClass = tearDownClass
+
+
+def pytest_runtest_setup(item):
     if django_settings_is_configured() and is_django_unittest(item):
         cls = item.cls
-
-        if hasattr(cls, '__real_setUpClass'):
-            return
-
-        cls.__real_setUpClass = cls.setUpClass
-        cls.__real_tearDownClass = cls.tearDownClass
-
-        cls.setUpClass = types.MethodType(lambda cls: None, cls)
-        cls.tearDownClass = types.MethodType(lambda cls: None, cls)
+        _disable_class_methods(cls)
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -315,10 +351,16 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
         request.getfuncargvalue('_django_db_setup')
 
         _django_cursor_wrapper.enable()
-        request.node.cls.__real_setUpClass()
+
+        cls = request.node.cls
+
+        _restore_class_methods(cls)
+        cls.setUpClass()
+        _disable_class_methods(cls)
 
         def teardown():
-            request.node.cls.__real_tearDownClass()
+            _restore_class_methods(cls)
+            cls.tearDownClass()
             _django_cursor_wrapper.restore()
 
         request.addfinalizer(teardown)

@@ -119,6 +119,65 @@ class TestUnittestMethods:
         ])
         assert result.ret == 0
 
+    def test_multi_inheritance_setUpClass(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+            from .app.models import Item
+
+            class TestA(TestCase):
+                expected_state = ['A']
+                state = []
+
+                @classmethod
+                def setUpClass(cls):
+                    super(TestA, cls).setUpClass()
+                    cls.state.append('A')
+
+                @classmethod
+                def tearDownClass(cls):
+                    assert cls.state.pop() == 'A'
+                    super(TestA, cls).tearDownClass()
+
+                def test_a(self):
+                    assert self.state == self.expected_state
+
+            class TestB(TestA):
+                expected_state = ['A', 'B']
+
+                @classmethod
+                def setUpClass(cls):
+                    super(TestB, cls).setUpClass()
+                    cls.state.append('B')
+
+                @classmethod
+                def tearDownClass(cls):
+                    assert cls.state.pop() == 'B'
+                    super(TestB, cls).tearDownClass()
+
+                def test_b(self):
+                    assert self.state == self.expected_state
+
+            class TestC(TestB):
+                expected_state = ['A', 'B', 'C']
+
+                @classmethod
+                def setUpClass(cls):
+                    super(TestC, cls).setUpClass()
+                    cls.state.append('C')
+
+                @classmethod
+                def tearDownClass(cls):
+                    assert cls.state.pop() == 'C'
+                    super(TestC, cls).tearDownClass()
+
+                def test_c(self):
+                    assert self.state == self.expected_state
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-vvvv', '-s')
+        assert result.parseoutcomes()['passed'] == 6
+        assert result.ret == 0
+
     def test_unittest(self, django_testdir):
         django_testdir.create_test_module('''
             from unittest import TestCase
