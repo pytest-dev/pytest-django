@@ -52,57 +52,57 @@ def test_noaccess_fixture(noaccess):
     pass
 
 
-@pytest.mark.skipif(get_django_version() < (1, 6),
-                    reason="shared_db_wrapper needs at least Django 1.6")
-class TestSharedDbWrapper(object):
-    """Tests for sharing data created with share_db_wrapper, order matters."""
-    @pytest.fixture(scope='class')
-    def shared_item(self, request, shared_db_wrapper):
-        with shared_db_wrapper(request):
-            return Item.objects.create(name='shared item')
+@pytest.mark.skipif(
+    get_django_version() < (1, 6),
+    reason="shared_db_wrapper needs at least Django 1.6")
+def test_shared_db_wrapper(django_testdir):
+    django_testdir.create_test_module('''
+        from .app.models import Item
+        import pytest
 
-    def test_preparing_data(self, shared_item):
-        type(self)._shared_item_pk = shared_item.pk
+        @pytest.fixture(scope='session')
+        def session_item(request, shared_db_wrapper):
+            with shared_db_wrapper(request):
+                return Item.objects.create(name='session')
 
-    def test_accessing_the_same_data(self, db, shared_item):
-        retrieved_item = Item.objects.get(name='shared item')
-        assert type(self)._shared_item_pk == retrieved_item.pk
+        @pytest.fixture(scope='module')
+        def module_item(request, shared_db_wrapper):
+            with shared_db_wrapper(request):
+                return Item.objects.create(name='module')
 
+        @pytest.fixture(scope='class')
+        def class_item(request, shared_db_wrapper):
+            with shared_db_wrapper(request):
+                return Item.objects.create(name='class')
 
-@pytest.mark.skipif(get_django_version() < (1, 6),
-                    reason="shared_db_wrapper needs at least Django 1.6")
-def test_shared_db_wrapper_not_leaking(db):
-    assert not Item.objects.filter(name='shared item').exists()
+        class TestItems:
+            def test_save_the_items(
+                    self, db, session_item, module_item, class_item):
+                global _session_item
+                global _module_item
+                global _class_item
+                assert session_item.pk
+                assert module_item.pk
+                assert class_item.pk
+                _session_item = session_item
+                _module_item = module_item
+                _class_item = class_item
 
+            def test_accessing_the_same_items(
+                    self, db, session_item, module_item, class_item):
+                assert _session_item == session_item
+                assert _module_item == module_item
+                assert _class_item == class_item
 
-def test_nesting_shared_db_wrapper(db, shared_db_wrapper):
-    finalizers = []
-    request = type('FakeRequest', (object, ), {
-        'funcargnames': (),
-        'addfinalizer': lambda self, f: finalizers.append(f)
-    })()
-
-    with shared_db_wrapper(request):
-        item1 = Item.objects.create()
-
-    with shared_db_wrapper(request):
-        item2 = Item.objects.create()
-
-    # Each call to shared_db_wrapper should have added 1 finalizer
-    item1_fin, item2_fin = finalizers
-
-    # Make sure the data lives outside `with shared_db_wrapper`
-    assert Item.objects.filter(pk=item1.pk).exists()
-    assert Item.objects.filter(pk=item2.pk).exists()
-
-    # Check that finalizers remove the right data
-    item2_fin()
-    assert Item.objects.filter(pk=item1.pk).exists()
-    assert not Item.objects.filter(pk=item2.pk).exists()
-
-    item1_fin()
-    assert not Item.objects.filter(pk=item1.pk).exists()
-    assert not Item.objects.filter(pk=item2.pk).exists()
+        class TestSharing:
+            def test_sharing_some_items(
+                    self, db, session_item, module_item, class_item):
+                assert _session_item == session_item
+                assert _module_item == module_item
+                assert _class_item != class_item
+    ''')
+    result = django_testdir.runpytest_subprocess('-v', '-s', '--reuse-db')
+    assert result.ret == 0
 
 
 class TestDatabaseFixtures:

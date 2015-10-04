@@ -234,7 +234,8 @@ def shared_db_wrapper(_django_db_setup, _django_cursor_wrapper):
             # Otherwise we've run it already.
             if exc_type == DummyException:
                 # dummy exception makes `atomic` rollback the savepoint
-                atomic.__exit__(exc_type, exc_value, traceback)
+                with _django_cursor_wrapper:
+                    atomic.__exit__(exc_type, exc_value, traceback)
 
         try:
             _django_cursor_wrapper.enable()
