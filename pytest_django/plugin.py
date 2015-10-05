@@ -194,9 +194,24 @@ def pytest_load_initial_conftests(early_config, parser, args):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
-    ds = (options.ds or
-          os.environ.get(SETTINGS_MODULE_ENV) or
-          early_config.getini(SETTINGS_MODULE_ENV))
+
+    if options.ds:
+        ds_source = 'command line option'
+        ds = options.ds
+    elif SETTINGS_MODULE_ENV in os.environ:
+        ds = os.environ[SETTINGS_MODULE_ENV]
+        ds_source = 'environment variable'
+    elif early_config.getini(SETTINGS_MODULE_ENV):
+        ds = early_config.getini(SETTINGS_MODULE_ENV)
+        ds_source = 'ini file'
+    else:
+        ds = None
+        ds_source = None
+
+    if ds:
+        early_config._dsm_report_header = 'django settings: %s (from %s)' % (ds, ds_source)
+    else:
+        early_config._dsm_report_header = None
 
     # Configure DJANGO_CONFIGURATION
     dc = (options.dc or
@@ -221,6 +236,11 @@ def pytest_load_initial_conftests(early_config, parser, args):
             settings.DATABASES
 
     _setup_django()
+
+
+def pytest_report_header(config):
+    if config._dsm_report_header:
+        return [config._dsm_report_header]
 
 
 @pytest.mark.trylast
