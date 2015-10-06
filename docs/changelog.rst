@@ -1,5 +1,15 @@
 Changelog
 =========
+2.9.1
+-----
+
+Bug fixes
+^^^^^^^^^
+
+* Fix regression introduced in 2.9.0 that caused TestCase subclasses with
+  mixins to cause errors. Thanks MikeVL for `the bug report
+  <https://github.com/pytest-dev/pytest-django/issues/280>`_.
+
 
 2.9.0
 -----
