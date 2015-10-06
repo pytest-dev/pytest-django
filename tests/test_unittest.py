@@ -124,7 +124,13 @@ class TestUnittestMethods:
             from django.test import TestCase
             from .app.models import Item
 
-            class TestA(TestCase):
+            # Using a mixin is a regression test, see #280 for more details:
+            # https://github.com/pytest-dev/pytest-django/issues/280
+
+            class SomeMixin(object):
+                pass
+
+            class TestA(SomeMixin, TestCase):
                 expected_state = ['A']
                 state = []
 
