@@ -22,8 +22,7 @@ Bug fixes
 
 * Call `setUpClass()` in Django `TestCase` properly when test class is
   inherited multiple places. Thanks to Benedikt Forchhammer for report and
-  initial test case. Fixes `issue
-  #265<https://github.com/pytest-dev/pytest-django/issues/265>`_.
+  initial test case. Fixes `issue #265 <https://github.com/pytest-dev/pytest-django/issues/265>`_.
 
 Compatibility
 ^^^^^^^^^^^^^
