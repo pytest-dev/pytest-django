@@ -257,6 +257,8 @@ def _method_is_defined_at_leaf(cls, method_name):
         if hasattr(base_cls, method_name):
             super_method = getattr(base_cls, method_name)
 
+    assert super_method is not None, '%s could not be found in base class' % method_name
+
     return getattr(cls, method_name).__func__ is not super_method.__func__
 
 
