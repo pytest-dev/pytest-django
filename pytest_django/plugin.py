@@ -251,7 +251,15 @@ def pytest_configure():
 
 
 def _method_is_defined_at_leaf(cls, method_name):
-    return getattr(cls.__base__, method_name).__func__ is not getattr(cls, method_name).__func__
+    super_method = None
+
+    for base_cls in cls.__bases__:
+        if hasattr(base_cls, method_name):
+            super_method = getattr(base_cls, method_name)
+
+    assert super_method is not None, '%s could not be found in base class' % method_name
+
+    return getattr(cls, method_name).__func__ is not super_method.__func__
 
 
 _disabled_classmethods = {}
