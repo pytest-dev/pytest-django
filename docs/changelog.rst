@@ -26,8 +26,6 @@ Bug fixes
 
 Compatibility
 ^^^^^^^^^^^^^
-* Drop support for Django 1.3. While pytest-django supports a wide range of
-  Django versions, extended for Django 1.3 was dropped in february 2013.
 
 * Settings defined in `pytest.ini`/`tox.ini`/`setup.cfg` used to override
   `DJANGO_SETTINGS_MODULE` defined in the environment. Previously the order was
@@ -36,6 +34,13 @@ Compatibility
   can instead specify `addopts = --ds=yourtestsettings` in the ini-file which
   will use the test settings. See `PR #199
   <https://github.com/pytest-dev/pytest-django/pull/199>`_.
+
+* Support for Django 1.9.
+
+* Support for Django master (to be 1.10) as of 2015-10-06.
+
+* Drop support for Django 1.3. While pytest-django supports a wide range of
+  Django versions, extended for Django 1.3 was dropped in february 2013.
 
 2.8.0
 -----
