@@ -39,10 +39,10 @@ Compatibility
 
 * Settings defined in `pytest.ini`/`tox.ini`/`setup.cfg` used to override
   `DJANGO_SETTINGS_MODULE` defined in the environment. Previously the order was
-  undocmented. Now, instead the settings from the environment will be used
-  instead. If you previously relied on overriding the enviornment variable, you
-  can instead specify `addopts = --ds=yourtestsettings` in the ini-file which
-  will use the test settings. See `PR #199
+  undocumented. Now, instead the settings from the environment will be used
+  instead. If you previously relied on overriding the environment variable,
+  you can instead specify `addopts = --ds=yourtestsettings` in the ini-file
+  which will use the test settings. See `PR #199
   <https://github.com/pytest-dev/pytest-django/pull/199>`_.
 
 * Support for Django 1.9.
