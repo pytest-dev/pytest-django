@@ -159,19 +159,32 @@ def django_testdir_initial(django_testdir):
                 def forwards(self, orm):
                     db.create_table(u'app_item', (
                         (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-                        ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+                        (u'name', self.gf('django.db.models.fields.CharField')(max_length=100)),
                     ))
                     db.send_create_signal(u'app', ['Item'])
+                    print("mark_south_migration_forwards")
+                    db.create_table(u'app_itemmetadata', (
+                        (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+                        (u'owner', self.gf('django.db.models.fields.related.ForeignKey')(orm['app.Item'])),
+                    ))
+                    db.send_create_signal(u'app', ['ItemMetadata'])
                     print("mark_south_migration_forwards"),
+
 
                 def backwards(self, orm):
                     db.delete_table(u'app_item')
+                    db.delete_table(u'app_itemmetadata')
 
                 models = {
                     u'app.item': {
                         'Meta': {'object_name': 'Item'},
                         u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-                        'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+                        u'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+                    },
+                    u'app.itemmetadata': {
+                        'Meta': {'object_name': 'ItemMetadata'},
+                        u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+                        u'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['app.Item']"})
                     }
                 }
 

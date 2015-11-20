@@ -201,3 +201,20 @@ def test_unittest_interaction(django_testdir):
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
         "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
     ])
+
+def test_transactional_cascading_flush(django_testdir):
+    django_testdir.create_test_module('''
+    import pytest
+    from .app.models import Item, ItemMetadata
+    @pytest.fixture
+    def item():
+         item = Item.objects.create(name='spam')
+         ItemMetadata.objects.create(owner=item)
+
+    @pytest.mark.django_db(transaction=True)
+    def test_cascade_flush(item):
+        pass
+    ''')
+
+    result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
+    result.assert_outcomes(passed=1)

@@ -9,3 +9,6 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+class ItemMetadata(models.Model):
+    owner = models.ForeignKey(Item)
