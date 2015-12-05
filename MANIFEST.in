@@ -2,8 +2,9 @@ include AUTHORS
 include README.rst
 include LICENSE
 
+recursive-include test *
+
 recursive-exclude pytest_django_test *
-recursive-exclude tests *
 recursive-exclude .tox *
 recursive-exclude bin *
 recursive-exclude src *
