@@ -23,7 +23,7 @@ class TestEnv(TestEnvBase):
         return self.python_version.startswith('pypy')
 
 # Python to run tox.
-RUN_PYTHON = '3.4'
+RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
