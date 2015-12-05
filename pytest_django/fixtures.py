@@ -43,15 +43,18 @@ def _django_db_setup(request,
     if request.config.getvalue('nomigrations'):
         _disable_native_migrations()
 
+    db_args = {}
     with _django_cursor_wrapper:
-        # Monkey patch Django's setup code to support database re-use
-        if request.config.getvalue('reuse_db'):
-            if not request.config.getvalue('create_db'):
+        if (request.config.getvalue('reuse_db') and
+                not request.config.getvalue('create_db')):
+            if get_django_version() >= (1, 8):
+                db_args['keepdb'] = True
+            else:
                 monkey_patch_creation_for_db_reuse()
 
         # Create the database
         db_cfg = setup_databases(verbosity=pytest.config.option.verbose,
-                                 interactive=False)
+                                 interactive=False, **db_args)
 
     def teardown_database():
         with _django_cursor_wrapper:
