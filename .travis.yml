@@ -2,7 +2,7 @@
 sudo: false
 language: python
 python:
-  - "3.5"
+  - "3.4"
 env:
   - TESTENV=pypy-2.8.1-master-sqlite_file
   - TESTENV=pypy3-2.8.1-1.8-sqlite_file
