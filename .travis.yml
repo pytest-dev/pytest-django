@@ -55,5 +55,5 @@ install:
   - sed -i.bak 's/whitelist_externals =/\0\n    travis_retry_pip/' tox.ini
   - diff tox.ini tox.ini.bak && return 1 || true
 
-  - pip install tox
+  - pip install tox==2.1.1
 script: tox -e $TESTENV

@@ -253,7 +253,7 @@ def make_travis_yml(envs):
           - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
           - diff tox.ini tox.ini.bak && return 1 || true
 
-          - pip install tox
+          - pip install tox==2.1.1
         script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
