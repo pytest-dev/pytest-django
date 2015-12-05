@@ -340,3 +340,12 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
     """)
     r = testdir.runpytest_subprocess('-s')
     assert r.ret == 0
+
+
+def test_no_django_settings_but_django_imported(testdir, monkeypatch):
+    """Make sure we do not crash when Django happens to be imported, but
+    settings is not properly configured"""
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    testdir.makeconftest('import django')
+    r = testdir.runpytest_subprocess('--help')
+    assert r.ret == 0

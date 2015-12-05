@@ -1,5 +1,12 @@
 Changelog
 =========
+
+NEXT
+----
+* Fix error when Django happens to be imported before pytest-django runs.
+  Thanks to Will Harris for `the bug report
+  <https://github.com/pytest-dev/pytest-django/issues/289>`_.
+
 2.9.1
 -----
 

@@ -128,7 +128,11 @@ def _setup_django():
     if 'django' not in sys.modules:
         return
 
-    import django
+    import django.conf
+
+    # Avoid trying to force-load Django when settings is not properly configured
+    if not django.conf.settings.configured:
+        return
 
     if hasattr(django, 'setup'):
         django.setup()
