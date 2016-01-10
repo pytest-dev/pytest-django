@@ -53,6 +53,10 @@ def pytest_addoption(parser):
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
                           'option can be used to override --reuse-db.')
+    group._addoption('--retry-db',
+                     action='store_true', dest='retry_db', default=False,
+                     help='Retry database creation if it fails to connect to '
+                          'the database')
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
