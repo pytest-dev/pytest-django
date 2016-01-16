@@ -219,6 +219,16 @@ or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
 
+.. note:: Combining database access fixtures.
+
+  When using multiple database fixtures together, only one of them is
+  used.  Their order of precedence is as follows (the last one wins):
+    * ``db``
+    * ``transactional_db``
+    * ``reset_sequences_db``
+  In addition, using ``live_server`` will also trigger transactional
+  database access, if not specified.
+
 ``settings``
 ~~~~~~~~~~~~
 
