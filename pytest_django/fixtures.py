@@ -169,7 +169,7 @@ def _disable_native_migrations():
 
 @pytest.fixture(scope='function')
 def db(request, _django_db_setup, _django_cursor_wrapper):
-    """Require a django test database
+    """Require a django test database.
 
     This database will be setup with the default fixtures and will have
     the transaction management disabled. At the end of the test the outer
@@ -190,7 +190,7 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
 
 @pytest.fixture(scope='function')
 def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
-    """Require a django test database with transaction support
+    """Require a django test database with transaction support.
 
     This will re-initialise the django database for each test and is
     thus slower than the normal ``db`` fixture.
@@ -206,10 +206,10 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
 
 @pytest.fixture(scope='function')
 def reset_sequences_db(request, _django_db_setup, _django_cursor_wrapper):
-    """Require a transactional test database with sequence reset support
+    """Require a transactional test database with sequence reset support.
 
     This behaves like the ``transactional_db`` fixture, with the addition
-    of enforcing a reset of all auto increment sequence.  If the enquiring
+    of enforcing a reset of all auto increment sequences.  If the enquiring
     test relies on such values (e.g. ids as primary keys), you should
     request this resource to ensure they are consistent across tests.
 
