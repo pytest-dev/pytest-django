@@ -52,19 +52,21 @@ def test_noaccess_fixture(noaccess):
 
 
 class TestDatabaseFixtures:
-    """Tests for the db and transactional_db fixtures"""
+    """Tests for the db, transactional_db and reset_sequences_db fixtures"""
 
-    @pytest.fixture(params=['db', 'transactional_db'])
-    def both_dbs(self, request):
-        if request.param == 'transactional_db':
+    @pytest.fixture(params=['db', 'transactional_db', 'reset_sequences_db'])
+    def all_dbs(self, request):
+        if request.param == 'reset_sequences_db':
+            return request.getfuncargvalue('reset_sequences_db')
+        elif request.param == 'transactional_db':
             return request.getfuncargvalue('transactional_db')
         elif request.param == 'db':
             return request.getfuncargvalue('db')
 
-    def test_access(self, both_dbs):
+    def test_access(self, all_dbs):
         Item.objects.create(name='spam')
 
-    def test_clean_db(self, both_dbs):
+    def test_clean_db(self, all_dbs):
         # Relies on the order: test_access created an object
         assert Item.objects.count() == 0
 
@@ -80,8 +82,29 @@ class TestDatabaseFixtures:
 
         assert not noop_transactions()
 
+    def test_transactions_enabled_via_reset_seq(self, reset_sequences_db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
+        assert not noop_transactions()
+
+    def test_reset_sequences_disabled_by_default(self, db):
+        testcase = db
+
+        assert not testcase.reset_sequences
+
+    def test_reset_sequences_disabled(self, transactional_db):
+        testcase = transactional_db
+
+        assert not testcase.reset_sequences
+
+    def test_reset_sequences_enabled(self, reset_sequences_db):
+        testcase = reset_sequences_db
+
+        assert testcase.reset_sequences
+
     @pytest.fixture
-    def mydb(self, both_dbs):
+    def mydb(self, all_dbs):
         # This fixture must be able to access the database
         Item.objects.create(name='spam')
 
@@ -93,13 +116,13 @@ class TestDatabaseFixtures:
         item = Item.objects.get(name='spam')
         assert item
 
-    def test_fixture_clean(self, both_dbs):
+    def test_fixture_clean(self, all_dbs):
         # Relies on the order: test_mydb created an object
         # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, request, both_dbs):
+    def fin(self, request, all_dbs):
         # This finalizer must be able to access the database
         request.addfinalizer(lambda: Item.objects.create(name='spam'))
 
@@ -162,6 +185,18 @@ class TestDatabaseMarker:
             pytest.skip('transactions required for this test')
 
         assert not noop_transactions()
+
+    @pytest.mark.django_db
+    def test_reset_sequences_disabled(self):
+        marker = self.test_reset_sequences_disabled.django_db
+
+        assert not marker.kwargs
+
+    @pytest.mark.django_db(reset_sequences=True)
+    def test_reset_sequences_enabled(self):
+        marker = self.test_reset_sequences_enabled.django_db
+
+        assert marker.kwargs['reset_sequences']
 
 
 def test_unittest_interaction(django_testdir):
