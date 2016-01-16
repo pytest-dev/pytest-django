@@ -187,14 +187,14 @@ class TestDatabaseMarker:
         assert not noop_transactions()
 
     @pytest.mark.django_db
-    def test_reset_sequences_disabled(self):
-        marker = self.test_reset_sequences_disabled.django_db
+    def test_reset_sequences_disabled(self, request):
+        marker = request.keywords['django_db']
 
         assert not marker.kwargs
 
     @pytest.mark.django_db(reset_sequences=True)
-    def test_reset_sequences_enabled(self):
-        marker = self.test_reset_sequences_enabled.django_db
+    def test_reset_sequences_enabled(self, request):
+        marker = request.keywords['django_db']
 
         assert marker.kwargs['reset_sequences']
 
