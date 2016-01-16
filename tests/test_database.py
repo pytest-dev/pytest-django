@@ -89,16 +89,22 @@ class TestDatabaseFixtures:
         assert not noop_transactions()
 
     def test_reset_sequences_disabled_by_default(self, db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
         testcase = db
 
         assert not testcase.reset_sequences
 
     def test_reset_sequences_disabled(self, transactional_db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
         testcase = transactional_db
 
         assert not testcase.reset_sequences
 
     def test_reset_sequences_enabled(self, reset_sequences_db):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
         testcase = reset_sequences_db
 
         assert testcase.reset_sequences
