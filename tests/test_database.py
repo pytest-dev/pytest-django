@@ -1,6 +1,7 @@
 from __future__ import with_statement
 
 import pytest
+from django import get_version
 from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
@@ -88,6 +89,8 @@ class TestDatabaseFixtures:
 
         assert not noop_transactions()
 
+    @pytest.mark.skipif(get_version() < '1.5',
+                        reason='reset_sequences needs Django >= 1.5')
     def test_reset_sequences_disabled_by_default(self, db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
@@ -95,6 +98,8 @@ class TestDatabaseFixtures:
 
         assert not testcase.reset_sequences
 
+    @pytest.mark.skipif(get_version() < '1.5',
+                        reason='reset_sequences needs Django >= 1.5')
     def test_reset_sequences_disabled(self, transactional_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
@@ -102,6 +107,8 @@ class TestDatabaseFixtures:
 
         assert not testcase.reset_sequences
 
+    @pytest.mark.skipif(get_version() < '1.5',
+                        reason='reset_sequences needs Django >= 1.5')
     def test_reset_sequences_enabled(self, reset_sequences_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
