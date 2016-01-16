@@ -178,12 +178,14 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     This is more limited than the ``transactional_db`` resource but
     faster.
 
-    If both this and ``transactional_db`` are requested then the
-    database setup will behave as only ``transactional_db`` was
-    requested.
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``reset_sequences_db``.
     """
-    if 'transactional_db' in request.funcargnames \
-            or 'live_server' in request.funcargnames:
+    if 'reset_sequences_db' in request.funcargnames:
+        return request.getfuncargvalue('reset_sequences_db')
+    if ('transactional_db' in request.funcargnames or
+            'live_server' in request.funcargnames):
         return request.getfuncargvalue('transactional_db')
     return _django_db_fixture_helper(request, _django_cursor_wrapper)
 
@@ -196,10 +198,14 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     thus slower than the normal ``db`` fixture.
 
     If you want to use the database with transactions you must request
-    this resource.  If both this and ``db`` are requested then the
-    database setup will behave as only ``transactional_db`` was
-    requested.
+    this resource.
+
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``reset_sequences_db``.
     """
+    if 'reset_sequences_db' in request.funcargnames:
+        return request.getfuncargvalue('reset_sequences_db')
     return _django_db_fixture_helper(request, _django_cursor_wrapper,
                                      transactional=True)
 
@@ -213,9 +219,9 @@ def reset_sequences_db(request, _django_db_setup, _django_cursor_wrapper):
     test relies on such values (e.g. ids as primary keys), you should
     request this resource to ensure they are consistent across tests.
 
-    If a combination of this, ``db`` and ``transactional_db`` is requested
-    then the database setup will behave as only ``reset_sequences_db``
-    was requested.
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``reset_sequences_db``.
     """
     return _django_db_fixture_helper(request, _django_cursor_wrapper,
                                      transactional=True, reset_sequences=True)
