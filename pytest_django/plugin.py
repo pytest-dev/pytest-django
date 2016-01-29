@@ -186,7 +186,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
         '"my_app.test_urls".')
     early_config.addinivalue_line(
         'markers',
-        'django_use_model(model): force model creation, '
+        'django_use_model(model=ModelClass): force model creation, '
         'even for unmanaged models. Model(s) are deleted at the end of scope')
 
     options = parser.parse_known_args(args)
