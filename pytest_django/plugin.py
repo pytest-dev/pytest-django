@@ -402,7 +402,7 @@ def _django_use_model(request):
     The test unit should be decorated:
 
     @pytest.mark.django_db
-    @pytest.mark.django_use_model(model)
+    @pytest.mark.django_use_model(model=ModelClass)
 
     :model: ModelClass, one or many
     """
@@ -411,14 +411,14 @@ def _django_use_model(request):
         return
     from django.db import connection
 
-    model = request.getfuncargvalue('model')
+    model = marker.kwargs['model']
 
     if isinstance(model, (list, tuple)):
         models = model
     else:
         models = (model,)
 
-    with contextlib.closing(connection.schema_editor()) as schema:
+    with connection.schema_editor() as schema:
         schema.deferred_sql = []
         for model_class in models:
             if not hasattr(model, '_meta'):
@@ -426,7 +426,7 @@ def _django_use_model(request):
             schema.create_model(model_class)
 
     def drop():
-        with contextlib.closing(connection.schema_editor()) as schema:
+        with connection.schema_editor() as schema:
             for model_class in models:
                 schema.delete_model(model_class)
 

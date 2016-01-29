@@ -97,9 +97,9 @@ when trying to access the database.
 ``pytest.mark.django_use_model`` - force model creation for unmanaged models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.django_use_model(model)
+.. py:function:: pytest.mark.django_use_model(model=ModelClass)
 
-   :type model: django model or list of django models
+   :type model: django model or list of django models, as kwarg
    :param model:
      Model or models to be created, should be used only with models that
      have ``Meta.managed = False``
@@ -115,7 +115,7 @@ when trying to access the database.
   Example usage::
 
      @pytest.mark.django_db
-     @pytest.mark.django_use_model(Unmanaged)
+     @pytest.mark.django_use_model(model=Unmanaged)
      def test_unmanaged():
         assert Unmanaged.objects.count() >= 0
 

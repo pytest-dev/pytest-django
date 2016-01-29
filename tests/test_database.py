@@ -141,6 +141,8 @@ class TestDatabaseMarker:
         assert not connection.in_atomic_block
 
 
+@pytest.mark.skipif(not hasattr(connection, 'schema_editor'),
+                    reason="This Django version does not support SchemaEditor")
 @pytest.mark.django_db
 class TestUseModel:
     """Tests for django_use_model marker"""
@@ -153,7 +155,7 @@ class TestUseModel:
             # Probably nothing else can be asserted here.
             Unmanaged.objects.exists()
 
-    @pytest.mark.django_use_model(Unmanaged)
+    @pytest.mark.django_use_model(model=Unmanaged)
     def test_unmanaged_created(self):
         """Make sure unmanaged models are created"""
         assert Unmanaged.objects.count() == 0
@@ -163,10 +165,20 @@ class TestUseModel:
         self.test_unmanaged_missing()
 
 
-
-@pytest.mark.django_use_model(Unmanaged)
+# TODO: Remove this next test before release
+@pytest.mark.skipif(not hasattr(connection, 'schema_editor'),
+                    reason="This Django version does not support SchemaEditor")
+@pytest.mark.django_db
+@pytest.mark.django_use_model(model=Unmanaged)
 def test_marked_test_not_get_hit():
-    assert True is False
+    """
+    A failing test like this was originally added to demonstrate that adding
+    "@pytest.mark.django_use_model(ModelClass)" caused a test not to be
+    collected. It's left here to demonstrate that it's now being collected
+    when called with model=ModelClass instead; it should be removed before
+    the next release.
+    """
+    assert "This test failing shows that it is being collected and run" is False
 
 
 def test_unittest_interaction(django_testdir):
