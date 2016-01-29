@@ -165,22 +165,6 @@ class TestUseModel:
         self.test_unmanaged_missing()
 
 
-# TODO: Remove this next test before release
-@pytest.mark.skipif(not hasattr(connection, 'schema_editor'),
-                    reason="This Django version does not support SchemaEditor")
-@pytest.mark.django_db
-@pytest.mark.django_use_model(model=Unmanaged)
-def test_marked_test_not_get_hit():
-    """
-    A failing test like this was originally added to demonstrate that adding
-    "@pytest.mark.django_use_model(ModelClass)" caused a test not to be
-    collected. It's left here to demonstrate that it's now being collected
-    when called with model=ModelClass instead; it should be removed before
-    the next release.
-    """
-    assert "This test failing shows that it is being collected and run" is False
-
-
 def test_unittest_interaction(django_testdir):
     "Test that (non-Django) unittests cannot access the DB."
 
