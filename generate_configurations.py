@@ -25,9 +25,9 @@ class TestEnv(TestEnvBase):
 # Python to run tox.
 RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
+PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.7.3', '2.8.1']
+PYTEST_VERSIONS = ['2.7.3', '2.8.7']
 DJANGO_VERSIONS = ['1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
@@ -74,7 +74,7 @@ def is_valid_env(env):
         return False
 
     # Django 1.9 dropped Python 3.2 and Python 3.3 support
-    if (env.python_version in ('python3.2', 'python3.3') and
+    if (env.python_version == 'python3.3' and
         env.django_version in ('1.7', '1.8', '1.9', 'master')):
         return False
 
@@ -91,9 +91,9 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.13.1'
+    yield 'pytest-xdist==1.14'
     yield DJANGO_REQUIREMENTS[env.django_version]
-    yield 'django-configurations==0.8'
+    yield 'django-configurations==1.0'
 
     if env.is_py2():
         yield 'south==1.0.2'
@@ -253,7 +253,7 @@ def make_travis_yml(envs):
           - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
           - diff tox.ini tox.ini.bak && return 1 || true
 
-          - pip install tox==2.1.1
+          - pip install tox==2.3.1
         script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
