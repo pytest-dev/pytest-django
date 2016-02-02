@@ -51,9 +51,12 @@ def pytest_addoption(parser):
     group._addoption('--dc',
                      action='store', type='string', dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
-    group._addoption('--nomigrations',
+    group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
-                     help='Disable Django 1.7 migrations on test setup')
+                     help='Disable Django 1.7+ migrations on test setup')
+    group._addoption('--migrations',
+                     action='store_false', dest='nomigrations', default=False,
+                     help='Enable Django 1.7+ migrations on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,

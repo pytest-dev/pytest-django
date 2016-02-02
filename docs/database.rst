@@ -128,3 +128,5 @@ Using ``--nomigrations`` will `disable Django 1.7+ migrations <https://gist.gith
 and create the database inspecting all app models (the default behavior of
 Django until version 1.6). It may be faster when there are several migrations
 to run in the database setup.
+You can use ``--migrations`` to force running migrations in case
+``--nomigrations`` is used, e.g. in ``setup.cfg``.

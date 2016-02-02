@@ -518,3 +518,8 @@ class TestNativeMigrations(object):
         result = testdir.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_migrations_run*'])
+
+        result = testdir.runpytest_subprocess('--no-migrations', '--migrations',
+                                              '--tb=short', '-v', '-s')
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(['*mark_migrations_run*'])
