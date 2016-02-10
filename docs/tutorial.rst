@@ -43,7 +43,7 @@ Step 2: Point pytest to your Django settings
 You need to tell pytest which Django settings that should be used for test
 runs. The easiest way to achieve this is to create a pytest configuration file with this information.
 
-Create a filed called ``pytest.ini`` in your project root directory that contains::
+Create a file called ``pytest.ini`` in your project root directory that contains::
 
     [pytest]
     DJANGO_SETTINGS_MODULE=yourproject.settings
