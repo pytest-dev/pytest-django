@@ -39,8 +39,7 @@ def pytest_addoption(parser):
     group._addoption('--reuse-db',
                      action='store_true', dest='reuse_db', default=False,
                      help='Re-use the testing database if it already exists, '
-                          'and do not remove it when the test finishes. This '
-                          'option will be ignored when --no-db is given.')
+                          'and do not remove it when the test finishes.')
     group._addoption('--create-db',
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
