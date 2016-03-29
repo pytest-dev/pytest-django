@@ -59,25 +59,26 @@ def test_shared_db_wrapper(django_testdir):
     django_testdir.create_test_module('''
         from .app.models import Item
         import pytest
+        from uuid import uuid4
 
         @pytest.fixture(scope='session')
         def session_item(request, shared_db_wrapper):
             with shared_db_wrapper(request):
-                return Item.objects.create(name='session')
+                return Item.objects.create(name='session-' + uuid4().hex)
 
         @pytest.fixture(scope='module')
         def module_item(request, shared_db_wrapper):
             with shared_db_wrapper(request):
-                return Item.objects.create(name='module')
+                return Item.objects.create(name='module-' + uuid4().hex)
 
         @pytest.fixture(scope='class')
         def class_item(request, shared_db_wrapper):
             with shared_db_wrapper(request):
-                return Item.objects.create(name='class')
+                return Item.objects.create(name='class-' + uuid4().hex)
 
         @pytest.fixture
         def function_item(db):
-            return Item.objects.create(name='function')
+            return Item.objects.create(name='function-' + uuid4().hex)
 
         class TestItems:
             def test_save_the_items(
@@ -98,22 +99,25 @@ def test_shared_db_wrapper(django_testdir):
 
             def test_accessing_the_same_items(
                     self, db, session_item, module_item, class_item):
-                assert _session_item == session_item
-                assert _module_item == module_item
-                assert _class_item == class_item
+                assert _session_item.name == session_item.name
+                Item.objects.get(pk=_session_item.pk)
+                assert _module_item.name == module_item.name
+                Item.objects.get(pk=_module_item.pk)
+                assert _class_item.name == class_item.name
+                Item.objects.get(pk=_class_item.pk)
 
         def test_mixing_with_other_db_tests(db):
-            Item.objects.get(pk=_module_item.pk)
-            assert Item.objects.filter(name='function').count() == 0
+            Item.objects.get(name=_module_item.name)
+            assert Item.objects.filter(name__startswith='function').count() == 0
 
         class TestSharing:
             def test_sharing_some_items(
                     self, db, session_item, module_item, class_item,
                     function_item):
-                assert _session_item == session_item
-                assert _module_item == module_item
-                assert _class_item != class_item
-                assert Item.objects.filter(name='function').count() == 1
+                assert _session_item.name == session_item.name
+                assert _module_item.name == module_item.name
+                assert _class_item.name != class_item.name
+                assert Item.objects.filter(name__startswith='function').count() == 1
     ''')
     result = django_testdir.runpytest_subprocess('-v', '-s', '--reuse-db')
     assert result.ret == 0
