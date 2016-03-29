@@ -75,9 +75,14 @@ def test_shared_db_wrapper(django_testdir):
             with shared_db_wrapper(request):
                 return Item.objects.create(name='class')
 
+        @pytest.fixture
+        def function_item(db):
+            return Item.objects.create(name='function')
+
         class TestItems:
             def test_save_the_items(
-                    self, db, session_item, module_item, class_item):
+                    self, db, session_item, module_item, class_item,
+                    function_item):
                 global _session_item
                 global _module_item
                 global _class_item
@@ -88,18 +93,27 @@ def test_shared_db_wrapper(django_testdir):
                 _module_item = module_item
                 _class_item = class_item
 
+            def test_mixing_with_non_db_tests(self):
+                pass
+
             def test_accessing_the_same_items(
                     self, db, session_item, module_item, class_item):
                 assert _session_item == session_item
                 assert _module_item == module_item
                 assert _class_item == class_item
 
+        def test_mixing_with_other_db_tests(db):
+            Item.objects.get(pk=_module_item.pk)
+            assert Item.objects.filter(name='function').count() == 0
+
         class TestSharing:
             def test_sharing_some_items(
-                    self, db, session_item, module_item, class_item):
+                    self, db, session_item, module_item, class_item,
+                    function_item):
                 assert _session_item == session_item
                 assert _module_item == module_item
                 assert _class_item != class_item
+                assert Item.objects.filter(name='function').count() == 1
     ''')
     result = django_testdir.runpytest_subprocess('-v', '-s', '--reuse-db')
     assert result.ret == 0
