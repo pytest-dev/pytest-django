@@ -82,8 +82,8 @@ def test_shared_db_wrapper(django_testdir):
 
         class TestItems:
             def test_save_the_items(
-                    self, db, session_item, module_item, class_item,
-                    function_item):
+                    self, session_item, module_item, class_item,
+                    function_item, db):
                 global _session_item
                 global _module_item
                 global _class_item
