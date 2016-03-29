@@ -207,8 +207,8 @@ def shared_db_wrapper(_django_db_setup, _django_cursor_wrapper):
     """
     from django.db import connection, transaction
 
-    if get_django_version() < (1, 6):
-        raise Exception('shared_db_wrapper is only supported on Django >= 1.6.')
+    if get_django_version() < (1, 8):
+        raise Exception('shared_db_wrapper is only supported on Django >= 1.8.')
 
     class DummyException(Exception):
         """Dummy for use with Atomic.__exit__."""

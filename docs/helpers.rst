@@ -201,7 +201,7 @@ and will take care to revert it when your fixture gets cleaned up.
 
 At the moment it does not work with ``transactional_db``,
 as the fixture itself depends on transactions.
-It also needs Django >= 1.6, as it's based on the ``atomic`` API.
+It also needs Django >= 1.8, as earlier versions close DB connections between tests.
 
 Example usage::
 

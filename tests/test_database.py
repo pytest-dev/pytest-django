@@ -53,8 +53,8 @@ def test_noaccess_fixture(noaccess):
 
 
 @pytest.mark.skipif(
-    get_django_version() < (1, 6),
-    reason="shared_db_wrapper needs at least Django 1.6")
+    get_django_version() < (1, 8),
+    reason="shared_db_wrapper needs at least Django 1.8")
 def test_shared_db_wrapper(django_testdir):
     django_testdir.create_test_module('''
         from .app.models import Item
