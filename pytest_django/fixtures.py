@@ -227,29 +227,24 @@ def shared_db_wrapper(_django_db_setup, _django_cursor_wrapper):
                     "shared_db_wrapper cannot be used when "
                     "the database doesn't support transactions.")
 
-        exc_type, exc_value, traceback = DummyException, DummyException(), None
         # Use atomic instead of calling .savepoint* directly.
         # This way works for both top-level transactions and "subtransactions".
         atomic = transaction.atomic()
 
         def finalize():
-            # Only run __exit__ if there was no error running the wrapped function.
-            # Otherwise we've run it already.
-            if exc_type == DummyException:
-                # dummy exception makes `atomic` rollback the savepoint
-                with _django_cursor_wrapper:
-                    atomic.__exit__(exc_type, exc_value, traceback)
+            # dummy exception makes `atomic` rollback the savepoint
+            with _django_cursor_wrapper:
+                atomic.__exit__(DummyException, DummyException(), None)
 
         try:
             _django_cursor_wrapper.enable()
             atomic.__enter__()
             yield
+            request.addfinalizer(finalize)
         except:
-            exc_type, exc_value, traceback = sys.exc_info()
-            atomic.__exit__(exc_type, exc_value, traceback)
+            atomic.__exit__(*sys.exc_info())
             raise
         finally:
-            request.addfinalizer(finalize)
             _django_cursor_wrapper.restore()
 
     return wrapper
