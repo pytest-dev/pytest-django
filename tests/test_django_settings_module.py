@@ -19,6 +19,26 @@ SECRET_KEY = 'foobar'
 '''
 
 
+def test_ds_ini(testdir, monkeypatch):
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    testdir.makeini("""
+       [pytest]
+       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+    """)
+    pkg = testdir.mkpydir('tpkg')
+    pkg.join('settings_ini.py').write(BARE_SETTINGS)
+    testdir.makepyfile("""
+        import os
+
+        def test_ds():
+            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
+    """)
+    result = testdir.runpytest_subprocess()
+    assert result.parseoutcomes()['passed'] == 1
+    result.stdout.fnmatch_lines(['django settings: tpkg.settings_ini (from ini file)*'])
+    assert result.ret == 0
+
+
 def test_ds_env(testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
     pkg = testdir.mkpydir('tpkg')
@@ -31,29 +51,9 @@ def test_ds_env(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
     """)
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(['*1 passed*'])
-    assert result.ret == 0
-
-
-def test_ds_ini(testdir, monkeypatch):
-    "DSM env should override ini."
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_ini')
-    testdir.makeini("""\
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-    """)
-    pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_ini.py')
-    settings.write(BARE_SETTINGS)
-    testdir.makepyfile("""
-        import os
-
-        def test_ds():
-            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
-    """)
-    result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(['*1 passed*'])
-    assert result.ret == 0
+    result.stdout.fnmatch_lines(['django settings: tpkg.settings_env (from '
+                                 'environment variable)*'])
+    assert result.parseoutcomes()['passed'] == 1
 
 
 def test_ds_option(testdir, monkeypatch):
@@ -72,7 +72,28 @@ def test_ds_option(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
     """)
     result = testdir.runpytest_subprocess('--ds=tpkg.settings_opt')
-    result.stdout.fnmatch_lines(['*1 passed*'])
+    result.stdout.fnmatch_lines(['django settings: tpkg.settings_opt (from command line option)'])
+    assert result.parseoutcomes()['passed'] == 1
+
+
+def test_ds_env_override_ini(testdir, monkeypatch):
+    "DSM env should override ini."
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
+    testdir.makeini("""\
+       [pytest]
+       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+    """)
+    pkg = testdir.mkpydir('tpkg')
+    settings = pkg.join('settings_env.py')
+    settings.write(BARE_SETTINGS)
+    testdir.makepyfile("""
+        import os
+
+        def test_ds():
+            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
+    """)
+    result = testdir.runpytest_subprocess()
+    assert result.parseoutcomes()['passed'] == 1
     assert result.ret == 0
 
 
@@ -318,4 +339,13 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
             assert pytestconfig.option.ds is None
     """)
     r = testdir.runpytest_subprocess('-s')
+    assert r.ret == 0
+
+
+def test_no_django_settings_but_django_imported(testdir, monkeypatch):
+    """Make sure we do not crash when Django happens to be imported, but
+    settings is not properly configured"""
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    testdir.makeconftest('import django')
+    r = testdir.runpytest_subprocess('--help')
     assert r.ret == 0

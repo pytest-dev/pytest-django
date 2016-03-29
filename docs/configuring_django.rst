@@ -38,6 +38,15 @@ Example contents of pytest.ini::
     [pytest]
     DJANGO_SETTINGS_MODULE = test_settings
 
+Order of choosing settings
+--------------------------
+
+When the command option `--ds`, the environment variable and the pytest.ini
+configuration is used at the same time, pytest-django will prefer using
+settings from the command line option `--ds`, then the environment variable and
+last the pytest.ini.
+You can use `addopts = --ds=yourtestsettings` in your pytest configuration
+to automatically add the `--ds` option.
 
 Using django-configurations
 ---------------------------

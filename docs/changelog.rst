@@ -1,6 +1,23 @@
 Changelog
 =========
 
+NEXT
+----
+* Fix error when Django happens to be imported before pytest-django runs.
+  Thanks to Will Harris for `the bug report
+  <https://github.com/pytest-dev/pytest-django/issues/289>`_.
+
+2.9.1
+-----
+
+Bug fixes
+^^^^^^^^^
+
+* Fix regression introduced in 2.9.0 that caused TestCase subclasses with
+  mixins to cause errors. Thanks MikeVL for `the bug report
+  <https://github.com/pytest-dev/pytest-django/issues/280>`_.
+
+
 2.9.0
 -----
 
@@ -22,11 +39,23 @@ Bug fixes
 
 * Call `setUpClass()` in Django `TestCase` properly when test class is
   inherited multiple places. Thanks to Benedikt Forchhammer for report and
-  initial test case. Fixes `issue
-  #265<https://github.com/pytest-dev/pytest-django/issues/265>`_.
+  initial test case. Fixes `issue #265 <https://github.com/pytest-dev/pytest-django/issues/265>`_.
 
 Compatibility
 ^^^^^^^^^^^^^
+
+* Settings defined in `pytest.ini`/`tox.ini`/`setup.cfg` used to override
+  `DJANGO_SETTINGS_MODULE` defined in the environment. Previously the order was
+  undocumented. Now, instead the settings from the environment will be used
+  instead. If you previously relied on overriding the environment variable,
+  you can instead specify `addopts = --ds=yourtestsettings` in the ini-file
+  which will use the test settings. See `PR #199
+  <https://github.com/pytest-dev/pytest-django/pull/199>`_.
+
+* Support for Django 1.9.
+
+* Support for Django master (to be 1.10) as of 2015-10-06.
+
 * Drop support for Django 1.3. While pytest-django supports a wide range of
   Django versions, extended for Django 1.3 was dropped in february 2013.
 

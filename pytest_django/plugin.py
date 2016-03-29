@@ -128,7 +128,11 @@ def _setup_django():
     if 'django' not in sys.modules:
         return
 
-    import django
+    import django.conf
+
+    # Avoid trying to force-load Django when settings is not properly configured
+    if not django.conf.settings.configured:
+        return
 
     if hasattr(django, 'setup'):
         django.setup()
@@ -194,9 +198,24 @@ def pytest_load_initial_conftests(early_config, parser, args):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
-    ds = (options.ds or
-          os.environ.get(SETTINGS_MODULE_ENV) or
-          early_config.getini(SETTINGS_MODULE_ENV))
+
+    if options.ds:
+        ds_source = 'command line option'
+        ds = options.ds
+    elif SETTINGS_MODULE_ENV in os.environ:
+        ds = os.environ[SETTINGS_MODULE_ENV]
+        ds_source = 'environment variable'
+    elif early_config.getini(SETTINGS_MODULE_ENV):
+        ds = early_config.getini(SETTINGS_MODULE_ENV)
+        ds_source = 'ini file'
+    else:
+        ds = None
+        ds_source = None
+
+    if ds:
+        early_config._dsm_report_header = 'django settings: %s (from %s)' % (ds, ds_source)
+    else:
+        early_config._dsm_report_header = None
 
     # Configure DJANGO_CONFIGURATION
     dc = (options.dc or
@@ -223,6 +242,11 @@ def pytest_load_initial_conftests(early_config, parser, args):
     _setup_django()
 
 
+def pytest_report_header(config):
+    if config._dsm_report_header:
+        return [config._dsm_report_header]
+
+
 @pytest.mark.trylast
 def pytest_configure():
     # Allow Django settings to be configured in a user pytest_configure call,
@@ -231,7 +255,15 @@ def pytest_configure():
 
 
 def _method_is_defined_at_leaf(cls, method_name):
-    return getattr(cls.__base__, method_name).__func__ is not getattr(cls, method_name).__func__
+    super_method = None
+
+    for base_cls in cls.__bases__:
+        if hasattr(base_cls, method_name):
+            super_method = getattr(base_cls, method_name)
+
+    assert super_method is not None, '%s could not be found in base class' % method_name
+
+    return getattr(cls, method_name).__func__ is not super_method.__func__
 
 
 _disabled_classmethods = {}
