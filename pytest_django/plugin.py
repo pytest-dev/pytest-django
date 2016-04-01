@@ -539,6 +539,20 @@ def _template_string_if_invalid_marker(request):
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
 
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_clear_site_cache():
+    """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
+    unexpected behavior with cached site objects.
+    """
+
+    if django_settings_is_configured():
+        from django.conf import settings as dj_settings
+
+        if 'django.contrib.sites' in dj_settings.INSTALLED_APPS:
+            from django.contrib.sites.models import Site
+            Site.objects.clear_cache()
+
 # ############### Helper Functions ################
 
 

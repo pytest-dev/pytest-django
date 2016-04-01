@@ -239,3 +239,18 @@ Example
         assert m.from_email == 'from@example.com'
         assert list(m.to) == ['to@example.com']
 
+
+Environment autouse fixtures
+----------------------------
+
+pytest-django provides some pytest fixtures that are of autouse
+nature. They provide functionality to assure a clean environment
+during tests.
+
+
+Clearing of site cache
+~~~~~~~~~~~~~~~~~~~~~~
+
+If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
+be cleared for each test to avoid hitting the cache and cause wrong Site
+object to be returned by ``Site.objects.get_current()``.
