@@ -269,30 +269,60 @@ def rf():
     return RequestFactory()
 
 
-class MonkeyPatchWrapper(object):
-    def __init__(self, monkeypatch, wrapped_object):
-        super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
-        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object',
-                                                    wrapped_object)
+def _delete_setting(test_node, settings, setting, enter):
+    from django.test.signals import setting_changed
+    delattr(settings, setting)
+    setting_changed.send(sender=test_node, setting=setting, value=None, enter=enter)
+
+
+def _set_setting(test_node, settings, setting, value, enter):
+    from django.test.signals import setting_changed
+    setattr(settings, setting, value)
+    setting_changed.send(sender=test_node, setting=setting, value=value, enter=enter)
+
+
+DOES_NOT_EXIST = object()
+
+
+class SettingsWrapper(object):
+    def __init__(self, node, django_settings):
+        super(SettingsWrapper, self).__setattr__('_node', node)
+        super(SettingsWrapper, self).__setattr__('_django_settings',
+                                                 django_settings)
+        super(SettingsWrapper, self).__setattr__('_to_restore', [])
 
     def __getattr__(self, attr):
-        return getattr(self.wrapped_object, attr)
+        return getattr(self._django_settings, attr)
+
+    def _save_to_restore(self, attr):
+        self._to_restore.append((attr, getattr(self._django_settings, attr, DOES_NOT_EXIST)))
 
     def __setattr__(self, attr, value):
-        self.monkeypatch.setattr(self.wrapped_object, attr, value,
-                                 raising=False)
+        self._save_to_restore(attr)
+        _set_setting(self._node, self._django_settings, attr, value, enter=True)
 
     def __delattr__(self, attr):
-        self.monkeypatch.delattr(self.wrapped_object, attr)
+        self._save_to_restore(attr)
+        _delete_setting(self._node, self._django_settings, attr, enter=True)
+
+    def _restore(self):
+        for setting, old_value in reversed(self._to_restore):
+            if old_value is DOES_NOT_EXIST:
+                _delete_setting(self._node, self._django_settings, setting, enter=False)
+            else:
+                _set_setting(self._node, self._django_settings, setting, old_value, enter=False)
 
 
 @pytest.fixture()
-def settings(monkeypatch):
+def settings(request, monkeypatch):
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
     from django.conf import settings as django_settings
-    return MonkeyPatchWrapper(monkeypatch, django_settings)
+
+    wrapper = SettingsWrapper(request.node, django_settings)
+    request.addfinalizer(wrapper._restore)
+    return wrapper
 
 
 @pytest.fixture(scope='session')
