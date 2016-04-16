@@ -30,6 +30,15 @@ def _marker_apifun(extra_settings='',
     }
 
 
+@pytest.fixture
+def testdir(testdir):
+    # pytest 2.7.x compatibility
+    if not hasattr(testdir, 'runpytest_subprocess'):
+        testdir.runpytest_subprocess = testdir.runpytest
+
+    return testdir
+
+
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
     marker = request.node.get_marker('django_project')
@@ -60,10 +69,11 @@ def django_testdir(request, testdir, monkeypatch):
         DATABASES = %(db_settings)s
 
         INSTALLED_APPS = [
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
             'tpkg.app',
         ]
         SECRET_KEY = 'foobar'
-        SITE_ID = 1234  # Needed for 1.3 compatibility
 
         MIDDLEWARE_CLASSES = (
             'django.contrib.sessions.middleware.SessionMiddleware',
@@ -72,6 +82,15 @@ def django_testdir(request, testdir, monkeypatch):
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.messages.middleware.MessageMiddleware',
         )
+
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {},
+            },
+        ]
 
         %(extra_settings)s
     ''') % {

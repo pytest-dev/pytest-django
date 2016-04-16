@@ -22,6 +22,13 @@ the command line::
 See the `py.test documentation on Usage and invocations
 <http://pytest.org/latest/usage.html>`_ for more help on available parameters.
 
+Additional command line options
+-------------------------------
+
+``--fail-on-template-vars`` - fail for invalid variables in templates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fail tests that render templates which make use of invalid template variables.
+
 Running tests in parallel with pytest-xdist
 -------------------------------------------
 pytest-django supports running tests on multiple processes to speed up test

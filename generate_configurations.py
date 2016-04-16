@@ -23,21 +23,21 @@ class TestEnv(TestEnvBase):
         return self.python_version.startswith('pypy')
 
 # Python to run tox.
-RUN_PYTHON = '3.4'
+RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
-                   'python3.4', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.6.4']
-DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', '1.8', 'master']
+PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.3',
+                   'python3.4', 'python3.5', 'pypy', 'pypy3']
+PYTEST_VERSIONS = ['2.7.3', '2.8.7']
+DJANGO_VERSIONS = ['1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
-    '1.3': 'Django>=1.3,<1.4',
     '1.4': 'Django>=1.4,<1.5',
     '1.5': 'Django>=1.5,<1.6',
     '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
-    '1.8': 'https://github.com/django/django/archive/stable/1.8.x.tar.gz',
+    '1.8': 'Django>=1.8,<1.9',
+    '1.9': 'Django>=1.9,<1.10',
     'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
@@ -49,7 +49,7 @@ TOX_TESTENV_TEMPLATE = dedent("""
     deps =
     %(deps)s
     setenv =
-         PYTHONPATH = {toxinidir}
+         PYTHONPATH = {toxinidir}:{env:PYTHONPATH:}
          UID = %(uid)s
     """)
 
@@ -62,7 +62,7 @@ def is_valid_env(env):
 
     if env.is_py3():
         # Django <1.5 does not support Python 3
-        if env.django_version in ('1.3', '1.4'):
+        if env.django_version == '1.4':
             return False
 
         # MySQL on Python 3 is not supported by Django
@@ -70,7 +70,20 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', 'master'):
+    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', '1.9', 'master'):
+        return False
+
+    # Django 1.9 dropped Python 3.2 and Python 3.3 support
+    if (env.python_version == 'python3.3' and
+        env.django_version in ('1.7', '1.8', '1.9', 'master')):
+        return False
+
+    # Python 3.5 is only supported by Django 1.8+
+    if env.python_version == 'python3.5':
+        return env.django_version in ('1.8', '1.9', 'master')
+
+    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4+.
+    if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
         return False
 
     return True
@@ -78,19 +91,15 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.11'
+    yield 'pytest-xdist==1.14'
     yield DJANGO_REQUIREMENTS[env.django_version]
-    yield 'django-configurations==0.8'
+    yield 'django-configurations==1.0'
 
     if env.is_py2():
         yield 'south==1.0.2'
 
     if env.settings == 'postgres':
-        # Django 1.3 does not work with recent psycopg2 versions
-        if env.django_version == '1.3':
-            yield 'psycopg2==2.4.1'
-        else:
-            yield 'psycopg2==2.5.2'
+        yield 'psycopg2==2.6.1'
 
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
         yield 'mysql-python==1.2.5'
@@ -110,7 +119,7 @@ def commands(uid, env):
         yield 'sh -c "dropdb %(name)s;' \
             ' createdb %(name)s || exit 0"' % {'name': db_name}
 
-    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs}' % env.settings
+    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs:tests}' % env.settings
 
 
 def testenv_name(env):
@@ -139,8 +148,8 @@ def generate_all_envs():
     products = itertools.product(PYTHON_VERSIONS, PYTEST_VERSIONS,
                                  DJANGO_VERSIONS, SETTINGS)
 
-    for idx, (python_version, pytest_version, django_version, settings) \
-            in enumerate(products):
+    for (python_version, pytest_version, django_version, settings) \
+            in products:
         env = TestEnv(python_version, pytest_version, django_version, settings)
 
         if is_valid_env(env):
@@ -156,10 +165,14 @@ def generate_default_envs(envs):
 
     def find_and_add(variations, env_getter):
         for variation in variations:
-            for env in reversed(envs):
-                if env_getter(env) == variation:
-                    result.add(env)
+            for existing in result:
+                if env_getter(existing) == variation:
                     break
+            else:
+                for env in reversed(envs):
+                    if env_getter(env) == variation:
+                        result.add(env)
+                        break
 
     # Add all Django versions for each main python version (2.x and 3.x).
     find_and_add(itertools.product(PYTHON_MAIN_VERSIONS, DJANGO_VERSIONS),
@@ -240,12 +253,12 @@ def make_travis_yml(envs):
           - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
           - diff tox.ini tox.ini.bak && return 1 || true
 
-          - pip install tox
+          - pip install tox==2.3.1
         script: tox -e $TESTENV
         """).strip("\n")
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
-                          python for python in PYTHON_VERSIONS)
+                          python for python in PYTHON_MAIN_VERSIONS)
     allow_failures = '\n'.join('    - env: TESTENV=%s' %
                                testenv_name(env) for env in envs
                                if env.django_version == 'master')

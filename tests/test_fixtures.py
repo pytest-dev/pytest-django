@@ -85,11 +85,6 @@ class TestSettings:
 
 
 class TestLiveServer:
-    pytestmark = [
-        pytest.mark.skipif(get_django_version() < (1, 4),
-                           reason="Django > 1.3 required"),
-    ]
-
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
 
@@ -187,7 +182,7 @@ class TestLiveServer:
                         live_server + '/static/a_file.txt').read()
                     assert force_text(response_data) == 'bla\\n'
             """)
-        result = django_testdir.runpytest('--tb=short', '-v')
+        result = django_testdir.runpytest_subprocess('--tb=short', '-v')
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
         assert result.ret == 0
 
@@ -227,14 +222,13 @@ def test_custom_user_model(django_testdir):
             USERNAME_FIELD = 'identifier'
         """, 'models.py')
     django_testdir.create_app_file("""
-        try:
-            from django.conf.urls import patterns  # Django >1.4
-        except ImportError:
-            from django.conf.urls.defaults import patterns  # Django 1.3
+        from django.conf.urls import url
+        from pytest_django_test.compat import patterns
+        from tpkg.app import views
 
         urlpatterns = patterns(
             '',
-            (r'admin-required/', 'tpkg.app.views.admin_required_view'),
+            url(r'admin-required/', views.admin_required_view),
         )
         """, 'urls.py')
     django_testdir.create_app_file("""
@@ -304,6 +298,6 @@ class Migration(migrations.Migration):
     ]
     """, 'migrations/0001_initial.py')  # noqa
 
-    result = django_testdir.runpytest('-s')
+    result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0

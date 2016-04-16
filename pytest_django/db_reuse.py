@@ -95,6 +95,8 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
     This method is a monkey patched version of create_test_db that
     will not actually create a new database, but just reuse the
     existing.
+
+    This is only used with Django < 1.8.
     """
     test_database_name = self._get_test_db_name()
     self.connection.settings_dict['NAME'] = test_database_name

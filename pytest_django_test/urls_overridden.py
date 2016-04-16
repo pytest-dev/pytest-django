@@ -1,9 +1,7 @@
-try:
-    from django.conf.urls import patterns, url  # Django >1.4
-except ImportError:
-    from django.conf.urls.defaults import patterns, url  # Django 1.3
-
+from django.conf.urls import url
 from django.http import HttpResponse
+
+from .compat import patterns
 
 urlpatterns = patterns(
     '',

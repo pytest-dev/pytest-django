@@ -4,6 +4,8 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 import contextlib
+import inspect
+from functools import reduce
 import os
 import sys
 import types
@@ -27,6 +29,7 @@ from .lazy_django import (django_settings_is_configured, get_django_version,
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
+INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
 DJANGO_ASSERTS = {
     # from https://github.com/django/django/blob/stable/1.3.x/django/test/testcases.py#L244
     (1, 3): ('assertContains', 'assertFormError', 'assertNotContains',
@@ -106,8 +109,7 @@ def pytest_addoption(parser):
     group._addoption('--reuse-db',
                      action='store_true', dest='reuse_db', default=False,
                      help='Re-use the testing database if it already exists, '
-                          'and do not remove it when the test finishes. This '
-                          'option will be ignored when --no-db is given.')
+                          'and do not remove it when the test finishes.')
     group._addoption('--create-db',
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
@@ -132,6 +134,12 @@ def pytest_addoption(parser):
                   'Automatically find and add a Django project to the '
                   'Python path.',
                   default=True)
+    group._addoption('--fail-on-template-vars',
+                     action='store_true', dest='itv', default=False,
+                     help='Fail for invalid variables in templates.')
+    parser.addini(INVALID_TEMPLATE_VARS_ENV,
+                  'Fail for invalid variables in templates.',
+                  default=False)
 
 
 def _exists(path, ignore=EnvironmentError):
@@ -186,7 +194,14 @@ def _add_django_project_to_path(args):
 
 
 def _setup_django():
-    import django
+    if 'django' not in sys.modules:
+        return
+
+    import django.conf
+
+    # Avoid trying to force-load Django when settings is not properly configured
+    if not django.conf.settings.configured:
+        return
 
     if hasattr(django, 'setup'):
         django.setup()
@@ -232,6 +247,9 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     options = parser.parse_known_args(args)
 
+    if options.version or options.help:
+        return
+
     django_find_project = _parse_django_find_project_ini(
         early_config.getini('django_find_project'))
 
@@ -240,15 +258,38 @@ def pytest_load_initial_conftests(early_config, parser, args):
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
+    # Configure FAIL_INVALID_TEMPLATE_VARS
+    itv = (options.itv or
+           os.environ.get(INVALID_TEMPLATE_VARS_ENV) in ['true', 'True', '1'] or
+           early_config.getini(INVALID_TEMPLATE_VARS_ENV))
+
+    if itv:
+        os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
+
     # Configure DJANGO_SETTINGS_MODULE
-    ds = (options.ds or
-          early_config.getini(SETTINGS_MODULE_ENV) or
-          os.environ.get(SETTINGS_MODULE_ENV))
+
+    if options.ds:
+        ds_source = 'command line option'
+        ds = options.ds
+    elif SETTINGS_MODULE_ENV in os.environ:
+        ds = os.environ[SETTINGS_MODULE_ENV]
+        ds_source = 'environment variable'
+    elif early_config.getini(SETTINGS_MODULE_ENV):
+        ds = early_config.getini(SETTINGS_MODULE_ENV)
+        ds_source = 'ini file'
+    else:
+        ds = None
+        ds_source = None
+
+    if ds:
+        early_config._dsm_report_header = 'django settings: %s (from %s)' % (ds, ds_source)
+    else:
+        early_config._dsm_report_header = None
 
     # Configure DJANGO_CONFIGURATION
     dc = (options.dc or
-          early_config.getini(CONFIGURATION_ENV) or
-          os.environ.get(CONFIGURATION_ENV))
+          os.environ.get(CONFIGURATION_ENV) or
+          early_config.getini(CONFIGURATION_ENV))
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
@@ -267,28 +308,78 @@ def pytest_load_initial_conftests(early_config, parser, args):
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
 
-        _setup_django()
+    _setup_django()
+
+
+def pytest_report_header(config):
+    if config._dsm_report_header:
+        return [config._dsm_report_header]
 
 
 @pytest.mark.trylast
 def pytest_configure():
-    if django_settings_is_configured():
-        _setup_django()
+    # Allow Django settings to be configured in a user pytest_configure call,
+    # but make sure we call django.setup()
+    _setup_django()
+
+
+def _method_is_defined_at_leaf(cls, method_name):
+    super_method = None
+
+    for base_cls in cls.__bases__:
+        if hasattr(base_cls, method_name):
+            super_method = getattr(base_cls, method_name)
+
+    assert super_method is not None, '%s could not be found in base class' % method_name
+
+    return getattr(cls, method_name).__func__ is not super_method.__func__
+
+
+_disabled_classmethods = {}
+
+
+def _disable_class_methods(cls):
+    if cls in _disabled_classmethods:
+        return
+
+    _disabled_classmethods[cls] = (
+        cls.setUpClass,
+        _method_is_defined_at_leaf(cls, 'setUpClass'),
+        cls.tearDownClass,
+        _method_is_defined_at_leaf(cls, 'tearDownClass'),
+    )
+
+    cls.setUpClass = types.MethodType(lambda cls: None, cls)
+    cls.tearDownClass = types.MethodType(lambda cls: None, cls)
+
+
+def _restore_class_methods(cls):
+    (setUpClass,
+     restore_setUpClass,
+     tearDownClass,
+     restore_tearDownClass) = _disabled_classmethods.pop(cls)
+
+    try:
+        del cls.setUpClass
+    except AttributeError:
+        raise
+
+    try:
+        del cls.tearDownClass
+    except AttributeError:
+        pass
+
+    if restore_setUpClass:
+        cls.setUpClass = setUpClass
+
+    if restore_tearDownClass:
+        cls.tearDownClass = tearDownClass
 
 
 def pytest_runtest_setup(item):
-
     if django_settings_is_configured() and is_django_unittest(item):
         cls = item.cls
-
-        if hasattr(cls, '__real_setUpClass'):
-            return
-
-        cls.__real_setUpClass = cls.setUpClass
-        cls.__real_tearDownClass = cls.tearDownClass
-
-        cls.setUpClass = types.MethodType(lambda cls: None, cls)
-        cls.tearDownClass = types.MethodType(lambda cls: None, cls)
+        _disable_class_methods(cls)
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -304,6 +395,7 @@ def _django_test_environment(request):
         we need to follow this model.
     """
     if django_settings_is_configured():
+        _setup_django()
         from django.conf import settings
         from .compat import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
@@ -360,17 +452,23 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
         request.getfuncargvalue('_django_db_setup')
 
         _django_cursor_wrapper.enable()
-        request.node.cls.__real_setUpClass()
+
+        cls = request.node.cls
+
+        _restore_class_methods(cls)
+        cls.setUpClass()
+        _disable_class_methods(cls)
 
         def teardown():
-            request.node.cls.__real_tearDownClass()
+            _restore_class_methods(cls)
+            cls.tearDownClass()
             _django_cursor_wrapper.restore()
 
         request.addfinalizer(teardown)
 
 
 @pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox(request):
+def _django_clear_outbox():
     """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail
@@ -384,18 +482,105 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches
+        from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
         django.conf.settings.ROOT_URLCONF = marker.urls
         clear_url_caches()
+        set_urlconf(None)
 
         def restore():
             django.conf.settings.ROOT_URLCONF = original_urlconf
+            # Copy the pattern from
+            # https://github.com/django/django/blob/master/django/test/signals.py#L152
+            clear_url_caches()
+            set_urlconf(None)
 
         request.addfinalizer(restore)
 
+
+@pytest.fixture(autouse=True, scope='session')
+def _fail_for_invalid_template_variable(request):
+    """Fixture that fails for invalid variables in templates.
+
+    This fixture will fail each test that uses django template rendering
+    should a template contain an invalid template variable.
+    The fail message will include the name of the invalid variable and
+    in most cases the template name.
+
+    It does not raise an exception, but fails, as the stack trace doesn't
+    offer any helpful information to debug.
+    This behavior can be switched off using the marker:
+    ``ignore_template_errors``
+    """
+    class InvalidVarException(object):
+        """Custom handler for invalid strings in templates."""
+
+        def __init__(self):
+            self.fail = True
+
+        def __contains__(self, key):
+            """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
+            return key == '%s'
+
+        def _get_template(self):
+            from django.template import Template
+
+            stack = inspect.stack()
+            # finding the ``render`` needle in the stack
+            frame = reduce(
+                lambda x, y: y[3] == 'render' and 'base.py' in y[1] and y or x,
+                stack
+            )
+            # assert 0, stack
+            frame = frame[0]
+            # finding only the frame locals in all frame members
+            f_locals = reduce(
+                lambda x, y: y[0] == 'f_locals' and y or x,
+                inspect.getmembers(frame)
+            )[1]
+            # ``django.template.base.Template``
+            template = f_locals['self']
+            if isinstance(template, Template):
+                return template
+
+        def __mod__(self, var):
+            """Handle TEMPLATE_STRING_IF_INVALID % var."""
+            template = self._get_template()
+            if template:
+                msg = "Undefined template variable '%s' in '%s'" % (var, template.name)
+            else:
+                msg = "Undefined template variable '%s'" % var
+            if self.fail:
+                pytest.fail(msg, pytrace=False)
+            else:
+                return msg
+    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
+        if django_settings_is_configured():
+            import django
+            from django.conf import settings
+
+            if django.VERSION >= (1, 8) and settings.TEMPLATES:
+                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
+            else:
+                settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
+
+
+@pytest.fixture(autouse=True)
+def _template_string_if_invalid_marker(request):
+    """Apply the @pytest.mark.ignore_template_errors marker,
+     internal to pytest-django."""
+    marker = request.keywords.get('ignore_template_errors', None)
+    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
+        if marker and django_settings_is_configured():
+            import django
+            from django.conf import settings
+
+            if django.VERSION >= (1, 8) and settings.TEMPLATES:
+                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
+            else:
+                settings.TEMPLATE_STRING_IF_INVALID.fail = False
 
 # ############### Helper Functions ################
 

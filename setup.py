@@ -18,7 +18,7 @@ def read(fname):
 
 setup(
     name='pytest-django',
-    version=__import__('pytest_django').__version__,
+    use_scm_version=True,
     description='A Django plugin for py.test.',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
@@ -28,6 +28,7 @@ setup(
     license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
+    setup_requires=['setuptools_scm==1.8.0'],
     install_requires=['pytest>=2.5'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',

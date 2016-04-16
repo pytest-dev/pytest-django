@@ -23,7 +23,7 @@ def test_db_reuse_simple(django_testdir):
             assert Item.objects.count() == 0
     ''')
 
-    result = django_testdir.runpytest('-v', '--reuse-db')
+    result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_db_can_be_accessed PASSED*",
@@ -55,7 +55,7 @@ def test_db_reuse(django_testdir):
 
     # Do not pass in --create-db to make sure it is created when it
     # does not exist
-    result_first = django_testdir.runpytest('-v', '--reuse-db')
+    result_first = django_testdir.runpytest_subprocess('-v', '--reuse-db')
     assert result_first.ret == 0
 
     result_first.stdout.fnmatch_lines([
@@ -66,7 +66,7 @@ def test_db_reuse(django_testdir):
     mark_database()
     assert mark_exists()
 
-    result_second = django_testdir.runpytest('-v', '--reuse-db')
+    result_second = django_testdir.runpytest_subprocess('-v', '--reuse-db')
     assert result_second.ret == 0
     result_second.stdout.fnmatch_lines([
         "*test_db_can_be_accessed PASSED*",
@@ -75,7 +75,7 @@ def test_db_reuse(django_testdir):
     # Make sure the database has not been re-created
     assert mark_exists()
 
-    result_third = django_testdir.runpytest('-v', '--reuse-db', '--create-db')
+    result_third = django_testdir.runpytest_subprocess('-v', '--reuse-db', '--create-db')
     assert result_third.ret == 0
     result_third.stdout.fnmatch_lines([
         "*test_db_can_be_accessed PASSED*",
@@ -119,7 +119,7 @@ class TestSqlite:
                     assert conn.settings_dict['NAME'] == '%s'
         ''' % (self.db_name_17, self.db_name_before_17))
 
-        result = django_testdir.runpytest('--tb=short', '-v')
+        result = django_testdir.runpytest_subprocess('--tb=short', '-v')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
 
@@ -164,7 +164,7 @@ def test_xdist_with_reuse(django_testdir):
             _check(settings)
     ''')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
+    result = django_testdir.runpytest_subprocess('-vv', '-n2', '-s', '--reuse-db')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
@@ -174,15 +174,15 @@ def test_xdist_with_reuse(django_testdir):
     assert db_exists('gw0')
     assert db_exists('gw1')
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db')
+    result = django_testdir.runpytest_subprocess('-vv', '-n2', '-s', '--reuse-db')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
     result.stdout.fnmatch_lines(['*PASSED*test_c*'])
     result.stdout.fnmatch_lines(['*PASSED*test_d*'])
 
-    result = django_testdir.runpytest('-vv', '-n2', '-s', '--reuse-db',
-                                      '--create-db')
+    result = django_testdir.runpytest_subprocess('-vv', '-n2', '-s', '--reuse-db',
+                                                 '--create-db')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*PASSED*test_a*'])
     result.stdout.fnmatch_lines(['*PASSED*test_b*'])
@@ -213,7 +213,7 @@ class TestSqliteWithXdist:
                 assert conn.creation._get_test_db_name() == ':memory:'
         ''')
 
-        result = django_testdir.runpytest('--tb=short', '-vv', '-n1')
+        result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-n1')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*PASSED*test_a*'])
 
@@ -234,7 +234,7 @@ def test_initial_data(django_testdir_initial):
                 == ["mark_initial_data"]
     ''')
 
-    result = django_testdir_initial.runpytest('--tb=short', '-v')
+    result = django_testdir_initial.runpytest_subprocess('--tb=short', '-v')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*test_inner_south*PASSED*'])
 
@@ -267,7 +267,7 @@ class TestSouth:
                     == ["mark_initial_data"]
         ''')
 
-        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        result = django_testdir_initial.runpytest_subprocess('--tb=short', '-v', '-s')
         result.stdout.fnmatch_lines_random([
             "tpkg/test_the_test.py::test_inner_south*",
             "*PASSED*",
@@ -297,7 +297,7 @@ class TestSouth:
         ''')
         django_testdir_initial.mkpydir('tpkg/app/south_migrations')
 
-        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        result = django_testdir_initial.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret != 0
         # Can be OperationalError or DatabaseError (Django 1.4).
         result.stdout.fnmatch_lines([
@@ -324,7 +324,7 @@ class TestSouth:
 
         testdir.create_initial_south_migration()
 
-        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result = testdir.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
@@ -346,7 +346,7 @@ class TestSouth:
                 pass
             ''')
 
-        result = django_testdir_initial.runpytest('--tb=short', '-v', '-s')
+        result = django_testdir_initial.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*PASSED*'])
         assert 'mark_south_migration_forwards' not in result.stdout.str()
@@ -377,7 +377,7 @@ class TestSouth:
                 def forwards(self, orm):
                     print("mark_south_migration_forwards")
             """, 'south_migrations/0001_initial.py')
-        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result = testdir.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_south_migration_forwards*'])
 
@@ -404,7 +404,7 @@ class TestSouth:
         p.write('raise Exception("This should not get imported.")',
                 ensure=True)
 
-        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result = testdir.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines_random([
             "tpkg/test_the_test.py::test_inner_south*",
@@ -440,7 +440,7 @@ class TestSouth:
             [pytest]
             python_files=*.py""", 'pytest.ini')
 
-        result = testdir.runpytest('--tb=short', '-v', '-s', '-c', pytest_ini)
+        result = testdir.runpytest_subprocess('--tb=short', '-v', '-s', '-c', pytest_ini)
         assert result.ret == 0
         result.stdout.fnmatch_lines_random([
             "tpkg/test.py::test_inner_south*",
@@ -469,7 +469,7 @@ class TestNativeMigrations(object):
         p.write('raise Exception("This should not get imported.")',
                 ensure=True)
 
-        result = testdir.runpytest('--nomigrations', '--tb=short', '-v')
+        result = testdir.runpytest_subprocess('--nomigrations', '--tb=short', '-v')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*test_inner_migrations*PASSED*'])
 
@@ -515,6 +515,6 @@ class TestNativeMigrations(object):
                     ),
                 ]
             """, 'migrations/0001_initial.py')
-        result = testdir.runpytest('--tb=short', '-v', '-s')
+        result = testdir.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*mark_migrations_run*'])

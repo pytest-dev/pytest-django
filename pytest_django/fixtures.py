@@ -43,14 +43,18 @@ def _django_db_setup(request,
     if request.config.getvalue('nomigrations'):
         _disable_native_migrations()
 
+    db_args = {}
     with _django_cursor_wrapper:
-        # Monkey patch Django's setup code to support database re-use
-        if request.config.getvalue('reuse_db'):
-            if not request.config.getvalue('create_db'):
+        if (request.config.getvalue('reuse_db') and
+                not request.config.getvalue('create_db')):
+            if get_django_version() >= (1, 8):
+                db_args['keepdb'] = True
+            else:
                 monkey_patch_creation_for_db_reuse()
 
         # Create the database
-        db_cfg = setup_databases(verbosity=0, interactive=False)
+        db_cfg = setup_databases(verbosity=pytest.config.option.verbose,
+                                 interactive=False, **db_args)
 
     def teardown_database():
         with _django_cursor_wrapper:
@@ -90,8 +94,8 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
                 from django.core.management import call_command
 
                 for db in connections:
-                    call_command('flush', verbosity=0,
-                                 interactive=False, database=db)
+                    call_command('flush', interactive=False, database=db,
+                                 verbosity=pytest.config.option.verbose)
                 for conn in connections.all():
                     conn.close()
             request.addfinalizer(flushdb)
@@ -147,13 +151,10 @@ def _handle_south():
 
 
 def _disable_native_migrations():
-    from django import get_version
+    from django.conf import settings
+    from .migrations import DisableMigrations
 
-    if get_version() >= '1.7':
-        from django.conf import settings
-        from .migrations import DisableMigrations
-
-        settings.MIGRATION_MODULES = DisableMigrations()
+    settings.MIGRATION_MODULES = DisableMigrations()
 
 
 # ############### User visible fixtures ################
@@ -286,7 +287,7 @@ class MonkeyPatchWrapper(object):
 
 
 @pytest.fixture()
-def settings(request, monkeypatch):
+def settings(monkeypatch):
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 

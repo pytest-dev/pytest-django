@@ -17,3 +17,4 @@ _build
 /share/
 .cache
 .Python
+.eggs

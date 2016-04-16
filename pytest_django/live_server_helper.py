@@ -1,14 +1,6 @@
 import sys
 
-import pytest
-
 from .lazy_django import get_django_version
-
-
-def supported():
-    import django.test.testcases
-
-    return hasattr(django.test.testcases, 'LiveServerThread')
 
 
 class LiveServer(object):
@@ -20,11 +12,8 @@ class LiveServer(object):
     """
 
     def __init__(self, addr):
-        try:
-            from django.test.testcases import LiveServerThread
-        except ImportError:
-            pytest.skip('live_server tests not supported in Django < 1.4')
         from django.db import connections
+        from django.test.testcases import LiveServerThread
 
         connections_override = {}
         for conn in connections.all():
