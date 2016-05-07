@@ -43,6 +43,16 @@ def test_admin_user_no_db_marker(admin_user, django_user_model):
     assert isinstance(admin_user, django_user_model)
 
 
+@pytest.fixture()
+def django_user_model_extra_fields():
+    return {'first_name': 'Somebody', 'last_name': 'Someone'}
+
+
+def test_admin_extra_fields(admin_user):
+    assert admin_user.first_name == 'Somebody'
+    assert admin_user.last_name == 'Someone'
+
+
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
 

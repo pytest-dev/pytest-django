@@ -16,7 +16,7 @@ from .lazy_django import get_django_version, skip_if_no_django
 __all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper']
+           'django_user_model_extra_fields', '_live_server_helper', ]
 
 
 # ############### Internal Fixtures ################
@@ -229,7 +229,13 @@ def django_username_field(django_user_model):
 
 
 @pytest.fixture()
-def admin_user(db, django_user_model, django_username_field):
+def django_user_model_extra_fields():
+    """Extra fields for Django's user model."""
+    return {}
+
+
+@pytest.fixture()
+def admin_user(db, django_user_model, django_username_field, django_user_model_extra_fields):
     """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
@@ -237,11 +243,11 @@ def admin_user(db, django_user_model, django_username_field):
     """
     UserModel = django_user_model
     username_field = django_username_field
+    extra_fields = django_user_model_extra_fields
 
     try:
         user = UserModel._default_manager.get(**{username_field: 'admin'})
     except UserModel.DoesNotExist:
-        extra_fields = {}
         if username_field != 'username':
             extra_fields[username_field] = 'admin'
         user = UserModel._default_manager.create_superuser(
