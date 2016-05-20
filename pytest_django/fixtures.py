@@ -28,7 +28,7 @@ def _django_db_setup(request,
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
-    if is_xdist_one_db_enabled(request.config):
+    if _is_xdist_one_db_enabled(request.config):
         return
 
     from .compat import setup_databases, teardown_databases
@@ -67,7 +67,7 @@ def _django_db_setup(request,
         request.addfinalizer(teardown_database)
 
 
-def is_xdist_one_db_enabled(config):
+def _is_xdist_one_db_enabled(config):
     from django.conf import settings
     is_sqlite = (settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3')
     # can't use one sqlite3 db for distributed test run because of lock
