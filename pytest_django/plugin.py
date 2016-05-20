@@ -13,13 +13,15 @@ import types
 
 import py
 import pytest
+from django.test.runner import setup_databases
 
+from .db_reuse import monkey_patch_creation_for_db_reuse
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
                        admin_user, client, db, django_user_model,
                        django_username_field, live_server, rf, settings,
-                       transactional_db)
-from .lazy_django import django_settings_is_configured, skip_if_no_django
+                       transactional_db, _handle_south, _disable_native_migrations)
+from .lazy_django import django_settings_is_configured, skip_if_no_django, get_django_version
 
 # Silence linters for imported fixtures.
 (_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
@@ -44,6 +46,10 @@ def pytest_addoption(parser):
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
                           'option will be ignored if not --reuse-db is given.')
+    group._addoption('--xdist-one-db',
+                     dest='xdist_one_db', default=False, action='store_true',
+                     help="Use only one database with xdist plugin. "
+                          "Doesn't work with sqlite3 backend due to db lock")
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
@@ -244,6 +250,31 @@ def pytest_load_initial_conftests(early_config, parser, args):
 def pytest_report_header(config):
     if config._dsm_report_header:
         return [config._dsm_report_header]
+
+
+def pytest_xdist_setupnodes(config):
+    """called once before any remote node is set up. """
+    if not config.getvalue('xdist_one_db'):
+        return
+    _setup_django()
+
+    from django.conf import settings
+    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+        return
+
+    _handle_south()
+
+    if config.getvalue('nomigrations'):
+        _disable_native_migrations()
+
+    db_args = {}
+    if get_django_version() >= (1, 8):
+        db_args['keepdb'] = True
+    else:
+        monkey_patch_creation_for_db_reuse()
+
+    # Create the database
+    setup_databases(verbosity=config.option.verbose, interactive=False, **db_args)
 
 
 @pytest.mark.trylast
