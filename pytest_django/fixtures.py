@@ -70,7 +70,7 @@ def _django_db_setup(request,
 def is_xdist_one_db_enabled(config):
     from django.conf import settings
     is_sqlite = (settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3')
-    # can't use one sqlite3 db for distributed database because of lock
+    # can't use one sqlite3 db for distributed test run because of lock
     return config.getvalue('xdist_one_db') and not is_sqlite
 
 
