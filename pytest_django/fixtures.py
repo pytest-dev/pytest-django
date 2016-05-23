@@ -77,6 +77,7 @@ def _is_xdist_one_db_enabled(config):
 
     return one_db
 
+
 def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     if is_django_unittest(request):
         return
