@@ -13,7 +13,6 @@ import types
 
 import py
 import pytest
-from django.test.runner import setup_databases
 
 from .db_reuse import monkey_patch_creation_for_db_reuse
 from .django_compat import is_django_unittest
@@ -273,6 +272,7 @@ def pytest_xdist_setupnodes(config):
     else:
         monkey_patch_creation_for_db_reuse()
 
+    from django.test.runner import setup_databases
     # Create the database
     setup_databases(verbosity=config.option.verbose, interactive=False, **db_args)
 
