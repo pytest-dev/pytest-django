@@ -194,26 +194,15 @@ def test_xdist_with_one_db_does_not_work_with_sqlite(django_testdir):
     django_testdir.create_test_module('''
         import pytest
 
-        from .app.models import Item
-
-        def _check(settings):
-            # Make sure that the database name looks correct
-            db_name = settings.DATABASES['default']['NAME']
-            assert db_name.endswith('_gw0')
-
-            assert Item.objects.count() == 0
-            Item.objects.create(name='foo')
-            assert Item.objects.count() == 1
-
-
         @pytest.mark.django_db
         def test_a(settings):
-            _check(settings)
+            pass
     ''')
 
     result = django_testdir.runpytest_subprocess('-vv', '-n1', '-s', '--xdist-one-db')
-    assert result.ret == 0
-    result.stdout.fnmatch_lines(['*PASSED*test_a*'])
+    assert result.ret == 1
+    result.stdout.fnmatch_lines(['*= 1 error*'])
+    result.stdout.fnmatch_lines(['*ValueError*'])
 
 
 class TestSqliteWithXdist:

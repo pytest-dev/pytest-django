@@ -70,9 +70,12 @@ def _django_db_setup(request,
 def _is_xdist_one_db_enabled(config):
     from django.conf import settings
     is_sqlite = (settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3')
-    # can't use one sqlite3 db for distributed test run because of lock
-    return config.getvalue('xdist_one_db') and not is_sqlite
 
+    one_db = config.getvalue('xdist_one_db')
+    if one_db and is_sqlite:
+        raise ValueError("xdist-one-db option can not be used together with sqlite3 backend")
+
+    return one_db
 
 def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     if is_django_unittest(request):
