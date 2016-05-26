@@ -211,7 +211,7 @@ def django_user_model(db):
     try:
         from django.contrib.auth import get_user_model
     except ImportError:
-        assert get_django_version < (1, 5)
+        assert get_django_version() < (1, 5)
         from django.contrib.auth.models import User as UserModel
     else:
         UserModel = get_user_model()
@@ -224,7 +224,7 @@ def django_username_field(django_user_model):
     try:
         return django_user_model.USERNAME_FIELD
     except AttributeError:
-        assert get_django_version < (1, 5)
+        assert get_django_version() < (1, 5)
         return 'username'
 
 
