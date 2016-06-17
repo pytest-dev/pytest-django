@@ -30,7 +30,7 @@ def _django_db_setup(request,
 
     if _is_xdist_one_db_enabled(request.config):
         with _django_cursor_wrapper:
-            _reuse_db()
+            _setup_reused_databases()
         return
 
     from .compat import setup_databases, teardown_databases
@@ -49,8 +49,8 @@ def _django_db_setup(request,
         _disable_native_migrations()
 
     with _django_cursor_wrapper:
-        if request.config.getvalue('_reuse_db') and not request.config.getvalue('create_db'):
-            db_cfg = _reuse_db()
+        if request.config.getvalue('reuse_db') and not request.config.getvalue('create_db'):
+            db_cfg = _setup_reused_databases()
         else:
             db_cfg = setup_databases(verbosity=pytest.config.option.verbose, interactive=False,)
 
@@ -58,11 +58,11 @@ def _django_db_setup(request,
         with _django_cursor_wrapper:
             teardown_databases(db_cfg)
 
-    if not request.config.getvalue('_reuse_db'):
+    if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
 
 
-def _reuse_db():
+def _setup_reused_databases():
     from .compat import setup_databases
     db_args = {}
 
