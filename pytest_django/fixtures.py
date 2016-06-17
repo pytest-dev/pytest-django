@@ -29,7 +29,8 @@ def _django_db_setup(request,
     skip_if_no_django()
 
     if _is_xdist_one_db_enabled(request.config):
-        _reuse_db()
+        with _django_cursor_wrapper:
+            _reuse_db()
         return
 
     from .compat import setup_databases, teardown_databases
