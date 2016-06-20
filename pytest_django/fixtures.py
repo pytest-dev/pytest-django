@@ -64,7 +64,8 @@ def _django_db_setup(request,
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
+def _django_db_fixture_helper(transactional, serialized_rollback,
+                              request, _django_cursor_wrapper):
     if is_django_unittest(request):
         return
 
@@ -105,6 +106,7 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
 
     if django_case:
         case = django_case(methodName='__init__')
+        case.serialized_rollback = serialized_rollback
         case._pre_setup()
         request.addfinalizer(case._post_teardown)
 
@@ -177,7 +179,9 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
         return request.getfuncargvalue('transactional_db')
-    return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
+    return _django_db_fixture_helper(
+        transaction=False, serialized_rollback=False,
+        request=request, _django_cursor_wrapper=_django_cursor_wrapper)
 
 
 @pytest.fixture(scope='function')
@@ -192,7 +196,22 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transactional_db`` was
     requested.
     """
-    return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
+    # TODO -- is request.getfuncargvalue('serialized_rollback') enough
+    #         to add 'serialized_rollback' to request.funcargnames?
+    serialized_rollback = 'serialized_rollback' in request.funcargnames
+    return _django_db_fixture_helper(
+        transaction=True, serialized_rollback=serialized_rollback,
+        request=request, _django_cursor_wrapper=_django_cursor_wrapper)
+
+
+@pytest.fixture(scope='function')
+def serialized_rollback(request):
+    """Enable serialized rollback after transaction test cases
+
+    This fixture only has an effect when the ``transactional_db``
+    fixture is active, which happen as a side-effect of requesting
+    ``live_server``.
+    """
 
 
 @pytest.fixture()

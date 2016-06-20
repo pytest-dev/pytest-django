@@ -16,7 +16,7 @@ on what marks are and for notes on using_ them.
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.django_db([transaction=False])
+.. py:function:: pytest.mark.django_db([transaction=False, serialized_rollback=False])
 
    This is used to mark a test function as requiring the database. It
    will ensure the database is setup correctly for the test. Each test
@@ -38,6 +38,14 @@ on what marks are and for notes on using_ them.
      uses. When ``transaction=True``, the behavior will be the same as
      `django.test.TransactionTestCase`_
 
+   :type serialized_rollback: bool
+   :param serialized_rollback:
+     The ``serialized_rollback`` argument enables `rollback emulation`_.
+     After a `django.test.TransactionTestCase`_ runs, the database is
+     flushed, destroying data created in data migrations. This is the
+     default behavior of Django. Setting ``serialized_rollback=True``
+     tells Django to restore that data.
+
    .. note::
 
       If you want access to the Django database *inside a fixture*
@@ -54,6 +62,7 @@ on what marks are and for notes on using_ them.
      Test classes that subclass Python's ``unittest.TestCase`` need to have the
      marker applied in order to access the database.
 
+.. _rollback emulation: https://docs.djangoproject.com/en/stable/topics/testing/overview/#rollback-emulation
 .. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
 .. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
 
@@ -191,6 +200,16 @@ transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
 :py:func:`~pytest.mark.django_db` mark to signal it needs the database.
 
+``serialized_rollback``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+When the ``transactional_db`` fixture is enabled, this fixture can be
+added to trigger `rollback emulation`_ and thus restores data created
+in data migrations after each transaction test.  This is only required
+for fixtures which need to enforce this behavior.  A test function
+would use :py:func:`~pytest.mark.django_db(serialized_rollback=True)`
+to request this behavior.
+
 ``live_server``
 ~~~~~~~~~~~~~~~
 
@@ -199,6 +218,12 @@ server's URL can be retrieved using the ``live_server.url`` attribute
 or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
+
+Since the live server and the tests run in different threads, they
+cannot share a database transaction. For this reason, ``live_server``
+depends on the ``transactional_db`` fixture. If tests depend on data
+created in data migrations, you should add the ``serialized_rollback``
+fixture.
 
 ``settings``
 ~~~~~~~~~~~~
