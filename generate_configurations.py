@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import itertools
 from collections import namedtuple
+import math
 from textwrap import dedent
 
 # https://xkcd.com/1319/
@@ -24,11 +25,11 @@ class TestEnv(TestEnvBase):
 
 # Python to run tox.
 RUN_PYTHON = '3.5'
-PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
+PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.5']
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.7.3', '2.8.7']
-DJANGO_VERSIONS = ['1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
+PYTEST_VERSIONS = ['2.9.2']
+DJANGO_VERSIONS = ['master', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
@@ -38,6 +39,7 @@ DJANGO_REQUIREMENTS = {
     '1.7': 'Django>=1.7,<1.8',
     '1.8': 'Django>=1.8,<1.9',
     '1.9': 'Django>=1.9,<1.10',
+    '1.10': 'https://github.com/django/django/archive/stable/1.10.x.zip',
     'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
@@ -55,14 +57,17 @@ TOX_TESTENV_TEMPLATE = dedent("""
 
 
 def is_valid_env(env):
-
     # Stable database adapters for PyPy+Postgres/MySQL are hard to come by..
-    if env.is_pypy() and env.settings in ('postgres', 'mysql_myisam', 'mysql_innodb'):
+    if env.is_pypy() and env.settings in ('postgres', 'mysql_myisam',
+                                          'mysql_innodb'):
         return False
+
+    dj_version = tuple(int(x) if x != 'master' else math.inf
+                        for x in env.django_version.split('.'))
 
     if env.is_py3():
         # Django <1.5 does not support Python 3
-        if env.django_version == '1.4':
+        if dj_version < (1, 5):
             return False
 
         # MySQL on Python 3 is not supported by Django
@@ -70,20 +75,20 @@ def is_valid_env(env):
             return False
 
     # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', '1.9', 'master'):
+    if env.python_version == 'python2.6' and dj_version >= (1, 7):
         return False
 
     # Django 1.9 dropped Python 3.2 and Python 3.3 support
-    if (env.python_version == 'python3.3' and
-        env.django_version in ('1.7', '1.8', '1.9', 'master')):
+    if env.python_version == 'python3.3' and dj_version >= (1, 9):
         return False
 
     # Python 3.5 is only supported by Django 1.8+
     if env.python_version == 'python3.5':
-        return env.django_version in ('1.8', '1.9', 'master')
+        return dj_version >= (1, 8)
 
-    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4+.
-    if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
+    # pypy3 is compatible with Python 3.3, but Django 1.9 only supports Python
+    # 2.7, 3.4+.
+    if env.python_version == 'pypy3' and dj_version >= (1, 9):
         return False
 
     return True
@@ -272,7 +277,7 @@ def make_travis_yml(envs):
 
 
 def main():
-    all_envs = sorted(generate_all_envs())
+    all_envs = list(generate_all_envs())
     default_envs = sorted(generate_default_envs(all_envs))
 
     with open('tox.ini', 'w+') as tox_ini_file:
