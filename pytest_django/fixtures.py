@@ -176,8 +176,8 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
     """
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
-        return request.getfuncargvalue('transactional_db')
-    return _django_db_fixture_helper(False, request, _django_cursor_wrapper)
+        request.getfuncargvalue('transactional_db')
+    _django_db_fixture_helper(False, request, _django_cursor_wrapper)
 
 
 @pytest.fixture(scope='function')
@@ -192,7 +192,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transactional_db`` was
     requested.
     """
-    return _django_db_fixture_helper(True, request, _django_cursor_wrapper)
+    _django_db_fixture_helper(True, request, _django_cursor_wrapper)
 
 
 @pytest.fixture()
