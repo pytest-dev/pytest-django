@@ -28,7 +28,7 @@ def _django_db_setup(request,
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
-    from .compat import setup_databases, teardown_databases
+    from django.test.runner import setup_databases, DiscoverRunner
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
@@ -58,7 +58,8 @@ def _django_db_setup(request,
 
     def teardown_database():
         with _django_cursor_wrapper:
-            teardown_databases(db_cfg)
+            (DiscoverRunner(verbosity=pytest.config.option.verbose, interactive=False)
+             .teardown_databases(db_cfg))
 
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
