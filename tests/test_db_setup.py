@@ -511,6 +511,18 @@ class TestNativeMigrations(object):
                         },
                         bases=(models.Model,),
                     ),
+                    migrations.CreateModel(
+                        name='ItemMetadata',
+                        fields=[
+                            ('id', models.AutoField(serialize=False,
+                                                    auto_created=True,
+                                                    primary_key=True)),
+                            ('owner', models.ForeignKey(to='app.Item')),
+                        ],
+                        options={
+                        },
+                        bases=(models.Model,),
+                    ),
                     migrations.RunPython(
                         print_it,
                     ),
