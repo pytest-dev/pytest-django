@@ -185,7 +185,7 @@ class TestrunnerVerbosity:
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py:*Creating test database for alias*",
             '*Operations to perform:*',
-            "*Apply all migrations: app, contenttypes, auth*",
+            "*Apply all migrations:*",
             "*PASSED*Destroying test database for alias 'default' ('*')...*"])
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
