@@ -28,6 +28,11 @@ def _django_db_setup(request,
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
+    if _is_xdist_one_db_enabled(request.config):
+        with _django_cursor_wrapper:
+            _setup_reused_databases()
+        return
+
     from .compat import setup_databases, teardown_databases
 
     # xdist
@@ -43,18 +48,11 @@ def _django_db_setup(request,
     if request.config.getvalue('nomigrations'):
         _disable_native_migrations()
 
-    db_args = {}
     with _django_cursor_wrapper:
-        if (request.config.getvalue('reuse_db') and
-                not request.config.getvalue('create_db')):
-            if get_django_version() >= (1, 8):
-                db_args['keepdb'] = True
-            else:
-                monkey_patch_creation_for_db_reuse()
-
-        # Create the database
-        db_cfg = setup_databases(verbosity=pytest.config.option.verbose,
-                                 interactive=False, **db_args)
+        if request.config.getvalue('reuse_db') and not request.config.getvalue('create_db'):
+            db_cfg = _setup_reused_databases()
+        else:
+            db_cfg = setup_databases(verbosity=pytest.config.option.verbose, interactive=False,)
 
     def teardown_database():
         with _django_cursor_wrapper:
@@ -62,6 +60,29 @@ def _django_db_setup(request,
 
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
+
+
+def _setup_reused_databases():
+    from .compat import setup_databases
+    db_args = {}
+
+    if get_django_version() >= (1, 8):
+        db_args['keepdb'] = True
+    else:
+        monkey_patch_creation_for_db_reuse()
+
+    return setup_databases(verbosity=pytest.config.option.verbose, interactive=False, **db_args)
+
+
+def _is_xdist_one_db_enabled(config):
+    from django.conf import settings
+    is_sqlite = (settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3')
+
+    one_db = config.getvalue('xdist_one_db')
+    if one_db and is_sqlite:
+        raise ValueError("xdist-one-db option can not be used together with sqlite3 backend")
+
+    return one_db
 
 
 def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):

@@ -48,6 +48,13 @@ def run_mysql(*args):
     return run_cmd(*args)
 
 
+def skip_if_sqlite():
+    from django.conf import settings
+
+    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+        pytest.skip('Skip if sqlite3 backend')
+
+
 def skip_if_sqlite_in_memory():
     from django.conf import settings
 
