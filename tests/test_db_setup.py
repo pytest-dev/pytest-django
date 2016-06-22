@@ -299,9 +299,10 @@ class TestSouth:
 
         result = django_testdir_initial.runpytest_subprocess('--tb=short', '-v', '-s')
         assert result.ret != 0
-        # Can be OperationalError or DatabaseError (Django 1.4).
+        # Can be OperationalError or DatabaseError (Django 1.4) with sqlite,
+        # ProgrammingError with PostgreSQL.
         result.stdout.fnmatch_lines([
-            '*Error:* no such table: app_item*'])
+            '*Error:*app_item*'])
 
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS += [ 'south', ]
