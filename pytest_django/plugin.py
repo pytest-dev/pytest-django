@@ -347,14 +347,7 @@ def _django_cursor_wrapper(request):
     if not django_settings_is_configured():
         return None
 
-    # util -> utils rename in Django 1.7
-    try:
-        import django.db.backends.utils
-        utils_module = django.db.backends.utils
-    except ImportError:
-        import django.db.backends.util
-        utils_module = django.db.backends.util
-
+    from django.db.backends import utils as utils_module
     manager = CursorManager(utils_module)
     manager.disable()
     request.addfinalizer(manager.restore)
