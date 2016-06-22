@@ -26,16 +26,13 @@ class TestEnv(TestEnvBase):
 # Python to run tox.
 RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.5']
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.3',
+PYTHON_VERSIONS = ['python2.7', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
 PYTEST_VERSIONS = ['2.9.2']
-DJANGO_VERSIONS = ['master', '1.4', '1.5', '1.6', '1.7', '1.8', '1.9', '1.10']
+DJANGO_VERSIONS = ['master', '1.7', '1.8', '1.9', '1.10']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
-    '1.4': 'Django>=1.4,<1.5',
-    '1.5': 'Django>=1.5,<1.6',
-    '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
     '1.8': 'Django>=1.8,<1.9',
     '1.9': 'Django>=1.9,<1.10',
@@ -66,17 +63,9 @@ def is_valid_env(env):
                         for x in env.django_version.split('.'))
 
     if env.is_py3():
-        # Django <1.5 does not support Python 3
-        if dj_version < (1, 5):
-            return False
-
         # MySQL on Python 3 is not supported by Django
         if env.settings in ('mysql_myisam', 'mysql_innodb'):
             return False
-
-    # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and dj_version >= (1, 7):
-        return False
 
     # Django 1.9 dropped Python 3.2 and Python 3.3 support
     if env.python_version == 'python3.3' and dj_version >= (1, 9):
