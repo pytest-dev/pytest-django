@@ -330,7 +330,7 @@ def _django_test_environment(request):
     if django_settings_is_configured():
         _setup_django()
         from django.conf import settings
-        from .compat import setup_test_environment, teardown_test_environment
+        from django.test.utils import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
