@@ -238,11 +238,9 @@ class TestNativeMigrations(object):
                 pass
         ''')
 
-        testdir.mkpydir('tpkg/app/migrations')
-        p = testdir.tmpdir.join(
-            "tpkg/app/migrations/0001_initial").new(ext="py")
-        p.write('raise Exception("This should not get imported.")',
-                ensure=True)
+        migration_file = testdir.tmpdir.join("tpkg/app/migrations/0001_initial.py")
+        assert migration_file.isfile()
+        migration_file.write('raise Exception("This should not get imported.")', ensure=True)
 
         result = testdir.runpytest_subprocess('--nomigrations', '--tb=short', '-v')
         assert result.ret == 0
@@ -260,8 +258,6 @@ class TestNativeMigrations(object):
                 pass
             ''')
 
-        testdir.mkpydir('tpkg/app/migrations')
-        testdir.tmpdir.join("tpkg/app/migrations/__init__").new(ext="py")
         testdir.create_app_file("""
             from django.db import migrations, models
 
