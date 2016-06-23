@@ -84,18 +84,13 @@ def test_db_reuse(django_testdir):
 
 class TestSqlite:
 
-    db_name_17 = 'test_db_name_django17'
-    db_name_before_17 = 'test_db_name_before_django17'
-
     db_settings = {'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'db_name',
+        'TEST': {
+            'NAME': 'test_custom_db_name'
+        }
     }}
-    from django import VERSION
-    if VERSION > (1, 7):
-        db_settings['default']['TEST'] = {'NAME': db_name_17}
-    else:
-        db_settings['default']['TEST_NAME'] = db_name_before_17
 
     def test_sqlite_test_name_used(self, django_testdir):
 
@@ -110,11 +105,8 @@ class TestSqlite:
 
                 assert conn.vendor == 'sqlite'
                 print(conn.settings_dict)
-                if VERSION > (1,7):
-                    assert conn.settings_dict['NAME'] == '%s'
-                else:
-                    assert conn.settings_dict['NAME'] == '%s'
-        ''' % (self.db_name_17, self.db_name_before_17))
+                assert conn.settings_dict['NAME'] == 'test_custom_db_name'
+        ''')
 
         result = django_testdir.runpytest_subprocess('--tb=short', '-v')
         assert result.ret == 0
