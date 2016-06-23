@@ -89,9 +89,6 @@ def requirements(env):
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==1.0'
 
-    if env.is_py2():
-        yield 'south==1.0.2'
-
     if env.settings == 'postgres':
         yield 'psycopg2==2.6.1'
 

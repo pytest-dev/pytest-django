@@ -43,16 +43,6 @@ My tests are not being found. Why not?
 When debugging test collection problems, the ``--collectonly`` flag and ``-rs``
 (report skipped tests) can be helpful.
 
-How do South and pytest-django play together?
----------------------------------------------
-
-pytest-django detects South and applies its monkey-patch, which gets fixed
-to handle initial data properly (which South would skip otherwise, because
-of a bug).
-
-The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control whether
-migrations are used to construct the test database.
-
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
 
