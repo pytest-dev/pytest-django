@@ -7,9 +7,6 @@ from pytest_django_test.db_helpers import (db_exists, drop_database,
                                            mark_database, mark_exists,
                                            skip_if_sqlite_in_memory)
 
-skip_on_python32 = pytest.mark.skipif(sys.version_info[:2] == (3, 2),
-                                      reason='xdist is flaky with Python 3.2')
-
 
 def test_db_reuse_simple(django_testdir):
     "A test for all backends to check that `--reuse-db` works."
@@ -124,7 +121,6 @@ class TestSqlite:
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
 
 
-@skip_on_python32
 def test_xdist_with_reuse(django_testdir):
     skip_if_sqlite_in_memory()
 
@@ -191,8 +187,6 @@ def test_xdist_with_reuse(django_testdir):
 
 
 class TestSqliteWithXdist:
-
-    pytestmark = skip_on_python32
 
     db_settings = {'default': {
         'ENGINE': 'django.db.backends.sqlite3',
