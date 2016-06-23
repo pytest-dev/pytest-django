@@ -136,15 +136,6 @@ class TestLiveServer:
         response_data = urlopen(live_server + '/item_count/').read()
         assert force_text(response_data) == 'Item count: 1'
 
-    @pytest.mark.skipif(get_django_version() >= (1, 7),
-                        reason="Django < 1.7 required")
-    def test_serve_static(self, live_server, settings):
-        """
-        Test that the LiveServer serves static files by default.
-        """
-        response_data = urlopen(live_server + '/static/a_file.txt').read()
-        assert force_text(response_data) == 'bla\n'
-
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS = [
             'django.contrib.auth',
