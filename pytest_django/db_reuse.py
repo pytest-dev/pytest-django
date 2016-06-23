@@ -48,14 +48,9 @@ def _monkeypatch(obj, method_name, new_method):
 
 def _get_db_name(db_settings, suffix):
     "This provides the default test db name that Django uses."
-    from django import VERSION as DJANGO_VERSION
-
     name = None
     try:
-        if DJANGO_VERSION > (1, 7):
-            name = db_settings['TEST']['NAME']
-        elif DJANGO_VERSION < (1, 7):
-            name = db_settings['TEST_NAME']
+        name = db_settings['TEST']['NAME']
     except KeyError:
         pass
 
