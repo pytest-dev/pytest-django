@@ -189,24 +189,13 @@ def client():
 @pytest.fixture()
 def django_user_model(db):
     """The class of Django's user model."""
-    try:
-        from django.contrib.auth import get_user_model
-    except ImportError:
-        assert get_django_version() < (1, 5)
-        from django.contrib.auth.models import User as UserModel
-    else:
-        UserModel = get_user_model()
-    return UserModel
-
+    from django.contrib.auth import get_user_model
+    return get_user_model()
 
 @pytest.fixture()
 def django_username_field(django_user_model):
     """The fieldname for the username used with Django's user model."""
-    try:
-        return django_user_model.USERNAME_FIELD
-    except AttributeError:
-        assert get_django_version() < (1, 5)
-        return 'username'
+    return django_user_model.USERNAME_FIELD
 
 
 @pytest.fixture()
