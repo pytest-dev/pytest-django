@@ -27,18 +27,12 @@ class LiveServer(object):
 
         liveserver_kwargs = {'connections_override': connections_override}
         from django.conf import settings
-        if ('django.contrib.staticfiles' in settings.INSTALLED_APPS and
-                get_django_version() >= (1, 7)):
-            from django.contrib.staticfiles.handlers import (
-                StaticFilesHandler)
+        if 'django.contrib.staticfiles' in settings.INSTALLED_APPS:
+            from django.contrib.staticfiles.handlers import StaticFilesHandler
             liveserver_kwargs['static_handler'] = StaticFilesHandler
         else:
-            try:
-                from django.test.testcases import _StaticFilesHandler
-            except ImportError:
-                pass
-            else:
-                liveserver_kwargs['static_handler'] = _StaticFilesHandler
+            from django.test.testcases import _StaticFilesHandler
+            liveserver_kwargs['static_handler'] = _StaticFilesHandler
 
         host, possible_ports = parse_addr(addr)
         self.thread = LiveServerThread(host, possible_ports,

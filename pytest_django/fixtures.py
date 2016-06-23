@@ -282,9 +282,8 @@ def live_server(request):
           needed as data inside a transaction is not shared between
           the live server and test code.
 
-          Static assets will be served for all versions of Django.
-          Except for django >= 1.7, if ``django.contrib.staticfiles`` is not
-          installed.
+          Static assets will be automatically served when
+          ``django.contrib.staticfiles`` is available in INSTALLED_APPS.
     """
     skip_if_no_django()
     addr = request.config.getvalue('liveserver')
