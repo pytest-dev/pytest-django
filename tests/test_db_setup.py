@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from pytest_django.lazy_django import get_django_version

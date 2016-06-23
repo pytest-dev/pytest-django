@@ -1,7 +1,5 @@
 import sys
 
-from .lazy_django import get_django_version
-
 
 class LiveServer(object):
     """The liveserver fixture

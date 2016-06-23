@@ -149,6 +149,7 @@ def django_user_model(db):
     from django.contrib.auth import get_user_model
     return get_user_model()
 
+
 @pytest.fixture()
 def django_username_field(django_user_model):
     """The fieldname for the username used with Django's user model."""
