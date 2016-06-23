@@ -46,7 +46,7 @@ first time a test needs them.  Once setup the database is cached for
 used for all subsequent tests and rolls back transactions to isolate
 tests from each other.  This is the same way the standard Django
 `TestCase
-<https://docs.djangoproject.com/en/1.4/topics/testing/#testcase>`_
+<https://docs.djangoproject.com/en/1.9/topics/testing/tools/#testcase>`_
 uses the database.  However ``pytest-django`` also caters for
 transaction test cases and allows you to keep the test databases
 configured across different test runs.
@@ -73,7 +73,7 @@ Tests requiring multiple databases
 Currently ``pytest-django`` does not specifically support Django's
 multi-database support.  You can however use normal Django
 ``TestCase`` instances to use it's `multi_db
-<https://docs.djangoproject.com/en/1.4/topics/testing/#multi-database-support>`_
+<https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#tests-and-multiple-databases>`_
 support.
 
 If you have any ideas about the best API to support multiple databases
