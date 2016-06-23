@@ -136,13 +136,7 @@ def _setup_django():
     if not django.conf.settings.configured:
         return
 
-    if hasattr(django, 'setup'):
-        django.setup()
-    else:
-        # Emulate Django 1.7 django.setup() with get_models
-        from django.db.models import get_models
-
-        get_models()
+    django.setup()
 
 
 def _parse_django_find_project_ini(x):
