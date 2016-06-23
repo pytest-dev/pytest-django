@@ -124,9 +124,7 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
 ``--nomigrations`` - Disable Django 1.7+ migrations
 --------------------------------------------------------------
 
-Using ``--nomigrations`` will `disable Django 1.7+ migrations <https://gist.github.com/NotSqrt/5f3c76cd15e40ef62d09>`_
-and create the database inspecting all app models (the default behavior of
-Django until version 1.6). It may be faster when there are several migrations
-to run in the database setup.
-You can use ``--migrations`` to force running migrations in case
-``--nomigrations`` is used, e.g. in ``setup.cfg``.
+Using ``--nomigrations`` will disable Django migrations and create the database
+by inspecting all models. It may be faster when there are several migrations to
+run in the database setup.  You can use ``--migrations`` to force running
+migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
