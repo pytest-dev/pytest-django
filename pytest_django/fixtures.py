@@ -79,28 +79,7 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     request.addfinalizer(_django_cursor_wrapper.disable)
 
     if transactional:
-        from django import get_version
-
-        if get_version() >= '1.5':
-            from django.test import TransactionTestCase as django_case
-
-        else:
-            # Django before 1.5 flushed the DB during setUp.
-            # Use pytest-django's old behavior with it.
-            def flushdb():
-                """Flush the database and close database connections"""
-                # Django does this by default *before* each test
-                # instead of after.
-                from django.db import connections
-                from django.core.management import call_command
-
-                for db in connections:
-                    call_command('flush', interactive=False, database=db,
-                                 verbosity=pytest.config.option.verbose)
-                for conn in connections.all():
-                    conn.close()
-            request.addfinalizer(flushdb)
-
+        from django.test import TransactionTestCase as django_case
     else:
         from django.test import TestCase as django_case
 
