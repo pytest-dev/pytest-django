@@ -14,7 +14,7 @@ from .app.models import Item
 
 # Construct names for the "inner" database used in runpytest tests
 DB_NAME = settings.DATABASES['default']['NAME']
-TEST_DB_NAME = settings.DATABASES['default']['TEST']['NAME']
+TEST_DB_NAME = settings.DATABASES['default']['TEST']['NAME'] or 'test_{}'.format(DB_NAME)
 
 if TEST_DB_NAME == ':memory:':
     DB_NAME = '/invalid_should_never_be_accessed'
