@@ -17,14 +17,14 @@ import pytest
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
                        admin_user, client, db, django_user_model,
-                       django_username_field, live_server, rf, settings,
-                       transactional_db)
+                       django_username_field, live_server, rf, shared_db_wrapper,
+                       settings, transactional_db)
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 # Silence linters for imported fixtures.
 (_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
  django_user_model, django_username_field, live_server, rf, settings,
- transactional_db)
+ shared_db_wrapper, transactional_db)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'

@@ -191,6 +191,26 @@ transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
 :py:func:`~pytest.mark.django_db` mark to signal it needs the database.
 
+``shared_db_wrapper``
+~~~~~~~~~~~~~~~~~~~~~
+
+This fixture can be used to create long-lived state in the database.
+It's meant to be used from fixtures with scope bigger than ``function``.
+It provides a context manager that will create a new database savepoint for you,
+and will take care to revert it when your fixture gets cleaned up.
+
+At the moment it does not work with ``transactional_db``,
+as the fixture itself depends on transactions.
+It also needs Django >= 1.8, as earlier versions close DB connections between tests.
+
+Example usage::
+
+  @pytest.fixture(scope='module')
+  def some_users(request, shared_db_wrapper):
+      with shared_db_wrapper(request):
+          return [User.objects.create(username='no {}'.format(i))
+                  for i in range(1000)]
+
 ``live_server``
 ~~~~~~~~~~~~~~~
 
