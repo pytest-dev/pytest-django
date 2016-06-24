@@ -71,8 +71,6 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
         # Do nothing, we get called with transactional=True, too.
         return
 
-    django_case = None
-
     _django_cursor_wrapper.enable()
     request.addfinalizer(_django_cursor_wrapper.disable)
 
@@ -81,10 +79,9 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     else:
         from django.test import TestCase as django_case
 
-    if django_case:
-        case = django_case(methodName='__init__')
-        case._pre_setup()
-        request.addfinalizer(case._post_teardown)
+    test_case = django_case(methodName='__init__')
+    test_case._pre_setup()
+    request.addfinalizer(test_case._post_teardown)
 
 
 def _disable_native_migrations():
