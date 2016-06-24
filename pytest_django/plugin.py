@@ -332,7 +332,7 @@ def _django_test_environment(request):
 
 @pytest.fixture(autouse=True, scope='session')
 def _django_cursor_wrapper(request):
-    """The django cursor wrapper, internal to pytest-django.
+    """Wrapper around Django's database access, internal to pytest-django.
 
     This will globally disable all database access. The object
     returned has a .enable() and a .disable() method which can be used
@@ -341,8 +341,7 @@ def _django_cursor_wrapper(request):
     if not django_settings_is_configured():
         return None
 
-    from django.db.backends import utils as utils_module
-    manager = CursorManager(utils_module)
+    manager = BlockDjangoDatabaseManager()
     manager.disable()
     request.addfinalizer(manager.restore)
     return manager
@@ -505,8 +504,8 @@ def _template_string_if_invalid_marker(request):
 # ############### Helper Functions ################
 
 
-class CursorManager(object):
-    """Manager for django.db.backends.util.CursorWrapper.
+class BlockDjangoDatabaseManager(object):
+    """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
     This is the object returned by _django_cursor_wrapper.
 
@@ -514,13 +513,19 @@ class CursorManager(object):
     no-op.
     """
 
-    def __init__(self, dbutil):
-        self._dbutil = dbutil
+    def __init__(self):
+        try:
+            from django.db.backends.base.base import BaseDatabaseWrapper
+        except ImportError:
+            # Django 1.7.
+            from django.db.backends import BaseDatabaseWrapper
+
+        self._dj_db_wrapper = BaseDatabaseWrapper
+        self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
         self._history = []
-        self._real_wrapper = dbutil.CursorWrapper
 
     def _save_active_wrapper(self):
-        return self._history.append(self._dbutil.CursorWrapper)
+        return self._history.append(self._dj_db_wrapper.ensure_connection)
 
     def _blocking_wrapper(*args, **kwargs):
         __tracebackhide__ = True
@@ -531,15 +536,15 @@ class CursorManager(object):
     def enable(self):
         """Enable access to the Django database."""
         self._save_active_wrapper()
-        self._dbutil.CursorWrapper = self._real_wrapper
+        self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
 
     def disable(self):
         """Disable access to the Django database."""
         self._save_active_wrapper()
-        self._dbutil.CursorWrapper = self._blocking_wrapper
+        self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
 
     def restore(self):
-        self._dbutil.CursorWrapper = self._history.pop()
+        self._dj_db_wrapper.ensure_connection = self._history.pop()
 
     def __enter__(self):
         self.enable()
