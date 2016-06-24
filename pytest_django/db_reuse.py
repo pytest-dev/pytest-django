@@ -48,14 +48,9 @@ def _monkeypatch(obj, method_name, new_method):
 
 def _get_db_name(db_settings, suffix):
     "This provides the default test db name that Django uses."
-    from django import VERSION as DJANGO_VERSION
-
     name = None
     try:
-        if DJANGO_VERSION > (1, 7):
-            name = db_settings['TEST']['NAME']
-        elif DJANGO_VERSION < (1, 7):
-            name = db_settings['TEST_NAME']
+        name = db_settings['TEST']['NAME']
     except KeyError:
         pass
 
@@ -107,11 +102,6 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
             test_db_repr = " ('%s')" % test_database_name
         print("Re-using existing test database for alias '%s'%s..." % (
             self.connection.alias, test_db_repr))
-
-    # confirm() is not needed/available in Django >= 1.5
-    # See https://code.djangoproject.com/ticket/17760
-    if hasattr(self.connection.features, 'confirm'):
-        self.connection.features.confirm()
 
     return test_database_name
 

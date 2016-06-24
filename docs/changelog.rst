@@ -15,6 +15,12 @@ Features
 * Added a new option `--migrations` to negate a default usage of
   `--nomigrations`.
 
+Compatibility
+^^^^^^^^^^^^^
+* Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
+  versions are now 1.7 and forward.
+* pytest-django no longer supports Python 2.6.
+
 2.9.1
 -----
 

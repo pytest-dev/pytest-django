@@ -136,13 +136,7 @@ def _setup_django():
     if not django.conf.settings.configured:
         return
 
-    if hasattr(django, 'setup'):
-        django.setup()
-    else:
-        # Emulate Django 1.7 django.setup() with get_models
-        from django.db.models import get_models
-
-        get_models()
+    django.setup()
 
 
 def _parse_django_find_project_ini(x):
@@ -330,7 +324,7 @@ def _django_test_environment(request):
     if django_settings_is_configured():
         _setup_django()
         from django.conf import settings
-        from .compat import setup_test_environment, teardown_test_environment
+        from django.test.utils import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
@@ -347,14 +341,7 @@ def _django_cursor_wrapper(request):
     if not django_settings_is_configured():
         return None
 
-    # util -> utils rename in Django 1.7
-    try:
-        import django.db.backends.utils
-        utils_module = django.db.backends.utils
-    except ImportError:
-        import django.db.backends.util
-        utils_module = django.db.backends.util
-
+    from django.db.backends import utils as utils_module
     manager = CursorManager(utils_module)
     manager.disable()
     request.addfinalizer(manager.restore)

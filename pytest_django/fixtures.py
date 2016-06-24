@@ -28,7 +28,7 @@ def _django_db_setup(request,
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
-    from .compat import setup_databases, teardown_databases
+    from django.test.runner import setup_databases, DiscoverRunner
 
     # xdist
     if hasattr(request.config, 'slaveinput'):
@@ -37,8 +37,6 @@ def _django_db_setup(request,
         db_suffix = None
 
     monkey_patch_creation_for_db_suffix(db_suffix)
-
-    _handle_south()
 
     if request.config.getvalue('nomigrations'):
         _disable_native_migrations()
@@ -58,7 +56,8 @@ def _django_db_setup(request,
 
     def teardown_database():
         with _django_cursor_wrapper:
-            teardown_databases(db_cfg)
+            (DiscoverRunner(verbosity=pytest.config.option.verbose, interactive=False)
+             .teardown_databases(db_cfg))
 
     if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
@@ -78,28 +77,7 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
     request.addfinalizer(_django_cursor_wrapper.disable)
 
     if transactional:
-        from django import get_version
-
-        if get_version() >= '1.5':
-            from django.test import TransactionTestCase as django_case
-
-        else:
-            # Django before 1.5 flushed the DB during setUp.
-            # Use pytest-django's old behavior with it.
-            def flushdb():
-                """Flush the database and close database connections"""
-                # Django does this by default *before* each test
-                # instead of after.
-                from django.db import connections
-                from django.core.management import call_command
-
-                for db in connections:
-                    call_command('flush', interactive=False, database=db,
-                                 verbosity=pytest.config.option.verbose)
-                for conn in connections.all():
-                    conn.close()
-            request.addfinalizer(flushdb)
-
+        from django.test import TransactionTestCase as django_case
     else:
         from django.test import TestCase as django_case
 
@@ -107,47 +85,6 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
         case = django_case(methodName='__init__')
         case._pre_setup()
         request.addfinalizer(case._post_teardown)
-
-
-def _handle_south():
-    from django.conf import settings
-
-    # NOTE: Django 1.7 does not have `management._commands` anymore, which
-    # is used by South's `patch_for_test_db_setup` and the code below.
-    if 'south' not in settings.INSTALLED_APPS or get_django_version() > (1, 7):
-        return
-
-    from django.core import management
-
-    try:
-        # if `south` >= 0.7.1 we can use the test helper
-        from south.management.commands import patch_for_test_db_setup
-    except ImportError:
-        # if `south` < 0.7.1 make sure its migrations are disabled
-        management.get_commands()
-        management._commands['syncdb'] = 'django.core'
-    else:
-        # Monkey-patch south.hacks.django_1_0.SkipFlushCommand to load
-        # initial data.
-        # Ref: http://south.aeracode.org/ticket/1395#comment:3
-        import south.hacks.django_1_0
-        from django.core.management.commands.flush import (
-            Command as FlushCommand)
-
-        class SkipFlushCommand(FlushCommand):
-            def handle_noargs(self, **options):
-                # Reinstall the initial_data fixture.
-                from django.core.management import call_command
-                # `load_initial_data` got introduces with Django 1.5.
-                load_initial_data = options.get('load_initial_data', None)
-                if load_initial_data or load_initial_data is None:
-                    # Reinstall the initial_data fixture.
-                    call_command('loaddata', 'initial_data', **options)
-                # no-op to avoid calling flush
-                return
-        south.hacks.django_1_0.SkipFlushCommand = SkipFlushCommand
-
-        patch_for_test_db_setup()
 
 
 def _disable_native_migrations():
@@ -209,24 +146,14 @@ def client():
 @pytest.fixture()
 def django_user_model(db):
     """The class of Django's user model."""
-    try:
-        from django.contrib.auth import get_user_model
-    except ImportError:
-        assert get_django_version() < (1, 5)
-        from django.contrib.auth.models import User as UserModel
-    else:
-        UserModel = get_user_model()
-    return UserModel
+    from django.contrib.auth import get_user_model
+    return get_user_model()
 
 
 @pytest.fixture()
 def django_username_field(django_user_model):
     """The fieldname for the username used with Django's user model."""
-    try:
-        return django_user_model.USERNAME_FIELD
-    except AttributeError:
-        assert get_django_version() < (1, 5)
-        return 'username'
+    return django_user_model.USERNAME_FIELD
 
 
 @pytest.fixture()
@@ -313,9 +240,8 @@ def live_server(request):
           needed as data inside a transaction is not shared between
           the live server and test code.
 
-          Static assets will be served for all versions of Django.
-          Except for django >= 1.7, if ``django.contrib.staticfiles`` is not
-          installed.
+          Static assets will be automatically served when
+          ``django.contrib.staticfiles`` is available in INSTALLED_APPS.
     """
     skip_if_no_django()
     addr = request.config.getvalue('liveserver')

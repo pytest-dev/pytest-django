@@ -5,4 +5,3 @@ pytest-xdist
 tox
 wheel
 twine
-south
