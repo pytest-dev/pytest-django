@@ -64,6 +64,7 @@ def test_urls_cache_is_cleared(testdir):
     result = testdir.runpytest_subprocess()
     assert result.ret == 0
 
+
 def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
     testdir.makepyfile(myurls="""
         from django.conf.urls import url
@@ -82,7 +83,7 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
         def fake_view(request):
             pass
 
-        urlpatterns = patterns('', url(r'second/$', fake_view, name='first'))
+        urlpatterns = patterns('', url(r'second/$', fake_view, name='second'))
     """)
 
     testdir.makepyfile("""
@@ -93,14 +94,12 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
         def test_something():
             reverse('first')
 
-
         @pytest.mark.urls('myurls2')
         def test_something_else():
             with pytest.raises(NoReverseMatch):
                 reverse('first')
 
             reverse('second')
-
     """)
 
     result = testdir.runpytest_subprocess()
