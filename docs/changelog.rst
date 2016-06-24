@@ -19,7 +19,11 @@ Compatibility
 ^^^^^^^^^^^^^
 * Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
   versions are now 1.7 and forward.
+
 * pytest-django no longer supports Python 2.6.
+
+* Specifying the `DJANGO_TEST_LIVE_SERVER_ADDRESS` environment variable is no
+  longer supported. Use `DJANGO_LIVE_TEST_SERVER_ADDRESS` instead.
 
 2.9.1
 -----

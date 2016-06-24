@@ -245,12 +245,6 @@ def live_server(request):
     if not addr:
         addr = os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS')
     if not addr:
-        addr = os.getenv('DJANGO_TEST_LIVE_SERVER_ADDRESS')
-        if addr:
-            warnings.warn('Please use DJANGO_LIVE_TEST_SERVER_ADDRESS'
-                          ' instead of DJANGO_TEST_LIVE_SERVER_ADDRESS.',
-                          DeprecationWarning)
-    if not addr:
         addr = 'localhost:8081,8100-8200'
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
