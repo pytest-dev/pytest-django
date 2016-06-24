@@ -49,7 +49,6 @@ TOX_TESTENV_TEMPLATE = dedent("""
     %(deps)s
     setenv =
          PYTHONPATH = {toxinidir}:{env:PYTHONPATH:}
-         UID = %(uid)s
     """)
 
 
@@ -96,32 +95,15 @@ def requirements(env):
         yield 'mysql-python==1.2.5'
 
 
-def commands(uid, env):
-    # Django versions prior to 1.7 must have the production database available
-    # https://code.djangoproject.com/ticket/16969
-    db_name = 'pytest_django_%s' % uid
-
-    # The sh trickery always exits with 0
-    if env.settings in ('mysql_myisam', 'mysql_innodb'):
-        yield 'sh -c "mysql -u root -e \'drop database if exists %(name)s;' \
-            ' create database %(name)s\'" || exit 0' % {'name': db_name}
-
-    if env.settings == 'postgres':
-        yield 'sh -c "dropdb %(name)s;' \
-            ' createdb %(name)s || exit 0"' % {'name': db_name}
-
-    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs:tests}' % env.settings
-
-
 def testenv_name(env):
     if len(PYTEST_VERSIONS) == 1:
         env = [getattr(env, x) for x in env._fields if x != 'pytest_version']
     return '-'.join(env)
 
 
-def tox_testenv_config(uid, env):
-    cmds = '\n'.join('    %s' % r for r in commands(uid, env))
-
+def tox_testenv_config(env):
+    cmd = ('    py.test --ds=pytest_django_test.settings_%s --strict -r '
+           'fEsxXw {posargs:tests}' % env.settings)
     deps = '\n'.join('    %s' % r for r in requirements(env))
 
     return TOX_TESTENV_TEMPLATE % {
@@ -129,9 +111,8 @@ def tox_testenv_config(uid, env):
         'python_version': env.python_version,
         'django_version': env.django_version,
         'settings': env.settings,
-        'commands': cmds,
+        'commands': cmd,
         'deps': deps,
-        'uid': uid,
     }
 
 
@@ -193,9 +174,7 @@ def make_tox_ini(envs, default_envs):
 
     # Add checkqa-testenvs for different PYTHON_VERSIONS.
     # flake8 is configured in setup.cfg.
-    idx = 0
     for python_version in PYTHON_VERSIONS:
-        idx = idx + 1
         contents.append(dedent("""
             [testenv:checkqa-%(python_version)s]
             commands =
@@ -203,16 +182,12 @@ def make_tox_ini(envs, default_envs):
                 flake8 --show-source --statistics pytest_django tests
             basepython = %(python_version)s
             deps =
-                flake8
-            setenv =
-                UID = %(uid)s""" % {
+                flake8""" % {
             'python_version': python_version,
-            'uid': idx,
         }))
 
     for env in envs:
-        idx = idx + 1
-        contents.append(tox_testenv_config(idx, env))
+        contents.append(tox_testenv_config(env))
 
     return '\n'.join(contents)
 
