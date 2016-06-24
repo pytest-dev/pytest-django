@@ -13,12 +13,15 @@ from textwrap import dedent
 TestEnvBase = namedtuple('TestEnvBase', ['python_version', 'pytest_version',
                                          'django_version', 'settings'])
 
+
 class TestEnv(TestEnvBase):
     def is_py2(self):
-        return self.python_version.startswith('python2') or self.python_version == 'pypy'
+        return (self.python_version.startswith('python2') or
+                self.python_version == 'pypy')
 
     def is_py3(self):
-        return self.python_version.startswith('python3') or self.python_version == 'pypy3'
+        return (self.python_version.startswith('python3') or
+                self.python_version == 'pypy3')
 
     def is_pypy(self):
         return self.python_version.startswith('pypy')
@@ -59,7 +62,7 @@ def is_valid_env(env):
         return False
 
     dj_version = tuple(int(x) if x != 'master' else math.inf
-                        for x in env.django_version.split('.'))
+                       for x in env.django_version.split('.'))
 
     if env.is_py3():
         # MySQL on Python 3 is not supported by Django
@@ -221,7 +224,7 @@ def make_travis_yml(envs):
 
           - pip install tox==2.3.1
         script: tox -e $TESTENV
-        """).strip("\n")
+        """).strip("\n")  # noqa
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
                           python for python in PYTHON_MAIN_VERSIONS)
@@ -247,7 +250,7 @@ def main():
     with open('.travis.yml', 'w+') as travis_yml_file:
         travis_yml_file.write(make_travis_yml(default_envs))
 
-    print ('tox.ini and .travis.yml has been generated!')
+    print('tox.ini and .travis.yml has been generated!')
 
 if __name__ == '__main__':
     main()
