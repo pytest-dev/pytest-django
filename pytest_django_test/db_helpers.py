@@ -12,12 +12,15 @@ from .compat import force_text
 from .app.models import Item
 
 
+# Construct names for the "inner" database used in runpytest tests
 DB_NAME = settings.DATABASES['default']['NAME']
-if DB_NAME == ':memory:':
-    TEST_DB_NAME = DB_NAME
+TEST_DB_NAME = settings.DATABASES['default']['TEST']['NAME']
+
+if TEST_DB_NAME == ':memory:':
+    DB_NAME = '/invalid_should_never_be_accessed'
 else:
-    DB_NAME += '_db_test'
-    TEST_DB_NAME = 'test_' + DB_NAME
+    DB_NAME += '_inner'
+    TEST_DB_NAME += '_inner'
 
 
 def get_db_engine():
@@ -54,32 +57,6 @@ def skip_if_sqlite_in_memory():
     if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3' \
             and settings.DATABASES['default']['NAME'] == ':memory:':
         pytest.skip('Do not test db reuse since database does not support it')
-
-
-def create_empty_production_database():
-    drop_database(name=DB_NAME)
-
-    if get_db_engine() == 'postgresql_psycopg2':
-        r = run_cmd('psql', 'postgres', '-c', 'CREATE DATABASE %s' % DB_NAME)
-        assert ('CREATE DATABASE' in force_text(r.std_out) or
-                'already exists' in force_text(r.std_err))
-        return
-
-    if get_db_engine() == 'mysql':
-        r = run_mysql('-e', 'CREATE DATABASE %s' % DB_NAME)
-        assert (r.status_code == 0 or
-                'database exists' in force_text(r.std_out) or
-                'database exists' in force_text(r.std_err))
-        return
-
-    if get_db_engine() == 'sqlite3':
-        if DB_NAME == ':memory:':
-            raise AssertionError(
-                'sqlite in-memory database must not be created!')
-        open(DB_NAME, 'a').close()
-        return
-
-    raise AssertionError('%s cannot be tested properly' % get_db_engine())
 
 
 def drop_database(name=TEST_DB_NAME, suffix=None):

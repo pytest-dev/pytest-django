@@ -1,5 +1,7 @@
 from __future__ import with_statement
 
+import os
+
 import pytest
 from django.core import mail
 from django.db import connection
@@ -133,8 +135,9 @@ def test_database_rollback_again():
     test_database_rollback()
 
 
+@pytest.mark.django_db
 def test_database_name():
-    name = connection.settings_dict['NAME']
+    dirname, name = os.path.split(connection.settings_dict['NAME'])
     assert name == ':memory:' or name.startswith('test_')
 
 
