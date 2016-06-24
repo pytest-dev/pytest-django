@@ -60,21 +60,21 @@ pytest-django is designed to work with the ``py.test`` command, but if you
 really need integration with ``manage.py test``, you can create a simple
 test runner like this::
 
-    class PyTestRunner(object):
-        """Runs py.test to discover and run tests."""
+    class PytestTestRunner(object):
+        """Runs pytest to discover and run tests."""
 
-        def __init__(self, verbosity=1, failfast=False,
-                     keepdb=False, **kwargs):
+        def __init__(self, verbosity=1, failfast=False, keepdb=False, **kwargs):
             self.verbosity = verbosity
             self.failfast = failfast
             self.keepdb = keepdb
 
         def run_tests(self, test_labels):
-            """
-            Run py.test and returns the exitcode.
-            """
+            """Run pytest and return the exitcode.
 
-            # Translate arguments
+            It translates some of Django's test command option to pytest's.
+            """
+            import pytest
+
             argv = []
             if self.verbosity == 0:
                 argv.append('--quiet')
@@ -98,8 +98,8 @@ Usage::
 
 **Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
 compatible with this approach, you need to use the standard Django methods of
-setting the ``DJANGO_SETTINGS_MODULE`` environmental variable or passing
-``--settings``.
+setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
+variables or the ``--settings`` command line option.
 
 How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------
