@@ -1,5 +1,4 @@
 import tempfile
-import os
 
 from pytest_django_test.settings_base import *  # noqa
 

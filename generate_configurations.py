@@ -182,7 +182,7 @@ def make_tox_ini(envs, default_envs):
             [testenv:checkqa-%(python_version)s]
             commands =
                 flake8 --version
-                flake8 --show-source --statistics pytest_django tests
+                flake8 --show-source --statistics
             basepython = %(python_version)s
             deps =
                 flake8""" % {

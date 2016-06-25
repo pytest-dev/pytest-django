@@ -5,11 +5,8 @@ import sqlite3
 import pytest
 
 from django.conf import settings
-from django.db import connection
-from django.db import transaction
 
 from .compat import force_text
-from .app.models import Item
 
 
 # Construct names for the "inner" database used in runpytest tests
