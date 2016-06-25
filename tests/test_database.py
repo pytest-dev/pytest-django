@@ -7,30 +7,6 @@ from django.test.testcases import connections_support_transactions
 from pytest_django_test.app.models import Item
 
 
-def noop_transactions():
-    """Test whether transactions are disabled.
-
-    Return True if transactions are disabled, False if they are
-    enabled.
-    """
-
-    # Newer versions of Django simply run standard tests in an atomic block.
-    if hasattr(connection, 'in_atomic_block'):
-        return connection.in_atomic_block
-    else:
-        with transaction.commit_manually():
-            Item.objects.create(name='transaction_noop_test')
-            transaction.rollback()
-
-        try:
-            item = Item.objects.get(name='transaction_noop_test')
-        except Item.DoesNotExist:
-            return False
-        else:
-            item.delete()
-            return True
-
-
 def test_noaccess():
     with pytest.raises(pytest.fail.Exception):
         Item.objects.create(name='spam')
@@ -72,13 +48,13 @@ class TestDatabaseFixtures:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     def test_transactions_enabled(self, transactional_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     @pytest.fixture
     def mydb(self, both_dbs):
@@ -147,21 +123,21 @@ class TestDatabaseMarker:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=False)
     def test_transactions_disabled_explicit(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=True)
     def test_transactions_enabled(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
 
 def test_unittest_interaction(django_testdir):

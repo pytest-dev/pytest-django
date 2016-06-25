@@ -14,7 +14,6 @@ from django.test.testcases import connections_support_transactions
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 from pytest_django_test.compat import force_text, HTTPError, urlopen
-from pytest_django_test.db_helpers import noop_transactions
 
 
 def test_client(client):
@@ -92,7 +91,7 @@ class TestLiveServer:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     def test_db_changes_visibility(self, live_server):
         response_data = urlopen(live_server + '/item_count/').read()

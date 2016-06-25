@@ -188,27 +188,3 @@ def mark_exists():
             conn.close()
 
     raise AssertionError('%s cannot be tested properly!' % get_db_engine())
-
-
-def noop_transactions():
-    """Test whether transactions are disabled.
-
-    Return True if transactions are disabled, False if they are
-    enabled.
-    """
-
-    # Newer versions of Django simply run standard tests in an atomic block.
-    if hasattr(connection, 'in_atomic_block'):
-        return connection.in_atomic_block
-    else:
-        with transaction.commit_manually():
-            Item.objects.create(name='transaction_noop_test')
-            transaction.rollback()
-
-        try:
-            item = Item.objects.get(name='transaction_noop_test')
-        except Item.DoesNotExist:
-            return False
-        else:
-            item.delete()
-            return True
