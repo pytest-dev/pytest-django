@@ -5,8 +5,7 @@ import sqlite3
 import pytest
 
 from django.conf import settings
-
-from .compat import force_text
+from django.utils.encoding import force_text
 
 
 # Construct names for the "inner" database used in runpytest tests

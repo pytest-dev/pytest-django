@@ -12,10 +12,11 @@ from django.db import connection
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
+from django.utils.encoding import force_text
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import force_text, HTTPError, urlopen
+from pytest_django_test.compat import HTTPError, urlopen
 
 
 def test_client(client):
@@ -156,10 +157,7 @@ class TestLiveServer:
         """
         django_testdir.create_test_module("""
             import pytest
-            try:
-                from django.utils.encoding import force_text
-            except ImportError:
-                from django.utils.encoding import force_unicode as force_text
+            from django.utils.encoding import force_text
 
             try:
                 from urllib2 import urlopen, HTTPError
@@ -235,7 +233,7 @@ def test_custom_user_model(django_testdir):
                     Template('Access denied').render(Context()))
         """, 'views.py')
     django_testdir.makepyfile("""
-        from pytest_django_test.compat import force_text
+        from django.utils.encoding import force_text
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
