@@ -12,17 +12,27 @@ from .compat import force_text
 from .app.models import Item
 
 
-DB_NAME = settings.DATABASES['default']['NAME']
-if DB_NAME == ':memory:':
-    TEST_DB_NAME = DB_NAME
+# Construct names for the "inner" database used in runpytest tests
+_settings = settings.DATABASES['default']
+
+DB_NAME = _settings['NAME']
+TEST_DB_NAME = _settings['TEST']['NAME']
+
+if _settings['ENGINE'] == 'django.db.backends.sqlite3' and TEST_DB_NAME is None:
+    TEST_DB_NAME = ':memory:'
 else:
-    DB_NAME += '_db_test'
-    TEST_DB_NAME = 'test_' + DB_NAME
+    DB_NAME += '_inner'
+
+    if TEST_DB_NAME is None:
+        # No explicit test db name was given, construct a default one
+        TEST_DB_NAME = 'test_{}_inner'.format(DB_NAME)
+    else:
+        # An explicit test db name was given, is that as the base name
+        TEST_DB_NAME = '{}_inner'.format(TEST_DB_NAME)
 
 
 def get_db_engine():
-    from django.conf import settings
-    return settings.DATABASES['default']['ENGINE'].split('.')[-1]
+    return _settings['ENGINE'].split('.')[-1]
 
 
 class CmdResult(object):
@@ -40,8 +50,7 @@ def run_cmd(*args):
 
 
 def run_mysql(*args):
-    from django.conf import settings
-    user = settings.DATABASES['default'].get('USER', None)
+    user = _settings.get('USER', None)
     if user:
         args = ('-u', user) + tuple(args)
     args = ('mysql',) + tuple(args)
@@ -49,37 +58,8 @@ def run_mysql(*args):
 
 
 def skip_if_sqlite_in_memory():
-    from django.conf import settings
-
-    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3' \
-            and settings.DATABASES['default']['NAME'] == ':memory:':
+    if _settings['ENGINE'] == 'django.db.backends.sqlite3' and _settings['TEST']['NAME'] is None:
         pytest.skip('Do not test db reuse since database does not support it')
-
-
-def create_empty_production_database():
-    drop_database(name=DB_NAME)
-
-    if get_db_engine() == 'postgresql_psycopg2':
-        r = run_cmd('psql', 'postgres', '-c', 'CREATE DATABASE %s' % DB_NAME)
-        assert ('CREATE DATABASE' in force_text(r.std_out) or
-                'already exists' in force_text(r.std_err))
-        return
-
-    if get_db_engine() == 'mysql':
-        r = run_mysql('-e', 'CREATE DATABASE %s' % DB_NAME)
-        assert (r.status_code == 0 or
-                'database exists' in force_text(r.std_out) or
-                'database exists' in force_text(r.std_err))
-        return
-
-    if get_db_engine() == 'sqlite3':
-        if DB_NAME == ':memory:':
-            raise AssertionError(
-                'sqlite in-memory database must not be created!')
-        open(DB_NAME, 'a').close()
-        return
-
-    raise AssertionError('%s cannot be tested properly' % get_db_engine())
 
 
 def drop_database(name=TEST_DB_NAME, suffix=None):
