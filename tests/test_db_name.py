@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from django import VERSION as DJANGO_VERSION
-
 from pytest_django.db_reuse import _get_db_name
 
 

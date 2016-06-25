@@ -73,7 +73,8 @@ def test_sole_test(django_testdir):
             def test_foo(self):
                 # Make sure we are actually using the test database
                 _, db_name = os.path.split(settings.DATABASES['default']['NAME'])
-                assert db_name.startswith('test_') or db_name == ':memory:' or 'file:memorydb' in db_name
+                assert db_name.startswith('test_') or db_name == ':memory:' \\
+                    or 'file:memorydb' in db_name
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
