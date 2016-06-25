@@ -177,3 +177,29 @@ def test_unittest_interaction(django_testdir):
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
         "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
     ])
+
+
+class Test_database_blocking:
+    def test_db_access_in_conftest(self, django_testdir):
+        """Make sure database access in conftest module is prohibited."""
+
+        django_testdir.makeconftest("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stderr.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+        ])
+
+    def test_db_access_in_test_module(self, django_testdir):
+        django_testdir.create_test_module("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+        ])

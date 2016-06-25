@@ -137,6 +137,7 @@ def _setup_django():
         return
 
     django.setup()
+    _blocking_manager.disable()
 
 
 def _parse_django_find_project_ini(x):
@@ -341,10 +342,7 @@ def _django_cursor_wrapper(request):
     if not django_settings_is_configured():
         return None
 
-    manager = BlockDjangoDatabaseManager()
-    manager.disable()
-    request.addfinalizer(manager.restore)
-    return manager
+    return _blocking_manager
 
 
 @pytest.fixture(autouse=True)
@@ -508,21 +506,26 @@ class BlockDjangoDatabaseManager(object):
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
     This is the object returned by _django_cursor_wrapper.
-
-    If created with None as django.db.backends.util the object is a
-    no-op.
     """
 
     def __init__(self):
+        self._history = []
+        self._real_ensure_connection = None
+
+    @property
+    def _dj_db_wrapper(self):
         try:
             from django.db.backends.base.base import BaseDatabaseWrapper
         except ImportError:
             # Django 1.7.
             from django.db.backends import BaseDatabaseWrapper
 
-        self._dj_db_wrapper = BaseDatabaseWrapper
-        self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
-        self._history = []
+        # The first time the _dj_db_wrapper is accessed, we will save a
+        # reference to the real implementation
+        if self._real_ensure_connection is None:
+            self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
+
+        return BaseDatabaseWrapper
 
     def _save_active_wrapper(self):
         return self._history.append(self._dj_db_wrapper.ensure_connection)
@@ -551,6 +554,9 @@ class BlockDjangoDatabaseManager(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.restore()
+
+
+_blocking_manager = BlockDjangoDatabaseManager()
 
 
 def validate_django_db(marker):
