@@ -4,7 +4,7 @@ from pytest_django_test.settings_base import *  # noqa
 # tests (via setting TEST_NAME / TEST['NAME']).
 
 # The name as expected / used by Django/pytest_django (tests/db_helpers.py).
-db_name = 'DBNAME_pytest_django_db' + db_suffix
+db_name = 'DBNAME_pytest_django_db' + db_suffix  # noqa
 test_db_name = 'test_' + db_name + '_db_test'
 
 DATABASES = {

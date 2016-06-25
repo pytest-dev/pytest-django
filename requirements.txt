@@ -5,3 +5,4 @@ pytest-xdist
 tox
 wheel
 twine
+flake8
