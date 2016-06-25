@@ -124,6 +124,7 @@ def django_testdir(request, testdir, monkeypatch):
 @pytest.fixture
 def django_testdir_initial(django_testdir):
     """A django_testdir fixture which provides initial_data."""
+    django_testdir.project_root.join('tpkg/app/migrations').remove()
     django_testdir.makefile('.json', initial_data="""
         [{
             "pk": 1,

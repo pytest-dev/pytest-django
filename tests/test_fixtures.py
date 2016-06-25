@@ -257,6 +257,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0001_initial'),
+        ('app', '0001_initial'),
     ]
 
     operations = [
@@ -286,7 +287,7 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-    """, 'migrations/0001_initial.py')  # noqa
+    """, 'migrations/0002_custom_user_model.py')  # noqa
 
     result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])

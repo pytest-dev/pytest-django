@@ -226,11 +226,8 @@ def test_initial_data(django_testdir_initial):
 class TestNativeMigrations(object):
     """ Tests for Django 1.7 Migrations """
 
-    @pytest.mark.skipif(get_django_version() < (1, 7),
-                        reason=('Django < 1.7 doesn\'t have migrations'))
-    def test_no_migrations(self, django_testdir_initial):
-        testdir = django_testdir_initial
-        testdir.create_test_module('''
+    def test_no_migrations(self, django_testdir):
+        django_testdir.create_test_module('''
             import pytest
 
             @pytest.mark.django_db
@@ -238,18 +235,14 @@ class TestNativeMigrations(object):
                 pass
         ''')
 
-        testdir.mkpydir('tpkg/app/migrations')
-        p = testdir.tmpdir.join(
-            "tpkg/app/migrations/0001_initial").new(ext="py")
-        p.write('raise Exception("This should not get imported.")',
-                ensure=True)
+        migration_file = django_testdir.project_root.join("tpkg/app/migrations/0001_initial.py")
+        assert migration_file.isfile()
+        migration_file.write('raise Exception("This should not get imported.")', ensure=True)
 
-        result = testdir.runpytest_subprocess('--nomigrations', '--tb=short', '-v')
+        result = django_testdir.runpytest_subprocess('--nomigrations', '--tb=short', '-v')
         assert result.ret == 0
         result.stdout.fnmatch_lines(['*test_inner_migrations*PASSED*'])
 
-    @pytest.mark.skipif(get_django_version() < (1, 7),
-                        reason=('Django < 1.7 doesn\'t have migrations'))
     def test_migrations_run(self, django_testdir):
         testdir = django_testdir
         testdir.create_test_module('''
@@ -260,8 +253,6 @@ class TestNativeMigrations(object):
                 pass
             ''')
 
-        testdir.mkpydir('tpkg/app/migrations')
-        testdir.tmpdir.join("tpkg/app/migrations/__init__").new(ext="py")
         testdir.create_app_file("""
             from django.db import migrations, models
 
