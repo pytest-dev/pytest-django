@@ -138,7 +138,7 @@ def test_database_rollback_again():
 @pytest.mark.django_db
 def test_database_name():
     dirname, name = os.path.split(connection.settings_dict['NAME'])
-    assert name == ':memory:' or name.startswith('test_')
+    assert 'file:memorydb' in name or name == ':memory:' or name.startswith('test_')
 
 
 def test_database_noaccess():

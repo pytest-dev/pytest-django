@@ -13,19 +13,26 @@ from .app.models import Item
 
 
 # Construct names for the "inner" database used in runpytest tests
-DB_NAME = settings.DATABASES['default']['NAME']
-TEST_DB_NAME = settings.DATABASES['default']['TEST']['NAME'] or 'test_{}'.format(DB_NAME)
+_settings = settings.DATABASES['default']
 
-if TEST_DB_NAME == ':memory:':
-    DB_NAME = '/invalid_should_never_be_accessed'
+DB_NAME = _settings['NAME']
+TEST_DB_NAME = _settings['TEST']['NAME']
+
+if _settings['ENGINE'] == 'django.db.backends.sqlite3' and TEST_DB_NAME is None:
+    TEST_DB_NAME = ':memory:'
 else:
     DB_NAME += '_inner'
-    TEST_DB_NAME += '_inner'
+
+    if TEST_DB_NAME is None:
+        # No explicit test db name was given, construct a default one
+        TEST_DB_NAME = 'test_{}_inner'.format(DB_NAME)
+    else:
+        # An explicit test db name was given, is that as the base name
+        TEST_DB_NAME = '{}_inner'.format(TEST_DB_NAME)
 
 
 def get_db_engine():
-    from django.conf import settings
-    return settings.DATABASES['default']['ENGINE'].split('.')[-1]
+    return _settings['ENGINE'].split('.')[-1]
 
 
 class CmdResult(object):
@@ -43,8 +50,7 @@ def run_cmd(*args):
 
 
 def run_mysql(*args):
-    from django.conf import settings
-    user = settings.DATABASES['default'].get('USER', None)
+    user = _settings.get('USER', None)
     if user:
         args = ('-u', user) + tuple(args)
     args = ('mysql',) + tuple(args)
@@ -52,10 +58,7 @@ def run_mysql(*args):
 
 
 def skip_if_sqlite_in_memory():
-    from django.conf import settings
-
-    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3' \
-            and settings.DATABASES['default']['NAME'] == ':memory:':
+    if _settings['ENGINE'] == 'django.db.backends.sqlite3' and _settings['TEST']['NAME'] is None:
         pytest.skip('Do not test db reuse since database does not support it')
 
 

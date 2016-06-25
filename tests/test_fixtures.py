@@ -7,7 +7,9 @@ fixtures are tested in test_database.
 from __future__ import with_statement
 
 import pytest
+
 from django.conf import settings as real_settings
+from django.db import connection
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 

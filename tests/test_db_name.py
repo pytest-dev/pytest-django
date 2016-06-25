@@ -27,10 +27,7 @@ def test_name_sqlite():
     assert _get_db_name(db_settings, None) == ':memory:'
     assert _get_db_name(db_settings, 'abc') == ':memory:'
 
-    if DJANGO_VERSION > (1, 7):
-        db_settings['TEST'] = {'NAME': 'custom_test_db'}
-    else:
-        db_settings['TEST_NAME'] = 'custom_test_db'
+    db_settings['TEST'] = {'NAME': 'custom_test_db'}
     assert _get_db_name(db_settings, None) == 'custom_test_db'
     assert _get_db_name(db_settings, 'abc') == 'custom_test_db_abc'
 
@@ -42,9 +39,6 @@ def test_testname():
         'HOST': 'localhost',
         'USER': '',
     }
-    if DJANGO_VERSION > (1, 7):
-        db_settings['TEST'] = {'NAME': 'test123'}
-    else:
-        db_settings['TEST_NAME'] = 'test123'
+    db_settings['TEST'] = {'NAME': 'test123'}
     assert _get_db_name(db_settings, None) == 'test123'
     assert _get_db_name(db_settings, 'abc') == 'test123_abc'

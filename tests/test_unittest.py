@@ -62,6 +62,8 @@ def test_sole_test(django_testdir):
     """
 
     django_testdir.create_test_module('''
+        import os
+
         from django.test import TestCase
         from django.conf import settings
 
@@ -70,8 +72,8 @@ def test_sole_test(django_testdir):
         class TestFoo(TestCase):
             def test_foo(self):
                 # Make sure we are actually using the test database
-                db_name = settings.DATABASES['default']['NAME']
-                assert 'test_' in db_name or db_name == ':memory:'
+                _, db_name = os.path.split(settings.DATABASES['default']['NAME'])
+                assert db_name.startswith('test_') or db_name == ':memory:' or 'file:memorydb' in db_name
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
