@@ -25,6 +25,13 @@ Compatibility
 * Specifying the `DJANGO_TEST_LIVE_SERVER_ADDRESS` environment variable is no
   longer supported. Use `DJANGO_LIVE_TEST_SERVER_ADDRESS` instead.
 
+* Ensuring accidental database access is now stricter than before. Previously
+  database access was prevented on the cursor level. To be safer and prevent
+  more cases, it is now prevented at the connection level. If you previously
+  had tests with interacted with the databases without a database cursor, you
+  will need to mark them with the `pytest.mark.django_db` marker or request the
+  `db` fixture.
+
 2.9.1
 -----
 
