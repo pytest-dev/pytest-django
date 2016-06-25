@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import pytest
-from django.db import connection, transaction
+from django.db import connection
 from django.test.testcases import connections_support_transactions
 
 from pytest_django_test.app.models import Item
