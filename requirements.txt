@@ -1,4 +1,5 @@
 -e .
+setuptools
 django
 django-configurations
 pytest-xdist
