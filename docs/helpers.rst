@@ -80,7 +80,7 @@ when trying to access the database.
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-..py:function:: pytest.mark.ignore_template_errors
+.. py:function:: pytest.mark.ignore_template_errors
 
   If you run py.test using the ``--fail-on-template-vars`` option,
   tests will fail should your templates contain any invalid variables.
