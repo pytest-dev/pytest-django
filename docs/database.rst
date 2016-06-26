@@ -9,8 +9,8 @@ minimum which is a best practice since next-to-no business logic
 should be requiring the database.  Moreover it makes it very clear
 what code uses the database and catches any mistakes.
 
-Enabling database access
-------------------------
+Enabling database access in tests
+---------------------------------
 
 You can use `py.test marks <http://pytest.org/latest/mark.html>`_ to
 tell ``pytest-django`` your test needs database access::
