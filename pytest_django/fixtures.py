@@ -23,7 +23,7 @@ __all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
 @pytest.fixture(scope='session')
 def _django_db_setup(request,
                      _django_test_environment,
-                     _django_cursor_wrapper):
+                     django_db_blocker):
     """Session-wide database setup, internal to pytest-django"""
     skip_if_no_django()
 
@@ -41,7 +41,7 @@ def _django_db_setup(request,
         _disable_native_migrations()
 
     db_args = {}
-    with _django_cursor_wrapper:
+    with django_db_blocker:
         if (request.config.getvalue('reuse_db') and
                 not request.config.getvalue('create_db')):
             if get_django_version() >= (1, 8):
@@ -54,7 +54,7 @@ def _django_db_setup(request,
                                  interactive=False, **db_args)
 
     def teardown_database():
-        with _django_cursor_wrapper:
+        with django_db_blocker:
             (DiscoverRunner(verbosity=pytest.config.option.verbose, interactive=False)
              .teardown_databases(db_cfg))
 
@@ -62,7 +62,7 @@ def _django_db_setup(request,
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
+def _django_db_fixture_helper(transactional, request, django_db_blocker):
     if is_django_unittest(request):
         return
 
@@ -70,8 +70,8 @@ def _django_db_fixture_helper(transactional, request, _django_cursor_wrapper):
         # Do nothing, we get called with transactional=True, too.
         return
 
-    _django_cursor_wrapper.enable()
-    request.addfinalizer(_django_cursor_wrapper.disable)
+    django_db_blocker.enable_database_access()
+    request.addfinalizer(django_db_blocker.restore_previous_access)
 
     if transactional:
         from django.test import TransactionTestCase as django_case
@@ -93,7 +93,7 @@ def _disable_native_migrations():
 # ############### User visible fixtures ################
 
 @pytest.fixture(scope='function')
-def db(request, _django_db_setup, _django_cursor_wrapper):
+def db(request, _django_db_setup, django_db_blocker):
     """Require a django test database
 
     This database will be setup with the default fixtures and will have
@@ -111,11 +111,11 @@ def db(request, _django_db_setup, _django_cursor_wrapper):
             or 'live_server' in request.funcargnames:
         request.getfuncargvalue('transactional_db')
     else:
-        _django_db_fixture_helper(False, request, _django_cursor_wrapper)
+        _django_db_fixture_helper(False, request, django_db_blocker)
 
 
 @pytest.fixture(scope='function')
-def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
+def transactional_db(request, _django_db_setup, django_db_blocker):
     """Require a django test database with transaction support
 
     This will re-initialise the django database for each test and is
@@ -126,7 +126,7 @@ def transactional_db(request, _django_db_setup, _django_cursor_wrapper):
     database setup will behave as only ``transactional_db`` was
     requested.
     """
-    _django_db_fixture_helper(True, request, _django_cursor_wrapper)
+    _django_db_fixture_helper(True, request, django_db_blocker)
 
 
 @pytest.fixture()

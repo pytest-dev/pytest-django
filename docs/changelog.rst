@@ -29,8 +29,13 @@ Compatibility
   database access was prevented on the cursor level. To be safer and prevent
   more cases, it is now prevented at the connection level. If you previously
   had tests which interacted with the databases without a database cursor, you
-  will need to mark them with the `pytest.mark.django_db` marker or request the
+  will need to mark them with the :func:`pytest.mark.django_db` marker or request the
   `db` fixture.
+
+* The previously undocumented internal fixture ``_django_cursor_wrapper`` has
+  been removed in favour of the new :fixture:`django_db_blocker` fixture. If
+  you previously relied in this internal fixture, you must update your code to
+  use the new fixture.
 
 2.9.1
 -----

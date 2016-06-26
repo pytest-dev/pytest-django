@@ -128,3 +128,51 @@ Using ``--nomigrations`` will disable Django migrations and create the database
 by inspecting all models. It may be faster when there are several migrations to
 run in the database setup.  You can use ``--migrations`` to force running
 migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
+
+Advanced database configuration
+-------------------------------
+
+There are some fixtures which will let you change the way the database is
+configured in your own project.
+
+django_db_blocker
+"""""""""""""""""
+
+.. fixture:: django_db_blocker
+
+.. warning::
+    This is an advanced feature. It does not manage transactions and changes
+    made to the database will not be automatically restored. Using the
+    :func:`pytest.mark.django_db` marker or :fixture:`db` fixture, which wraps
+    database changes in a transaction and restores the state is generally the
+    thing you want in tests. This marker can be used when you are trying to
+    influence the way the database is configured.
+
+Database access is by default not allowed. ``django_db_blocker`` is the object
+which can allow specific code paths to have access to the database. This
+fixture is used internally to implement the ``db`` fixture.
+
+
+:fixture:`django_db_blocker` can be used as a context manager to enable database
+access for the specified block::
+
+    @pytest.fixture
+    def myfixture(django_db_blocker):
+        with django_db_blocker:
+            ...  # modify something in the database
+
+You can also manage the access manually via these methods:
+
+.. py:method:: django_db_blocker.enable_database_access()
+
+  Enable database access. Must be followed by a call to
+  :func:`~django_db_blocker.restore_previous_access`.
+
+.. py:method:: django_db_blocker.disable_database_access()
+
+  Enable database access. Must be followed by a call to
+  :func:`~django_db_blocker.restore_previous_access`.
+
+.. py:function:: django_db_blocker.restore_previous_access()
+
+  Restore the previous state of the database blocking.

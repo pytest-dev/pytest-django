@@ -137,7 +137,7 @@ def _setup_django():
         return
 
     django.setup()
-    _blocking_manager.disable()
+    _blocking_manager.disable_database_access()
 
 
 def _parse_django_find_project_ini(x):
@@ -331,13 +331,19 @@ def _django_test_environment(request):
         request.addfinalizer(teardown_test_environment)
 
 
-@pytest.fixture(autouse=True, scope='session')
-def _django_cursor_wrapper(request):
-    """Wrapper around Django's database access, internal to pytest-django.
+@pytest.fixture(scope='session')
+def django_db_blocker():
+    """Wrapper around Django's database access.
 
-    This will globally disable all database access. The object
-    returned has a .enable() and a .disable() method which can be used
-    to temporarily enable database access.
+    This object can be used to re-enable database access.  This fixture is used
+    internally in pytest-django to build the other fixtures and can be used for
+    special database handling.
+
+    The object is a context manager and returned provides the methods
+    .enable_database_access()/.disable_database_access() and .restore() the
+    temporarily enable database access.
+
+    This is an advanced feature that is meant to be used to implement database fixtures.
     """
     if not django_settings_is_configured():
         return None
@@ -362,13 +368,13 @@ def _django_db_marker(request):
 
 
 @pytest.fixture(autouse=True, scope='class')
-def _django_setup_unittest(request, _django_cursor_wrapper):
+def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
         request.getfuncargvalue('_django_test_environment')
         request.getfuncargvalue('_django_db_setup')
 
-        _django_cursor_wrapper.enable()
+        django_db_blocker.enable_database_access()
 
         cls = request.node.cls
 
@@ -379,7 +385,7 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
         def teardown():
             _restore_class_methods(cls)
             cls.tearDownClass()
-            _django_cursor_wrapper.restore()
+            django_db_blocker.restore_previous_access()
 
         request.addfinalizer(teardown)
 
@@ -502,10 +508,10 @@ def _template_string_if_invalid_marker(request):
 # ############### Helper Functions ################
 
 
-class BlockDjangoDatabaseManager(object):
+class _DatabaseBlocker(object):
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
-    This is the object returned by _django_cursor_wrapper.
+    This is the object returned by django_db_blocker.
     """
 
     def __init__(self):
@@ -536,27 +542,27 @@ class BlockDjangoDatabaseManager(object):
         pytest.fail('Database access not allowed, '
                     'use the "django_db" mark to enable it.')
 
-    def enable(self):
+    def enable_database_access(self):
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
 
-    def disable(self):
+    def disable_database_access(self):
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
 
-    def restore(self):
+    def restore_previous_access(self):
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
     def __enter__(self):
-        self.enable()
+        self.enable_database_access()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.restore()
+        self.restore_previous_access()
 
 
-_blocking_manager = BlockDjangoDatabaseManager()
+_blocking_manager = _DatabaseBlocker()
 
 
 def validate_django_db(marker):
