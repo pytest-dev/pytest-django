@@ -32,6 +32,12 @@ def noop_transactions():
             return True
 
 
+def db_supports_reset_sequences():
+    """Return if the current db engine supports `reset_sequences`."""
+    return (connection.features.supports_transactions and
+            connection.features.supports_sequence_reset)
+
+
 def test_noaccess():
     with pytest.raises(pytest.fail.Exception):
         Item.objects.create(name='spam')
@@ -50,6 +56,18 @@ def noaccess():
 def test_noaccess_fixture(noaccess):
     # Setup will fail if this test needs to fail
     pass
+
+
+@pytest.fixture
+def non_zero_sequences_counter(db):
+    """Ensure that the db's internal sequence counter is > 0.
+
+    This is used to test the `reset_sequences` feature.
+    """
+    item_1 = Item.objects.create(name='item_1')
+    item_2 = Item.objects.create(name='item_2')
+    item_1.delete()
+    item_2.delete()
 
 
 class TestDatabaseFixtures:
@@ -91,30 +109,33 @@ class TestDatabaseFixtures:
 
     @pytest.mark.skipif(get_version() < '1.5',
                         reason='reset_sequences needs Django >= 1.5')
-    def test_reset_sequences_disabled_by_default(self, db):
-        if not connections_support_transactions():
-            pytest.skip('transactions required for this test')
-        testcase = db
+    def test_reset_sequences_db_fixture(
+            self, db, django_testdir, non_zero_sequences_counter):
 
-        assert not testcase.reset_sequences
+        if not db_supports_reset_sequences():
+            pytest.skip('transactions and reset_sequences must be supported '
+                        'by the database to run this test')
 
-    @pytest.mark.skipif(get_version() < '1.5',
-                        reason='reset_sequences needs Django >= 1.5')
-    def test_reset_sequences_disabled(self, transactional_db):
-        if not connections_support_transactions():
-            pytest.skip('transactions required for this test')
-        testcase = transactional_db
+        # The test runs on a database that already contains objects, so its
+        # id counter is > 0. We check for the ids of newly created objects.
+        django_testdir.create_test_module('''
+            import pytest
+            from .app.models import Item
 
-        assert not testcase.reset_sequences
+            def test_reset_sequences_db_not_requested(db):
+                item = Item.objects.create(name='new_item')
+                assert item.id > 0
 
-    @pytest.mark.skipif(get_version() < '1.5',
-                        reason='reset_sequences needs Django >= 1.5')
-    def test_reset_sequences_enabled(self, reset_sequences_db):
-        if not connections_support_transactions():
-            pytest.skip('transactions required for this test')
-        testcase = reset_sequences_db
+            def test_reset_sequences_db_requested(reset_sequences_db):
+                item = Item.objects.create(name='new_item')
+                assert item.id == 0
+        ''')
 
-        assert testcase.reset_sequences
+        result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
+        result.stdout.fnmatch_lines([
+            "*test_reset_sequences_db_not_requested PASSED*",
+            "*test_reset_sequences_db_requested PASSED*",
+        ])
 
     @pytest.fixture
     def mydb(self, all_dbs):
