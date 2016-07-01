@@ -60,7 +60,7 @@ def test_noaccess_fixture(noaccess):
 
 @pytest.fixture
 def non_zero_sequences_counter(db):
-    """Ensure that the db's internal sequence counter is > 0.
+    """Ensure that the db's internal sequence counter is > 1.
 
     This is used to test the `reset_sequences` feature.
     """
@@ -117,18 +117,18 @@ class TestDatabaseFixtures:
                         'by the database to run this test')
 
         # The test runs on a database that already contains objects, so its
-        # id counter is > 0. We check for the ids of newly created objects.
+        # id counter is > 1. We check for the ids of newly created objects.
         django_testdir.create_test_module('''
             import pytest
             from .app.models import Item
 
             def test_reset_sequences_db_not_requested(db):
                 item = Item.objects.create(name='new_item')
-                assert item.id > 0
+                assert item.id > 1
 
             def test_reset_sequences_db_requested(reset_sequences_db):
                 item = Item.objects.create(name='new_item')
-                assert item.id == 0
+                assert item.id == 1
         ''')
 
         result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
