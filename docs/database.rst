@@ -165,12 +165,12 @@ You can also manage the access manually via these methods:
 
 .. py:method:: django_db_blocker.enable_database_access()
 
-  Enable database access. Must be followed by a call to
+  Enable database access. Should be followed by a call to
   :func:`~django_db_blocker.restore_previous_access`.
 
 .. py:method:: django_db_blocker.disable_database_access()
 
-  Enable database access. Must be followed by a call to
+  Disable database access. Should be followed by a call to
   :func:`~django_db_blocker.restore_previous_access`.
 
 .. py:function:: django_db_blocker.restore_previous_access()
