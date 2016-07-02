@@ -14,17 +14,24 @@ import types
 import py
 import pytest
 
-from .django_compat import is_django_unittest
-from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
-                       admin_user, client, db, django_user_model,
-                       django_username_field, live_server, rf, settings,
-                       transactional_db)
-from .lazy_django import django_settings_is_configured, skip_if_no_django
+from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
+from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_modify_db_settings  # noqa
+from .fixtures import _live_server_helper  # noqa
+from .fixtures import admin_client  # noqa
+from .fixtures import admin_user  # noqa
+from .fixtures import client  # noqa
+from .fixtures import db  # noqa
+from .fixtures import django_user_model  # noqa
+from .fixtures import django_username_field  # noqa
+from .fixtures import live_server  # noqa
+from .fixtures import rf  # noqa
+from .fixtures import settings  # noqa
+from .fixtures import transactional_db  # noqa
 
-# Silence linters for imported fixtures.
-(_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
- django_user_model, django_username_field, live_server, rf, settings,
- transactional_db)
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -231,7 +238,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
         # Forcefully load django settings, throws ImportError or
         # ImproperlyConfigured if settings cannot be loaded.
-        from django.conf import settings
+        from django.conf import settings  # noqa
 
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
@@ -311,7 +318,7 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture(autouse=True, scope='session')
-def _django_test_environment(request):
+def django_test_environment(request):
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -324,7 +331,7 @@ def _django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.conf import settings
+        from django.conf import settings  # noqa
         from django.test.utils import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
         setup_test_environment()
@@ -371,8 +378,8 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        request.getfuncargvalue('_django_test_environment')
-        request.getfuncargvalue('_django_db_setup')
+        request.getfuncargvalue('django_test_environment')
+        request.getfuncargvalue('django_db_setup')
 
         django_db_blocker.enable_database_access()
 
@@ -482,7 +489,7 @@ def _fail_for_invalid_template_variable(request):
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if django_settings_is_configured():
             import django
-            from django.conf import settings
+            from django.conf import settings  # noqa
 
             if django.VERSION >= (1, 8) and settings.TEMPLATES:
                 settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
@@ -498,7 +505,7 @@ def _template_string_if_invalid_marker(request):
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if marker and django_settings_is_configured():
             import django
-            from django.conf import settings
+            from django.conf import settings  # noqa
 
             if django.VERSION >= (1, 8) and settings.TEMPLATES:
                 settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False

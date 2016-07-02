@@ -194,7 +194,8 @@ class TestSqliteWithXdist:
                 (conn, ) = connections.all()
 
                 assert conn.vendor == 'sqlite'
-                assert conn.creation._get_test_db_name() == ':memory:'
+                db_name = conn.creation._get_test_db_name()
+                assert 'file:memorydb' in db_name or db_name == ':memory:'
         ''')
 
         result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-n1')

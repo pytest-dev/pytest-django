@@ -7,58 +7,93 @@ import os
 import pytest
 
 from . import live_server_helper
-from .db_reuse import (monkey_patch_creation_for_db_reuse,
-                       monkey_patch_creation_for_db_suffix)
+
 from .django_compat import is_django_unittest
+
 from .lazy_django import get_django_version, skip_if_no_django
 
-__all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
+__all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper']
 
 
-# ############### Internal Fixtures ################
-
 @pytest.fixture(scope='session')
-def _django_db_setup(request,
-                     _django_test_environment,
-                     django_db_blocker):
-    """Session-wide database setup, internal to pytest-django"""
+def django_db_modify_db_settings(request):
     skip_if_no_django()
 
+    from django.conf import settings
+
+    for db_settings in settings.DATABASES.values():
+
+        try:
+            test_name = db_settings['TEST']['NAME']
+        except KeyError:
+            test_name = None
+
+        if not test_name:
+            if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
+                return ':memory:'
+            else:
+                test_name = 'test_{}'.format(db_settings['NAME'])
+
+        # Put a suffix like _gw0, _gw1 etc on xdist processes
+        xdist_suffix = getattr(request.config, 'slaveinput', {}).get('slaveid')
+        if test_name != ':memory:' and xdist_suffix is not None:
+            test_name = '{}_{}'.format(test_name, xdist_suffix)
+
+        db_settings.setdefault('TEST', {})
+        db_settings['TEST']['NAME'] = test_name
+
+
+@pytest.fixture(scope='session')
+def django_db_use_migrations(request):
+    return not request.config.getvalue('nomigrations')
+
+
+@pytest.fixture(scope='session')
+def django_db_keepdb(request):
+    return request.config.getvalue('reuse_db') and not request.config.getvalue('create_db')
+
+
+@pytest.fixture(scope='session')
+def django_db_setup(
+    request,
+    django_test_environment,
+    django_db_blocker,
+    django_db_use_migrations,
+    django_db_keepdb,
+    django_db_modify_db_settings,
+):
+    """Top level fixture to ensure test databases are available"""
     from django.test.runner import setup_databases, DiscoverRunner
 
-    # xdist
-    if hasattr(request.config, 'slaveinput'):
-        db_suffix = request.config.slaveinput['slaveid']
-    else:
-        db_suffix = None
+    db_args = {}
 
-    monkey_patch_creation_for_db_suffix(db_suffix)
-
-    if request.config.getvalue('nomigrations'):
+    if not django_db_use_migrations:
         _disable_native_migrations()
 
-    db_args = {}
-    with django_db_blocker:
-        if (request.config.getvalue('reuse_db') and
-                not request.config.getvalue('create_db')):
-            if get_django_version() >= (1, 8):
-                db_args['keepdb'] = True
-            else:
-                monkey_patch_creation_for_db_reuse()
+    if django_db_keepdb:
+        if get_django_version() >= (1, 8):
+            db_args['keepdb'] = True
+        else:
+            # Django 1.7 compatibility
+            from .db_reuse import monkey_patch_creation_for_db_reuse
+            monkey_patch_creation_for_db_reuse()
 
-        # Create the database
-        db_cfg = setup_databases(verbosity=pytest.config.option.verbose,
-                                 interactive=False, **db_args)
+    with django_db_blocker:
+        db_cfg = setup_databases(
+            verbosity=pytest.config.option.verbose,
+            interactive=False,
+            **db_args
+        )
 
     def teardown_database():
         with django_db_blocker:
             (DiscoverRunner(verbosity=pytest.config.option.verbose, interactive=False)
              .teardown_databases(db_cfg))
 
-    if not request.config.getvalue('reuse_db'):
+    if not django_db_keepdb:
         request.addfinalizer(teardown_database)
 
 
@@ -93,7 +128,7 @@ def _disable_native_migrations():
 # ############### User visible fixtures ################
 
 @pytest.fixture(scope='function')
-def db(request, _django_db_setup, django_db_blocker):
+def db(request, django_db_setup, django_db_blocker):
     """Require a django test database
 
     This database will be setup with the default fixtures and will have
@@ -115,7 +150,7 @@ def db(request, _django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(scope='function')
-def transactional_db(request, _django_db_setup, django_db_blocker):
+def transactional_db(request, django_db_setup, django_db_blocker):
     """Require a django test database with transaction support
 
     This will re-initialise the django database for each test and is
