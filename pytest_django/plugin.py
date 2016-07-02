@@ -347,7 +347,7 @@ def django_db_blocker():
     special database handling.
 
     The object is a context manager and provides the methods
-    .enable_database_access()/.disable_database_access() and .restore() the
+    .enable_database_access()/.disable_database_access() and .restore_database_access() to
     temporarily enable database access.
 
     This is an advanced feature that is meant to be used to implement database fixtures.
