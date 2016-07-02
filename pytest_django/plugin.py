@@ -346,7 +346,7 @@ def django_db_blocker():
     internally in pytest-django to build the other fixtures and can be used for
     special database handling.
 
-    The object is a context manager and returned provides the methods
+    The object is a context manager and provides the methods
     .enable_database_access()/.disable_database_access() and .restore() the
     temporarily enable database access.
 
