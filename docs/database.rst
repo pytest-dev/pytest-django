@@ -376,3 +376,25 @@ If you instead want your tests to use the same database, override the
     @pytest.fixture(scope='session')
     def django_db_modify_db_settings():
         pass
+
+Randomize database sequences
+""""""""""""""""""""""""""""
+
+You can customize the test database after it has been created by extending the
+:fixture:`django_db_setup` fixture. This example shows how to give a PostgreSQL
+sequence a random starting value. This can be used to detect and prevent
+primary key id's from being hard-coded in tests.
+
+Put this in ``conftest.py``::
+
+    import random
+    import pytest
+    from django.db import connection
+
+
+    @pytest.fixture(scope='session')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker:
+            cur = connection.cursor()
+            cur.execute('ALTER SEQUENCE app_model_id_seq RESTART WITH %s;',
+                        [random.randint(10000, 20000)])
