@@ -84,7 +84,9 @@ def django_db_setup(
         else:
             # Django 1.7 compatibility
             from .db_reuse import monkey_patch_creation_for_db_reuse
-            monkey_patch_creation_for_db_reuse()
+
+            with django_db_blocker:
+                monkey_patch_creation_for_db_reuse()
 
     with django_db_blocker:
         db_cfg = setup_databases(
