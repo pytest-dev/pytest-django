@@ -333,3 +333,29 @@ Put this into ``conftest.py``::
             'HOST': 'db.example.com',
             'NAME': 'external_db',
         }
+
+
+Populate the database with initial test data
+""""""""""""""""""""""""""""""""""""""""""""
+
+This example shows how you can populate the test database with test data. The
+test data will be saved in the database, i.e. it will not just be part of a
+transactions. This example uses Django's fixture loading mechanism, but it can
+be replaced with any way of loading data into the database.
+
+Notice that :fixture:`django_db_setup` is in the argument list. This may look
+odd at first, but it will make sure that the sure that the original
+pytest-django fixture is used to create the test database. When
+``call_command`` is invoked, the test database is already prepared and
+configured.
+
+Put this in conftest.py::
+
+    import pytest
+
+    from django.core.management import call_command
+
+    @pytest.fixture(scope='session')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker:
+            call_command('loaddata', 'your_data_fixture.json')
