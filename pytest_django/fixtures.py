@@ -19,7 +19,7 @@ __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
 
 
 @pytest.fixture(scope='session')
-def django_db_modify_db_settings(request):
+def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
     from django.conf import settings
@@ -44,6 +44,11 @@ def django_db_modify_db_settings(request):
 
         db_settings.setdefault('TEST', {})
         db_settings['TEST']['NAME'] = test_name
+
+
+@pytest.fixture(scope='session')
+def django_db_modify_db_settings(django_db_modify_db_settings_xdist_suffix):
+    skip_if_no_django()
 
 
 @pytest.fixture(scope='session')

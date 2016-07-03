@@ -181,13 +181,25 @@ django_db_modify_db_settings
 This fixture allows modifying `django.conf.settings.DATABASES` just before the
 databases are configured.
 
-The default implementation of this fixture adds a suffix to the database name
-when the tests are run via pytest-xdist.
-
 If you need to customize the location of your test database, this is the
 fixture you want to override.
 
+The default implementation of this fixture requests the
+:fixture:`django_db_modify_db_settings_xdist_suffix` to provide compatibility
+with pytest-xdist.
+
 This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_modify_db_settings_xdist_suffix
+"""""""""""""""""""""""""""""""""""""""""
+
+.. fixture:: django_db_modify_db_settings_xdist_suffix
+
+Requesting this fixture will add a suffix to the database name when the tests
+are run via pytest-xdist.
+
+This fixture is by default requsted from
+:fixture:`django_db_modify_db_settings_xdist_suffix`.
 
 django_db_use_migrations
 """"""""""""""""""""""""
