@@ -132,8 +132,88 @@ migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
 Advanced database configuration
 -------------------------------
 
+pytest-django provides options to customize the way database is configured. The
+default database construction mostly follows Django's own test runner. You can
+however influence all parts of the database setup process to make it fit in
+projects with special requirements.
+
+This section assumes some familiary with the Django test runner, Django
+database creation and pytest fixtures.
+
+Fixtures
+########
+
 There are some fixtures which will let you change the way the database is
-configured in your own project.
+configured in your own project. These fixtures can be overriden in your own
+project by specifying a fixture with the same name and scope in ``conftest.py``.
+
+.. admonition:: Use the pytest-django source code
+
+    The default implementation of these fixtures can be found in
+    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py>`_.
+
+    The code is relatively short and straightforward and can provide a
+    starting point when you need to customize database setup in your own
+    project.
+
+
+django_db_setup
+"""""""""""""""
+
+.. fixture:: django_db_setup
+
+This is the top-level fixture that ensures that the test databases are created
+and available. This fixture is session scoped (it will be run once per test
+session) and is responsible make sure the test database is available for tests
+that need it.
+
+The default implementation creates the test database by applying migrations and removes
+databases after the test run.
+
+You can override this fixture in your own ``conftest.py`` to customize how test
+databases are constructed.
+
+django_db_modify_db_settings
+""""""""""""""""""""""""""""
+
+.. fixture:: django_db_modify_db_settings
+
+This fixture allows modifying `django.conf.settings.DATABASES` just before the
+databases are configured.
+
+The default implementation of this fixture adds a suffix to the database name
+when the tests are run via pytest-xdist.
+
+If you need to customize the location of your test database, this is the
+fixture you want to override.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_use_migrations
+""""""""""""""""""""""""
+
+.. fixture:: django_db_use_migrations
+
+Returns True/False whether or not to use migrations to create the test
+databases.
+
+The default implementation returns the value of the
+``--migrations``/``--nomigrations`` command line options.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_keepdb
+""""""""""""""""
+
+.. fixture:: django_db_keepdb
+
+Returns True/False wheter or not to keep the re-use an existing database and to
+keep it after the test run.
+
+The default implementation handles the ``--reuse-db`` and ``--create-db``
+command line options.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
 
 django_db_blocker
 """""""""""""""""
@@ -141,12 +221,12 @@ django_db_blocker
 .. fixture:: django_db_blocker
 
 .. warning::
-    This is an advanced feature. It does not manage transactions and changes
-    made to the database will not be automatically restored. Using the
-    :func:`pytest.mark.django_db` marker or :fixture:`db` fixture, which wraps
-    database changes in a transaction and restores the state is generally the
-    thing you want in tests. This marker can be used when you are trying to
-    influence the way the database is configured.
+    It does not manage transactions and changes made to the database will not
+    be automatically restored. Using the :func:`pytest.mark.django_db` marker
+    or :fixture:`db` fixture, which wraps database changes in a transaction and
+    restores the state is generally the thing you want in tests. This marker
+    can be used when you are trying to influence the way the database is
+    configured.
 
 Database access is by default not allowed. ``django_db_blocker`` is the object
 which can allow specific code paths to have access to the database. This
