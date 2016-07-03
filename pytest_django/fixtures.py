@@ -73,14 +73,14 @@ def django_db_setup(
     """Top level fixture to ensure test databases are available"""
     from django.test.runner import setup_databases, DiscoverRunner
 
-    db_args = {}
+    setup_databases_args = {}
 
     if not django_db_use_migrations:
         _disable_native_migrations()
 
     if django_db_keepdb:
         if get_django_version() >= (1, 8):
-            db_args['keepdb'] = True
+            setup_databases_args['keepdb'] = True
         else:
             # Django 1.7 compatibility
             from .db_reuse import monkey_patch_creation_for_db_reuse
@@ -92,7 +92,7 @@ def django_db_setup(
         db_cfg = setup_databases(
             verbosity=pytest.config.option.verbose,
             interactive=False,
-            **db_args
+            **setup_databases_args
         )
 
     def teardown_database():

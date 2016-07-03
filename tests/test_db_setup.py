@@ -27,9 +27,7 @@ def test_db_reuse_simple(django_testdir):
 
 def test_db_reuse(django_testdir):
     """
-    Test the re-use db functionality. This test requires a PostgreSQL server
-    to be available and the environment variables PG_HOST, PG_DB, PG_USER to
-    be defined.
+    Test the re-use db functionality.
     """
     skip_if_sqlite_in_memory()
 
