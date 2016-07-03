@@ -144,7 +144,7 @@ Fixtures
 ########
 
 There are some fixtures which will let you change the way the database is
-configured in your own project. These fixtures can be overriden in your own
+configured in your own project. These fixtures can be overridden in your own
 project by specifying a fixture with the same name and scope in ``conftest.py``.
 
 .. admonition:: Use the pytest-django source code
@@ -164,7 +164,7 @@ django_db_setup
 
 This is the top-level fixture that ensures that the test databases are created
 and available. This fixture is session scoped (it will be run once per test
-session) and is responsible make sure the test database is available for tests
+session) and is responsible for making sure the test database is available for tests
 that need it.
 
 The default implementation creates the test database by applying migrations and removes
@@ -206,7 +206,7 @@ django_db_use_migrations
 
 .. fixture:: django_db_use_migrations
 
-Returns True/False whether or not to use migrations to create the test
+Returns whether or not to use migrations to create the test
 databases.
 
 The default implementation returns the value of the
@@ -219,8 +219,8 @@ django_db_keepdb
 
 .. fixture:: django_db_keepdb
 
-Returns True/False wheter or not to keep the re-use an existing database and to
-keep it after the test run.
+Returns whether or not to re-use an existing database and to keep it after the
+test run.
 
 The default implementation handles the ``--reuse-db`` and ``--create-db``
 command line options.
