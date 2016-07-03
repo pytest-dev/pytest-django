@@ -129,6 +129,8 @@ by inspecting all models. It may be faster when there are several migrations to
 run in the database setup.  You can use ``--migrations`` to force running
 migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
 
+.. _advanced-database-configuration:
+
 Advanced database configuration
 -------------------------------
 

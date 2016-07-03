@@ -15,6 +15,15 @@ Features
 * Added a new option `--migrations` to negate a default usage of
   `--nomigrations`.
 
+* The previously internal pytest-django fixture that handles database creation
+  and setup has been refactored, refined and made a public API.
+
+  This opens up more flexibility and advanced use cases to configure the test
+  database in new ways.
+
+  See :ref:`advanced-database-configuration` for more information on the new
+  fixtures and example use cases.
+
 Compatibility
 ^^^^^^^^^^^^^
 * Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
@@ -32,10 +41,11 @@ Compatibility
   will need to mark them with the :func:`pytest.mark.django_db` marker or request the
   `db` fixture.
 
-* The previously undocumented internal fixture ``_django_cursor_wrapper`` has
-  been removed in favour of the new :fixture:`django_db_blocker` fixture. If
-  you previously relied in this internal fixture, you must update your code to
-  use the new fixture.
+* The previously undocumented internal fixtures ``_django_db_setup``,
+  ``_django_cursor_wrapper`` has been removed in favour of the new public
+  fixtures. If you previously relied on these internal fixtures, you must
+  update your code. See :ref:`advanced-database-configuration` for more
+  information on the new fixtures and example use cases.
 
 2.9.1
 -----
