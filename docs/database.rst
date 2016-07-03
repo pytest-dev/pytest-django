@@ -349,7 +349,7 @@ pytest-django fixture is used to create the test database. When
 ``call_command`` is invoked, the test database is already prepared and
 configured.
 
-Put this in conftest.py::
+Put this in ``conftest.py``::
 
     import pytest
 
@@ -359,3 +359,20 @@ Put this in conftest.py::
     def django_db_setup(django_db_setup, django_db_blocker):
         with django_db_blocker:
             call_command('loaddata', 'your_data_fixture.json')
+
+Use the same database for all xdist processes
+"""""""""""""""""""""""""""""""""""""""""""""
+
+By default, each xdist process gets its own database to run tests on. This is
+needed to have transactional tests that does not interfere with eachother.
+
+If you instead want your tests to use the same database, override the
+:fixture:`django_db_modify_db_settings` to not do anything. Put this in
+``conftest.py``::
+
+    import pytest
+
+
+    @pytest.fixture(scope='session')
+    def django_db_modify_db_settings():
+        pass
