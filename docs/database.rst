@@ -276,7 +276,9 @@ Using a template database for tests
 """""""""""""""""""""""""""""""""""
 
 This example shows how a pre-created PostgreSQL source database can be copied
-and used for tests.::
+and used for tests.
+
+Put this into ``conftest.py``::
 
     import pytest
     from django.db import connections
@@ -308,3 +310,26 @@ and used for tests.::
             connection.close()
 
         run_sql('DROP DATABASE the_copied_db')
+
+
+Using an existing, external database for tests
+""""""""""""""""""""""""""""""""""""""""""""""
+
+This example shows how you can connect to an existing database and use it for
+your tests. This example is trivial, you just need to disable all of
+pytest-django and Django's test database creation and point to the existing
+database. This is achieved by simply implementing a no-op
+:fixture:`django_db_setup` fixture.
+
+Put this into ``conftest.py``::
+
+    import pytest
+
+
+    @pytest.fixture(scope='session')
+    def django_db_setup():
+        settings.DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': 'db.example.com',
+            'NAME': 'external_db',
+        }
