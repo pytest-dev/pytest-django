@@ -27,9 +27,7 @@ def test_db_reuse_simple(django_testdir):
 
 def test_db_reuse(django_testdir):
     """
-    Test the re-use db functionality. This test requires a PostgreSQL server
-    to be available and the environment variables PG_HOST, PG_DB, PG_USER to
-    be defined.
+    Test the re-use db functionality.
     """
     skip_if_sqlite_in_memory()
 
@@ -194,7 +192,8 @@ class TestSqliteWithXdist:
                 (conn, ) = connections.all()
 
                 assert conn.vendor == 'sqlite'
-                assert conn.creation._get_test_db_name() == ':memory:'
+                db_name = conn.creation._get_test_db_name()
+                assert 'file:memorydb' in db_name or db_name == ':memory:'
         ''')
 
         result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-n1')

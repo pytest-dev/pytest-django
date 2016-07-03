@@ -128,3 +128,275 @@ Using ``--nomigrations`` will disable Django migrations and create the database
 by inspecting all models. It may be faster when there are several migrations to
 run in the database setup.  You can use ``--migrations`` to force running
 migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
+
+.. _advanced-database-configuration:
+
+Advanced database configuration
+-------------------------------
+
+pytest-django provides options to customize the way database is configured. The
+default database construction mostly follows Django's own test runner. You can
+however influence all parts of the database setup process to make it fit in
+projects with special requirements.
+
+This section assumes some familiary with the Django test runner, Django
+database creation and pytest fixtures.
+
+Fixtures
+########
+
+There are some fixtures which will let you change the way the database is
+configured in your own project. These fixtures can be overridden in your own
+project by specifying a fixture with the same name and scope in ``conftest.py``.
+
+.. admonition:: Use the pytest-django source code
+
+    The default implementation of these fixtures can be found in
+    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py>`_.
+
+    The code is relatively short and straightforward and can provide a
+    starting point when you need to customize database setup in your own
+    project.
+
+
+django_db_setup
+"""""""""""""""
+
+.. fixture:: django_db_setup
+
+This is the top-level fixture that ensures that the test databases are created
+and available. This fixture is session scoped (it will be run once per test
+session) and is responsible for making sure the test database is available for tests
+that need it.
+
+The default implementation creates the test database by applying migrations and removes
+databases after the test run.
+
+You can override this fixture in your own ``conftest.py`` to customize how test
+databases are constructed.
+
+django_db_modify_db_settings
+""""""""""""""""""""""""""""
+
+.. fixture:: django_db_modify_db_settings
+
+This fixture allows modifying `django.conf.settings.DATABASES` just before the
+databases are configured.
+
+If you need to customize the location of your test database, this is the
+fixture you want to override.
+
+The default implementation of this fixture requests the
+:fixture:`django_db_modify_db_settings_xdist_suffix` to provide compatibility
+with pytest-xdist.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_modify_db_settings_xdist_suffix
+"""""""""""""""""""""""""""""""""""""""""
+
+.. fixture:: django_db_modify_db_settings_xdist_suffix
+
+Requesting this fixture will add a suffix to the database name when the tests
+are run via pytest-xdist.
+
+This fixture is by default requsted from
+:fixture:`django_db_modify_db_settings_xdist_suffix`.
+
+django_db_use_migrations
+""""""""""""""""""""""""
+
+.. fixture:: django_db_use_migrations
+
+Returns whether or not to use migrations to create the test
+databases.
+
+The default implementation returns the value of the
+``--migrations``/``--nomigrations`` command line options.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_keepdb
+""""""""""""""""
+
+.. fixture:: django_db_keepdb
+
+Returns whether or not to re-use an existing database and to keep it after the
+test run.
+
+The default implementation handles the ``--reuse-db`` and ``--create-db``
+command line options.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
+django_db_blocker
+"""""""""""""""""
+
+.. fixture:: django_db_blocker
+
+.. warning::
+    It does not manage transactions and changes made to the database will not
+    be automatically restored. Using the :func:`pytest.mark.django_db` marker
+    or :fixture:`db` fixture, which wraps database changes in a transaction and
+    restores the state is generally the thing you want in tests. This marker
+    can be used when you are trying to influence the way the database is
+    configured.
+
+Database access is by default not allowed. ``django_db_blocker`` is the object
+which can allow specific code paths to have access to the database. This
+fixture is used internally to implement the ``db`` fixture.
+
+
+:fixture:`django_db_blocker` can be used as a context manager to enable database
+access for the specified block::
+
+    @pytest.fixture
+    def myfixture(django_db_blocker):
+        with django_db_blocker:
+            ...  # modify something in the database
+
+You can also manage the access manually via these methods:
+
+.. py:method:: django_db_blocker.enable_database_access()
+
+  Enable database access. Should be followed by a call to
+  :func:`~django_db_blocker.restore_previous_access`.
+
+.. py:method:: django_db_blocker.disable_database_access()
+
+  Disable database access. Should be followed by a call to
+  :func:`~django_db_blocker.restore_previous_access`.
+
+.. py:function:: django_db_blocker.restore_previous_access()
+
+  Restore the previous state of the database blocking.
+
+Examples
+########
+
+Using a template database for tests
+"""""""""""""""""""""""""""""""""""
+
+This example shows how a pre-created PostgreSQL source database can be copied
+and used for tests.
+
+Put this into ``conftest.py``::
+
+    import pytest
+    from django.db import connections
+
+    import psycopg2
+    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+
+    def run_sql(sql):
+        conn = psycopg2.connect(database='postgres')
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+        cur.execute(sql)
+        conn.close()
+
+
+    @pytest.yield_fixture(scope='session')
+    def django_db_setup():
+        from django.conf import settings
+
+        settings.DATABASES['default']['NAME'] = 'the_copied_db'
+
+        run_sql('DROP DATABASE IF EXISTS the_copied_db')
+        run_sql('CREATE DATABASE the_copied_db TEMPLATE the_source_db')
+
+        yield
+
+        for connection in connections.all():
+            connection.close()
+
+        run_sql('DROP DATABASE the_copied_db')
+
+
+Using an existing, external database for tests
+""""""""""""""""""""""""""""""""""""""""""""""
+
+This example shows how you can connect to an existing database and use it for
+your tests. This example is trivial, you just need to disable all of
+pytest-django and Django's test database creation and point to the existing
+database. This is achieved by simply implementing a no-op
+:fixture:`django_db_setup` fixture.
+
+Put this into ``conftest.py``::
+
+    import pytest
+
+
+    @pytest.fixture(scope='session')
+    def django_db_setup():
+        settings.DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': 'db.example.com',
+            'NAME': 'external_db',
+        }
+
+
+Populate the database with initial test data
+""""""""""""""""""""""""""""""""""""""""""""
+
+This example shows how you can populate the test database with test data. The
+test data will be saved in the database, i.e. it will not just be part of a
+transactions. This example uses Django's fixture loading mechanism, but it can
+be replaced with any way of loading data into the database.
+
+Notice that :fixture:`django_db_setup` is in the argument list. This may look
+odd at first, but it will make sure that the sure that the original
+pytest-django fixture is used to create the test database. When
+``call_command`` is invoked, the test database is already prepared and
+configured.
+
+Put this in ``conftest.py``::
+
+    import pytest
+
+    from django.core.management import call_command
+
+    @pytest.fixture(scope='session')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker:
+            call_command('loaddata', 'your_data_fixture.json')
+
+Use the same database for all xdist processes
+"""""""""""""""""""""""""""""""""""""""""""""
+
+By default, each xdist process gets its own database to run tests on. This is
+needed to have transactional tests that does not interfere with eachother.
+
+If you instead want your tests to use the same database, override the
+:fixture:`django_db_modify_db_settings` to not do anything. Put this in
+``conftest.py``::
+
+    import pytest
+
+
+    @pytest.fixture(scope='session')
+    def django_db_modify_db_settings():
+        pass
+
+Randomize database sequences
+""""""""""""""""""""""""""""
+
+You can customize the test database after it has been created by extending the
+:fixture:`django_db_setup` fixture. This example shows how to give a PostgreSQL
+sequence a random starting value. This can be used to detect and prevent
+primary key id's from being hard-coded in tests.
+
+Put this in ``conftest.py``::
+
+    import random
+    import pytest
+    from django.db import connection
+
+
+    @pytest.fixture(scope='session')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker:
+            cur = connection.cursor()
+            cur.execute('ALTER SEQUENCE app_model_id_seq RESTART WITH %s;',
+                        [random.randint(10000, 20000)])
