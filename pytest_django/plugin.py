@@ -36,7 +36,6 @@ from .fixtures import transactional_db  # noqa
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
-
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
