@@ -1,5 +1,7 @@
 from __future__ import with_statement
 
+import os
+
 import pytest
 from django.core import mail
 from django.db import connection
@@ -133,9 +135,10 @@ def test_database_rollback_again():
     test_database_rollback()
 
 
+@pytest.mark.django_db
 def test_database_name():
-    name = connection.settings_dict['NAME']
-    assert name == ':memory:' or name.startswith('test_')
+    dirname, name = os.path.split(connection.settings_dict['NAME'])
+    assert 'file:memorydb' in name or name == ':memory:' or name.startswith('test_')
 
 
 def test_database_noaccess():
@@ -184,7 +187,8 @@ class TestrunnerVerbosity:
         result = testdir.runpytest_subprocess('-s', '-v', '-v')
         result.stdout.fnmatch_lines([
             "tpkg/test_the_test.py:*Creating test database for alias*",
-            "*Creating table app_item*",
+            '*Operations to perform:*',
+            "*Apply all migrations:*",
             "*PASSED*Destroying test database for alias 'default' ('*')...*"])
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):

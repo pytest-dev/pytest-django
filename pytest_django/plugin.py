@@ -14,17 +14,27 @@ import types
 import py
 import pytest
 
-from .django_compat import is_django_unittest
-from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
-                       admin_user, client, db, django_user_model,
-                       django_username_field, live_server, rf, settings,
-                       transactional_db, reset_sequences_db)
+from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
+from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_modify_db_settings  # noqa
+from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
+from .fixtures import _live_server_helper  # noqa
+from .fixtures import admin_client  # noqa
+from .fixtures import admin_user  # noqa
+from .fixtures import client  # noqa
+from .fixtures import db  # noqa
+from .fixtures import django_user_model  # noqa
+from .fixtures import django_username_field  # noqa
+from .fixtures import live_server  # noqa
+from .fixtures import reset_sequences_db  # noqa
+from .fixtures import rf  # noqa
+from .fixtures import settings  # noqa
+from .fixtures import transactional_db  # noqa
+
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
-# Silence linters for imported fixtures.
-(_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
- django_user_model, django_username_field, live_server, rf, settings,
- transactional_db, reset_sequences_db)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -39,21 +49,23 @@ def pytest_addoption(parser):
     group._addoption('--reuse-db',
                      action='store_true', dest='reuse_db', default=False,
                      help='Re-use the testing database if it already exists, '
-                          'and do not remove it when the test finishes. This '
-                          'option will be ignored when --no-db is given.')
+                          'and do not remove it when the test finishes.')
     group._addoption('--create-db',
                      action='store_true', dest='create_db', default=False,
                      help='Re-create the database, even if it exists. This '
-                          'option will be ignored if not --reuse-db is given.')
+                          'option can be used to override --reuse-db.')
     group._addoption('--ds',
                      action='store', type='string', dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
     group._addoption('--dc',
                      action='store', type='string', dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
-    group._addoption('--nomigrations',
+    group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
-                     help='Disable Django 1.7 migrations on test setup')
+                     help='Disable Django 1.7+ migrations on test setup')
+    group._addoption('--migrations',
+                     action='store_false', dest='nomigrations', default=False,
+                     help='Enable Django 1.7+ migrations on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -134,13 +146,8 @@ def _setup_django():
     if not django.conf.settings.configured:
         return
 
-    if hasattr(django, 'setup'):
-        django.setup()
-    else:
-        # Emulate Django 1.7 django.setup() with get_models
-        from django.db.models import get_models
-
-        get_models()
+    django.setup()
+    _blocking_manager.disable_database_access()
 
 
 def _parse_django_find_project_ini(x):
@@ -234,7 +241,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
         # Forcefully load django settings, throws ImportError or
         # ImproperlyConfigured if settings cannot be loaded.
-        from django.conf import settings
+        from django.conf import settings  # noqa
 
         with _handle_import_error(_django_project_scan_outcome):
             settings.DATABASES
@@ -314,7 +321,7 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture(autouse=True, scope='session')
-def _django_test_environment(request):
+def django_test_environment(request):
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -327,36 +334,31 @@ def _django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.conf import settings
-        from .compat import setup_test_environment, teardown_test_environment
+        from django.conf import settings  # noqa
+        from django.test.utils import setup_test_environment, teardown_test_environment
         settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
 
-@pytest.fixture(autouse=True, scope='session')
-def _django_cursor_wrapper(request):
-    """The django cursor wrapper, internal to pytest-django.
+@pytest.fixture(scope='session')
+def django_db_blocker():
+    """Wrapper around Django's database access.
 
-    This will globally disable all database access. The object
-    returned has a .enable() and a .disable() method which can be used
-    to temporarily enable database access.
+    This object can be used to re-enable database access.  This fixture is used
+    internally in pytest-django to build the other fixtures and can be used for
+    special database handling.
+
+    The object is a context manager and provides the methods
+    .enable_database_access()/.disable_database_access() and .restore_database_access() to
+    temporarily enable database access.
+
+    This is an advanced feature that is meant to be used to implement database fixtures.
     """
     if not django_settings_is_configured():
         return None
 
-    # util -> utils rename in Django 1.7
-    try:
-        import django.db.backends.utils
-        utils_module = django.db.backends.utils
-    except ImportError:
-        import django.db.backends.util
-        utils_module = django.db.backends.util
-
-    manager = CursorManager(utils_module)
-    manager.disable()
-    request.addfinalizer(manager.restore)
-    return manager
+    return _blocking_manager
 
 
 @pytest.fixture(autouse=True)
@@ -378,13 +380,13 @@ def _django_db_marker(request):
 
 
 @pytest.fixture(autouse=True, scope='class')
-def _django_setup_unittest(request, _django_cursor_wrapper):
+def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        request.getfuncargvalue('_django_test_environment')
-        request.getfuncargvalue('_django_db_setup')
+        request.getfuncargvalue('django_test_environment')
+        request.getfuncargvalue('django_db_setup')
 
-        _django_cursor_wrapper.enable()
+        django_db_blocker.enable_database_access()
 
         cls = request.node.cls
 
@@ -395,7 +397,7 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
         def teardown():
             _restore_class_methods(cls)
             cls.tearDownClass()
-            _django_cursor_wrapper.restore()
+            django_db_blocker.restore_previous_access()
 
         request.addfinalizer(teardown)
 
@@ -492,7 +494,7 @@ def _fail_for_invalid_template_variable(request):
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if django_settings_is_configured():
             import django
-            from django.conf import settings
+            from django.conf import settings  # noqa
 
             if django.VERSION >= (1, 8) and settings.TEMPLATES:
                 settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
@@ -508,7 +510,7 @@ def _template_string_if_invalid_marker(request):
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if marker and django_settings_is_configured():
             import django
-            from django.conf import settings
+            from django.conf import settings  # noqa
 
             if django.VERSION >= (1, 8) and settings.TEMPLATES:
                 settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
@@ -518,22 +520,33 @@ def _template_string_if_invalid_marker(request):
 # ############### Helper Functions ################
 
 
-class CursorManager(object):
-    """Manager for django.db.backends.util.CursorWrapper.
+class _DatabaseBlocker(object):
+    """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
-    This is the object returned by _django_cursor_wrapper.
-
-    If created with None as django.db.backends.util the object is a
-    no-op.
+    This is the object returned by django_db_blocker.
     """
 
-    def __init__(self, dbutil):
-        self._dbutil = dbutil
+    def __init__(self):
         self._history = []
-        self._real_wrapper = dbutil.CursorWrapper
+        self._real_ensure_connection = None
+
+    @property
+    def _dj_db_wrapper(self):
+        try:
+            from django.db.backends.base.base import BaseDatabaseWrapper
+        except ImportError:
+            # Django 1.7.
+            from django.db.backends import BaseDatabaseWrapper
+
+        # The first time the _dj_db_wrapper is accessed, we will save a
+        # reference to the real implementation
+        if self._real_ensure_connection is None:
+            self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
+
+        return BaseDatabaseWrapper
 
     def _save_active_wrapper(self):
-        return self._history.append(self._dbutil.CursorWrapper)
+        return self._history.append(self._dj_db_wrapper.ensure_connection)
 
     def _blocking_wrapper(*args, **kwargs):
         __tracebackhide__ = True
@@ -541,24 +554,27 @@ class CursorManager(object):
         pytest.fail('Database access not allowed, '
                     'use the "django_db" mark to enable it.')
 
-    def enable(self):
+    def enable_database_access(self):
         """Enable access to the Django database."""
         self._save_active_wrapper()
-        self._dbutil.CursorWrapper = self._real_wrapper
+        self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
 
-    def disable(self):
+    def disable_database_access(self):
         """Disable access to the Django database."""
         self._save_active_wrapper()
-        self._dbutil.CursorWrapper = self._blocking_wrapper
+        self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
 
-    def restore(self):
-        self._dbutil.CursorWrapper = self._history.pop()
+    def restore_previous_access(self):
+        self._dj_db_wrapper.ensure_connection = self._history.pop()
 
     def __enter__(self):
-        self.enable()
+        self.enable_database_access()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.restore()
+        self.restore_previous_access()
+
+
+_blocking_manager = _DatabaseBlocker()
 
 
 def validate_django_db(marker):

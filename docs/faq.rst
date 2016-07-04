@@ -43,16 +43,6 @@ My tests are not being found. Why not?
 When debugging test collection problems, the ``--collectonly`` flag and ``-rs``
 (report skipped tests) can be helpful.
 
-How do South and pytest-django play together?
----------------------------------------------
-
-pytest-django detects South and applies its monkey-patch, which gets fixed
-to handle initial data properly (which South would skip otherwise, because
-of a bug).
-
-The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control whether
-migrations are used to construct the test database.
-
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
 
@@ -62,6 +52,54 @@ tests. This ensures that each test can run independently, regardless of wheter
 transactions are tested or not.
 
 .. _faq-getting-help:
+
+How can I use ``manage.py test`` with pytest-django?
+----------------------------------------------------
+
+pytest-django is designed to work with the ``py.test`` command, but if you
+really need integration with ``manage.py test``, you can create a simple
+test runner like this::
+
+    class PytestTestRunner(object):
+        """Runs pytest to discover and run tests."""
+
+        def __init__(self, verbosity=1, failfast=False, keepdb=False, **kwargs):
+            self.verbosity = verbosity
+            self.failfast = failfast
+            self.keepdb = keepdb
+
+        def run_tests(self, test_labels):
+            """Run pytest and return the exitcode.
+
+            It translates some of Django's test command option to pytest's.
+            """
+            import pytest
+
+            argv = []
+            if self.verbosity == 0:
+                argv.append('--quiet')
+            if self.verbosity == 2:
+                argv.append('--verbose')
+            if self.failfast:
+                argv.append('--exitfirst')
+            if self.keepdb:
+                argv.append('--reuse-db')
+
+            argv.extend(test_labels)
+            return pytest.main(argv)
+
+Add the path to this class in your Django settings::
+
+    TEST_RUNNER = 'my_project.runner.PyTestRunner'
+
+Usage::
+
+    ./manage.py test <django args> -- <py.test args>
+
+**Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
+compatible with this approach, you need to use the standard Django methods of
+setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
+variables or the ``--settings`` command line option.
 
 How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------

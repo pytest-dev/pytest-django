@@ -4,43 +4,28 @@ language: python
 python:
   - "3.5"
 env:
-  - TESTENV=pypy-2.8.1-master-sqlite_file
-  - TESTENV=pypy3-2.8.1-1.8-sqlite_file
-  - TESTENV=python2.6-2.8.1-1.6-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.4-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.5-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.6-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.7-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.8-sqlite_file
-  - TESTENV=python2.7-2.8.1-1.9-sqlite_file
-  - TESTENV=python2.7-2.8.1-master-mysql_innodb
-  - TESTENV=python2.7-2.8.1-master-mysql_myisam
-  - TESTENV=python2.7-2.8.1-master-sqlite_file
-  - TESTENV=python3.2-2.8.1-1.6-sqlite_file
-  - TESTENV=python3.3-2.8.1-1.6-sqlite_file
-  - TESTENV=python3.4-2.8.1-1.5-sqlite_file
-  - TESTENV=python3.4-2.8.1-1.6-sqlite_file
-  - TESTENV=python3.4-2.8.1-1.7-sqlite_file
-  - TESTENV=python3.4-2.8.1-1.8-sqlite_file
-  - TESTENV=python3.4-2.8.1-1.9-sqlite_file
-  - TESTENV=python3.4-2.8.1-master-sqlite_file
-  - TESTENV=python3.5-2.7.3-master-sqlite_file
-  - TESTENV=python3.5-2.8.1-master-postgres
-  - TESTENV=python3.5-2.8.1-master-sqlite
-  - TESTENV=python3.5-2.8.1-master-sqlite_file
+  - TESTENV=pypy-1.10-sqlite_file
+  - TESTENV=pypy3-1.8-sqlite
+  - TESTENV=pypy3-1.8-sqlite_file
+  - TESTENV=python2.7-1.10-mysql_innodb
+  - TESTENV=python2.7-1.10-mysql_myisam
+  - TESTENV=python2.7-1.10-postgres
+  - TESTENV=python2.7-1.7-postgres
+  - TESTENV=python2.7-1.8-postgres
+  - TESTENV=python2.7-1.9-postgres
+  - TESTENV=python2.7-master-postgres
+  - TESTENV=python3.3-1.8-postgres
+  - TESTENV=python3.4-1.10-postgres
+  - TESTENV=python3.5-1.10-postgres
+  - TESTENV=python3.5-1.8-postgres
+  - TESTENV=python3.5-1.9-postgres
+  - TESTENV=python3.5-master-postgres
   - TESTENV=checkqa-python2.7
-  - TESTENV=checkqa-python3.4
+  - TESTENV=checkqa-python3.5
 matrix:
   allow_failures:
-    - env: TESTENV=pypy-2.8.1-master-sqlite_file
-    - env: TESTENV=python2.7-2.8.1-master-mysql_innodb
-    - env: TESTENV=python2.7-2.8.1-master-mysql_myisam
-    - env: TESTENV=python2.7-2.8.1-master-sqlite_file
-    - env: TESTENV=python3.4-2.8.1-master-sqlite_file
-    - env: TESTENV=python3.5-2.7.3-master-sqlite_file
-    - env: TESTENV=python3.5-2.8.1-master-postgres
-    - env: TESTENV=python3.5-2.8.1-master-sqlite
-    - env: TESTENV=python3.5-2.8.1-master-sqlite_file
+    - env: TESTENV=python2.7-master-postgres
+    - env: TESTENV=python3.5-master-postgres
 install:
   # Create pip wrapper script, using travis_retry (a function) and
   # inject it into tox.ini.
@@ -55,5 +40,5 @@ install:
   - sed -i.bak 's/whitelist_externals =/\0\n    travis_retry_pip/' tox.ini
   - diff tox.ini tox.ini.bak && return 1 || true
 
-  - pip install tox==2.1.1
+  - pip install tox==2.3.1
 script: tox -e $TESTENV

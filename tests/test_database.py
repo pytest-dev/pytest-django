@@ -8,30 +8,6 @@ from django.test.testcases import connections_support_transactions
 from pytest_django_test.app.models import Item
 
 
-def noop_transactions():
-    """Test whether transactions are disabled.
-
-    Return True if transactions are disabled, False if they are
-    enabled.
-    """
-
-    # Newer versions of Django simply run standard tests in an atomic block.
-    if hasattr(connection, 'in_atomic_block'):
-        return connection.in_atomic_block
-    else:
-        with transaction.commit_manually():
-            Item.objects.create(name='transaction_noop_test')
-            transaction.rollback()
-
-        try:
-            item = Item.objects.get(name='transaction_noop_test')
-        except Item.DoesNotExist:
-            return False
-        else:
-            item.delete()
-            return True
-
-
 def db_supports_reset_sequences():
     """Return if the current db engine supports `reset_sequences`."""
     return (connection.features.supports_transactions and
@@ -93,19 +69,19 @@ class TestDatabaseFixtures:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     def test_transactions_enabled(self, transactional_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     def test_transactions_enabled_via_reset_seq(self, reset_sequences_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     @pytest.mark.skipif(get_version() < '1.5',
                         reason='reset_sequences needs Django >= 1.5')
@@ -204,21 +180,21 @@ class TestDatabaseMarker:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=False)
     def test_transactions_disabled_explicit(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=True)
     def test_transactions_enabled(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     @pytest.mark.django_db
     def test_reset_sequences_disabled(self, request):
@@ -270,3 +246,29 @@ def test_unittest_interaction(django_testdir):
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
         "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
     ])
+
+
+class Test_database_blocking:
+    def test_db_access_in_conftest(self, django_testdir):
+        """Make sure database access in conftest module is prohibited."""
+
+        django_testdir.makeconftest("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stderr.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+        ])
+
+    def test_db_access_in_test_module(self, django_testdir):
+        django_testdir.create_test_module("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+        ])

@@ -3,9 +3,49 @@ Changelog
 
 NEXT
 ----
+Bug fixes
+^^^^^^^^^
+
 * Fix error when Django happens to be imported before pytest-django runs.
   Thanks to Will Harris for `the bug report
   <https://github.com/pytest-dev/pytest-django/issues/289>`_.
+
+Features
+^^^^^^^^
+* Added a new option `--migrations` to negate a default usage of
+  `--nomigrations`.
+
+* The previously internal pytest-django fixture that handles database creation
+  and setup has been refactored, refined and made a public API.
+
+  This opens up more flexibility and advanced use cases to configure the test
+  database in new ways.
+
+  See :ref:`advanced-database-configuration` for more information on the new
+  fixtures and example use cases.
+
+Compatibility
+^^^^^^^^^^^^^
+* Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
+  versions are now 1.7 and forward.
+
+* pytest-django no longer supports Python 2.6.
+
+* Specifying the `DJANGO_TEST_LIVE_SERVER_ADDRESS` environment variable is no
+  longer supported. Use `DJANGO_LIVE_TEST_SERVER_ADDRESS` instead.
+
+* Ensuring accidental database access is now stricter than before. Previously
+  database access was prevented on the cursor level. To be safer and prevent
+  more cases, it is now prevented at the connection level. If you previously
+  had tests which interacted with the databases without a database cursor, you
+  will need to mark them with the :func:`pytest.mark.django_db` marker or request the
+  `db` fixture.
+
+* The previously undocumented internal fixtures ``_django_db_setup``,
+  ``_django_cursor_wrapper`` has been removed in favour of the new public
+  fixtures. If you previously relied on these internal fixtures, you must
+  update your code. See :ref:`advanced-database-configuration` for more
+  information on the new fixtures and example use cases.
 
 2.9.1
 -----

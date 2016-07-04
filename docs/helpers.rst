@@ -13,54 +13,55 @@ on what marks are and for notes on using_ them.
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-``pytest.mark.django_db`` - request database access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``pytest.mark.django_db(transaction=False, reset_sequences=False)`` - request database access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False])
 
-   This is used to mark a test function as requiring the database. It
-   will ensure the database is setup correctly for the test.  Each test
-   will run in its own transaction which will be rolled back at the end
-   of the test. This behavior is the same as Django's standard
-   `django.test.TestCase`_ class.
+This is used to mark a test function as requiring the database. It
+will ensure the database is setup correctly for the test.  Each test
+will run in its own transaction which will be rolled back at the end
+of the test. This behavior is the same as Django's standard
+`django.test.TestCase`_ class.
 
-   In order for a test to have access to the database it must either
-   be marked using the ``django_db`` mark or request one of the ``db``,
-   ``transactional_db`` or ``reset_sequences_db`` fixtures.  Otherwise the
-   test will fail when trying to access the database.
+In order for a test to have access to the database it must either
+be marked using the ``django_db`` mark or request one of the ``db``,
+``transactional_db`` or ``reset_sequences_db`` fixtures.  Otherwise the
+test will fail when trying to access the database.
 
-   :type transaction: bool
-   :param transaction:
-     The ``transaction`` argument will allow the test to use real transactions.
-     With ``transaction=False`` (the default when not specified), transaction
-     operations are noops during the test. This is the same behavior that
-     `django.test.TestCase`_
-     uses. When ``transaction=True``, the behavior will be the same as
-     `django.test.TransactionTestCase`_
+:type transaction: bool
+:param transaction:
+ The ``transaction`` argument will allow the test to use real transactions.
+ With ``transaction=False`` (the default when not specified), transaction
+ operations are noops during the test. This is the same behavior that
+ `django.test.TestCase`_
+ uses. When ``transaction=True``, the behavior will be the same as
+ `django.test.TransactionTestCase`_
 
-   :type reset_sequences: bool
-   :param reset_sequences:
-     The ``reset_sequences`` argument will ask to reset auto increment sequence
-     values (e.g. primary keys) before running the test.  Defaults to
-     ``False``.  Must be used together with ``transaction=True`` to have an
-     effect.  Please be aware that not all databases support this feature.
-     For details see `django.test.TransactionTestCase.reset_sequences`_
 
-   .. note::
+:type reset_sequences: bool
+:param reset_sequences:
+ The ``reset_sequences`` argument will ask to reset auto increment sequence
+ values (e.g. primary keys) before running the test.  Defaults to
+ ``False``.  Must be used together with ``transaction=True`` to have an
+ effect.  Please be aware that not all databases support this feature.
+ For details see `django.test.TransactionTestCase.reset_sequences`_
 
-      If you want access to the Django database *inside a fixture*
-      this marker will not help even if the function requesting your
-      fixture has this marker applied.  To access the database in a
-      fixture, the fixture itself will have to request the ``db``,
-      ``transactional_db`` or ``reset_sequences_db`` fixture.  See below
-      for a description of them.
+.. note::
 
-   .. note:: Automatic usage with ``django.test.TestCase``.
+  If you want access to the Django database *inside a fixture*
+  this marker will not help even if the function requesting your
+  fixture has this marker applied.  To access the database in a
+  fixture, the fixture itself will have to request the ``db``,
+  ``transactional_db`` or ``reset_sequences_db`` fixture.  See below
+  for a description of them.
 
-     Test classes that subclass `django.test.TestCase`_ will have access to
-     the database always to make them compatible with existing Django tests.
-     Test classes that subclass Python's ``unittest.TestCase`` need to have the
-     marker applied in order to access the database.
+.. note:: Automatic usage with ``django.test.TestCase``.
+
+ Test classes that subclass `django.test.TestCase`_ will have access to
+ the database always to make them compatible with existing Django tests.
+ Test classes that subclass Python's ``unittest.TestCase`` need to have the
+ marker applied in order to access the database.
 
 .. _django.test.TransactionTestCase.reset_sequences: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#django.test.TransactionTestCase.reset_sequences
 .. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
@@ -89,7 +90,7 @@ on what marks are and for notes on using_ them.
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-..py:function:: pytest.mark.ignore_template_errors
+.. py:function:: pytest.mark.ignore_template_errors
 
   If you run py.test using the ``--fail-on-template-vars`` option,
   tests will fail should your templates contain any invalid variables.
@@ -186,6 +187,8 @@ The field name used for the username on the user model.
 
 ``db``
 ~~~~~~~
+
+.. fixture:: db
 
 This fixture will ensure the Django database is set up.  This only
 required for fixtures which want to use the database themselves.  A

@@ -24,7 +24,7 @@ setup(
     author_email='andreas@pelme.se',
     maintainer="Andreas Pelme",
     maintainer_email="andreas@pelme.se",
-    url='http://pytest-django.readthedocs.org/',
+    url='https://pytest-django.readthedocs.io/',
     license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
@@ -42,6 +42,6 @@ setup(
                  'Programming Language :: Python :: 3.2',
                  'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: 3.4',
-                ],
+                 ],
     # the following makes a plugin available to py.test
     entry_points={'pytest11': ['django = pytest_django.plugin']})

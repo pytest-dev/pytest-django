@@ -7,14 +7,16 @@ fixtures are tested in test_database.
 from __future__ import with_statement
 
 import pytest
+
+from django.db import connection
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
+from django.utils.encoding import force_text
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import force_text, HTTPError, urlopen
-from pytest_django_test.db_helpers import noop_transactions
+from pytest_django_test.compat import HTTPError, urlopen
 
 
 def test_client(client):
@@ -92,7 +94,7 @@ class TestLiveServer:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     def test_db_changes_visibility(self, live_server):
         response_data = urlopen(live_server + '/item_count/').read()
@@ -136,15 +138,6 @@ class TestLiveServer:
         response_data = urlopen(live_server + '/item_count/').read()
         assert force_text(response_data) == 'Item count: 1'
 
-    @pytest.mark.skipif(get_django_version() >= (1, 7),
-                        reason="Django < 1.7 required")
-    def test_serve_static(self, live_server, settings):
-        """
-        Test that the LiveServer serves static files by default.
-        """
-        response_data = urlopen(live_server + '/static/a_file.txt').read()
-        assert force_text(response_data) == 'bla\n'
-
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS = [
             'django.contrib.auth',
@@ -164,10 +157,7 @@ class TestLiveServer:
         """
         django_testdir.create_test_module("""
             import pytest
-            try:
-                from django.utils.encoding import force_text
-            except ImportError:
-                from django.utils.encoding import force_unicode as force_text
+            from django.utils.encoding import force_text
 
             try:
                 from urllib2 import urlopen, HTTPError
@@ -209,8 +199,6 @@ class TestLiveServer:
     ]
     ROOT_URLCONF = 'tpkg.app.urls'
     """)
-@pytest.mark.skipif(get_django_version() < (1, 5),
-                    reason="Django >= 1.5 required")
 def test_custom_user_model(django_testdir):
     django_testdir.create_app_file("""
         from django.contrib.auth.models import AbstractUser
@@ -245,7 +233,7 @@ def test_custom_user_model(django_testdir):
                     Template('Access denied').render(Context()))
         """, 'views.py')
     django_testdir.makepyfile("""
-        from pytest_django_test.compat import force_text
+        from django.utils.encoding import force_text
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
@@ -267,6 +255,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0001_initial'),
+        ('app', '0001_initial'),
     ]
 
     operations = [
@@ -296,7 +285,7 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-    """, 'migrations/0001_initial.py')  # noqa
+    """, 'migrations/0002_custom_user_model.py')  # noqa
 
     result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])

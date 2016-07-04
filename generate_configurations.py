@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import itertools
 from collections import namedtuple
+import math
 from textwrap import dedent
 
 # https://xkcd.com/1319/
@@ -12,32 +13,33 @@ from textwrap import dedent
 TestEnvBase = namedtuple('TestEnvBase', ['python_version', 'pytest_version',
                                          'django_version', 'settings'])
 
+
 class TestEnv(TestEnvBase):
     def is_py2(self):
-        return self.python_version.startswith('python2') or self.python_version == 'pypy'
+        return (self.python_version.startswith('python2') or
+                self.python_version == 'pypy')
 
     def is_py3(self):
-        return self.python_version.startswith('python3') or self.python_version == 'pypy3'
+        return (self.python_version.startswith('python3') or
+                self.python_version == 'pypy3')
 
     def is_pypy(self):
         return self.python_version.startswith('pypy')
 
 # Python to run tox.
 RUN_PYTHON = '3.5'
-PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.4']
-PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3',
+PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.5']
+PYTHON_VERSIONS = ['python2.7', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.7.3', '2.8.1']
-DJANGO_VERSIONS = ['1.4', '1.5', '1.6', '1.7', '1.8', '1.9', 'master']
+PYTEST_VERSIONS = ['2.9.2']
+DJANGO_VERSIONS = ['master', '1.7', '1.8', '1.9', '1.10']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']
 DJANGO_REQUIREMENTS = {
-    '1.4': 'Django>=1.4,<1.5',
-    '1.5': 'Django>=1.5,<1.6',
-    '1.6': 'Django>=1.6,<1.7',
     '1.7': 'Django>=1.7,<1.8',
     '1.8': 'Django>=1.8,<1.9',
     '1.9': 'Django>=1.9,<1.10',
+    '1.10': 'https://github.com/django/django/archive/stable/1.10.x.zip',
     'master': 'https://github.com/django/django/archive/master.tar.gz',
 }
 
@@ -50,40 +52,34 @@ TOX_TESTENV_TEMPLATE = dedent("""
     %(deps)s
     setenv =
          PYTHONPATH = {toxinidir}:{env:PYTHONPATH:}
-         UID = %(uid)s
     """)
 
 
 def is_valid_env(env):
-
     # Stable database adapters for PyPy+Postgres/MySQL are hard to come by..
-    if env.is_pypy() and env.settings in ('postgres', 'mysql_myisam', 'mysql_innodb'):
+    if env.is_pypy() and env.settings in ('postgres', 'mysql_myisam',
+                                          'mysql_innodb'):
         return False
 
-    if env.is_py3():
-        # Django <1.5 does not support Python 3
-        if env.django_version == '1.4':
-            return False
+    dj_version = tuple(int(x) if x != 'master' else math.inf
+                       for x in env.django_version.split('.'))
 
+    if env.is_py3():
         # MySQL on Python 3 is not supported by Django
         if env.settings in ('mysql_myisam', 'mysql_innodb'):
             return False
 
-    # Django 1.7 dropped Python 2.6 support
-    if env.python_version == 'python2.6' and env.django_version in ('1.7', '1.8', '1.9', 'master'):
-        return False
-
     # Django 1.9 dropped Python 3.2 and Python 3.3 support
-    if (env.python_version in ('python3.2', 'python3.3') and
-        env.django_version in ('1.7', '1.8', '1.9', 'master')):
+    if env.python_version == 'python3.3' and dj_version >= (1, 9):
         return False
 
     # Python 3.5 is only supported by Django 1.8+
     if env.python_version == 'python3.5':
-        return env.django_version in ('1.8', '1.9', 'master')
+        return dj_version >= (1, 8)
 
-    # pypy3 is compatible with Python 3.2, but Django 1.9 only supports Python 2.7, 3.4+.
-    if env.python_version == 'pypy3' and env.django_version in ('1.9', 'master'):
+    # pypy3 is compatible with Python 3.3, but Django 1.9 only supports Python
+    # 2.7, 3.4+.
+    if env.python_version == 'pypy3' and dj_version >= (1, 9):
         return False
 
     return True
@@ -91,12 +87,9 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.13.1'
+    yield 'pytest-xdist==1.14'
     yield DJANGO_REQUIREMENTS[env.django_version]
-    yield 'django-configurations==0.8'
-
-    if env.is_py2():
-        yield 'south==1.0.2'
+    yield 'django-configurations==1.0'
 
     if env.settings == 'postgres':
         yield 'psycopg2==2.6.1'
@@ -105,32 +98,15 @@ def requirements(env):
         yield 'mysql-python==1.2.5'
 
 
-def commands(uid, env):
-    # Django versions prior to 1.7 must have the production database available
-    # https://code.djangoproject.com/ticket/16969
-    db_name = 'pytest_django_%s' % uid
-
-    # The sh trickery always exits with 0
-    if env.settings in ('mysql_myisam', 'mysql_innodb'):
-        yield 'sh -c "mysql -u root -e \'drop database if exists %(name)s;' \
-            ' create database %(name)s\'" || exit 0' % {'name': db_name}
-
-    if env.settings == 'postgres':
-        yield 'sh -c "dropdb %(name)s;' \
-            ' createdb %(name)s || exit 0"' % {'name': db_name}
-
-    yield 'py.test --ds=pytest_django_test.settings_%s --strict -r fEsxXw {posargs:tests}' % env.settings
-
-
 def testenv_name(env):
     if len(PYTEST_VERSIONS) == 1:
         env = [getattr(env, x) for x in env._fields if x != 'pytest_version']
     return '-'.join(env)
 
 
-def tox_testenv_config(uid, env):
-    cmds = '\n'.join('    %s' % r for r in commands(uid, env))
-
+def tox_testenv_config(env):
+    cmd = ('    py.test --ds=pytest_django_test.settings_%s --strict -r '
+           'fEsxXw {posargs:tests}' % env.settings)
     deps = '\n'.join('    %s' % r for r in requirements(env))
 
     return TOX_TESTENV_TEMPLATE % {
@@ -138,9 +114,8 @@ def tox_testenv_config(uid, env):
         'python_version': env.python_version,
         'django_version': env.django_version,
         'settings': env.settings,
-        'commands': cmds,
+        'commands': cmd,
         'deps': deps,
-        'uid': uid,
     }
 
 
@@ -202,26 +177,20 @@ def make_tox_ini(envs, default_envs):
 
     # Add checkqa-testenvs for different PYTHON_VERSIONS.
     # flake8 is configured in setup.cfg.
-    idx = 0
     for python_version in PYTHON_VERSIONS:
-        idx = idx + 1
         contents.append(dedent("""
             [testenv:checkqa-%(python_version)s]
             commands =
                 flake8 --version
-                flake8 --show-source --statistics pytest_django tests
+                flake8 --show-source --statistics
             basepython = %(python_version)s
             deps =
-                flake8
-            setenv =
-                UID = %(uid)s""" % {
+                flake8""" % {
             'python_version': python_version,
-            'uid': idx,
         }))
 
     for env in envs:
-        idx = idx + 1
-        contents.append(tox_testenv_config(idx, env))
+        contents.append(tox_testenv_config(env))
 
     return '\n'.join(contents)
 
@@ -253,9 +222,9 @@ def make_travis_yml(envs):
           - sed -i.bak 's/whitelist_externals =/\\0\\n    travis_retry_pip/' tox.ini
           - diff tox.ini tox.ini.bak && return 1 || true
 
-          - pip install tox==2.1.1
+          - pip install tox==2.3.1
         script: tox -e $TESTENV
-        """).strip("\n")
+        """).strip("\n")  # noqa
     testenvs = '\n'.join('  - TESTENV=%s' % testenv_name(env) for env in envs)
     checkenvs = '\n'.join('  - TESTENV=checkqa-%s' %
                           python for python in PYTHON_MAIN_VERSIONS)
@@ -272,7 +241,7 @@ def make_travis_yml(envs):
 
 
 def main():
-    all_envs = sorted(generate_all_envs())
+    all_envs = list(generate_all_envs())
     default_envs = sorted(generate_default_envs(all_envs))
 
     with open('tox.ini', 'w+') as tox_ini_file:
@@ -281,7 +250,7 @@ def main():
     with open('.travis.yml', 'w+') as travis_yml_file:
         travis_yml_file.write(make_travis_yml(default_envs))
 
-    print ('tox.ini and .travis.yml has been generated!')
+    print('tox.ini and .travis.yml has been generated!')
 
 if __name__ == '__main__':
     main()
