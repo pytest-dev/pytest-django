@@ -13,8 +13,8 @@ on what marks are and for notes on using_ them.
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-``pytest.mark.django_db(transaction=False, reset_sequences=False)`` - request database access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``pytest.mark.django_db`` - request database access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False])
 
