@@ -35,7 +35,8 @@ def test_ds_ini(testdir, monkeypatch):
     """)
     result = testdir.runpytest_subprocess()
     assert result.parseoutcomes()['passed'] == 1
-    result.stdout.fnmatch_lines(['django settings: tpkg.settings_ini (from ini file)*'])
+    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_ini '
+                                 '(from ini file)*'])
     assert result.ret == 0
 
 
@@ -51,7 +52,7 @@ def test_ds_env(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
     """)
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(['django settings: tpkg.settings_env (from '
+    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_env (from '
                                  'environment variable)*'])
     assert result.parseoutcomes()['passed'] == 1
 
@@ -72,7 +73,8 @@ def test_ds_option(testdir, monkeypatch):
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
     """)
     result = testdir.runpytest_subprocess('--ds=tpkg.settings_opt')
-    result.stdout.fnmatch_lines(['django settings: tpkg.settings_opt (from command line option)'])
+    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_opt '
+                                 '(from command line option)'])
     assert result.parseoutcomes()['passed'] == 1
 
 

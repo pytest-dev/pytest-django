@@ -205,7 +205,7 @@ also directly concatenate a string to form a URL: ``live_server +
 ``settings``
 ~~~~~~~~~~~~
 
-This fixture will provide a handle on the django settings module, and
+This fixture will provide a handle on the Django settings module, and
 automatically revert any changes made to the settings (modifications, additions
 and deletions).
 

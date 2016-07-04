@@ -32,7 +32,8 @@ from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 
-from .lazy_django import django_settings_is_configured, skip_if_no_django
+from .lazy_django import (django_settings_is_configured,
+                          get_django_version, skip_if_no_django)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -140,7 +141,7 @@ def _setup_django():
 
     import django.conf
 
-    # Avoid trying to force-load Django when settings is not properly configured
+    # Avoid force-loading Django when settings are not properly configured.
     if not django.conf.settings.configured:
         return
 
@@ -203,7 +204,6 @@ def pytest_load_initial_conftests(early_config, parser, args):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
-
     if options.ds:
         ds_source = 'command line option'
         ds = options.ds
@@ -218,7 +218,8 @@ def pytest_load_initial_conftests(early_config, parser, args):
         ds_source = None
 
     if ds:
-        early_config._dsm_report_header = 'django settings: %s (from %s)' % (ds, ds_source)
+        early_config._dsm_report_header = 'Django settings: %s (from %s)' % (
+            ds, ds_source)
     else:
         early_config._dsm_report_header = None
 
@@ -237,7 +238,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
             import configurations.importer
             configurations.importer.install()
 
-        # Forcefully load django settings, throws ImportError or
+        # Forcefully load Django settings, throws ImportError or
         # ImproperlyConfigured if settings cannot be loaded.
         from django.conf import settings  # noqa
 
@@ -266,7 +267,8 @@ def _method_is_defined_at_leaf(cls, method_name):
         if hasattr(base_cls, method_name):
             super_method = getattr(base_cls, method_name)
 
-    assert super_method is not None, '%s could not be found in base class' % method_name
+    assert super_method is not None, (
+        '%s could not be found in base class' % method_name)
 
     return getattr(cls, method_name).__func__ is not super_method.__func__
 
@@ -333,7 +335,8 @@ def django_test_environment(request):
     if django_settings_is_configured():
         _setup_django()
         from django.conf import settings  # noqa
-        from django.test.utils import setup_test_environment, teardown_test_environment
+        from django.test.utils import (setup_test_environment,
+                                       teardown_test_environment)
         settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
@@ -348,10 +351,11 @@ def django_db_blocker():
     special database handling.
 
     The object is a context manager and provides the methods
-    .enable_database_access()/.disable_database_access() and .restore_database_access() to
-    temporarily enable database access.
+    .enable_database_access()/.disable_database_access() and
+    .restore_database_access() to temporarily enable database access.
 
-    This is an advanced feature that is meant to be used to implement database fixtures.
+    This is an advanced feature that is meant to be used to implement database
+    fixtures.
     """
     if not django_settings_is_configured():
         return None
@@ -480,22 +484,24 @@ def _fail_for_invalid_template_variable(request):
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
             template = self._get_template()
             if template:
-                msg = "Undefined template variable '%s' in '%s'" % (var, template.name)
+                msg = "Undefined template variable '%s' in '%s'" % (
+                    var, template.name)
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
                 pytest.fail(msg, pytrace=False)
             else:
                 return msg
-    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
-        if django_settings_is_configured():
-            import django
-            from django.conf import settings  # noqa
 
-            if django.VERSION >= (1, 8) and settings.TEMPLATES:
-                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
-            else:
-                settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
+    if (os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true' and
+            django_settings_is_configured()):
+        from django.conf import settings as dj_settings
+
+        if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+            dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = (
+                InvalidVarException())
+        else:
+            dj_settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
 
 
 @pytest.fixture(autouse=True)
@@ -505,11 +511,10 @@ def _template_string_if_invalid_marker(request):
     marker = request.keywords.get('ignore_template_errors', None)
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if marker and django_settings_is_configured():
-            import django
-            from django.conf import settings  # noqa
+            from django.conf import settings as dj_settings
 
-            if django.VERSION >= (1, 8) and settings.TEMPLATES:
-                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
+            if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+                dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 settings.TEMPLATE_STRING_IF_INVALID.fail = False
 
@@ -535,7 +540,7 @@ class _DatabaseBlocker(object):
             from django.db.backends import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
-        # reference to the real implementation
+        # reference to the real implementation.
         if self._real_ensure_connection is None:
             self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
 
