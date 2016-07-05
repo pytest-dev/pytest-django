@@ -74,13 +74,13 @@ def pytest_addoption(parser):
     parser.addini('django_find_project',
                   'Automatically find and add a Django project to the '
                   'Python path.',
-                  default=True)
+                  type='bool', default=True)
     group._addoption('--fail-on-template-vars',
                      action='store_true', dest='itv', default=False,
                      help='Fail for invalid variables in templates.')
     parser.addini(INVALID_TEMPLATE_VARS_ENV,
                   'Fail for invalid variables in templates.',
-                  default=False)
+                  type='bool', default=False)
 
 
 def _exists(path, ignore=EnvironmentError):
@@ -148,22 +148,21 @@ def _setup_django():
     _blocking_manager.disable_database_access()
 
 
-def _parse_django_find_project_ini(x):
+def _get_boolean_value(x, name, default=None):
+    if x is None:
+        return default
     if x in (True, False):
         return x
-
-    x = x.lower()
     possible_values = {'true': True,
                        'false': False,
                        '1': True,
                        '0': False}
-
     try:
-        return possible_values[x]
+        return possible_values[x.lower()]
     except KeyError:
-        raise ValueError('%s is not a valid value for django_find_project. '
-                         'It must be one of %s.'
-                         % (x, ', '.join(possible_values.keys())))
+        raise ValueError('{} is not a valid value for {}. '
+                         'It must be one of {}.'
+                         % (x, name, ', '.join(possible_values.keys())))
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
@@ -186,20 +185,18 @@ def pytest_load_initial_conftests(early_config, parser, args):
     if options.version or options.help:
         return
 
-    django_find_project = _parse_django_find_project_ini(
-        early_config.getini('django_find_project'))
+    django_find_project = _get_boolean_value(
+        early_config.getini('django_find_project'), 'django_find_project')
 
     if django_find_project:
         _django_project_scan_outcome = _add_django_project_to_path(args)
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
-    # Configure FAIL_INVALID_TEMPLATE_VARS
-    itv = (options.itv or
-           os.environ.get(INVALID_TEMPLATE_VARS_ENV) in ['true', 'True', '1'] or
-           early_config.getini(INVALID_TEMPLATE_VARS_ENV))
-
-    if itv:
+    if (options.itv or
+            _get_boolean_value(os.environ.get(INVALID_TEMPLATE_VARS_ENV),
+                               INVALID_TEMPLATE_VARS_ENV) or
+            early_config.getini(INVALID_TEMPLATE_VARS_ENV)):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
