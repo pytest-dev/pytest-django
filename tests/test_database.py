@@ -1,11 +1,24 @@
 from __future__ import with_statement
 
 import pytest
-from django import get_version
+from django import VERSION
 from django.db import connection
 from django.test.testcases import connections_support_transactions
 
 from pytest_django_test.app.models import Item
+
+
+def get_comparable_django_version():
+    """Return the Django version as tuple of integers (major, minor, patch).
+
+    Ignores any other version parts like 'final' or 'beta'.
+
+    This is more reliable to compare against version requirements in the
+    same format, as opposed to comparing strings like: '1.10' > '1.5' 
+    which would return False although that version is considered higher.
+    """
+    major, minor, patch = VERSION[0], VERSION[1], VERSION[2]
+    return (major, minor, patch)
 
 
 def db_supports_reset_sequences():
@@ -83,7 +96,7 @@ class TestDatabaseFixtures:
 
         assert not connection.in_atomic_block
 
-    @pytest.mark.skipif(get_version() < '1.5',
+    @pytest.mark.skipif(get_comparable_django_version() < (1, 5, 0),
                         reason='reset_sequences needs Django >= 1.5')
     def test_reset_sequences_db_fixture(
             self, db, django_testdir, non_zero_sequences_counter):
