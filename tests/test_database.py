@@ -60,12 +60,14 @@ def non_zero_sequences_counter(db):
 
 
 class TestDatabaseFixtures:
-    """Tests for the db, transactional_db and reset_sequences_db fixtures"""
+    """Tests for the different database fixtures."""
 
-    @pytest.fixture(params=['db', 'transactional_db', 'reset_sequences_db'])
+    @pytest.fixture(params=['db',
+                            'transactional_db',
+                            'django_db_reset_sequences'])
     def all_dbs(self, request):
-        if request.param == 'reset_sequences_db':
-            return request.getfuncargvalue('reset_sequences_db')
+        if request.param == 'django_db_reset_sequences':
+            return request.getfuncargvalue('django_db_reset_sequences')
         elif request.param == 'transactional_db':
             return request.getfuncargvalue('transactional_db')
         elif request.param == 'db':
@@ -90,7 +92,8 @@ class TestDatabaseFixtures:
 
         assert not connection.in_atomic_block
 
-    def test_transactions_enabled_via_reset_seq(self, reset_sequences_db):
+    def test_transactions_enabled_via_reset_seq(
+            self, django_db_reset_sequences):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
@@ -98,7 +101,7 @@ class TestDatabaseFixtures:
 
     @pytest.mark.skipif(get_comparable_django_version() < (1, 5, 0),
                         reason='reset_sequences needs Django >= 1.5')
-    def test_reset_sequences_db_fixture(
+    def test_django_db_reset_sequences_fixture(
             self, db, django_testdir, non_zero_sequences_counter):
 
         if not db_supports_reset_sequences():
@@ -111,19 +114,20 @@ class TestDatabaseFixtures:
             import pytest
             from .app.models import Item
 
-            def test_reset_sequences_db_not_requested(db):
+            def test_django_db_reset_sequences_not_requested(db):
                 item = Item.objects.create(name='new_item')
                 assert item.id > 1
 
-            def test_reset_sequences_db_requested(reset_sequences_db):
+            def test_django_db_reset_sequences_requested(
+                    django_db_reset_sequences):
                 item = Item.objects.create(name='new_item')
                 assert item.id == 1
         ''')
 
         result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
         result.stdout.fnmatch_lines([
-            "*test_reset_sequences_db_not_requested PASSED*",
-            "*test_reset_sequences_db_requested PASSED*",
+            "*test_django_db_reset_sequences_not_requested PASSED*",
+            "*test_django_db_reset_sequences_requested PASSED*",
         ])
 
     @pytest.fixture
@@ -257,7 +261,7 @@ def test_unittest_interaction(django_testdir):
         "*test_db_access_2 FAILED*",
         "*test_db_access_3 FAILED*",
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-        "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
+        "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",  # noqa
     ])
 
 
@@ -272,7 +276,7 @@ class Test_database_blocking:
 
         result = django_testdir.runpytest_subprocess('-v')
         result.stderr.fnmatch_lines([
-            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',  # noqa
         ])
 
     def test_db_access_in_test_module(self, django_testdir):
@@ -283,5 +287,5 @@ class Test_database_blocking:
 
         result = django_testdir.runpytest_subprocess('-v')
         result.stdout.fnmatch_lines([
-            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',  # noqa
         ])

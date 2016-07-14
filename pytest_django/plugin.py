@@ -28,7 +28,7 @@ from .fixtures import db  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
-from .fixtures import reset_sequences_db  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
@@ -365,13 +365,13 @@ def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
     This will dynamically request the ``db``, ``transactional_db`` or
-    ``reset_sequences_db`` fixtures as required by the django_db marker.
+    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
     """
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
         if marker.reset_sequences:
-            request.getfuncargvalue('reset_sequences_db')
+            request.getfuncargvalue('django_db_reset_sequences')
         elif marker.transaction:
             request.getfuncargvalue('transactional_db')
         else:

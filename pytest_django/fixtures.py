@@ -13,7 +13,7 @@ from .django_compat import is_django_unittest
 from .lazy_django import get_django_version, skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db',
-           'reset_sequences_db', 'admin_user', 'django_user_model',
+           'django_db_reset_sequences', 'admin_user', 'django_user_model',
            'django_username_field', 'client', 'admin_client', 'rf',
            'settings', 'live_server', '_live_server_helper']
 
@@ -155,10 +155,10 @@ def db(request, django_db_setup, django_db_blocker):
 
     If multiple database fixtures are requested, they take precedence
     over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``reset_sequences_db``.
+    ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if 'reset_sequences_db' in request.funcargnames:
-        request.getfuncargvalue('reset_sequences_db')
+    if 'django_db_reset_sequences' in request.funcargnames:
+        request.getfuncargvalue('django_db_reset_sequences')
     if ('transactional_db' in request.funcargnames or
             'live_server' in request.funcargnames):
         request.getfuncargvalue('transactional_db')
@@ -178,16 +178,16 @@ def transactional_db(request, django_db_setup, django_db_blocker):
 
     If multiple database fixtures are requested, they take precedence
     over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``reset_sequences_db``.
+    ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if 'reset_sequences_db' in request.funcargnames:
-        request.getfuncargvalue('reset_sequences_db')
+    if 'django_db_reset_sequences' in request.funcargnames:
+        request.getfuncargvalue('django_db_reset_sequences')
     _django_db_fixture_helper(request, django_db_blocker,
                               transactional=True)
 
 
 @pytest.fixture(scope='function')
-def reset_sequences_db(request, django_db_setup, django_db_blocker):
+def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
     """Require a transactional test database with sequence reset support.
 
     This behaves like the ``transactional_db`` fixture, with the addition
@@ -197,7 +197,7 @@ def reset_sequences_db(request, django_db_setup, django_db_blocker):
 
     If multiple database fixtures are requested, they take precedence
     over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``reset_sequences_db``.
+    ``transactional_db``, ``django_db_reset_sequences``.
     """
     _django_db_fixture_helper(request, django_db_blocker,
                               transactional=True, reset_sequences=True)
