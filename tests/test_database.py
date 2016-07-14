@@ -14,7 +14,7 @@ def get_comparable_django_version():
     Ignores any other version parts like 'final' or 'beta'.
 
     This is more reliable to compare against version requirements in the
-    same format, as opposed to comparing strings like: '1.10' > '1.5' 
+    same format, as opposed to comparing strings like: '1.10' > '1.5'
     which would return False although that version is considered higher.
     """
     major, minor, patch = VERSION[0], VERSION[1], VERSION[2]
