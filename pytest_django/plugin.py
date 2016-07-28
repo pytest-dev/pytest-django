@@ -28,6 +28,7 @@ from .fixtures import db  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
@@ -363,13 +364,15 @@ def django_db_blocker():
 def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
-    This will dynamically request the ``db`` or ``transactional_db``
-    fixtures as required by the django_db marker.
+    This will dynamically request the ``db``, ``transactional_db`` or
+    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
     """
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
-        if marker.transaction:
+        if marker.reset_sequences:
+            request.getfuncargvalue('django_db_reset_sequences')
+        elif marker.transaction:
             request.getfuncargvalue('transactional_db')
         else:
             request.getfuncargvalue('db')
@@ -576,11 +579,16 @@ _blocking_manager = _DatabaseBlocker()
 def validate_django_db(marker):
     """Validate the django_db marker.
 
-    It checks the signature and creates the `transaction` attribute on
-    the marker which will have the correct value.
+    It checks the signature and creates the ``transaction`` and
+    ``reset_sequences`` attributes on the marker which will have the
+    correct values.
+
+    A sequence reset is only allowed when combined with a transaction.
     """
-    def apifun(transaction=False):
+    def apifun(transaction=False, reset_sequences=False):
         marker.transaction = transaction
+        marker.reset_sequences = transaction and reset_sequences
+
     apifun(*marker.args, **marker.kwargs)
 
 
