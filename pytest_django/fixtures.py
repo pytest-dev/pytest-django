@@ -58,7 +58,8 @@ def django_db_use_migrations(request):
 
 @pytest.fixture(scope='session')
 def django_db_keepdb(request):
-    return request.config.getvalue('reuse_db') and not request.config.getvalue('create_db')
+    return (request.config.getvalue('reuse_db') and not
+            request.config.getvalue('create_db'))
 
 
 @pytest.fixture(scope='session')
@@ -97,7 +98,8 @@ def django_db_setup(
 
     def teardown_database():
         with django_db_blocker:
-            (DiscoverRunner(verbosity=pytest.config.option.verbose, interactive=False)
+            (DiscoverRunner(verbosity=pytest.config.option.verbose,
+                            interactive=False)
              .teardown_databases(db_cfg))
 
     if not django_db_keepdb:
