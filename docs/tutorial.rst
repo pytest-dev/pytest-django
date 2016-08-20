@@ -13,7 +13,7 @@ Talks, articles and blog posts
 
  * Talk from DjangoCon Europe 2014: `pytest: helps you write better Django apps, by Andreas Pelme <https://www.youtube.com/watch?v=aaArYVh6XSM>`_
 
- * Talk from EuroPython 2013: `Testing Django application with py.test, by Andreas Pelme <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
+ * Talk from EuroPython 2013: `Testing Django application with pytest, by Andreas Pelme <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
 
  * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <http://pydanny.com/pytest-no-boilerplate-testing.html>`_
 
@@ -56,10 +56,10 @@ full documentation on :ref:`configuring_django_settings`.
 Step 3: Run your test suite
 ---------------------------
 
-Tests are invoked directly with the ``py.test`` command, instead of ``manage.py
+Tests are invoked directly with the ``pytest`` command, instead of ``manage.py
 test``, that you might be used to::
 
-    py.test
+    pytest
 
 Do you have problems with pytest not finding your code? See the FAQ
 :ref:`faq-import-error`.

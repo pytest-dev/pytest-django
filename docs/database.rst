@@ -12,7 +12,7 @@ what code uses the database and catches any mistakes.
 Enabling database access in tests
 ---------------------------------
 
-You can use `py.test marks <http://pytest.org/latest/mark.html>`_ to
+You can use `pytest marks <http://pytest.org/latest/mark.html>`_ to
 tell ``pytest-django`` your test needs database access::
 
    import pytest
@@ -24,7 +24,7 @@ tell ``pytest-django`` your test needs database access::
 
 It is also possible to mark all tests in a class or module at once.
 This demonstrates all the ways of marking, even though they overlap.
-Just one of these marks would have been sufficient.  See the `py.test
+Just one of these marks would have been sufficient.  See the `pytest
 documentation
 <http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules>`_
 for detail::
@@ -115,10 +115,10 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
     [pytest]
     addopts = --reuse-db
 
-* Just run tests with ``py.test``, on the first run the test database will be
+* Just run tests with ``pytest``, on the first run the test database will be
   created. The next test run it will be reused.
 
-* When you alter your database schema, run ``py.test --create-db``, to force
+* When you alter your database schema, run ``pytest --create-db``, to force
   re-creation of the test database.
 
 ``--nomigrations`` - Disable Django 1.7+ migrations

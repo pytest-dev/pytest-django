@@ -31,7 +31,7 @@ locale, put the following code in your project's `conftest.py
 
 My tests are not being found. Why not?
 -------------------------------------------------------------------------------------
- By default, py.test looks for tests in files named ``test_*.py`` (note that
+ By default, pytest looks for tests in files named ``test_*.py`` (note that
  this is not the same as ``test*.py``).  If you have your tests in files with
  other names, they will not be collected. It is common to put tests under
  ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini``
@@ -56,7 +56,7 @@ transactions are tested or not.
 How can I use ``manage.py test`` with pytest-django?
 ----------------------------------------------------
 
-pytest-django is designed to work with the ``py.test`` command, but if you
+pytest-django is designed to work with the ``pytest`` command, but if you
 really need integration with ``manage.py test``, you can create a simple
 test runner like this::
 
@@ -94,7 +94,7 @@ Add the path to this class in your Django settings::
 
 Usage::
 
-    ./manage.py test <django args> -- <py.test args>
+    ./manage.py test <django args> -- <pytest args>
 
 **Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
 compatible with this approach, you need to use the standard Django methods of

@@ -117,14 +117,14 @@ You can manually create the virtualenv using::
 
     $ make testenv
 
-This will install a virtualenv with py.test and the latest stable version of
+This will install a virtualenv with pytest and the latest stable version of
 Django. The virtualenv can then be activated with::
 
     $ source bin/activate
 
-Then, simply invoke py.test to run the test suite::
+Then, simply invoke pytest to run the test suite::
 
-    $ py.test --ds=tests.settings_sqlite
+    $ pytest --ds=tests.settings_sqlite
 
 
 tox can be used to run the test suite under different configurations by
@@ -164,7 +164,7 @@ but please don't include them in your pull requests.
 
 After this short initial setup you're ready to run tests::
 
-    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` py.test --ds=tests.postgres_settings
+    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=tests.postgres_settings
 
 You should repeat the above step for sqlite and mysql before the next step.
 This step will create a lot of ``.coverage`` files with additional suffixes for

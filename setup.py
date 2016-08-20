@@ -19,7 +19,7 @@ def read(fname):
 setup(
     name='pytest-django',
     use_scm_version=True,
-    description='A Django plugin for py.test.',
+    description='A Django plugin for pytest.',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
     maintainer="Andreas Pelme",
@@ -44,5 +44,5 @@ setup(
                  'Programming Language :: Python :: 3.4',
                  'Programming Language :: Python :: 3.5',
                  ],
-    # the following makes a plugin available to py.test
+    # the following makes a plugin available to pytest
     entry_points={'pytest11': ['django = pytest_django.plugin']})
