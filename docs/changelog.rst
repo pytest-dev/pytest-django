@@ -26,6 +26,9 @@ Features
 
 Compatibility
 ^^^^^^^^^^^^^
+* Official for the pytest 3.0.0 (2.9.2 release should work too, though). The
+  documentation is updated to mention ``pytest`` instead of ``py.test``.
+
 * Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
   versions are now 1.7 and forward.
 
