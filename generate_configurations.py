@@ -31,7 +31,7 @@ RUN_PYTHON = '3.5'
 PYTHON_MAIN_VERSIONS = ['python2.7', 'python3.5']
 PYTHON_VERSIONS = ['python2.7', 'python3.3',
                    'python3.4', 'python3.5', 'pypy', 'pypy3']
-PYTEST_VERSIONS = ['2.9.2']
+PYTEST_VERSIONS = ['2.9.2', '3.0.0']
 DJANGO_VERSIONS = ['master', '1.7', '1.8', '1.9', '1.10']
 SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb',
             'postgres']

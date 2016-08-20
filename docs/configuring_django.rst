@@ -15,11 +15,11 @@ Django settings the same way Django does by default.
 Example::
 
     $ export DJANGO_SETTINGS_MODULE=test_settings
-    $ py.test
+    $ pytest
 
 or::
 
-    $ DJANGO_SETTINGS_MODULE=test_settings py.test
+    $ DJANGO_SETTINGS_MODULE=test_settings pytest
 
 
 Command line option ``--ds=SETTINGS``
@@ -27,7 +27,7 @@ Command line option ``--ds=SETTINGS``
 
 Example::
 
-    $ py.test --ds=test_settings
+    $ pytest --ds=test_settings
 
 
 pytest.ini settings
@@ -59,11 +59,11 @@ flag, or pytest.ini DJANGO_CONFIGURATION.
 Environment Variable::
 
     $ export DJANGO_CONFIGURATION=MySettings
-    $ py.test
+    $ pytest
 
 Command Line Option::
 
-    $ py.test --dc=MySettings
+    $ pytest --dc=MySettings
 
 
 INI File Contents::

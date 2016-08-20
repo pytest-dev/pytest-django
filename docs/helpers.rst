@@ -6,7 +6,7 @@ Django helpers
 Markers
 -------
 
-``pytest-django`` registers and uses markers.  See the py.test documentation_
+``pytest-django`` registers and uses markers.  See the pytest documentation_
 on what marks are and for notes on using_ them.
 
 .. _documentation: http://pytest.org/latest/mark.html
@@ -82,7 +82,7 @@ when trying to access the database.
 
 .. py:function:: pytest.mark.ignore_template_errors
 
-  If you run py.test using the ``--fail-on-template-vars`` option,
+  If you run pytest using the ``--fail-on-template-vars`` option,
   tests will fail should your templates contain any invalid variables.
   This marker will disable this feature by setting ``settings.TEMPLATE_STRING_IF_INVALID=None``
   or the ``string_if_invalid`` template option in Django>=1.7
@@ -98,7 +98,7 @@ Fixtures
 --------
 
 pytest-django provides some pytest fixtures to provide dependencies for tests.
-More information on fixtures is available in the `py.test documentation
+More information on fixtures is available in the `pytest documentation
 <http://pytest.org/latest/fixture.html>`_.
 
 

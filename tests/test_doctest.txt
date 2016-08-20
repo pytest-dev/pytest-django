@@ -1,4 +1,4 @@
-This doctest should run without problems with py.test.
+This doctest should run without problems with pytest.
 
 >>> print('works')
 works

@@ -1,4 +1,4 @@
-"""A py.test plugin which helps testing Django applications
+"""A pytest plugin which helps testing Django applications
 
 This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
