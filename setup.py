@@ -29,7 +29,7 @@ setup(
     packages=['pytest_django'],
     long_description=read('README.rst'),
     setup_requires=['setuptools_scm==1.11.1'],
-    install_requires=['pytest>=2.5'],
+    install_requires=['pytest>=2.9'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
