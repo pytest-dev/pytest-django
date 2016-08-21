@@ -9,3 +9,9 @@ except ImportError:
         (_DiscoverRunner(verbosity=verbosity,
                          interactive=False)
          .teardown_databases(db_cfg))
+
+try:
+    from django.db.backends.base.base import BaseDatabaseWrapper  # noqa
+except ImportError:
+    # Django 1.7.
+    from django.db.backends import BaseDatabaseWrapper  # noqa

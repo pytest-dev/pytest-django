@@ -530,11 +530,7 @@ class _DatabaseBlocker(object):
 
     @property
     def _dj_db_wrapper(self):
-        try:
-            from django.db.backends.base.base import BaseDatabaseWrapper
-        except ImportError:
-            # Django 1.7.
-            from django.db.backends import BaseDatabaseWrapper
+        from .compat import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
         # reference to the real implementation.
