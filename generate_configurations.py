@@ -87,12 +87,12 @@ def is_valid_env(env):
 
 def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
-    yield 'pytest-xdist==1.14'
+    yield 'pytest-xdist==1.15'
     yield DJANGO_REQUIREMENTS[env.django_version]
     yield 'django-configurations==1.0'
 
     if env.settings == 'postgres':
-        yield 'psycopg2==2.6.1'
+        yield 'psycopg2==2.6.2'
 
     if env.settings in ('mysql_myisam', 'mysql_innodb'):
         yield 'mysql-python==1.2.5'
