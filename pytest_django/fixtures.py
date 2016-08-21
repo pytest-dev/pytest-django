@@ -72,7 +72,7 @@ def django_db_setup(
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
-    from django.test.runner import setup_databases, DiscoverRunner
+    from .compat import setup_databases, teardown_databases
 
     setup_databases_args = {}
 
@@ -98,9 +98,10 @@ def django_db_setup(
 
     def teardown_database():
         with django_db_blocker:
-            (DiscoverRunner(verbosity=pytest.config.option.verbose,
-                            interactive=False)
-             .teardown_databases(db_cfg))
+            teardown_databases(
+                db_cfg,
+                verbosity=pytest.config.option.verbose,
+            )
 
     if not django_db_keepdb:
         request.addfinalizer(teardown_database)
