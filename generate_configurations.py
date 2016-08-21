@@ -89,7 +89,7 @@ def requirements(env):
     yield 'pytest==%s' % (env.pytest_version)
     yield 'pytest-xdist==1.15'
     yield DJANGO_REQUIREMENTS[env.django_version]
-    yield 'django-configurations==2.0'
+    yield 'django-configurations==1.0'
 
     if env.settings == 'postgres':
         yield 'psycopg2==2.6.2'
