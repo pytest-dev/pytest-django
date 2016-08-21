@@ -86,10 +86,10 @@ def django_db_setup(
             # Django 1.7 compatibility
             from .db_reuse import monkey_patch_creation_for_db_reuse
 
-            with django_db_blocker:
+            with django_db_blocker.unblock():
                 monkey_patch_creation_for_db_reuse()
 
-    with django_db_blocker:
+    with django_db_blocker.unblock():
         db_cfg = setup_databases(
             verbosity=pytest.config.option.verbose,
             interactive=False,
@@ -97,7 +97,7 @@ def django_db_setup(
         )
 
     def teardown_database():
-        with django_db_blocker:
+        with django_db_blocker.unblock():
             teardown_databases(
                 db_cfg,
                 verbosity=pytest.config.option.verbose,
@@ -115,8 +115,8 @@ def _django_db_fixture_helper(transactional, request, django_db_blocker):
         # Do nothing, we get called with transactional=True, too.
         return
 
-    django_db_blocker.enable_database_access()
-    request.addfinalizer(django_db_blocker.restore_previous_access)
+    django_db_blocker.unblock()
+    request.addfinalizer(django_db_blocker.restore)
 
     if transactional:
         from django.test import TransactionTestCase as django_case

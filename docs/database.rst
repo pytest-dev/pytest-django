@@ -252,22 +252,22 @@ access for the specified block::
 
     @pytest.fixture
     def myfixture(django_db_blocker):
-        with django_db_blocker:
+        with django_db_blocker.unblock():
             ...  # modify something in the database
 
 You can also manage the access manually via these methods:
 
-.. py:method:: django_db_blocker.enable_database_access()
+.. py:method:: django_db_blocker.unblock()
 
   Enable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore_previous_access`.
+  :func:`~django_db_blocker.restore`.
 
-.. py:method:: django_db_blocker.disable_database_access()
+.. py:method:: django_db_blocker.block()
 
   Disable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore_previous_access`.
+  :func:`~django_db_blocker.restore`.
 
-.. py:function:: django_db_blocker.restore_previous_access()
+.. py:function:: django_db_blocker.restore()
 
   Restore the previous state of the database blocking.
 
@@ -359,7 +359,7 @@ Put this in ``conftest.py``::
 
     @pytest.fixture(scope='session')
     def django_db_setup(django_db_setup, django_db_blocker):
-        with django_db_blocker:
+        with django_db_blocker.unblock():
             call_command('loaddata', 'your_data_fixture.json')
 
 Use the same database for all xdist processes
@@ -396,7 +396,7 @@ Put this in ``conftest.py``::
 
     @pytest.fixture(scope='session')
     def django_db_setup(django_db_setup, django_db_blocker):
-        with django_db_blocker:
+        with django_db_blocker.unblock():
             cur = connection.cursor()
             cur.execute('ALTER SEQUENCE app_model_id_seq RESTART WITH %s;',
                         [random.randint(10000, 20000)])
@@ -418,7 +418,7 @@ Put this in ``conftest.py``::
 
     @pytest.fixture(scope='session')
     def django_db_setup(django_db_blocker):
-        with django_db_blocker:
+        with django_db_blocker.unblock():
             with connection.cursor() as c:
                 c.executescript('''
                 DROP TABLE IF EXISTS theapp_item;

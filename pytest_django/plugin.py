@@ -146,7 +146,7 @@ def _setup_django():
         return
 
     django.setup()
-    _blocking_manager.disable_database_access()
+    _blocking_manager.block()
 
 
 def _get_boolean_value(x, name, default=None):
@@ -348,8 +348,7 @@ def django_db_blocker():
     special database handling.
 
     The object is a context manager and provides the methods
-    .enable_database_access()/.disable_database_access() and
-    .restore_database_access() to temporarily enable database access.
+    .unblock()/.block() and .restore() to temporarily enable database access.
 
     This is an advanced feature that is meant to be used to implement database
     fixtures.
@@ -383,7 +382,7 @@ def _django_setup_unittest(request, django_db_blocker):
         request.getfuncargvalue('django_test_environment')
         request.getfuncargvalue('django_db_setup')
 
-        django_db_blocker.enable_database_access()
+        django_db_blocker.unblock()
 
         cls = request.node.cls
 
@@ -394,7 +393,7 @@ def _django_setup_unittest(request, django_db_blocker):
         def teardown():
             _restore_class_methods(cls)
             cls.tearDownClass()
-            django_db_blocker.restore_previous_access()
+            django_db_blocker.restore()
 
         request.addfinalizer(teardown)
 
@@ -518,6 +517,17 @@ def _template_string_if_invalid_marker(request):
 # ############### Helper Functions ################
 
 
+class _DatabaseBlockerContextManager(object):
+    def __init__(self, db_blocker):
+        self._db_blocker = db_blocker
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._db_blocker.restore()
+
+
 class _DatabaseBlocker(object):
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
@@ -530,11 +540,7 @@ class _DatabaseBlocker(object):
 
     @property
     def _dj_db_wrapper(self):
-        try:
-            from django.db.backends.base.base import BaseDatabaseWrapper
-        except ImportError:
-            # Django 1.7.
-            from django.db.backends import BaseDatabaseWrapper
+        from .compat import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
         # reference to the real implementation.
@@ -552,24 +558,20 @@ class _DatabaseBlocker(object):
         pytest.fail('Database access not allowed, '
                     'use the "django_db" mark to enable it.')
 
-    def enable_database_access(self):
+    def unblock(self):
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
+        return _DatabaseBlockerContextManager(self)
 
-    def disable_database_access(self):
+    def block(self):
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
+        return _DatabaseBlockerContextManager(self)
 
-    def restore_previous_access(self):
+    def restore(self):
         self._dj_db_wrapper.ensure_connection = self._history.pop()
-
-    def __enter__(self):
-        self.enable_database_access()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.restore_previous_access()
 
 
 _blocking_manager = _DatabaseBlocker()
