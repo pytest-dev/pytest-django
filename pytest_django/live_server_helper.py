@@ -13,6 +13,7 @@ class LiveServer(object):
         import django
         from django.db import connections
         from django.test.testcases import LiveServerThread
+        from django.test.utils import modify_settings
 
         connections_override = {}
         for conn in connections.all():
@@ -41,6 +42,11 @@ class LiveServer(object):
             host = addr
             self.thread = LiveServerThread(host, **liveserver_kwargs)
 
+        self._live_server_modified_settings = modify_settings(
+            ALLOWED_HOSTS={'append': host},
+        )
+        self._live_server_modified_settings.enable()
+
         self.thread.daemon = True
         self.thread.start()
         self.thread.is_ready.wait()
@@ -54,6 +60,7 @@ class LiveServer(object):
         terminate = getattr(self.thread, 'terminate', lambda: None)
         terminate()
         self.thread.join()
+        self._live_server_modified_settings.disable()
 
     @property
     def url(self):
