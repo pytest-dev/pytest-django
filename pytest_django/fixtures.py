@@ -285,11 +285,23 @@ def live_server(request):
           ``django.contrib.staticfiles`` is available in INSTALLED_APPS.
     """
     skip_if_no_django()
-    addr = request.config.getvalue('liveserver')
+
+    import django
+
+    addr = (request.config.getvalue('liveserver') or
+            os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS'))
+
+    if addr and django.VERSION >= (1, 11) and ':' in addr:
+        request.config.warn('D001', 'Specifying a live server port is not supported '
+                            'in Django 1.11. This will be an error in a future '
+                            'pytest-django release.')
+
     if not addr:
-        addr = os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS')
-    if not addr:
-        addr = 'localhost:8081,8100-8200'
+        if django.VERSION < (1, 11):
+            addr = 'localhost:8081,8100-8200'
+        else:
+            addr = 'localhost'
+
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
     return server
