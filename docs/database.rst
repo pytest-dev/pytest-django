@@ -400,3 +400,29 @@ Put this in ``conftest.py``::
             cur = connection.cursor()
             cur.execute('ALTER SEQUENCE app_model_id_seq RESTART WITH %s;',
                         [random.randint(10000, 20000)])
+
+Create the test database from a custom SQL script
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+You can replace the :fixture:`django_db_setup` fixture and run any code in its
+place. This includes creating your database by hand by running a SQL script
+directly. This example shows how sqlite3's executescript method. In more a more
+general use cases you probably want to load the SQL statements from a file or
+invoke the ``psql`` or the ``mysql`` command line tool.
+
+Put this in ``conftest.py``::
+
+    import pytest
+    from django.db import connection
+
+
+    @pytest.fixture(scope='session')
+    def django_db_setup(django_db_blocker):
+        with django_db_blocker:
+            with connection.cursor() as c:
+                c.executescript('''
+                DROP TABLE IF EXISTS theapp_item;
+                CREATE TABLE theapp_item (id, name);
+                INSERT INTO theapp_item (name) VALUES ('created from a sql script');
+                ''')
+
