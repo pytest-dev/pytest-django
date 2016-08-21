@@ -1,8 +1,9 @@
 Changelog
 =========
 
-NEXT
-----
+3.0.0
+-----
+
 Bug fixes
 ^^^^^^^^^
 
@@ -30,7 +31,8 @@ Compatibility
   documentation is updated to mention ``pytest`` instead of ``py.test``.
 
 * Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
-  versions are now 1.7 and forward.
+  versions are now 1.7 and forward. Django master is supported as of
+  2016-08-21.
 
 * pytest-django no longer supports Python 2.6.
 
