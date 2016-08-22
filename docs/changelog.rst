@@ -13,8 +13,8 @@ Bug fixes
 
 Features
 ^^^^^^^^
-* Added a new option `--migrations` to negate a default usage of
-  `--nomigrations`.
+* Added a new option ``--migrations`` to negate a default usage of
+  ``--nomigrations``.
 
 * The previously internal pytest-django fixture that handles database creation
   and setup has been refactored, refined and made a public API.
@@ -36,15 +36,15 @@ Compatibility
 
 * pytest-django no longer supports Python 2.6.
 
-* Specifying the `DJANGO_TEST_LIVE_SERVER_ADDRESS` environment variable is no
-  longer supported. Use `DJANGO_LIVE_TEST_SERVER_ADDRESS` instead.
+* Specifying the ``DJANGO_TEST_LIVE_SERVER_ADDRESS`` environment variable is no
+  longer supported. Use ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` instead.
 
 * Ensuring accidental database access is now stricter than before. Previously
   database access was prevented on the cursor level. To be safer and prevent
   more cases, it is now prevented at the connection level. If you previously
   had tests which interacted with the databases without a database cursor, you
   will need to mark them with the :func:`pytest.mark.django_db` marker or
-  request the `db` fixture.
+  request the ``db`` fixture.
 
 * The previously undocumented internal fixtures ``_django_db_setup``,
   ``_django_cursor_wrapper`` have been removed in favour of the new public
@@ -71,7 +71,7 @@ and Python 3.5
 
 Features
 ^^^^^^^^
-* `--fail-on-template-vars` - fail tests for invalid variables in templates.
+* ``--fail-on-template-vars`` - fail tests for invalid variables in templates.
   Thanks to Johannes Hoppe for idea and implementation. Thanks Daniel Hahler
   for review and feedback.
 
@@ -82,18 +82,18 @@ Bug fixes
   discussions. Fixes `issue #183
   <https://github.com/pytest-dev/pytest-django/issues/183>`_.
 
-* Call `setUpClass()` in Django `TestCase` properly when test class is
+* Call ``setUpClass()`` in Django ``TestCase`` properly when test class is
   inherited multiple places. Thanks to Benedikt Forchhammer for report and
   initial test case. Fixes `issue #265 <https://github.com/pytest-dev/pytest-django/issues/265>`_.
 
 Compatibility
 ^^^^^^^^^^^^^
 
-* Settings defined in `pytest.ini`/`tox.ini`/`setup.cfg` used to override
-  `DJANGO_SETTINGS_MODULE` defined in the environment. Previously the order was
+* Settings defined in ``pytest.ini``/``tox.ini``/``setup.cfg`` used to override
+  ``DJANGO_SETTINGS_MODULE`` defined in the environment. Previously the order was
   undocumented. Now, instead the settings from the environment will be used
   instead. If you previously relied on overriding the environment variable,
-  you can instead specify `addopts = --ds=yourtestsettings` in the ini-file
+  you can instead specify ``addopts = --ds=yourtestsettings`` in the ini-file
   which will use the test settings. See `PR #199
   <https://github.com/pytest-dev/pytest-django/pull/199>`_.
 
