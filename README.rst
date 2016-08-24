@@ -10,6 +10,7 @@ pytest-django allows you to test your Django project/applications with the
 
 * `Quick start / tutorial
   <https://pytest-django.readthedocs.io/en/latest/tutorial.html>`_
+* `Changelog <https://pytest-django.readthedocs.io/en/latest/changelog.html>`_
 * Full documentation: https://pytest-django.readthedocs.io/en/latest/
 * `Contribution docs
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
