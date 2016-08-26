@@ -49,6 +49,22 @@ def test_rf(rf):
     assert isinstance(rf, RequestFactory)
 
 
+@pytest.mark.django_db
+def test_assert_num_queries(assert_num_queries, django_user_model):
+    with assert_num_queries(3):
+        Item.objects.create(name='foo')
+        Item.objects.create(name='bar')
+        Item.objects.create(name='baz')
+
+
+@pytest.mark.django_db
+def test_assert_num_queries_fails_properly(assert_num_queries, django_user_model):
+    with pytest.raises(AssertionError):
+        with assert_num_queries(3):
+            Item.objects.create(name='foo')
+            Item.objects.create(name='bar')
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 

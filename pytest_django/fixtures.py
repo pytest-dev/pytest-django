@@ -6,6 +6,10 @@ import os
 
 import pytest
 
+from contextlib import contextmanager
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
 from . import live_server_helper
 
 from .django_compat import is_django_unittest
@@ -15,7 +19,7 @@ from .lazy_django import get_django_version, skip_if_no_django
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper']
+           '_live_server_helper', 'assert_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -323,3 +327,21 @@ def _live_server_helper(request):
     """
     if 'live_server' in request.funcargnames:
         request.getfuncargvalue('transactional_db')
+
+
+@pytest.fixture(scope='function')
+def assert_num_queries(db, pytestconfig):
+
+    @contextmanager
+    def _assert_num_queries(num):
+        with CaptureQueriesContext(connection) as context:
+            yield
+            msg = "Expected to perform %s queries but %s was done" % (num, len(context))
+            if pytestconfig.getoption('verbose') > 0:
+                sqls = (q['sql'] for q in context.captured_queries)
+                msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
+            else:
+                msg += " (add -v option to show queries)"
+            assert len(context) == num, msg
+
+    return _assert_num_queries

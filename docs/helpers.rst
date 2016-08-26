@@ -217,3 +217,21 @@ Example
     def test_with_specific_settings(settings):
         settings.USE_TZ = True
         assert settings.USE_TZ
+
+``assert_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture allows to check that expected number of queries are performed.
+Note that currently it only supports default database.
+
+
+Example
+"""""""
+
+::
+
+    def test_queries(assert_num_queries):
+        with assert_num_queries(3):
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+            Item.objects.create('baz')
