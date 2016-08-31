@@ -336,7 +336,7 @@ def assert_num_queries(db, pytestconfig):
     def _assert_num_queries(num):
         with CaptureQueriesContext(connection) as context:
             yield
-            msg = "Expected to perform %s queries but %s was done" % (num, len(context))
+            msg = "Expected to perform %s queries but %s were done" % (num, len(context))
             if pytestconfig.getoption('verbose') > 0:
                 sqls = (q['sql'] for q in context.captured_queries)
                 msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
