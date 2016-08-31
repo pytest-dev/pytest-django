@@ -50,7 +50,7 @@ def test_rf(rf):
 
 
 @pytest.mark.django_db
-def test_assert_num_queries_db(assert_num_queries, django_user_model):
+def test_assert_num_queries_db(assert_num_queries):
     with assert_num_queries(3):
         Item.objects.create(name='foo')
         Item.objects.create(name='bar')
@@ -62,7 +62,7 @@ def test_assert_num_queries_db(assert_num_queries, django_user_model):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_assert_num_queries_transactional_db(assert_num_queries, django_user_model):
+def test_assert_num_queries_transactional_db(assert_num_queries):
     with assert_num_queries(3):
         Item.objects.create(name='foo')
         Item.objects.create(name='bar')
