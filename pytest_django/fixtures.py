@@ -328,7 +328,7 @@ def _live_server_helper(request):
 
 
 @pytest.fixture(scope='function')
-def assert_num_queries(db, pytestconfig):
+def assert_num_queries(pytestconfig):
     from django.db import connection
     from django.test.utils import CaptureQueriesContext
 

@@ -50,19 +50,27 @@ def test_rf(rf):
 
 
 @pytest.mark.django_db
-def test_assert_num_queries(assert_num_queries, django_user_model):
+def test_assert_num_queries_db(assert_num_queries, django_user_model):
     with assert_num_queries(3):
         Item.objects.create(name='foo')
         Item.objects.create(name='bar')
         Item.objects.create(name='baz')
 
-
-@pytest.mark.django_db
-def test_assert_num_queries_fails_properly(assert_num_queries, django_user_model):
     with pytest.raises(pytest.fail.Exception):
-        with assert_num_queries(3):
-            Item.objects.create(name='foo')
-            Item.objects.create(name='bar')
+        with assert_num_queries(2):
+            Item.objects.create(name='quux')
+
+
+@pytest.mark.django_db(transaction=True)
+def test_assert_num_queries_transactional_db(assert_num_queries, django_user_model):
+    with assert_num_queries(3):
+        Item.objects.create(name='foo')
+        Item.objects.create(name='bar')
+        Item.objects.create(name='baz')
+
+    with pytest.raises(pytest.fail.Exception):
+        with assert_num_queries(2):
+            Item.objects.create(name='quux')
 
 
 class TestSettings:
