@@ -8,7 +8,7 @@ from __future__ import with_statement
 
 import pytest
 
-from django.db import connection
+from django.db import connection, transaction
 from django.conf import settings as real_settings
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
@@ -62,15 +62,17 @@ def test_assert_num_queries_db(assert_num_queries):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_assert_num_queries_transactional_db(assert_num_queries):
-    with assert_num_queries(3):
-        Item.objects.create(name='foo')
-        Item.objects.create(name='bar')
-        Item.objects.create(name='baz')
+def test_assert_num_queries_transactional_db(transactional_db, assert_num_queries):
+    with transaction.atomic():
 
-    with pytest.raises(pytest.fail.Exception):
-        with assert_num_queries(2):
-            Item.objects.create(name='quux')
+        with assert_num_queries(3):
+            Item.objects.create(name='foo')
+            Item.objects.create(name='bar')
+            Item.objects.create(name='baz')
+
+        with pytest.raises(pytest.fail.Exception):
+            with assert_num_queries(2):
+                Item.objects.create(name='quux')
 
 
 def test_assert_num_queries_output(django_testdir):
