@@ -7,8 +7,6 @@ import os
 import pytest
 
 from contextlib import contextmanager
-from django.db import connection
-from django.test.utils import CaptureQueriesContext
 
 from . import live_server_helper
 
@@ -331,6 +329,8 @@ def _live_server_helper(request):
 
 @pytest.fixture(scope='function')
 def assert_num_queries(db, pytestconfig):
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
 
     @contextmanager
     def _assert_num_queries(num):
