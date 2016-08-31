@@ -73,6 +73,42 @@ def test_assert_num_queries_transactional_db(assert_num_queries):
             Item.objects.create(name='quux')
 
 
+def test_assert_num_queries_output(django_testdir):
+    django_testdir.create_test_module("""
+        from django.contrib.contenttypes.models import ContentType
+        import pytest
+
+        @pytest.mark.django_db
+        def test_queries(assert_num_queries):
+            with assert_num_queries(1):
+                list(ContentType.objects.all())
+                ContentType.objects.count()
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short')
+    result.stdout.fnmatch_lines(['*Expected to perform 1 queries but 2 were done*'])
+    assert result.ret == 1
+
+
+def test_assert_num_queries_output_verbose(django_testdir):
+    django_testdir.create_test_module("""
+        from django.contrib.contenttypes.models import ContentType
+        import pytest
+
+        @pytest.mark.django_db
+        def test_queries(assert_num_queries):
+            with assert_num_queries(11):
+                list(ContentType.objects.all())
+                ContentType.objects.count()
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
+    result.stdout.fnmatch_lines([
+        '*Expected to perform 11 queries but 2 were done*',
+        '*Queries:*',
+        '*========*',
+    ])
+    assert result.ret == 1
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 
