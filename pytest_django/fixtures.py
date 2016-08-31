@@ -342,6 +342,7 @@ def assert_num_queries(db, pytestconfig):
                 msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
             else:
                 msg += " (add -v option to show queries)"
-            assert len(context) == num, msg
+            if num != len(context):
+                pytest.fail(msg)
 
     return _assert_num_queries

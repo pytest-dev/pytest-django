@@ -59,7 +59,7 @@ def test_assert_num_queries(assert_num_queries, django_user_model):
 
 @pytest.mark.django_db
 def test_assert_num_queries_fails_properly(assert_num_queries, django_user_model):
-    with pytest.raises(AssertionError):
+    with pytest.raises(pytest.fail.Exception):
         with assert_num_queries(3):
             Item.objects.create(name='foo')
             Item.objects.create(name='bar')
