@@ -13,12 +13,12 @@ matrix:
   fast_finish: true
   include:
     - python: 2.7
-      env: TOXENV=python2.7-3.0.0-master-postgres
+      env: TOXENV=py27-pytest300-djangomaster-postgres
     - python: 3.5
-      env: TOXENV=python3.5-3.0.0-master-postgres
+      env: TOXENV=py35-pytest300-djangomaster-postgres
   allow_failures:
-    - env: TOXENV=python2.7-3.0.0-master-postgres
-    - env: TOXENV=python3.5-3.0.0-master-postgres
+    - env: TOXENV=py27-pytest300-djangomaster-postgres
+    - env: TOXENV=py35-pytest300-djangomaster-postgres
 
 cache:
   directories:
@@ -44,5 +44,4 @@ install:
 
 script:
   - tox
-  - "find ${TRAVIS_BUILD_DIR}/.tox -name log -type d | xargs -I {} rm -rf {}"
-
+  - "find ${TRAVIS_BUILD_DIR}/.tox -name log -o -name __pycache__ -type d | xargs -I {} rm -rf {}"
