@@ -271,6 +271,10 @@ You can also manage the access manually via these methods:
 
   Restore the previous state of the database blocking.
 
+.. py:attribute:: django_db_blocker.is_blocked
+
+  True if the database is blocked.
+
 Examples
 ########
 

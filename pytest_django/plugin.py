@@ -549,6 +549,10 @@ class _DatabaseBlocker(object):
 
         return BaseDatabaseWrapper
 
+    @property
+    def is_blocked(self):
+        return self._dj_db_wrapper.ensure_connection == self._blocking_wrapper
+
     def _save_active_wrapper(self):
         return self._history.append(self._dj_db_wrapper.ensure_connection)
 

@@ -332,3 +332,32 @@ class Test_django_db_blocker:
     def test_unblock_with_block(self, django_db_blocker):
         with django_db_blocker.unblock():
             Item.objects.exists()
+
+
+class Test_django_db_blocker_is_blocked:
+    def test_db(self, db, django_db_blocker):
+        assert not django_db_blocker.is_blocked
+
+    def test_transactional_db(self, transactional_db, django_db_blocker):
+        assert not django_db_blocker.is_blocked
+
+    @pytest.mark.django_db
+    def test_django_db_mark(self, django_db_blocker):
+        assert not django_db_blocker.is_blocked
+
+    @pytest.mark.django_db(transaction=True)
+    def test_transactional_django_db_mark(self, django_db_blocker):
+        assert not django_db_blocker.is_blocked
+
+    def test_live_server(self, live_server, django_db_blocker):
+        assert not django_db_blocker.is_blocked
+
+    def test_not_enabled(self, django_db_blocker):
+        assert django_db_blocker.is_blocked
+
+    def test_with_unblock(self, django_db_blocker):
+        django_db_blocker.unblock()
+        assert not django_db_blocker.is_blocked
+
+        django_db_blocker.block()
+        assert django_db_blocker.is_blocked
