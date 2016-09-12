@@ -32,10 +32,15 @@ class TestDatabaseFixtures:
 
     @pytest.fixture(params=['db', 'transactional_db'])
     def both_dbs(self, request):
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
         if request.param == 'transactional_db':
-            return request.getfuncargvalue('transactional_db')
+            return getfixturevalue('transactional_db')
         elif request.param == 'db':
-            return request.getfuncargvalue('db')
+            return getfixturevalue('db')
 
     def test_access(self, both_dbs):
         Item.objects.create(name='spam')

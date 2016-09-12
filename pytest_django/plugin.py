@@ -369,18 +369,29 @@ def _django_db_marker(request):
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
+
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
         if marker.transaction:
-            request.getfuncargvalue('transactional_db')
+            getfixturevalue('transactional_db')
         else:
-            request.getfuncargvalue('db')
+            getfixturevalue('db')
 
 
 @pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        request.getfuncargvalue('django_test_environment')
-        request.getfuncargvalue('django_db_setup')
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
+        getfixturevalue('django_test_environment')
+        getfixturevalue('django_db_setup')
 
         django_db_blocker.unblock()
 

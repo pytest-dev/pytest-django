@@ -154,7 +154,12 @@ def db(request, django_db_setup, django_db_blocker):
     """
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
-        request.getfuncargvalue('transactional_db')
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
+        getfixturevalue('transactional_db')
     else:
         _django_db_fixture_helper(False, request, django_db_blocker)
 
@@ -322,4 +327,9 @@ def _live_server_helper(request):
     function-scoped.
     """
     if 'live_server' in request.funcargnames:
-        request.getfuncargvalue('transactional_db')
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
+        getfixturevalue('transactional_db')
