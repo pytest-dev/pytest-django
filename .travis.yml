@@ -1,28 +1,61 @@
 # Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
-python:
-  - 3.5
-  - 3.4
-  - 3.3
-  - 2.7
-  - pypy
-  - pypy3
 
 matrix:
   fast_finish: true
   include:
-    - python: 2.7
-      env: TOXENV=py27-pytest300-djangomaster-postgres
+
     - python: 3.5
       env: TOXENV=py35-pytest300-djangomaster-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest300-django1.10-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest300-django1.9-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest300-django1.8-postgres
+    - python: 3.5
+      env: TOXENV=py35-checkqa
+
+    - python: 3.4
+      env: TOXENV=py34-pytest300-django1.10-postgres
+
+    - python: 3.3
+      env: TOXENV=py34-pytest300-django1.8-postgres
+
+    - python: 2.7
+      env: TOXENV=py27-pytest300-djangomaster-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.10-mysql_innodb
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.10-mysql_myisam
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.10-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.9-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.8-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest300-django1.7-postgres
+    - python: 2.7
+      env: TOXENV=py27-checkqa
+
+    - python: pypy3
+      env: TOXENV=pypy3-pytest292-django1.8-sqlite_file
+    - python: pypy3
+      env: TOXENV=pypy3-pytest300-django1.8-sqlite
+    - python: pypy3
+      env: TOXENV=pypy3-pytest300-django1.8-sqlite_file
+
+    - python: pypy
+      env: TOXENV=pypy-pytest300-django1.10-sqlite_file
+
   allow_failures:
     - env: TOXENV=py27-pytest300-djangomaster-postgres
     - env: TOXENV=py35-pytest300-djangomaster-postgres
 
 cache:
   directories:
-    - "${HOME}/virtualenv"
     - "${TRAVIS_BUILD_DIR}/.tox"
 
 install:
@@ -40,8 +73,7 @@ install:
   - diff tox.ini tox.ini.bak && return 1 || true
 
   - pip install tox==2.3.1
-  - pip install tox-travis
 
 script:
   - tox
-  - "find ${TRAVIS_BUILD_DIR}/.tox -name log -o -name __pycache__ -type d | xargs -I {} rm -rf {}"
+  - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
