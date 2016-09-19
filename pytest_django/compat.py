@@ -15,3 +15,11 @@ try:
 except ImportError:
     # Django 1.7.
     from django.db.backends import BaseDatabaseWrapper  # noqa
+
+
+def getfixturevalue(request, value):
+    try:
+        return request.getfixturevalue(value)
+    except AttributeError:
+        return request.getfuncargvalue(value)
+
