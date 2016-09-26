@@ -17,7 +17,7 @@ from .lazy_django import get_django_version, skip_if_no_django
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'assert_num_queries']
+           '_live_server_helper', 'django_assert_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -328,7 +328,7 @@ def _live_server_helper(request):
 
 
 @pytest.fixture(scope='function')
-def assert_num_queries(pytestconfig):
+def django_assert_num_queries(pytestconfig):
     from django.db import connection
     from django.test.utils import CaptureQueriesContext
 
