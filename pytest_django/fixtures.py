@@ -8,7 +8,6 @@ import pytest
 
 from . import live_server_helper
 
-from .compat import getfixturevalue
 from .django_compat import is_django_unittest
 
 from .lazy_django import get_django_version, skip_if_no_django
@@ -155,6 +154,7 @@ def db(request, django_db_setup, django_db_blocker):
     """
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
+        from .compat import getfixturevalue
         getfixturevalue(request, 'transactional_db')
     else:
         _django_db_fixture_helper(False, request, django_db_blocker)
@@ -323,4 +323,5 @@ def _live_server_helper(request):
     function-scoped.
     """
     if 'live_server' in request.funcargnames:
+        from .compat import getfixturevalue
         getfixturevalue(request, 'transactional_db')

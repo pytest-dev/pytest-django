@@ -14,7 +14,6 @@ import types
 import py
 import pytest
 
-from .compat import getfixturevalue
 from .django_compat import is_django_unittest  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
@@ -370,6 +369,7 @@ def _django_db_marker(request):
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
+        from .compat import getfixturevalue
         if marker.transaction:
             getfixturevalue(request, 'transactional_db')
         else:
@@ -380,6 +380,7 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
+        from .compat import getfixturevalue
         getfixturevalue(request, 'django_test_environment')
         getfixturevalue(request, 'django_db_setup')
 
