@@ -18,8 +18,8 @@ except ImportError:
 
 
 def getfixturevalue(request, value):
-    try:
+    if hasattr(request, 'getfixturevalue'):
         return request.getfixturevalue(value)
-    except AttributeError:
-        return request.getfuncargvalue(value)
+
+    return request.getfuncargvalue(value)
 
