@@ -380,9 +380,15 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        from .compat import getfixturevalue
-        getfixturevalue(request, 'django_test_environment')
-        getfixturevalue(request, 'django_db_setup')
+        # Cannot use pytest_django.compat.getfixturevalue as it would
+        # pull in Django deps too early
+        try:
+            getfixturevalue = request.getfixturevalue
+        except AttributeError:
+            getfixturevalue = request.getfuncargvalue
+
+        getfixturevalue('django_test_environment')
+        getfixturevalue('django_db_setup')
 
         django_db_blocker.unblock()
 

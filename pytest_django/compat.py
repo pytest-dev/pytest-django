@@ -22,4 +22,3 @@ def getfixturevalue(request, value):
         return request.getfixturevalue(value)
 
     return request.getfuncargvalue(value)
-
