@@ -4,6 +4,7 @@ import pytest
 from django.db import connection
 from django.test.testcases import connections_support_transactions
 
+from pytest_django.pytest_compat import getfixturevalue
 from pytest_django_test.app.models import Item
 
 
@@ -32,7 +33,6 @@ class TestDatabaseFixtures:
 
     @pytest.fixture(params=['db', 'transactional_db'])
     def both_dbs(self, request):
-        from pytest_django.compat import getfixturevalue
         if request.param == 'transactional_db':
             return getfixturevalue(request, 'transactional_db')
         elif request.param == 'db':

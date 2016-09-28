@@ -1,3 +1,5 @@
+# This file cannot be imported from until Django sets up
+
 try:
     # Django 1.11
     from django.test.utils import setup_databases, teardown_databases  # noqa
@@ -15,10 +17,3 @@ try:
 except ImportError:
     # Django 1.7.
     from django.db.backends import BaseDatabaseWrapper  # noqa
-
-
-def getfixturevalue(request, value):
-    if hasattr(request, 'getfixturevalue'):
-        return request.getfixturevalue(value)
-
-    return request.getfuncargvalue(value)

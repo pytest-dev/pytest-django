@@ -31,6 +31,7 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .pytest_compat import getfixturevalue
 
 from .lazy_django import (django_settings_is_configured,
                           get_django_version, skip_if_no_django)
@@ -369,7 +370,6 @@ def _django_db_marker(request):
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
-        from .compat import getfixturevalue
         if marker.transaction:
             getfixturevalue(request, 'transactional_db')
         else:
@@ -380,15 +380,8 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        # Cannot use pytest_django.compat.getfixturevalue as it would
-        # pull in Django deps too early
-        try:
-            getfixturevalue = request.getfixturevalue
-        except AttributeError:
-            getfixturevalue = request.getfuncargvalue
-
-        getfixturevalue('django_test_environment')
-        getfixturevalue('django_db_setup')
+        getfixturevalue(request, 'django_test_environment')
+        getfixturevalue(request, 'django_db_setup')
 
         django_db_blocker.unblock()
 
