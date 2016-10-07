@@ -361,3 +361,19 @@ class Test_django_db_blocker_is_blocked:
 
         django_db_blocker.block()
         assert django_db_blocker.is_blocked
+
+    def test_with_unblock_context_manager(self, django_db_blocker):
+        assert django_db_blocker.is_blocked
+
+        with django_db_blocker.unblock():
+            assert not django_db_blocker.is_blocked
+
+        assert django_db_blocker.is_blocked
+
+    def test_with_block_context_manager(self, django_db_blocker, db):
+        assert not django_db_blocker.is_blocked
+
+        with django_db_blocker.block():
+            assert django_db_blocker.is_blocked
+
+        assert not django_db_blocker.is_blocked
