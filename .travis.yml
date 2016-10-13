@@ -4,29 +4,29 @@ language: python
 python:
   - "3.5"
 env:
-  - TESTENV=pypy-3.0.0-1.10-sqlite_file
+  - TESTENV=pypy-3.0.3-1.10-sqlite_file
   - TESTENV=pypy3-2.9.2-1.8-sqlite_file
-  - TESTENV=pypy3-3.0.0-1.8-sqlite
-  - TESTENV=pypy3-3.0.0-1.8-sqlite_file
-  - TESTENV=python2.7-3.0.0-1.10-mysql_innodb
-  - TESTENV=python2.7-3.0.0-1.10-mysql_myisam
-  - TESTENV=python2.7-3.0.0-1.10-postgres
-  - TESTENV=python2.7-3.0.0-1.7-postgres
-  - TESTENV=python2.7-3.0.0-1.8-postgres
-  - TESTENV=python2.7-3.0.0-1.9-postgres
-  - TESTENV=python2.7-3.0.0-master-postgres
-  - TESTENV=python3.3-3.0.0-1.8-postgres
-  - TESTENV=python3.4-3.0.0-1.10-postgres
-  - TESTENV=python3.5-3.0.0-1.10-postgres
-  - TESTENV=python3.5-3.0.0-1.8-postgres
-  - TESTENV=python3.5-3.0.0-1.9-postgres
-  - TESTENV=python3.5-3.0.0-master-postgres
+  - TESTENV=pypy3-3.0.3-1.8-sqlite
+  - TESTENV=pypy3-3.0.3-1.8-sqlite_file
+  - TESTENV=python2.7-3.0.3-1.10-mysql_innodb
+  - TESTENV=python2.7-3.0.3-1.10-mysql_myisam
+  - TESTENV=python2.7-3.0.3-1.10-postgres
+  - TESTENV=python2.7-3.0.3-1.7-postgres
+  - TESTENV=python2.7-3.0.3-1.8-postgres
+  - TESTENV=python2.7-3.0.3-1.9-postgres
+  - TESTENV=python2.7-3.0.3-master-postgres
+  - TESTENV=python3.3-3.0.3-1.8-postgres
+  - TESTENV=python3.4-3.0.3-1.10-postgres
+  - TESTENV=python3.5-3.0.3-1.10-postgres
+  - TESTENV=python3.5-3.0.3-1.8-postgres
+  - TESTENV=python3.5-3.0.3-1.9-postgres
+  - TESTENV=python3.5-3.0.3-master-postgres
   - TESTENV=checkqa-python2.7
   - TESTENV=checkqa-python3.5
 matrix:
   allow_failures:
-    - env: TESTENV=python2.7-3.0.0-master-postgres
-    - env: TESTENV=python3.5-3.0.0-master-postgres
+    - env: TESTENV=python2.7-3.0.3-master-postgres
+    - env: TESTENV=python3.5-3.0.3-master-postgres
 install:
   # Create pip wrapper script, using travis_retry (a function) and
   # inject it into tox.ini.
