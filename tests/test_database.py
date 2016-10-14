@@ -175,7 +175,8 @@ def test_unittest_interaction(django_testdir):
         "*test_db_access_2 FAILED*",
         "*test_db_access_3 FAILED*",
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-        "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
+        '*Failed: Database access not allowed, use the "django_db" mark, '
+        'or the "db" or "transactional_db" fixtures to enable it.',
     ])
 
 
@@ -190,7 +191,8 @@ class Test_database_blocking:
 
         result = django_testdir.runpytest_subprocess('-v')
         result.stderr.fnmatch_lines([
-            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+            '*Failed: Database access not allowed, use the "django_db" mark, '
+            'or the "db" or "transactional_db" fixtures to enable it.*',
         ])
 
     def test_db_access_in_test_module(self, django_testdir):
@@ -201,5 +203,6 @@ class Test_database_blocking:
 
         result = django_testdir.runpytest_subprocess('-v')
         result.stdout.fnmatch_lines([
-            '*Failed: Database access not allowed, use the "django_db" mark to enable it.*',
+            '*Failed: Database access not allowed, use the "django_db" mark, '
+            'or the "db" or "transactional_db" fixtures to enable it.',
         ])
