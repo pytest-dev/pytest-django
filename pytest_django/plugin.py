@@ -556,7 +556,8 @@ class _DatabaseBlocker(object):
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
         pytest.fail('Database access not allowed, '
-                    'use the "django_db" mark to enable it.')
+                    'use the "django_db" mark, or the '
+                    '"db" or "transactional_db" fixtures to enable it.')
 
     def unblock(self):
         """Enable access to the Django database."""
