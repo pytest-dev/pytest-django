@@ -90,7 +90,7 @@ test runner like this::
 
 Add the path to this class in your Django settings::
 
-    TEST_RUNNER = 'my_project.runner.PyTestRunner'
+    TEST_RUNNER = 'my_project.runner.PytestTestRunner'
 
 Usage::
 
