@@ -403,7 +403,7 @@ def _django_clear_outbox():
     """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail
-        mail.outbox = []
+        del mail.outbox[:]
 
 
 @pytest.fixture(autouse=True, scope='function')
