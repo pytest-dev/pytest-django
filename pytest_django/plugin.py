@@ -399,7 +399,7 @@ def _django_setup_unittest(request, django_db_blocker):
 
 
 @pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox():
+def _django_clear_outbox(django_test_environment):
     """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail
