@@ -16,7 +16,7 @@ from pytest_django_test.app.models import Item
 
 
 def test_mail(mailoutbox):
-    assert mailoutbox is mail.outbox  # check that mail.outbox and the yielded value from the fixture is same object
+    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
     assert len(mailoutbox) == 0
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
     assert len(mailoutbox) == 1
