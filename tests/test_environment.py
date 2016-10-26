@@ -15,19 +15,20 @@ from pytest_django_test.app.models import Item
 # to do it.
 
 
-def test_mail():
-    assert len(mail.outbox) == 0
+def test_mail(mailoutbox):
+    assert mailoutbox is mail.outbox  # check that mail.outbox and the yielded value from the fixture is same object
+    assert len(mailoutbox) == 0
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
-    assert len(mail.outbox) == 1
-    m = mail.outbox[0]
+    assert len(mailoutbox) == 1
+    m = mailoutbox[0]
     assert m.subject == 'subject'
     assert m.body == 'body'
     assert m.from_email == 'from@example.com'
     assert list(m.to) == ['to@example.com']
 
 
-def test_mail_again():
-    test_mail()
+def test_mail_again(mailoutbox):
+    test_mail(mailoutbox)
 
 
 @pytest.mark.django_project(extra_settings="""
