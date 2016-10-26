@@ -399,12 +399,23 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
-@pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox(django_test_environment):
-    """Clear the django outbox, internal to pytest-django."""
-    if django_settings_is_configured():
-        from django.core import mail
-        del mail.outbox[:]
+@pytest.yield_fixture(scope='function')
+def mailoutbox():
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+
+    _old_mailbox = getattr(mail, 'outbox', None)
+    outbox = []
+    setattr(mail, 'outbox', outbox)
+
+    yield outbox
+
+    if _old_mailbox is not None:
+        setattr(mail, 'outbox', _old_mailbox)
+    else:
+        delattr(mail, 'outbox')
 
 
 @pytest.fixture(autouse=True, scope='function')
