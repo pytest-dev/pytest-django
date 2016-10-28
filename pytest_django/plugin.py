@@ -86,6 +86,11 @@ def pytest_addoption(parser):
                   'Fail for invalid variables in templates.',
                   type='bool', default=False)
 
+    group._addoption('--querycount',
+                     action='store', type=int, default=None, metavar='N',
+                     help='Show top N tests with most queries '
+                          '(N=0 for all).')
+
 
 def _exists(path, ignore=EnvironmentError):
     try:
@@ -335,6 +340,59 @@ def pytest_runtest_setup(item):
     if django_settings_is_configured() and is_django_unittest(item):
         cls = item.cls
         _disable_class_methods(cls)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_call(item):
+    count_parameter = item.config.option.querycount
+    if count_parameter is None:
+        yield
+        return
+
+    from django.test.utils import CaptureQueriesContext
+    from django.db import connection
+
+    with CaptureQueriesContext(connection) as context:
+        yield
+
+    item.add_report_section('call', 'queries', context.captured_queries)
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus):
+    count_parameter = terminalreporter.config.option.querycount
+    if count_parameter is None:
+        return
+
+    if count_parameter:
+        header = 'top {} tests with most queries'.format(count_parameter)
+        reports_slice = slice(None, count_parameter)
+    else:
+        header = 'top tests with most queries'
+        reports_slice = slice(None, None)
+
+    terminalreporter.write_sep('=', header)
+
+    def get_query_count(report):
+        sections = dict(report.sections)
+        return len(sections.get('Captured queries call', []))
+
+    reports = (
+        terminalreporter.stats.get('failed', []) +
+        terminalreporter.stats.get('passed', [])
+    )
+
+    reports.sort(key=get_query_count)
+    reports.reverse()
+
+    for report in reports[reports_slice]:
+        count = get_query_count(report)
+        nodeid = report.nodeid.replace("::()::", "::")
+
+        terminalreporter.write_line('{count: <4} {when: <8} {nodeid}'.format(
+            count=count,
+            when=report.when,
+            nodeid=nodeid
+        ))
 
 
 @pytest.fixture(autouse=True, scope='session')
