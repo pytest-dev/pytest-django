@@ -19,7 +19,7 @@ class TestQueryCount(object):
         ''')
 
         result = django_testdir.runpytest_subprocess()
-        assert 'tests with most queries' not in result.stdout.str()
+        assert 'top tests with most queries' not in result.stdout.str()
 
     def test_querycount_report_lines(self, django_testdir):
         django_testdir.create_test_module('''
@@ -52,14 +52,14 @@ class TestQueryCount(object):
                 assert True
         ''')
 
-        result = django_testdir.runpytest_subprocess('--querycount=3')
+        result = django_testdir.runpytest_subprocess('--querycount=4')
         lines = result.stdout.get_lines_after(
-            '*top 3 tests with most queries*'
+            '*top 4 tests with most queries*'
         )
         assert 'test_two_queries' in lines[0]
         assert 'test_one_query' in lines[1]
         assert 'test_failed' in lines[2]
-        assert 'test_zero_queries' not in result.stdout.str()
+        assert 'test_zero_queries' in lines[3]
 
     def test_report_all_lines_on_querycount_zero(self, django_testdir):
         django_testdir.create_test_module('''
