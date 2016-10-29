@@ -29,6 +29,12 @@ Additional command line options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fail tests that render templates which make use of invalid template variables.
 
+
+``--querycount`` - show top N tests with most queries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Show a list of top N tests which executed most queries. Use `--querycount=0`
+to display a list of all tests ordered by the number of queries executed.
+
 Running tests in parallel with pytest-xdist
 -------------------------------------------
 pytest-django supports running tests on multiple processes to speed up test
