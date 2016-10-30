@@ -358,7 +358,7 @@ def pytest_runtest_call(item):
     item.add_report_section('call', 'queries', context.captured_queries)
 
 
-def pytest_terminal_summary(terminalreporter, exitstatus):
+def pytest_terminal_summary(terminalreporter):
     count_parameter = terminalreporter.config.option.querycount
     if count_parameter is None:
         return
