@@ -19,3 +19,8 @@ _build
 .Python
 .eggs
 *.egg
+
+#py3 pyenv
+pyvenv.cfg
+lib64
+pip-selfcheck.json

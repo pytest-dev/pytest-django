@@ -238,11 +238,13 @@ def rf():
     return RequestFactory()
 
 
-class MonkeyPatchWrapper(object):
+class BaseSettingsWrapper(object):
+
     def __init__(self, monkeypatch, wrapped_object):
-        super(MonkeyPatchWrapper, self).__setattr__('monkeypatch', monkeypatch)
-        super(MonkeyPatchWrapper, self).__setattr__('wrapped_object',
-                                                    wrapped_object)
+        super(BaseSettingsWrapper, self).__setattr__('monkeypatch',
+                                                     monkeypatch)
+        super(BaseSettingsWrapper, self).__setattr__('wrapped_object',
+                                                     wrapped_object)
 
     def __getattr__(self, attr):
         return getattr(self.wrapped_object, attr)
@@ -255,13 +257,46 @@ class MonkeyPatchWrapper(object):
         self.monkeypatch.delattr(self.wrapped_object, attr)
 
 
+class SettingsWrapper(BaseSettingsWrapper):
+    """
+    """
+
+    def __init__(self, monkeypatch):
+        print('hello')
+        wrapper = self.get_wrapper()
+        super(SettingsWrapper, self).__init__(monkeypatch, wrapper.wrapped)
+        super(SettingsWrapper, self).__setattr__(
+            'wrapper', wrapper)
+
+    def get_wrapper(self):
+        from django.test.utils import override_settings
+        wrapper = override_settings()
+        wrapper.enable()
+        return wrapper
+
+    def __delattr__(self, attr):
+        super(SettingsWrapper, self).__delattr__(attr)
+        del self.wrapper.options[attr]
+        self.wrapper.enable()
+
+    def __setattr__(self, attr, value):
+        super(SettingsWrapper, self).__setattr__(attr, value)
+        self.wrapper.options[attr] = value
+        self.wrapper.enable()
+
+    def finalize(self):
+        self.wrapper.disable()
+
+
 @pytest.fixture()
 def settings(monkeypatch):
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
-    from django.conf import settings as django_settings
-    return MonkeyPatchWrapper(monkeypatch, django_settings)
+    wrapper = SettingsWrapper(monkeypatch)
+    yield wrapper
+    #  Finalizing
+    wrapper.finalize()
 
 
 @pytest.fixture(scope='session')
