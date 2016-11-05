@@ -222,6 +222,26 @@ class TestSettings:
         ])
 
 
+class TestChecks:
+
+    def test_checks_are_run(self, django_testdir):
+        django_testdir.create_app_file("""
+            from django.core.checks import Error, register
+
+            @register
+            def fail(app_configs, **kwargs):
+                return [Error('My failure message', id='test.001')]
+            """, '__init__.py')
+        django_testdir.makepyfile("""
+            def test_simple():
+                assert True
+            """)
+
+        result = django_testdir.runpytest_subprocess('-s')
+        result.stderr.fnmatch_lines(['*My failure message*'])
+        assert result.ret != 0
+
+
 class TestLiveServer:
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
