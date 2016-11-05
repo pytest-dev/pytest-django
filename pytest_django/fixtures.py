@@ -3,6 +3,8 @@
 from __future__ import with_statement
 
 import os
+import sys
+from contextlib import contextmanager
 
 import pytest
 
@@ -97,6 +99,9 @@ def django_db_setup(
             **setup_databases_args
         )
 
+        if get_django_version() < (1, 11):
+            run_check(request)
+
     def teardown_database():
         with django_db_blocker.unblock():
             teardown_databases(
@@ -106,6 +111,42 @@ def django_db_setup(
 
     if not django_db_keepdb:
         request.addfinalizer(teardown_database)
+
+
+def run_check(request):
+    from django.core.management import call_command
+    from django.core.management.base import SystemCheckError
+
+    # Only run once per process
+    if getattr(run_check, 'did_fail', False):
+        return
+
+    with disable_input_capture(request):
+        try:
+            call_command('check')
+        except SystemCheckError as ex:
+            run_check.did_fail = True
+
+            if hasattr(request.config, 'slaveinput'):
+                # Kill the xdist test process horribly
+                # N.B. 'shouldstop' maybe be obeyed properly in later as hinted at in
+                # https://github.com/pytest-dev/pytest-xdist/commit/e8fa73719662d1be5074a0750329fe0c35583484
+                print(ex.args[0])
+                sys.exit(1)
+            else:
+                request.session.exitstatus = 1
+                request.session.shouldstop = True
+                raise
+
+
+@contextmanager
+def disable_input_capture(request):
+    capmanager = request.config.pluginmanager.getplugin('capturemanager')
+    capmanager.suspendcapture()
+    try:
+        yield
+    finally:
+        capmanager.resumecapture()
 
 
 def _django_db_fixture_helper(transactional, request, django_db_blocker):
