@@ -104,7 +104,6 @@ class TestSettings:
         settings.FOOBAR = 'abc123'
         assert sorted(result) == [
             ('FOOBAR', 'abc123', True),
-            ('SECRET_KEY', 'change 2', True),
         ]
 
     def test_modification_signal(self, django_testdir):
@@ -146,11 +145,13 @@ class TestSettings:
             '*Setting changed: enter=True,setting=SECRET_KEY,value=change 1*',
             '*Setting changed: enter=True,setting=SECRET_KEY,value=change 2*',
             '*Setting changed: enter=False,setting=SECRET_KEY,value=change 1*',
+            '*Setting changed: enter=False,setting=SECRET_KEY,value=foobar*',
         ])
 
         result.stdout.fnmatch_lines([
             '*Setting changed: enter=True,setting=FOOBAR,value=abc123*',
-            '*Setting changed: enter=False,setting=FOOBAR,value=abc123*',
+            ('*Setting changed: enter=False,setting=FOOBAR,value=None,'
+             'actual_value=<<does not exist>>*'),
         ])
 
 

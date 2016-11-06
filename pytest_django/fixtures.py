@@ -6,6 +6,7 @@ import os
 import warnings
 
 import pytest
+from django.test import override_settings
 
 from . import live_server_helper
 from .db_reuse import (monkey_patch_creation_for_db_reuse,
@@ -269,58 +270,41 @@ def rf():
     return RequestFactory()
 
 
-class BaseSettingsWrapper(object):
-    def __init__(self, monkeypatch, wrapped_object):
-        super(BaseSettingsWrapper, self).__setattr__('monkeypatch',
-                                                     monkeypatch)
-        super(BaseSettingsWrapper, self).__setattr__('wrapped_object',
-                                                     wrapped_object)
-
-    def __getattr__(self, attr):
-        return getattr(self.wrapped_object, attr)
-
-    def __setattr__(self, attr, value):
-        self.monkeypatch.setattr(self.wrapped_object, attr, value,
-                                 raising=False)
+class SettingsWrapper(object):
+    to_restore = []
 
     def __delattr__(self, attr):
-        self.monkeypatch.delattr(self.wrapped_object, attr)
+        override = override_settings()
+        override.enable()
+        from django.conf import settings
+        delattr(settings, attr)
 
-
-class SettingsWrapper(BaseSettingsWrapper):
-    def __init__(self, monkeypatch):
-        wrapper = self.get_wrapper()
-        super(SettingsWrapper, self).__init__(monkeypatch, wrapper.wrapped)
-        super(SettingsWrapper, self).__setattr__(
-            'wrapper', wrapper)
-
-    def get_wrapper(self):
-        from django.test.utils import override_settings
-        wrapper = override_settings()
-        wrapper.enable()
-        return wrapper
-
-    def __delattr__(self, attr):
-        super(SettingsWrapper, self).__delattr__(attr)
-        if attr in self.wrapper.options:
-            del self.wrapper.options[attr]
-            self.wrapper.enable()
+        self.to_restore.append(override)
 
     def __setattr__(self, attr, value):
-        super(SettingsWrapper, self).__setattr__(attr, value)
-        self.wrapper.options[attr] = value
-        self.wrapper.enable()
+        override = override_settings(**{
+            attr: value
+        })
+        override.enable()
+        self.to_restore.append(override)
+
+    def __getattr__(self, item):
+        from django.conf import settings
+        return getattr(settings, item)
 
     def finalize(self):
-        self.wrapper.disable()
+        for override in reversed(self.to_restore):
+            override.disable()
+
+        self.to_restore.clear()
 
 
 @pytest.yield_fixture()
-def settings(monkeypatch):
+def settings():
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
-    wrapper = SettingsWrapper(monkeypatch)
+    wrapper = SettingsWrapper()
     yield wrapper
     wrapper.finalize()
 
