@@ -6,7 +6,6 @@ import os
 import warnings
 
 import pytest
-from django.test import override_settings
 
 from . import live_server_helper
 from .db_reuse import (monkey_patch_creation_for_db_reuse,
@@ -274,6 +273,7 @@ class SettingsWrapper(object):
     to_restore = []
 
     def __delattr__(self, attr):
+        from django.test import override_settings
         override = override_settings()
         override.enable()
         from django.conf import settings
@@ -282,6 +282,7 @@ class SettingsWrapper(object):
         self.to_restore.append(override)
 
     def __setattr__(self, attr, value):
+        from django.test import override_settings
         override = override_settings(**{
             attr: value
         })
