@@ -54,10 +54,10 @@ def pytest_addoption(parser):
                      help='Re-create the database, even if it exists. This '
                           'option can be used to override --reuse-db.')
     group._addoption('--ds',
-                     action='store', type='string', dest='ds', default=None,
+                     action='store', type=str, dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
     group._addoption('--dc',
-                     action='store', type='string', dest='dc', default=None,
+                     action='store', type=str, dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
