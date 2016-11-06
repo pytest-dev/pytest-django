@@ -297,7 +297,7 @@ class SettingsWrapper(object):
         for override in reversed(self.to_restore):
             override.disable()
 
-        self.to_restore.clear()
+        del self.to_restore[:]
 
 
 @pytest.yield_fixture()
