@@ -48,7 +48,7 @@ Does pytest-django work with the pytest-xdist plugin?
 
 Yes. pytest-django supports running tests in parallel with pytest-xdist. Each
 process created by xdist gets its own separate database that is used for the
-tests. This ensures that each test can run independently, regardless of wheter
+tests. This ensures that each test can run independently, regardless of whether
 transactions are tested or not.
 
 .. _faq-getting-help:
