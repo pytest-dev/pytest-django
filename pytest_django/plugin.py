@@ -31,6 +31,7 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .pytest_compat import getfixturevalue
 
 from .lazy_django import (django_settings_is_configured,
                           get_django_version, skip_if_no_django)
@@ -54,10 +55,10 @@ def pytest_addoption(parser):
                      help='Re-create the database, even if it exists. This '
                           'option can be used to override --reuse-db.')
     group._addoption('--ds',
-                     action='store', type='string', dest='ds', default=None,
+                     action='store', type=str, dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
     group._addoption('--dc',
-                     action='store', type='string', dest='dc', default=None,
+                     action='store', type=str, dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
@@ -370,17 +371,17 @@ def _django_db_marker(request):
     if marker:
         validate_django_db(marker)
         if marker.transaction:
-            request.getfuncargvalue('transactional_db')
+            getfixturevalue(request, 'transactional_db')
         else:
-            request.getfuncargvalue('db')
+            getfixturevalue(request, 'db')
 
 
 @pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        request.getfuncargvalue('django_test_environment')
-        request.getfuncargvalue('django_db_setup')
+        getfixturevalue(request, 'django_test_environment')
+        getfixturevalue(request, 'django_db_setup')
 
         django_db_blocker.unblock()
 
@@ -399,11 +400,11 @@ def _django_setup_unittest(request, django_db_blocker):
 
 
 @pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox():
+def _django_clear_outbox(django_test_environment):
     """Clear the django outbox, internal to pytest-django."""
     if django_settings_is_configured():
         from django.core import mail
-        mail.outbox = []
+        del mail.outbox[:]
 
 
 @pytest.fixture(autouse=True, scope='function')
@@ -556,7 +557,8 @@ class _DatabaseBlocker(object):
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
         pytest.fail('Database access not allowed, '
-                    'use the "django_db" mark to enable it.')
+                    'use the "django_db" mark, or the '
+                    '"db" or "transactional_db" fixtures to enable it.')
 
     def unblock(self):
         """Enable access to the Django database."""
