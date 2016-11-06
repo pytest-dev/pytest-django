@@ -31,12 +31,14 @@ def test_noaccess_fixture(noaccess):
 class TestDatabaseFixtures:
     """Tests for the db and transactional_db fixtures"""
 
-    @pytest.fixture(params=['db', 'transactional_db'])
+    @pytest.fixture(params=['db', 'transactional_db', 'use_multi_db'])
     def both_dbs(self, request):
         if request.param == 'transactional_db':
             return getfixturevalue(request, 'transactional_db')
         elif request.param == 'db':
             return getfixturevalue(request, 'db')
+        elif request.param == 'use_multi_db':
+            return getfixturevalue(request, 'use_multi_db')
 
     def test_access(self, both_dbs):
         Item.objects.create(name='spam')
@@ -56,6 +58,16 @@ class TestDatabaseFixtures:
             pytest.skip('transactions required for this test')
 
         assert not connection.in_atomic_block
+
+    def test_multi_db_enabled(self, use_multi_db):
+        assert self._is_multi_db()
+
+    def test_multi_db_transactions_enabled(self, transactional_db, use_multi_db):
+        assert self._is_multi_db()
+
+    def _is_multi_db(self):
+        from django.test import TestCase
+        return TestCase.multi_db
 
     @pytest.fixture
     def mydb(self, both_dbs):
@@ -139,6 +151,22 @@ class TestDatabaseMarker:
             pytest.skip('transactions required for this test')
 
         assert not connection.in_atomic_block
+
+    @pytest.mark.django_db(multi_db=False)
+    def test_multi_db_disabled_explicit(self):
+        assert not self._is_multi_db()
+
+    @pytest.mark.django_db(multi_db=True)
+    def test_multi_db_enabled(self):
+        assert self._is_multi_db()
+
+    @pytest.mark.django_db(multi_db=True, transaction=True)
+    def test_transactions_enabled_multi_db_enabled(self):
+        assert self._is_multi_db()
+
+    def _is_multi_db(self):
+        from django.test import TestCase
+        return TestCase.multi_db
 
 
 def test_unittest_interaction(django_testdir):

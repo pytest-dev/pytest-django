@@ -13,8 +13,8 @@ on what marks are and for notes on using_ them.
 .. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-``pytest.mark.django_db(transaction=False)`` - request database access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``pytest.mark.django_db(transaction=False, multi_db=False)`` - request database access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. :py:function:: pytest.mark.django_db:
 
@@ -25,27 +25,35 @@ of the test. This behavior is the same as Django's standard
 `django.test.TestCase`_ class.
 
 In order for a test to have access to the database it must either
-be marked using the ``django_db`` mark or request one of the ``db``
-or ``transactional_db`` fixtures.  Otherwise the test will fail
-when trying to access the database.
+be marked using the ``django_db`` mark or request one of the ``db``,
+``transactional_db`` or ``use_multi_db`` fixtures.  Otherwise the test will
+fail when trying to access the database.
 
 :type transaction: bool
 :param transaction:
- The ``transaction`` argument will allow the test to use real transactions.
- With ``transaction=False`` (the default when not specified), transaction
- operations are noops during the test. This is the same behavior that
- `django.test.TestCase`_
- uses. When ``transaction=True``, the behavior will be the same as
- `django.test.TransactionTestCase`_
+  The ``transaction`` argument will allow the test to use real transactions.
+  With ``transaction=False`` (the default when not specified), transaction
+  operations are noops during the test. This is the same behavior that
+  `django.test.TestCase`_
+  uses. When ``transaction=True``, the behavior will be the same as
+  `django.test.TransactionTestCase`_
+
+:type multi_db: bool
+:param multi_db:
+  The ``multi_db`` allows the test to flush *all* databases before running.
+  With ``multi_db=False`` (the default when not specified), only the *default*
+  database will be flushed. This is the same behavior that `django.test.TestCase`_
+  uses. When ``multi_db=True``, the behavior will be the same as a
+  `django.test.TestCase`_ with the class attribute ``multi_db = True``
 
 .. note::
 
   If you want access to the Django database *inside a fixture*
   this marker will not help even if the function requesting your
   fixture has this marker applied.  To access the database in a
-  fixture, the fixture itself will have to request the ``db`` or
-  ``transactional_db`` fixture.  See below for a description of
-  them.
+  fixture, the fixture itself will have to request the ``db``,
+  ``transactional_db`` or ``use_multi_db`` fixture.  See below for a
+  description of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
@@ -192,6 +200,15 @@ This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
 :py:func:`~pytest.mark.django_db` mark to signal it needs the database.
+
+``use_multi_db``
+~~~~~~~~~~~~
+
+This fixture can be used to request access to the database including
+multiple database support.  This is only required for fixtures which
+need databases access themselves.  A test function would normally use the
+:py:func:`~pytest.mark.django_db` mark to signal it needs the database.
+
 
 ``live_server``
 ~~~~~~~~~~~~~~~

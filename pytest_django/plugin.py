@@ -31,6 +31,7 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .fixtures import use_multi_db  # noqa
 from .pytest_compat import getfixturevalue
 
 from .lazy_django import (django_settings_is_configured,
@@ -364,14 +365,16 @@ def django_db_blocker():
 def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
-    This will dynamically request the ``db`` or ``transactional_db``
-    fixtures as required by the django_db marker.
+    This will dynamically request the ``db``, ``transactional_db``
+    or ``use_multi_db`` fixtures as required by the django_db marker.
     """
     marker = request.keywords.get('django_db', None)
     if marker:
         validate_django_db(marker)
         if marker.transaction:
             getfixturevalue(request, 'transactional_db')
+        elif marker.multi_db:
+            getfixturevalue(request, 'use_multi_db')
         else:
             getfixturevalue(request, 'db')
 
@@ -582,11 +585,12 @@ _blocking_manager = _DatabaseBlocker()
 def validate_django_db(marker):
     """Validate the django_db marker.
 
-    It checks the signature and creates the `transaction` attribute on
-    the marker which will have the correct value.
+    It checks the signature and creates the `transaction` and `multi_db`
+    attributes on the marker which will have the correct value.
     """
-    def apifun(transaction=False):
+    def apifun(transaction=False, multi_db=False):
         marker.transaction = transaction
+        marker.multi_db = multi_db
     apifun(*marker.args, **marker.kwargs)
 
 
