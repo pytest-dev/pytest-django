@@ -270,7 +270,7 @@ def rf():
 
 
 class SettingsWrapper(object):
-    to_restore = []
+    _to_restore = []
 
     def __delattr__(self, attr):
         from django.test import override_settings
@@ -279,7 +279,7 @@ class SettingsWrapper(object):
         from django.conf import settings
         delattr(settings, attr)
 
-        self.to_restore.append(override)
+        self._to_restore.append(override)
 
     def __setattr__(self, attr, value):
         from django.test import override_settings
@@ -287,17 +287,17 @@ class SettingsWrapper(object):
             attr: value
         })
         override.enable()
-        self.to_restore.append(override)
+        self._to_restore.append(override)
 
     def __getattr__(self, item):
         from django.conf import settings
         return getattr(settings, item)
 
     def finalize(self):
-        for override in reversed(self.to_restore):
+        for override in reversed(self._to_restore):
             override.disable()
 
-        del self.to_restore[:]
+        del self._to_restore[:]
 
 
 @pytest.yield_fixture()
