@@ -1,3 +1,5 @@
+# This file cannot be imported from until Django sets up
+
 try:
     # Django 1.11
     from django.test.utils import setup_databases, teardown_databases  # noqa

@@ -48,7 +48,7 @@ Does pytest-django work with the pytest-xdist plugin?
 
 Yes. pytest-django supports running tests in parallel with pytest-xdist. Each
 process created by xdist gets its own separate database that is used for the
-tests. This ensures that each test can run independently, regardless of wheter
+tests. This ensures that each test can run independently, regardless of whether
 transactions are tested or not.
 
 .. _faq-getting-help:
@@ -80,6 +80,8 @@ test runner like this::
                 argv.append('--quiet')
             if self.verbosity == 2:
                 argv.append('--verbose')
+            if self.verbosity == 3:
+                argv.append('-vv')
             if self.failfast:
                 argv.append('--exitfirst')
             if self.keepdb:
@@ -90,7 +92,7 @@ test runner like this::
 
 Add the path to this class in your Django settings::
 
-    TEST_RUNNER = 'my_project.runner.PyTestRunner'
+    TEST_RUNNER = 'my_project.runner.PytestTestRunner'
 
 Usage::
 
