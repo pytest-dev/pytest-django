@@ -85,6 +85,77 @@ class TestSettings:
         assert hasattr(settings, 'SECRET_KEY')
         assert hasattr(real_settings, 'SECRET_KEY')
 
+    def test_signals(self, settings):
+        result = []
+
+        def assert_signal(signal, sender, setting, value, enter):
+            result.append((setting, value, enter))
+
+        from django.test.signals import setting_changed
+        setting_changed.connect(assert_signal)
+
+        result = []
+        settings.SECRET_KEY = 'change 1'
+        settings.SECRET_KEY = 'change 2'
+        assert result == [
+            ('SECRET_KEY', 'change 1', True),
+            ('SECRET_KEY', 'change 2', True),
+        ]
+
+        result = []
+        settings.FOOBAR = 'abc123'
+        assert sorted(result) == [
+            ('FOOBAR', 'abc123', True),
+        ]
+
+    def test_modification_signal(self, django_testdir):
+        django_testdir.create_test_module("""
+            import pytest
+
+            from django.conf import settings
+            from django.test.signals import setting_changed
+
+
+            @pytest.fixture(autouse=True, scope='session')
+            def settings_change_printer():
+                def receiver(sender, **kwargs):
+                    fmt_dict = {'actual_value': getattr(settings, kwargs['setting'],
+                                                        '<<does not exist>>')}
+                    fmt_dict.update(kwargs)
+
+                    print('Setting changed: '
+                          'enter=%(enter)s,setting=%(setting)s,'
+                          'value=%(value)s,actual_value=%(actual_value)s'
+                          % fmt_dict)
+
+                setting_changed.connect(receiver, weak=False)
+
+
+            def test_set(settings):
+                settings.SECRET_KEY = 'change 1'
+                settings.SECRET_KEY = 'change 2'
+
+
+            def test_set_non_existent(settings):
+                settings.FOOBAR = 'abc123'
+         """)
+
+        result = django_testdir.runpytest_subprocess('--tb=short', '-v', '-s')
+
+        # test_set
+        result.stdout.fnmatch_lines([
+            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 1*',
+            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 2*',
+            '*Setting changed: enter=False,setting=SECRET_KEY,value=change 1*',
+            '*Setting changed: enter=False,setting=SECRET_KEY,value=foobar*',
+        ])
+
+        result.stdout.fnmatch_lines([
+            '*Setting changed: enter=True,setting=FOOBAR,value=abc123*',
+            ('*Setting changed: enter=False,setting=FOOBAR,value=None,'
+             'actual_value=<<does not exist>>*'),
+        ])
+
 
 class TestLiveServer:
     def test_url(self, live_server):
