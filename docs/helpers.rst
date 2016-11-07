@@ -221,8 +221,8 @@ Example
 ``assert_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~
 
-This fixture allows to check that expected number of queries are performed.
-Note that currently it only supports default database.
+This fixture allows to check for an expected number of DB queries.
+It currently only supports the default database.
 
 
 Example
