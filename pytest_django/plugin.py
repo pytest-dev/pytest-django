@@ -407,42 +407,28 @@ class _DirectMailboxAccessProtector(list):
     __len__ = __getitem__ = __nonzero__ = __bool__ = _raise_assertion
 
 
-@pytest.yield_fixture(autouse=True)
-def _error_on_direct_mail_outbox_access():
+@pytest.fixture(autouse=True)
+def _error_on_direct_mail_outbox_access(monkeypatch):
     if not django_settings_is_configured():
         return
 
     from django.core import mail
 
-    _old_mailbox = getattr(mail, 'outbox', None)
     outbox = _DirectMailboxAccessProtector()
-    setattr(mail, 'outbox', outbox)
-
-    yield outbox
-
-    if _old_mailbox is not None:
-        setattr(mail, 'outbox', _old_mailbox)
-    else:
-        delattr(mail, 'outbox')
+    monkeypatch.setattr(mail, 'outbox', outbox)
+    return outbox
 
 
-@pytest.yield_fixture(scope='function')
-def mailoutbox(_error_on_direct_mail_outbox_access):
+@pytest.fixture(scope='function')
+def mailoutbox(monkeypatch, _error_on_direct_mail_outbox_access):
     if not django_settings_is_configured():
         return
 
     from django.core import mail
 
-    _old_mailbox = getattr(mail, 'outbox', None)
     outbox = list()
-    setattr(mail, 'outbox', outbox)
-
-    yield outbox
-
-    if _old_mailbox is not None:
-        setattr(mail, 'outbox', _old_mailbox)
-    else:
-        delattr(mail, 'outbox')
+    monkeypatch.setattr(mail, 'outbox', outbox)
+    return outbox
 
 
 @pytest.fixture(autouse=True, scope='function')
