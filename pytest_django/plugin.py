@@ -402,7 +402,7 @@ def _django_setup_unittest(request, django_db_blocker):
 class _DirectMailboxAccessProtector(list):
 
     def _raise_assertion(*args, **kwargs):
-        raise AssertionError('Use the mailoutbox fixture')
+        raise AssertionError('To access mail.outbox, use the mailoutbox fixture.')
 
     __len__ = __getitem__ = __nonzero__ = __bool__ = _raise_assertion
 
@@ -424,7 +424,7 @@ def mailoutbox(_error_on_direct_mail_outbox_access):
     from django.core import mail
 
     _old_mailbox = getattr(mail, 'outbox', None)
-    outbox = []
+    outbox = list()
     setattr(mail, 'outbox', outbox)
 
     yield outbox

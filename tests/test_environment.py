@@ -5,6 +5,7 @@ import os
 import pytest
 from django.core import mail
 from django.db import connection
+from django.test import TestCase
 
 from pytest_django_test.app.models import Item
 
@@ -19,9 +20,24 @@ def test_direct_mailbox_access_not_allowed():
     with pytest.raises(AssertionError):
         len(mail.outbox)
 
+    with pytest.raises(AssertionError):
+        mail.outbox[0]
+
+    with pytest.raises(AssertionError):
+        if mail.outbox:
+            pass
+
 
 def test_direct_mailbox_proection_should_not_break_sending_mail():
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+
+
+class TestDirectAccessWorksForDjangoTestCase(TestCase):
+
+    def test_one(self):
+        assert len(mail.outbox) == 0
+        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        assert len(mail.outbox) == 1
 
 
 @pytest.mark.django_project(extra_settings="""
