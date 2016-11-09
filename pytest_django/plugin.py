@@ -399,8 +399,25 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
+class _DirectMailboxAccessProtector(list):
+
+    def _raise_assertion(*args, **kwargs):
+        raise AssertionError('Use the mailoutbox fixture')
+
+    __len__ = __getitem__ = __nonzero__ = __bool__ = _raise_assertion
+
+
+@pytest.yield_fixture(autouse=True)
+def _error_on_direct_mail_outbox_access():
+    from django.core import mail
+    old = mail.outbox
+    mail.outbox = _DirectMailboxAccessProtector()
+    yield
+    mail.outbox = old
+
+
 @pytest.yield_fixture(scope='function')
-def mailoutbox():
+def mailoutbox(_error_on_direct_mail_outbox_access):
     if not django_settings_is_configured():
         return
 

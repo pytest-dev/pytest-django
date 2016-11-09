@@ -15,20 +15,13 @@ from pytest_django_test.app.models import Item
 # to do it.
 
 
-def test_mail(mailoutbox):
-    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
-    assert len(mailoutbox) == 0
+def test_direct_mailbox_access_not_allowed():
+    with pytest.raises(AssertionError):
+        len(mail.outbox)
+
+
+def test_direct_mailbox_proection_should_not_break_sending_mail():
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
-    assert len(mailoutbox) == 1
-    m = mailoutbox[0]
-    assert m.subject == 'subject'
-    assert m.body == 'body'
-    assert m.from_email == 'from@example.com'
-    assert list(m.to) == ['to@example.com']
-
-
-def test_mail_again(mailoutbox):
-    test_mail(mailoutbox)
 
 
 @pytest.mark.django_project(extra_settings="""
