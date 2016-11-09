@@ -15,7 +15,8 @@ Compatibility
 * IMPORTANT: the internal autouse fixture _django_clear_outbox has been
   removed. If you have relied on this to get an empty outbox for your
   test, you should change tests to use the ``mailoutbox`` fixture instead.
-  See documentation of ``mailoutbox`` fixture for usage.
+  See documentation of ``mailoutbox`` fixture for usage. If you try to
+  access mail.outbox directly, AssertionError will be raised.
 
 3.0.0
 -----
