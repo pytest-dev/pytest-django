@@ -34,10 +34,16 @@ def test_direct_mailbox_proection_should_not_break_sending_mail():
 
 class TestDirectAccessWorksForDjangoTestCase(TestCase):
 
-    def test_one(self):
+    def _do_test(self):
         assert len(mail.outbox) == 0
         mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
         assert len(mail.outbox) == 1
+
+    def test_one(self):
+        self._do_test()
+
+    def test_two(self):
+        self._do_test()
 
 
 @pytest.mark.django_project(extra_settings="""
