@@ -407,10 +407,6 @@ class _DirectMailboxAccessProtector(list):
     __len__ = __getitem__ = __nonzero__ = __bool__ = _raise_assertion
 
 
-# def mailoutbox_setup_and_teardown(outbox_type):
-#
-
-
 @pytest.yield_fixture(autouse=True)
 def _error_on_direct_mail_outbox_access():
     if not django_settings_is_configured():
