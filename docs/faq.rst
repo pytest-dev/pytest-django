@@ -103,6 +103,15 @@ compatible with this approach, you need to use the standard Django methods of
 setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
 variables or the ``--settings`` command line option.
 
+How can I give database access to all my tests without the `django_db` marker?
+------------------------------------------------------------------------------
+
+Create an autouse fixture and put it in `conftest.py` in your project root::
+
+    @pytest.fixture(autouse=True)
+    def enable_db_access_for_all_tests(db):
+        pass
+
 How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------
 
