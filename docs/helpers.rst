@@ -217,3 +217,25 @@ Example
     def test_with_specific_settings(settings):
         settings.USE_TZ = True
         assert settings.USE_TZ
+
+``mailoutbox``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A clean mail outbox where django emails are being sent.
+
+Example
+"""""""
+
+::
+
+    from django.core import mail
+
+    def test_mail(mailoutbox):
+        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        assert len(mailoutbox) == 1
+        m = mailoutbox[0]
+        assert m.subject == 'subject'
+        assert m.body == 'body'
+        assert m.from_email == 'from@example.com'
+        assert list(m.to) == ['to@example.com']
+

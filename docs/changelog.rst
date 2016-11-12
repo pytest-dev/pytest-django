@@ -1,6 +1,23 @@
 Changelog
 =========
 
+3.1.0
+-----
+
+Features
+^^^^^^^^
+* Added new function scoped fixture ``mailoutbox`` that gives access to
+  djangos ``mail.outbox``. The will clean/empty the ``mail.outbox`` to
+  assure that no old mails are still in the outbox.
+
+Compatibility
+^^^^^^^^^^^^^
+* IMPORTANT: the internal autouse fixture _django_clear_outbox has been
+  removed. If you have relied on this to get an empty outbox for your
+  test, you should change tests to use the ``mailoutbox`` fixture instead.
+  See documentation of ``mailoutbox`` fixture for usage. If you try to
+  access mail.outbox directly, AssertionError will be raised.
+
 3.0.0
 -----
 

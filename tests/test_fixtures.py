@@ -10,6 +10,7 @@ import pytest
 
 from django.db import connection
 from django.conf import settings as real_settings
+from django.core import mail
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_text
@@ -403,3 +404,19 @@ class Test_django_db_blocker:
     def test_unblock_with_block(self, django_db_blocker):
         with django_db_blocker.unblock():
             Item.objects.exists()
+
+
+def test_mail(mailoutbox):
+    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
+    assert len(mailoutbox) == 0
+    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    assert len(mailoutbox) == 1
+    m = mailoutbox[0]
+    assert m.subject == 'subject'
+    assert m.body == 'body'
+    assert m.from_email == 'from@example.com'
+    assert list(m.to) == ['to@example.com']
+
+
+def test_mail_again(mailoutbox):
+    test_mail(mailoutbox)
