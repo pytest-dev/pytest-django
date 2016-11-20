@@ -9,6 +9,9 @@ Features
 * Added new function scoped fixture ``mailoutbox`` that gives access to
   djangos ``mail.outbox``. The will clean/empty the ``mail.outbox`` to
   assure that no old mails are still in the outbox.
+* If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
+  be cleared for each test to avoid hitting the cache and cause wrong Site
+  object to be returned by ``Site.objects.get_current()``.
 
 Compatibility
 ^^^^^^^^^^^^^

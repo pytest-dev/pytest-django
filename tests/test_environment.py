@@ -3,9 +3,12 @@ from __future__ import with_statement
 import os
 
 import pytest
+from django.contrib.sites.models import Site
+from django.contrib.sites import models as site_models
 from django.core import mail
 from django.db import connection
 from django.test import TestCase
+from pytest_django.lazy_django import get_django_version
 
 from pytest_django_test.app.models import Item
 
@@ -215,3 +218,26 @@ class TestrunnerVerbosity:
             "*PASSED*"])
         assert ("*Destroying test database for alias 'default' ('*')...*"
                 not in result.stdout.str())
+
+
+@pytest.mark.skipif(
+    get_django_version() < (1, 8),
+    reason='Django 1.7 requires settings.SITE_ID to be set, so this test is invalid'
+)
+@pytest.mark.django_db
+@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+def test_clear_site_cache(site_name, rf, monkeypatch):
+    request = rf.get('/')
+    monkeypatch.setattr(request, 'get_host', lambda: 'foo.com')
+    Site.objects.create(domain='foo.com', name=site_name)
+    assert Site.objects.get_current(request=request).name == site_name
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+def test_clear_site_cache_check_site_cache_size(site_name, settings):
+    assert len(site_models.SITE_CACHE) == 0
+    site = Site.objects.create(domain='foo.com', name=site_name)
+    settings.SITE_ID = site.id
+    assert Site.objects.get_current() == site
+    assert len(site_models.SITE_CACHE) == 1
