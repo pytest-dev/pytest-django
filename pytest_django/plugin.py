@@ -410,6 +410,7 @@ class _DirectMailboxAccessProtector(list):
     __bool__ = _raise_assertion
     __eq__ = _raise_assertion
     __ne__ = _raise_assertion
+    __iter__ = _raise_assertion
 
 
 @pytest.fixture(autouse=True)

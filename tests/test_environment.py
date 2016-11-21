@@ -42,6 +42,14 @@ class Test_direct_mailbox_access_not_allowed():
         with pytest.raises(AssertionError):
             mail.outbox != 'whatever'
 
+    def test_unpacking(self):
+        with pytest.raises(AssertionError):
+            (foo,) = mail.outbox
+
+    def test_iteration(self):
+        with pytest.raises(AssertionError):
+            for x in mail.outbox:
+                pass
 
 def test_direct_mailbox_proection_should_not_break_sending_mail():
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
