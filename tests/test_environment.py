@@ -51,6 +51,7 @@ class Test_direct_mailbox_access_not_allowed():
             for x in mail.outbox:
                 pass
 
+
 def test_direct_mailbox_proection_should_not_break_sending_mail():
     mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
 
