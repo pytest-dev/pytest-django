@@ -14,6 +14,7 @@ from .pytest_compat import getfixturevalue
 from .lazy_django import get_django_version, skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
+           'django_db_testcase', 'django_transactional_db_testcase', 
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper']
@@ -108,6 +109,18 @@ def django_db_setup(
         request.addfinalizer(teardown_database)
 
 
+@pytest.fixture
+def django_db_testcase(request):
+    from django.test import TestCase
+    return TestCase
+
+
+@pytest.fixture
+def django_transactional_db_testcase(request):
+    from django.test import TransactionTestCase
+    return TransactionTestCase
+
+
 def _django_db_fixture_helper(transactional, request, django_db_blocker):
     if is_django_unittest(request):
         return
@@ -119,10 +132,9 @@ def _django_db_fixture_helper(transactional, request, django_db_blocker):
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
 
-    if transactional:
-        from django.test import TransactionTestCase as django_case
-    else:
-        from django.test import TestCase as django_case
+    testcase_class_fixture = ('django_transactional_db_testcase'
+                              if transactional else 'django_db_testcase')
+    django_case = getfixturevalue(request, testcase_class_fixture)
 
     test_case = django_case(methodName='__init__')
     test_case._pre_setup()
