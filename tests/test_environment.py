@@ -19,16 +19,28 @@ from pytest_django_test.app.models import Item
 # to do it.
 
 
-def test_direct_mailbox_access_not_allowed():
-    with pytest.raises(AssertionError):
-        len(mail.outbox)
+class Test_direct_mailbox_access_not_allowed():
 
-    with pytest.raises(AssertionError):
-        mail.outbox[0]
+    def test_len(self):
+        with pytest.raises(AssertionError):
+            len(mail.outbox)
 
-    with pytest.raises(AssertionError):
-        if mail.outbox:
-            pass
+    def test_indexing(self):
+        with pytest.raises(AssertionError):
+            mail.outbox[0]
+
+    def test_bool(self):
+        with pytest.raises(AssertionError):
+            if mail.outbox:
+                pass
+
+    def test_equality(self):
+        with pytest.raises(AssertionError):
+            mail.outbox == 'whatever'
+
+    def test_not_equality(self):
+        with pytest.raises(AssertionError):
+            mail.outbox != 'whatever'
 
 
 def test_direct_mailbox_proection_should_not_break_sending_mail():

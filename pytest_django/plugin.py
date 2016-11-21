@@ -404,7 +404,12 @@ class _DirectMailboxAccessProtector(list):
     def _raise_assertion(*args, **kwargs):
         raise AssertionError('To access mail.outbox, use the mailoutbox fixture.')
 
-    __len__ = __getitem__ = __nonzero__ = __bool__ = _raise_assertion
+    __len__ = _raise_assertion
+    __getitem__ = _raise_assertion
+    __nonzero__ = _raise_assertion
+    __bool__ = _raise_assertion
+    __eq__ = _raise_assertion
+    __ne__ = _raise_assertion
 
 
 @pytest.fixture(autouse=True)
