@@ -402,7 +402,9 @@ def _django_setup_unittest(request, django_db_blocker):
 class _DirectMailboxAccessProtector(list):
 
     def _raise_assertion(*args, **kwargs):
-        raise AssertionError('To access mail.outbox, use the mailoutbox fixture.')
+        __tracebackhide__ = True
+        raise AssertionError('''To access mail.outbox, use the mailoutbox fixture.
+See http://pytest-django.readthedocs.io/en/latest/helpers.html#mailoutbox for more information.''')
 
     __len__ = _raise_assertion
     __getitem__ = _raise_assertion
