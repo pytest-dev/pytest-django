@@ -9,11 +9,8 @@ Bug fixes
 
 * Workaround `--pdb` interaction with Django TestCase. The issue is caused by
   Django TestCase not implementing TestCase.debug() properly but was brought to
-  attention with recent changes in pytest 3.0.2. Related issues:
-  * https://github.com/pytest-dev/pytest/issues/1977
-  * https://github.com/pytest-dev/pytest-django/pull/406
-  * https://code.djangoproject.com/ticket/27391
-
+  attention with recent changes in pytest 3.0.2. Related issues: `pytest issue <https://github.com/pytest-dev/pytest/issues/1977>`_, 
+  `Django issue <https://code.djangoproject.com/ticket/27391>`_.
 
 3.1.0
 -----
