@@ -415,44 +415,22 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
-class _DirectMailboxAccessProtector(list):
-
-    def _raise_assertion(*args, **kwargs):
-        __tracebackhide__ = True
-        raise AssertionError('''To access mail.outbox, use the mailoutbox fixture.
-See http://pytest-django.readthedocs.io/en/latest/helpers.html#mailoutbox for more information.''')
-
-    __len__ = _raise_assertion
-    __getitem__ = _raise_assertion
-    __nonzero__ = _raise_assertion
-    __bool__ = _raise_assertion
-    __eq__ = _raise_assertion
-    __ne__ = _raise_assertion
-    __iter__ = _raise_assertion
-
-
-@pytest.fixture(autouse=True)
-def _error_on_direct_mail_outbox_access(monkeypatch):
+@pytest.fixture(scope='function', autouse=True)
+def _dj_autoclear_mailbox():
     if not django_settings_is_configured():
         return
 
     from django.core import mail
-
-    outbox = _DirectMailboxAccessProtector()
-    monkeypatch.setattr(mail, 'outbox', outbox)
-    return outbox
+    del mail.outbox[:]
 
 
 @pytest.fixture(scope='function')
-def mailoutbox(monkeypatch, _error_on_direct_mail_outbox_access):
+def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
     if not django_settings_is_configured():
         return
 
     from django.core import mail
-
-    outbox = list()
-    monkeypatch.setattr(mail, 'outbox', outbox)
-    return outbox
+    return mail.outbox
 
 
 @pytest.fixture(autouse=True, scope='function')

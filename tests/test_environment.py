@@ -18,42 +18,17 @@ from pytest_django_test.app.models import Item
 # This is possible with some of the testdir magic, but this is the lazy way
 # to do it.
 
+@pytest.mark.parametrize('subject', ['subject1', 'subject2'])
+def test_autoclear_mailbox(subject):
+    assert len(mail.outbox) == 0
+    mail.send_mail(subject, 'body', 'from@example.com', ['to@example.com'])
+    assert len(mail.outbox) == 1
 
-class Test_direct_mailbox_access_not_allowed():
-
-    def test_len(self):
-        with pytest.raises(AssertionError):
-            len(mail.outbox)
-
-    def test_indexing(self):
-        with pytest.raises(AssertionError):
-            mail.outbox[0]
-
-    def test_bool(self):
-        with pytest.raises(AssertionError):
-            if mail.outbox:
-                pass
-
-    def test_equality(self):
-        with pytest.raises(AssertionError):
-            mail.outbox == 'whatever'
-
-    def test_not_equality(self):
-        with pytest.raises(AssertionError):
-            mail.outbox != 'whatever'
-
-    def test_unpacking(self):
-        with pytest.raises(AssertionError):
-            (foo,) = mail.outbox
-
-    def test_iteration(self):
-        with pytest.raises(AssertionError):
-            for x in mail.outbox:
-                pass
-
-
-def test_direct_mailbox_proection_should_not_break_sending_mail():
-    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    m = mail.outbox[0]
+    assert m.subject == subject
+    assert m.body == 'body'
+    assert m.from_email == 'from@example.com'
+    assert m.to == ['to@example.com']
 
 
 class TestDirectAccessWorksForDjangoTestCase(TestCase):
