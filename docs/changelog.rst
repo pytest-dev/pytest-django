@@ -30,7 +30,15 @@ Compatibility
   removed. If you have relied on this to get an empty outbox for your
   test, you should change tests to use the ``mailoutbox`` fixture instead.
   See documentation of ``mailoutbox`` fixture for usage. If you try to
-  access mail.outbox directly, AssertionError will be raised.
+  access mail.outbox directly, AssertionError will be raised. If you
+  previously relied on the old behaviour and do not want to change your
+  tests, put this in your project conftest.py::
+
+    @pytest.fixture(autouse=True)
+    def clear_outbox():
+        from django.core import mail
+        mail.outbox = []
+
 
 3.0.0
 -----
