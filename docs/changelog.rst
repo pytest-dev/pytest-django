@@ -1,6 +1,17 @@
 Changelog
 =========
 
+3.1.2
+-----
+
+Bug fixes
+^^^^^^^^^
+
+* Auto clearing of ``mail.outbox`` has been re-introduced to not break
+  functionality in 3.x.x release. This means that Compatibility issues
+  mentioned in the 3.1.0 release are no longer present. Related issue:
+  _`pytest-django issue <https://github.com/pytest-dev/pytest-django/issues/433>`
+
 3.1.1
 -----
 

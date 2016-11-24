@@ -254,3 +254,11 @@ Clearing of site cache
 If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
 be cleared for each test to avoid hitting the cache and cause wrong Site
 object to be returned by ``Site.objects.get_current()``.
+
+
+Clearing of mail.outbox
+~~~~~~~~~~~~~~~~~~~~~~~
+
+``mail.outbox`` will be cleared for each pytest, to give tests a empty
+mailbox. It is however more pytestic to use the ``mailoutbox`` fixture
+to access ``mail.outbox``.
