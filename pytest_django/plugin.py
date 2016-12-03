@@ -31,6 +31,7 @@ from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
+from .fixtures import run_checks  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 from .pytest_compat import getfixturevalue
@@ -327,6 +328,13 @@ def pytest_runtest_setup(item):
     if django_settings_is_configured() and is_django_unittest(item):
         cls = item.cls
         _disable_class_methods(cls)
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus):
+    check_exc = getattr(run_checks, 'exc', None)
+    if check_exc:
+        terminalreporter.write('\n')
+        terminalreporter.write(str(check_exc))
 
 
 @pytest.fixture(autouse=True, scope='session')

@@ -5,6 +5,7 @@ from __future__ import with_statement
 import os
 import sys
 from contextlib import contextmanager
+from io import BytesIO
 
 import pytest
 
@@ -99,8 +100,7 @@ def django_db_setup(
             **setup_databases_args
         )
 
-        if get_django_version() < (1, 11):
-            run_check(request)
+        run_checks(request)
 
     def teardown_database():
         with django_db_blocker.unblock():
@@ -113,30 +113,31 @@ def django_db_setup(
         request.addfinalizer(teardown_database)
 
 
-def run_check(request):
+def run_checks(request):
     from django.core.management import call_command
     from django.core.management.base import SystemCheckError
 
     # Only run once per process
-    if getattr(run_check, 'did_fail', False):
+    if getattr(run_checks, 'ran', False):
         return
+    run_checks.ran = True
 
-    with disable_input_capture(request):
-        try:
-            call_command('check')
-        except SystemCheckError as ex:
-            run_check.did_fail = True
+    out = BytesIO()
+    try:
+        call_command('check', out=out, err=out)
+    except SystemCheckError as ex:
+        run_checks.exc = ex
 
-            if hasattr(request.config, 'slaveinput'):
-                # Kill the xdist test process horribly
-                # N.B. 'shouldstop' maybe be obeyed properly in later as hinted at in
-                # https://github.com/pytest-dev/pytest-xdist/commit/e8fa73719662d1be5074a0750329fe0c35583484
-                print(ex.args[0])
-                sys.exit(1)
-            else:
-                request.session.exitstatus = 1
-                request.session.shouldstop = True
-                raise
+        if hasattr(request.config, 'slaveinput'):
+            # Kill the xdist test process horribly
+            # N.B. 'shouldstop' may be obeyed properly in the future as hinted at in
+            # https://github.com/pytest-dev/pytest-xdist/commit/e8fa73719662d1be5074a0750329fe0c35583484
+            print(ex.args[0])
+            sys.exit(1)
+        else:
+            # Ensure we get the EXIT_TESTSFAILED exit code
+            request.session.testsfailed += 1
+            request.session.shouldstop = True
 
 
 @contextmanager
