@@ -88,3 +88,25 @@ class TestQueryCount(object):
         )
         assert 'test_two_queries' in lines[0]
         assert 'test_one_query' in lines[1]
+
+    def test_should_report_fixture_queries(self, django_testdir):
+        django_testdir.create_test_module('''
+            import pytest
+            from django.db import connection
+
+            @pytest.fixture
+            def one_query():
+                with connection.cursor() as cursor:
+                    cursor.execute('SELECT 1')
+
+            @pytest.mark.django_db
+            def test_without_queries(one_query):
+                pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess(
+            '--setup-show',
+            '--querycount=5'
+        )
+
+        assert '(# queries executed: 1)' in result.stdout.str()

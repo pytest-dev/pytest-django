@@ -325,6 +325,32 @@ def pytest_runtest_setup(item):
 
 
 @pytest.hookimpl(hookwrapper=True)
+def pytest_fixture_setup(fixturedef, request):
+    config = request.config
+
+    if config.option.querycount is None or not config.option.setupshow:
+        yield
+        return
+
+    from django.test.utils import CaptureQueriesContext
+    from django.db import connection
+
+    with CaptureQueriesContext(connection) as context:
+        yield
+
+    querycount = len(context.captured_queries)
+
+    if querycount:
+        capman = config.pluginmanager.getplugin('capturemanager')
+        capman.suspendcapture()
+
+        tw = config.get_terminal_writer()
+        tw.write(' (# queries executed: {})'.format(querycount))
+
+        capman.resumecapture()
+
+
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_call(item):
     count_parameter = item.config.option.querycount
     if count_parameter is None:
