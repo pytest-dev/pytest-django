@@ -62,6 +62,8 @@ def test_sole_test(django_testdir):
     """
 
     django_testdir.create_test_module('''
+        import os
+
         from django.test import TestCase
         from django.conf import settings
 
@@ -70,8 +72,9 @@ def test_sole_test(django_testdir):
         class TestFoo(TestCase):
             def test_foo(self):
                 # Make sure we are actually using the test database
-                db_name = settings.DATABASES['default']['NAME']
-                assert db_name.startswith('test_') or db_name == ':memory:'
+                _, db_name = os.path.split(settings.DATABASES['default']['NAME'])
+                assert db_name.startswith('test_') or db_name == ':memory:' \\
+                    or 'file:memorydb' in db_name
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
@@ -232,3 +235,46 @@ class TestCaseWithTrDbFixture(TestCase):
     def test_simple(self):
         # We only want to check setup/teardown does not conflict
         assert 1
+
+
+def test_pdb_enabled(django_testdir):
+    """
+    Make sure the database is flushed and tests are isolated when
+    using the --pdb option.
+
+    See issue #405 for details:
+    https://github.com/pytest-dev/pytest-django/issues/405
+    """
+
+    django_testdir.create_test_module('''
+        import os
+
+        from django.test import TestCase
+        from django.conf import settings
+
+        from .app.models import Item
+
+        class TestPDBIsolation(TestCase):
+            def setUp(self):
+                """setUp should be called after starting a transaction"""
+                assert Item.objects.count() == 0
+                Item.objects.create(name='Some item')
+                Item.objects.create(name='Some item again')
+
+            def test_count(self):
+                self.assertEqual(Item.objects.count(), 2)
+                assert Item.objects.count() == 2
+                Item.objects.create(name='Foo')
+                self.assertEqual(Item.objects.count(), 3)
+
+            def test_count_again(self):
+                self.test_count()
+
+            def tearDown(self):
+                """tearDown should be called before rolling back the database"""
+                assert Item.objects.count() == 3
+
+    ''')
+
+    result = django_testdir.runpytest_subprocess('-v', '--pdb')
+    assert result.ret == 0

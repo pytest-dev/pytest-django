@@ -1,11 +1,106 @@
 Changelog
 =========
 
-NEXT
-----
+3.1.2
+-----
+
+Bug fixes
+^^^^^^^^^
+
+* Auto clearing of ``mail.outbox`` has been re-introduced to not break
+  functionality in 3.x.x release. This means that Compatibility issues
+  mentioned in the 3.1.0 release are no longer present. Related issue:
+  _`pytest-django issue <https://github.com/pytest-dev/pytest-django/issues/433>`
+
+3.1.1
+-----
+
+Bug fixes
+^^^^^^^^^
+
+* Workaround `--pdb` interaction with Django TestCase. The issue is caused by
+  Django TestCase not implementing TestCase.debug() properly but was brought to
+  attention with recent changes in pytest 3.0.2. Related issues: `pytest issue <https://github.com/pytest-dev/pytest/issues/1977>`_, 
+  `Django issue <https://code.djangoproject.com/ticket/27391>`_.
+
+3.1.0
+-----
+
+Features
+^^^^^^^^
+* Added new function scoped fixture ``mailoutbox`` that gives access to
+  djangos ``mail.outbox``. The will clean/empty the ``mail.outbox`` to
+  assure that no old mails are still in the outbox.
+* If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
+  be cleared for each test to avoid hitting the cache and cause wrong Site
+  object to be returned by ``Site.objects.get_current()``.
+
+Compatibility
+^^^^^^^^^^^^^
+* IMPORTANT: the internal autouse fixture _django_clear_outbox has been
+  removed. If you have relied on this to get an empty outbox for your
+  test, you should change tests to use the ``mailoutbox`` fixture instead.
+  See documentation of ``mailoutbox`` fixture for usage. If you try to
+  access mail.outbox directly, AssertionError will be raised. If you
+  previously relied on the old behaviour and do not want to change your
+  tests, put this in your project conftest.py::
+
+    @pytest.fixture(autouse=True)
+    def clear_outbox():
+        from django.core import mail
+        mail.outbox = []
+
+
+3.0.0
+-----
+
+Bug fixes
+^^^^^^^^^
+
 * Fix error when Django happens to be imported before pytest-django runs.
   Thanks to Will Harris for `the bug report
   <https://github.com/pytest-dev/pytest-django/issues/289>`_.
+
+Features
+^^^^^^^^
+* Added a new option ``--migrations`` to negate a default usage of
+  ``--nomigrations``.
+
+* The previously internal pytest-django fixture that handles database creation
+  and setup has been refactored, refined and made a public API.
+
+  This opens up more flexibility and advanced use cases to configure the test
+  database in new ways.
+
+  See :ref:`advanced-database-configuration` for more information on the new
+  fixtures and example use cases.
+
+Compatibility
+^^^^^^^^^^^^^
+* Official for the pytest 3.0.0 (2.9.2 release should work too, though). The
+  documentation is updated to mention ``pytest`` instead of ``py.test``.
+
+* Django versions 1.4, 1.5 and 1.6 is no longer supported. The supported
+  versions are now 1.7 and forward. Django master is supported as of
+  2016-08-21.
+
+* pytest-django no longer supports Python 2.6.
+
+* Specifying the ``DJANGO_TEST_LIVE_SERVER_ADDRESS`` environment variable is no
+  longer supported. Use ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` instead.
+
+* Ensuring accidental database access is now stricter than before. Previously
+  database access was prevented on the cursor level. To be safer and prevent
+  more cases, it is now prevented at the connection level. If you previously
+  had tests which interacted with the databases without a database cursor, you
+  will need to mark them with the :func:`pytest.mark.django_db` marker or
+  request the ``db`` fixture.
+
+* The previously undocumented internal fixtures ``_django_db_setup``,
+  ``_django_cursor_wrapper`` have been removed in favour of the new public
+  fixtures. If you previously relied on these internal fixtures, you must
+  update your code. See :ref:`advanced-database-configuration` for more
+  information on the new fixtures and example use cases.
 
 2.9.1
 -----
@@ -26,7 +121,7 @@ and Python 3.5
 
 Features
 ^^^^^^^^
-* `--fail-on-template-vars` - fail tests for invalid variables in templates.
+* ``--fail-on-template-vars`` - fail tests for invalid variables in templates.
   Thanks to Johannes Hoppe for idea and implementation. Thanks Daniel Hahler
   for review and feedback.
 
@@ -37,18 +132,18 @@ Bug fixes
   discussions. Fixes `issue #183
   <https://github.com/pytest-dev/pytest-django/issues/183>`_.
 
-* Call `setUpClass()` in Django `TestCase` properly when test class is
+* Call ``setUpClass()`` in Django ``TestCase`` properly when test class is
   inherited multiple places. Thanks to Benedikt Forchhammer for report and
   initial test case. Fixes `issue #265 <https://github.com/pytest-dev/pytest-django/issues/265>`_.
 
 Compatibility
 ^^^^^^^^^^^^^
 
-* Settings defined in `pytest.ini`/`tox.ini`/`setup.cfg` used to override
-  `DJANGO_SETTINGS_MODULE` defined in the environment. Previously the order was
+* Settings defined in ``pytest.ini``/``tox.ini``/``setup.cfg`` used to override
+  ``DJANGO_SETTINGS_MODULE`` defined in the environment. Previously the order was
   undocumented. Now, instead the settings from the environment will be used
   instead. If you previously relied on overriding the environment variable,
-  you can instead specify `addopts = --ds=yourtestsettings` in the ini-file
+  you can instead specify ``addopts = --ds=yourtestsettings`` in the ini-file
   which will use the test settings. See `PR #199
   <https://github.com/pytest-dev/pytest-django/pull/199>`_.
 

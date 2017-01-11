@@ -11,7 +11,7 @@ except ImportError:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pytest_django' + db_suffix,
+        'NAME': 'pytest_django' + db_suffix,  # noqa
         'HOST': 'localhost',
         'USER': '',
     },

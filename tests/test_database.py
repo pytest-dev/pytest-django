@@ -1,34 +1,11 @@
 from __future__ import with_statement
 
 import pytest
-from django.db import connection, transaction
+from django.db import connection
 from django.test.testcases import connections_support_transactions
 
+from pytest_django.pytest_compat import getfixturevalue
 from pytest_django_test.app.models import Item
-
-
-def noop_transactions():
-    """Test whether transactions are disabled.
-
-    Return True if transactions are disabled, False if they are
-    enabled.
-    """
-
-    # Newer versions of Django simply run standard tests in an atomic block.
-    if hasattr(connection, 'in_atomic_block'):
-        return connection.in_atomic_block
-    else:
-        with transaction.commit_manually():
-            Item.objects.create(name='transaction_noop_test')
-            transaction.rollback()
-
-        try:
-            item = Item.objects.get(name='transaction_noop_test')
-        except Item.DoesNotExist:
-            return False
-        else:
-            item.delete()
-            return True
 
 
 def test_noaccess():
@@ -57,9 +34,9 @@ class TestDatabaseFixtures:
     @pytest.fixture(params=['db', 'transactional_db'])
     def both_dbs(self, request):
         if request.param == 'transactional_db':
-            return request.getfuncargvalue('transactional_db')
+            return getfixturevalue(request, 'transactional_db')
         elif request.param == 'db':
-            return request.getfuncargvalue('db')
+            return getfixturevalue(request, 'db')
 
     def test_access(self, both_dbs):
         Item.objects.create(name='spam')
@@ -72,13 +49,13 @@ class TestDatabaseFixtures:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     def test_transactions_enabled(self, transactional_db):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     @pytest.fixture
     def mydb(self, both_dbs):
@@ -147,21 +124,21 @@ class TestDatabaseMarker:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=False)
     def test_transactions_disabled_explicit(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert noop_transactions()
+        assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=True)
     def test_transactions_enabled(self):
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
 
 def test_unittest_interaction(django_testdir):
@@ -199,5 +176,34 @@ def test_unittest_interaction(django_testdir):
         "*test_db_access_2 FAILED*",
         "*test_db_access_3 FAILED*",
         "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-        "*Failed: Database access not allowed, use the \"django_db\" mark to enable*",
+        '*Failed: Database access not allowed, use the "django_db" mark, '
+        'or the "db" or "transactional_db" fixtures to enable it.',
     ])
+
+
+class Test_database_blocking:
+    def test_db_access_in_conftest(self, django_testdir):
+        """Make sure database access in conftest module is prohibited."""
+
+        django_testdir.makeconftest("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stderr.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark, '
+            'or the "db" or "transactional_db" fixtures to enable it.*',
+        ])
+
+    def test_db_access_in_test_module(self, django_testdir):
+        django_testdir.create_test_module("""
+            from tpkg.app.models import Item
+            Item.objects.get()
+        """)
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            '*Failed: Database access not allowed, use the "django_db" mark, '
+            'or the "db" or "transactional_db" fixtures to enable it.',
+        ])

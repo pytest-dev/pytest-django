@@ -7,14 +7,17 @@ fixtures are tested in test_database.
 from __future__ import with_statement
 
 import pytest
+
+from django.db import connection
 from django.conf import settings as real_settings
+from django.core import mail
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
+from django.utils.encoding import force_text
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import force_text, HTTPError, urlopen
-from pytest_django_test.db_helpers import noop_transactions
+from pytest_django_test.compat import HTTPError, urlopen
 
 
 def test_client(client):
@@ -83,6 +86,77 @@ class TestSettings:
         assert hasattr(settings, 'SECRET_KEY')
         assert hasattr(real_settings, 'SECRET_KEY')
 
+    def test_signals(self, settings):
+        result = []
+
+        def assert_signal(signal, sender, setting, value, enter):
+            result.append((setting, value, enter))
+
+        from django.test.signals import setting_changed
+        setting_changed.connect(assert_signal)
+
+        result = []
+        settings.SECRET_KEY = 'change 1'
+        settings.SECRET_KEY = 'change 2'
+        assert result == [
+            ('SECRET_KEY', 'change 1', True),
+            ('SECRET_KEY', 'change 2', True),
+        ]
+
+        result = []
+        settings.FOOBAR = 'abc123'
+        assert sorted(result) == [
+            ('FOOBAR', 'abc123', True),
+        ]
+
+    def test_modification_signal(self, django_testdir):
+        django_testdir.create_test_module("""
+            import pytest
+
+            from django.conf import settings
+            from django.test.signals import setting_changed
+
+
+            @pytest.fixture(autouse=True, scope='session')
+            def settings_change_printer():
+                def receiver(sender, **kwargs):
+                    fmt_dict = {'actual_value': getattr(settings, kwargs['setting'],
+                                                        '<<does not exist>>')}
+                    fmt_dict.update(kwargs)
+
+                    print('Setting changed: '
+                          'enter=%(enter)s,setting=%(setting)s,'
+                          'value=%(value)s,actual_value=%(actual_value)s'
+                          % fmt_dict)
+
+                setting_changed.connect(receiver, weak=False)
+
+
+            def test_set(settings):
+                settings.SECRET_KEY = 'change 1'
+                settings.SECRET_KEY = 'change 2'
+
+
+            def test_set_non_existent(settings):
+                settings.FOOBAR = 'abc123'
+         """)
+
+        result = django_testdir.runpytest_subprocess('--tb=short', '-v', '-s')
+
+        # test_set
+        result.stdout.fnmatch_lines([
+            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 1*',
+            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 2*',
+            '*Setting changed: enter=False,setting=SECRET_KEY,value=change 1*',
+            '*Setting changed: enter=False,setting=SECRET_KEY,value=foobar*',
+        ])
+
+        result.stdout.fnmatch_lines([
+            '*Setting changed: enter=True,setting=FOOBAR,value=abc123*',
+            ('*Setting changed: enter=False,setting=FOOBAR,value=None,'
+             'actual_value=<<does not exist>>*'),
+        ])
+
 
 class TestLiveServer:
     def test_url(self, live_server):
@@ -92,7 +166,7 @@ class TestLiveServer:
         if not connections_support_transactions():
             pytest.skip('transactions required for this test')
 
-        assert not noop_transactions()
+        assert not connection.in_atomic_block
 
     def test_db_changes_visibility(self, live_server):
         response_data = urlopen(live_server + '/item_count/').read()
@@ -136,15 +210,6 @@ class TestLiveServer:
         response_data = urlopen(live_server + '/item_count/').read()
         assert force_text(response_data) == 'Item count: 1'
 
-    @pytest.mark.skipif(get_django_version() >= (1, 7),
-                        reason="Django < 1.7 required")
-    def test_serve_static(self, live_server, settings):
-        """
-        Test that the LiveServer serves static files by default.
-        """
-        response_data = urlopen(live_server + '/static/a_file.txt').read()
-        assert force_text(response_data) == 'bla\n'
-
     @pytest.mark.django_project(extra_settings="""
         INSTALLED_APPS = [
             'django.contrib.auth',
@@ -164,10 +229,7 @@ class TestLiveServer:
         """
         django_testdir.create_test_module("""
             import pytest
-            try:
-                from django.utils.encoding import force_text
-            except ImportError:
-                from django.utils.encoding import force_unicode as force_text
+            from django.utils.encoding import force_text
 
             try:
                 from urllib2 import urlopen, HTTPError
@@ -197,6 +259,20 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + '/static/a_file.txt').read()
 
+    @pytest.mark.skipif(get_django_version() < (1, 11),
+                        reason='Django >= 1.11 required')
+    def test_specified_port_error_message_django_111(self, django_testdir):
+        django_testdir.create_test_module("""
+        def test_with_live_server(live_server):
+            pass
+        """)
+
+        result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234')
+        result.stdout.fnmatch_lines([
+            '*Specifying a live server port is not supported in Django 1.11. This '
+            'will be an error in a future pytest-django release.*'
+        ])
+
 
 @pytest.mark.django_project(extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
@@ -209,8 +285,6 @@ class TestLiveServer:
     ]
     ROOT_URLCONF = 'tpkg.app.urls'
     """)
-@pytest.mark.skipif(get_django_version() < (1, 5),
-                    reason="Django >= 1.5 required")
 def test_custom_user_model(django_testdir):
     django_testdir.create_app_file("""
         from django.contrib.auth.models import AbstractUser
@@ -245,7 +319,7 @@ def test_custom_user_model(django_testdir):
                     Template('Access denied').render(Context()))
         """, 'views.py')
     django_testdir.makepyfile("""
-        from pytest_django_test.compat import force_text
+        from django.utils.encoding import force_text
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
@@ -267,6 +341,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0001_initial'),
+        ('app', '0001_initial'),
     ]
 
     operations = [
@@ -296,8 +371,52 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-    """, 'migrations/0001_initial.py')  # noqa
+    """, 'migrations/0002_custom_user_model.py')  # noqa
 
     result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines(['*1 passed*'])
     assert result.ret == 0
+
+
+class Test_django_db_blocker:
+    @pytest.mark.django_db
+    def test_block_manually(self, django_db_blocker):
+        try:
+            django_db_blocker.block()
+            with pytest.raises(pytest.fail.Exception):
+                Item.objects.exists()
+        finally:
+            django_db_blocker.restore()
+
+    @pytest.mark.django_db
+    def test_block_with_block(self, django_db_blocker):
+        with django_db_blocker.block():
+            with pytest.raises(pytest.fail.Exception):
+                Item.objects.exists()
+
+    def test_unblock_manually(self, django_db_blocker):
+        try:
+            django_db_blocker.unblock()
+            Item.objects.exists()
+        finally:
+            django_db_blocker.restore()
+
+    def test_unblock_with_block(self, django_db_blocker):
+        with django_db_blocker.unblock():
+            Item.objects.exists()
+
+
+def test_mail(mailoutbox):
+    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
+    assert len(mailoutbox) == 0
+    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    assert len(mailoutbox) == 1
+    m = mailoutbox[0]
+    assert m.subject == 'subject'
+    assert m.body == 'body'
+    assert m.from_email == 'from@example.com'
+    assert list(m.to) == ['to@example.com']
+
+
+def test_mail_again(mailoutbox):
+    test_mail(mailoutbox)

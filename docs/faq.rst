@@ -31,7 +31,7 @@ locale, put the following code in your project's `conftest.py
 
 My tests are not being found. Why not?
 -------------------------------------------------------------------------------------
- By default, py.test looks for tests in files named ``test_*.py`` (note that
+ By default, pytest looks for tests in files named ``test_*.py`` (note that
  this is not the same as ``test*.py``).  If you have your tests in files with
  other names, they will not be collected. It is common to put tests under
  ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini``
@@ -43,25 +43,74 @@ My tests are not being found. Why not?
 When debugging test collection problems, the ``--collectonly`` flag and ``-rs``
 (report skipped tests) can be helpful.
 
-How do South and pytest-django play together?
----------------------------------------------
-
-pytest-django detects South and applies its monkey-patch, which gets fixed
-to handle initial data properly (which South would skip otherwise, because
-of a bug).
-
-The ``SOUTH_TESTS_MIGRATE`` Django setting can be used to control whether
-migrations are used to construct the test database.
-
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
 
 Yes. pytest-django supports running tests in parallel with pytest-xdist. Each
 process created by xdist gets its own separate database that is used for the
-tests. This ensures that each test can run independently, regardless of wheter
+tests. This ensures that each test can run independently, regardless of whether
 transactions are tested or not.
 
 .. _faq-getting-help:
+
+How can I use ``manage.py test`` with pytest-django?
+----------------------------------------------------
+
+pytest-django is designed to work with the ``pytest`` command, but if you
+really need integration with ``manage.py test``, you can create a simple
+test runner like this::
+
+    class PytestTestRunner(object):
+        """Runs pytest to discover and run tests."""
+
+        def __init__(self, verbosity=1, failfast=False, keepdb=False, **kwargs):
+            self.verbosity = verbosity
+            self.failfast = failfast
+            self.keepdb = keepdb
+
+        def run_tests(self, test_labels):
+            """Run pytest and return the exitcode.
+
+            It translates some of Django's test command option to pytest's.
+            """
+            import pytest
+
+            argv = []
+            if self.verbosity == 0:
+                argv.append('--quiet')
+            if self.verbosity == 2:
+                argv.append('--verbose')
+            if self.verbosity == 3:
+                argv.append('-vv')
+            if self.failfast:
+                argv.append('--exitfirst')
+            if self.keepdb:
+                argv.append('--reuse-db')
+
+            argv.extend(test_labels)
+            return pytest.main(argv)
+
+Add the path to this class in your Django settings::
+
+    TEST_RUNNER = 'my_project.runner.PytestTestRunner'
+
+Usage::
+
+    ./manage.py test <django args> -- <pytest args>
+
+**Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
+compatible with this approach, you need to use the standard Django methods of
+setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
+variables or the ``--settings`` command line option.
+
+How can I give database access to all my tests without the `django_db` marker?
+------------------------------------------------------------------------------
+
+Create an autouse fixture and put it in `conftest.py` in your project root::
+
+    @pytest.fixture(autouse=True)
+    def enable_db_access_for_all_tests(db):
+        pass
 
 How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------

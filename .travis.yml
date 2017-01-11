@@ -1,45 +1,63 @@
 # Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
-python:
-  - "3.5"
-env:
-  - TESTENV=pypy-2.8.7-master-sqlite_file
-  - TESTENV=pypy3-2.8.7-1.8-sqlite_file
-  - TESTENV=python2.6-2.8.7-1.6-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.4-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.5-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.6-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.7-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.8-sqlite_file
-  - TESTENV=python2.7-2.8.7-1.9-sqlite_file
-  - TESTENV=python2.7-2.8.7-master-mysql_innodb
-  - TESTENV=python2.7-2.8.7-master-mysql_myisam
-  - TESTENV=python2.7-2.8.7-master-sqlite_file
-  - TESTENV=python3.3-2.8.7-1.6-sqlite_file
-  - TESTENV=python3.4-2.8.7-1.5-sqlite_file
-  - TESTENV=python3.4-2.8.7-1.6-sqlite_file
-  - TESTENV=python3.4-2.8.7-1.7-sqlite_file
-  - TESTENV=python3.4-2.8.7-1.8-sqlite_file
-  - TESTENV=python3.4-2.8.7-1.9-sqlite_file
-  - TESTENV=python3.4-2.8.7-master-sqlite_file
-  - TESTENV=python3.5-2.7.3-master-sqlite_file
-  - TESTENV=python3.5-2.8.7-master-postgres
-  - TESTENV=python3.5-2.8.7-master-sqlite
-  - TESTENV=python3.5-2.8.7-master-sqlite_file
-  - TESTENV=checkqa-python2.7
-  - TESTENV=checkqa-python3.4
+
 matrix:
+  fast_finish: true
+  include:
+
+    - python: 3.5
+      env: TOXENV=py35-pytest30-djangomaster-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest30-django1.10-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest30-django1.9-postgres
+    - python: 3.5
+      env: TOXENV=py35-pytest30-django1.8-postgres
+    - python: 3.5
+      env: TOXENV=py35-checkqa
+
+    - python: 3.4
+      env: TOXENV=py34-pytest30-django1.10-postgres
+
+    - python: 3.3
+      env: TOXENV=py34-pytest30-django1.8-postgres
+
+    - python: 2.7
+      env: TOXENV=py27-pytest30-djangomaster-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.10-mysql_innodb
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.10-mysql_myisam
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.10-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.9-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.8-postgres
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.7-postgres
+    - python: 2.7
+      env: TOXENV=py27-checkqa
+
+    - python: pypy3
+      env: TOXENV=pypy3-pytest29-django1.8-sqlite_file
+    - python: pypy3
+      env: TOXENV=pypy3-pytest30-django1.8-sqlite
+    - python: pypy3
+      env: TOXENV=pypy3-pytest30-django1.8-sqlite_file
+
+    - python: pypy
+      env: TOXENV=pypy-pytest30-django1.10-sqlite_file
+
   allow_failures:
-    - env: TESTENV=pypy-2.8.7-master-sqlite_file
-    - env: TESTENV=python2.7-2.8.7-master-mysql_innodb
-    - env: TESTENV=python2.7-2.8.7-master-mysql_myisam
-    - env: TESTENV=python2.7-2.8.7-master-sqlite_file
-    - env: TESTENV=python3.4-2.8.7-master-sqlite_file
-    - env: TESTENV=python3.5-2.7.3-master-sqlite_file
-    - env: TESTENV=python3.5-2.8.7-master-postgres
-    - env: TESTENV=python3.5-2.8.7-master-sqlite
-    - env: TESTENV=python3.5-2.8.7-master-sqlite_file
+    - env: TOXENV=py27-pytest30-djangomaster-postgres
+    - env: TOXENV=py35-pytest30-djangomaster-postgres
+
+cache:
+  directories:
+    - "${TRAVIS_BUILD_DIR}/.tox"
+
 install:
   # Create pip wrapper script, using travis_retry (a function) and
   # inject it into tox.ini.
@@ -55,4 +73,7 @@ install:
   - diff tox.ini tox.ini.bak && return 1 || true
 
   - pip install tox==2.3.1
-script: tox -e $TESTENV
+
+script:
+  - tox
+  - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
