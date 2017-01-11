@@ -89,6 +89,14 @@ DJANGO_ASSERTS = {
              'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
              'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
              'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual'),
+    # from https://github.com/django/django/blob/stable/1.10.x/django/test/testcases.py#L155
+    #  and https://github.com/django/django/blob/stable/1.10.x/django/test/testcases.py#L797
+    (1, 10): ('assertContains', 'assertFieldOutput', 'assertFormError',
+              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+              'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
+              'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
+              'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
+              'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual'),
 }
 
 # ############### pytest hooks ################
