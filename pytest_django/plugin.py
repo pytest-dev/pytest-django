@@ -66,7 +66,7 @@ DJANGO_ASSERTS = {
              'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
              'assertXMLEqual', 'assertXMLNotEqual'),
     # from https://github.com/django/django/blob/stable/1.7.x/django/test/testcases.py#L162
-    #  and https://github.com/django/django/blob/stable/1.7.x/django/test/testcases.py#L718
+    #  and https://github.com/django/django/blob/stable/1.7.x/django/test/testcases.py#L722
     (1, 7): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
              'assertInHTML', 'assertJSONEqual', 'assertNotContains',
@@ -74,8 +74,16 @@ DJANGO_ASSERTS = {
              'assertRedirects', 'assertTemplateNotUsed', 'assertTemplateUsed',
              'assertXMLEqual', 'assertXMLNotEqual'),
     # from https://github.com/django/django/blob/stable/1.8.x/django/test/testcases.py#L142
-    #  and https://github.com/django/django/blob/stable/1.8.x/django/test/testcases.py#L747
+    #  and https://github.com/django/django/blob/stable/1.8.x/django/test/testcases.py#L751
     (1, 8): ('assertContains', 'assertFieldOutput', 'assertFormError',
+             'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
+             'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
+             'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
+             'assertRaisesMessage', 'assertRedirects', 'assertTemplateNotUsed',
+             'assertTemplateUsed', 'assertXMLEqual', 'assertXMLNotEqual'),
+    # from https://github.com/django/django/blob/stable/1.9.x/django/test/testcases.py#L158
+    #  and https://github.com/django/django/blob/stable/1.9.x/django/test/testcases.py#L818
+    (1, 9): ('assertContains', 'assertFieldOutput', 'assertFormError',
              'assertFormsetError', 'assertHTMLEqual', 'assertHTMLNotEqual',
              'assertInHTML', 'assertJSONEqual', 'assertJSONNotEqual',
              'assertNotContains', 'assertNumQueries', 'assertQuerysetEqual',
