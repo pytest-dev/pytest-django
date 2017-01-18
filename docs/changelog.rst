@@ -10,7 +10,7 @@ Bug fixes
 * Auto clearing of ``mail.outbox`` has been re-introduced to not break
   functionality in 3.x.x release. This means that Compatibility issues
   mentioned in the 3.1.0 release are no longer present. Related issue:
-  _`pytest-django issue <https://github.com/pytest-dev/pytest-django/issues/433>`
+  `pytest-django issue <https://github.com/pytest-dev/pytest-django/issues/433>`__
 
 3.1.1
 -----
@@ -20,8 +20,9 @@ Bug fixes
 
 * Workaround `--pdb` interaction with Django TestCase. The issue is caused by
   Django TestCase not implementing TestCase.debug() properly but was brought to
-  attention with recent changes in pytest 3.0.2. Related issues: `pytest issue <https://github.com/pytest-dev/pytest/issues/1977>`_, 
-  `Django issue <https://code.djangoproject.com/ticket/27391>`_.
+  attention with recent changes in pytest 3.0.2. Related issues:
+  `pytest issue <https://github.com/pytest-dev/pytest/issues/1977>`__,
+  `Django issue <https://code.djangoproject.com/ticket/27391>`__
 
 3.1.0
 -----
@@ -59,7 +60,7 @@ Bug fixes
 
 * Fix error when Django happens to be imported before pytest-django runs.
   Thanks to Will Harris for `the bug report
-  <https://github.com/pytest-dev/pytest-django/issues/289>`_.
+  <https://github.com/pytest-dev/pytest-django/issues/289>`__.
 
 Features
 ^^^^^^^^
@@ -110,7 +111,7 @@ Bug fixes
 
 * Fix regression introduced in 2.9.0 that caused TestCase subclasses with
   mixins to cause errors. Thanks MikeVL for `the bug report
-  <https://github.com/pytest-dev/pytest-django/issues/280>`_.
+  <https://github.com/pytest-dev/pytest-django/issues/280>`__.
 
 
 2.9.0
@@ -130,11 +131,12 @@ Bug fixes
 * Ensure urlconf is properly reset when using @pytest.mark.urls. Thanks to
   Sarah Bird, David Szotten, Daniel Hahler and Yannick PÉROUX for patch and
   discussions. Fixes `issue #183
-  <https://github.com/pytest-dev/pytest-django/issues/183>`_.
+  <https://github.com/pytest-dev/pytest-django/issues/183>`__.
 
 * Call ``setUpClass()`` in Django ``TestCase`` properly when test class is
   inherited multiple places. Thanks to Benedikt Forchhammer for report and
-  initial test case. Fixes `issue #265 <https://github.com/pytest-dev/pytest-django/issues/265>`_.
+  initial test case. Fixes `issue #265
+  <https://github.com/pytest-dev/pytest-django/issues/265>`__.
 
 Compatibility
 ^^^^^^^^^^^^^
@@ -145,7 +147,7 @@ Compatibility
   instead. If you previously relied on overriding the environment variable,
   you can instead specify ``addopts = --ds=yourtestsettings`` in the ini-file
   which will use the test settings. See `PR #199
-  <https://github.com/pytest-dev/pytest-django/pull/199>`_.
+  <https://github.com/pytest-dev/pytest-django/pull/199>`__.
 
 * Support for Django 1.9.
 
@@ -186,7 +188,9 @@ Features
 * Automatic discovery of Django projects to make it easier for new users. This
   change is slightly backward incompatible, if you encounter problems with it,
   the old behaviour can be restored by adding this to ``pytest.ini``,
-  ``setup.cfg`` or ``tox.ini``::
+  ``setup.cfg`` or ``tox.ini``:
+
+  .. code-block:: ini
 
     [pytest]
     django_find_project = false
@@ -366,7 +370,7 @@ way for easier additions of new and exciting features in the future!
 1.3
 ---
 * Added ``--reuse-db`` and ``--create-db`` to allow database re-use. Many
-  thanks to `django-nose <https://github.com/jbalogh/django-nose>`_ for
+  thanks to `django-nose <https://github.com/jbalogh/django-nose>`__ for
   code and inspiration for this feature.
 
 1.2.2
@@ -389,7 +393,8 @@ way for easier additions of new and exciting features in the future!
 1.1
 ---
 
-* The initial release of this fork from `Ben Firshman original project <http://github.com/bfirsh/pytest_django>`_
+* The initial release of this fork from `Ben Firshman original project
+  <http://github.com/bfirsh/pytest_django>`__
 * Added documentation
 * Uploaded to PyPI for easy installation
 * Added the ``transaction_test_case`` decorator for tests that needs real transactions
