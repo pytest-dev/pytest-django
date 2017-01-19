@@ -40,6 +40,16 @@ matrix:
     - python: 2.7
       env: TOXENV=py27-checkqa
 
+    - python: pypy
+      env: TOXENV=pypy-pytest30-django1.10-sqlite_file
+
+  allow_failures:
+    - env: TOXENV=py27-pytest30-djangomaster-postgres
+    - env: TOXENV=py35-pytest30-djangomaster-postgres
+
+    # Temporary.
+    # https://github.com/pytest-dev/pytest-django/pull/445
+    # https://github.com/pytest-dev/pytest-django/issues/448
     - python: pypy3
       env: TOXENV=pypy3-pytest29-django1.8-sqlite_file
     - python: pypy3
@@ -47,12 +57,6 @@ matrix:
     - python: pypy3
       env: TOXENV=pypy3-pytest30-django1.8-sqlite_file
 
-    - python: pypy
-      env: TOXENV=pypy-pytest30-django1.10-sqlite_file
-
-  allow_failures:
-    - env: TOXENV=py27-pytest30-djangomaster-postgres
-    - env: TOXENV=py35-pytest30-djangomaster-postgres
 
 cache:
   directories:
