@@ -12,3 +12,10 @@ def is_django_unittest(request_or_item):
         return False
 
     return issubclass(cls, SimpleTestCase)
+
+
+try:
+    # django.urls was introduced in Django 1.10
+    from django.urls import clear_url_caches, set_urlconf, is_valid_path, reverse, NoReverseMatch
+except ImportError:
+    from django.core.urlresolvers import clear_url_caches, set_urlconf, is_valid_path, reverse, NoReverseMatch
