@@ -11,27 +11,27 @@ for testing `Django`_ applications and projects.
 Quick Start
 ===========
 
-1. ``pip install pytest-django``
-2. Make sure ``DJANGO_SETTINGS_MODULE`` is defined and and run tests with the ``pytest`` command.
-3. (Optional) If you want tests of Django's default application layout be discovered (``tests.py``),
-   if you put your tests under a ``tests/`` directory , or your files are not named ``test_FOO.py``,
-   see the FAQ at :ref:`faq-tests-not-being-picked-up`.
+.. code-block:: bash
 
-Table of Contents
-=================
+   $ pip install pytest-django
 
-.. toctree::
-   :maxdepth: 3
+Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
+:ref:`configuring_django_settings`) and make your tests discoverable
+(see :ref:`faq-tests-not-being-picked-up`):
 
-   tutorial
-   configuring_django
-   managing_python_path
-   usage
-   database
-   helpers
-   faq
-   contributing
-   changelog
+.. code-block:: ini
+
+   # -- FILE: pytest.ini (or tox.ini)
+   [pytest]
+   DJANGO_SETTINGS_MODULE = test_settings
+   # -- recommended but optional:
+   python_files = tests.py test_*.py *_tests.py
+
+Run your tests with ``pytest``:
+
+.. code-block:: bash
+
+   $ pytest
 
 Why would I use this instead of Django's manage.py test command?
 ================================================================
@@ -50,14 +50,30 @@ See the `pytest documentation`_ for more information on pytest.
 .. _Manage test dependencies with fixtures: http://docs.pytest.org/en/latest/fixture.html
 .. _pytest documentation: http://docs.pytest.org/
 
-Bugs? Feature suggestions?
+Bugs? Feature Suggestions?
 ==========================
 
 Report issues and feature requests at the `GitHub issue tracker`_.
 
 .. _GitHub issue tracker: http://github.com/pytest-dev/pytest-django/issues
 
-Indices and tables
+Table of Contents
+=================
+
+.. toctree::
+   :maxdepth: 3
+
+   tutorial
+   configuring_django
+   managing_python_path
+   usage
+   database
+   helpers
+   faq
+   contributing
+   changelog
+
+Indices and Tables
 ==================
 
 * :ref:`genindex`
