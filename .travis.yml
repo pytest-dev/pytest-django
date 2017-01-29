@@ -9,6 +9,8 @@ matrix:
     - python: 3.5
       env: TOXENV=py35-pytest30-djangomaster-postgres
     - python: 3.5
+      env: TOXENV=py35-pytest30-django1.11-postgres
+    - python: 3.5
       env: TOXENV=py35-pytest30-django1.10-postgres
     - python: 3.5
       env: TOXENV=py35-pytest30-django1.9-postgres
@@ -18,15 +20,17 @@ matrix:
       env: TOXENV=py35-checkqa
 
     - python: 3.4
-      env: TOXENV=py34-pytest30-django1.10-postgres
+      env: TOXENV=py34-pytest30-django1.11-postgres
 
     - python: 3.3
       env: TOXENV=py34-pytest30-django1.8-postgres
 
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.10-mysql_innodb
+      env: TOXENV=py27-pytest30-django1.11-mysql_innodb
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.10-mysql_myisam
+      env: TOXENV=py27-pytest30-django1.11-mysql_myisam
+    - python: 2.7
+      env: TOXENV=py27-pytest30-django1.11-postgres
     - python: 2.7
       env: TOXENV=py27-pytest30-django1.10-postgres
     - python: 2.7
@@ -39,7 +43,7 @@ matrix:
       env: TOXENV=py27-checkqa
 
     - python: pypy
-      env: TOXENV=pypy-pytest30-django1.10-sqlite_file
+      env: TOXENV=pypy-pytest30-django1.11-sqlite_file
 
   allow_failures:
     - env: TOXENV=py35-pytest30-djangomaster-postgres
