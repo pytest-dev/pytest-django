@@ -24,8 +24,6 @@ matrix:
       env: TOXENV=py34-pytest30-django1.8-postgres
 
     - python: 2.7
-      env: TOXENV=py27-pytest30-djangomaster-postgres
-    - python: 2.7
       env: TOXENV=py27-pytest30-django1.10-mysql_innodb
     - python: 2.7
       env: TOXENV=py27-pytest30-django1.10-mysql_myisam
@@ -44,7 +42,6 @@ matrix:
       env: TOXENV=pypy-pytest30-django1.10-sqlite_file
 
   allow_failures:
-    - env: TOXENV=py27-pytest30-djangomaster-postgres
     - env: TOXENV=py35-pytest30-djangomaster-postgres
 
     # Temporary.
