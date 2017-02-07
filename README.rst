@@ -1,6 +1,9 @@
 .. image:: https://secure.travis-ci.org/pytest-dev/pytest-django.png?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/pytest-dev/pytest-django
+.. image:: https://img.shields.io/pypi/v/pytest-django.svg?style=flat
+   :alt: PyPI Version
+   :target: https://pypi.python.org/pypi/pytest-django
 
 Welcome to pytest-django!
 =========================

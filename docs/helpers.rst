@@ -235,3 +235,48 @@ Example
             Item.objects.create('foo')
             Item.objects.create('bar')
             Item.objects.create('baz')
+
+``mailoutbox``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A clean mail outbox where django emails are being sent.
+
+Example
+"""""""
+
+::
+
+    from django.core import mail
+
+    def test_mail(mailoutbox):
+        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        assert len(mailoutbox) == 1
+        m = mailoutbox[0]
+        assert m.subject == 'subject'
+        assert m.body == 'body'
+        assert m.from_email == 'from@example.com'
+        assert list(m.to) == ['to@example.com']
+
+
+Environment autouse fixtures
+----------------------------
+
+pytest-django provides some pytest fixtures that are of autouse
+nature. They provide functionality to assure a clean environment
+during tests.
+
+
+Clearing of site cache
+~~~~~~~~~~~~~~~~~~~~~~
+
+If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
+be cleared for each test to avoid hitting the cache and cause wrong Site
+object to be returned by ``Site.objects.get_current()``.
+
+
+Clearing of mail.outbox
+~~~~~~~~~~~~~~~~~~~~~~~
+
+``mail.outbox`` will be cleared for each pytest, to give tests a empty
+mailbox. It is however more pytestic to use the ``mailoutbox`` fixture
+to access ``mail.outbox``.

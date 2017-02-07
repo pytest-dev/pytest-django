@@ -29,7 +29,9 @@ Step 1: Installation
 
 pytest-django can be obtained directly from `PyPI
 <http://pypi.python.org/pypi/pytest-django>`_, and can be installed with
-``pip``::
+``pip``:
+
+.. code-block:: bash
 
     pip install pytest-django
 
@@ -41,23 +43,37 @@ Step 2: Point pytest to your Django settings
 --------------------------------------------
 
 You need to tell pytest which Django settings that should be used for test
-runs. The easiest way to achieve this is to create a pytest configuration file with this information.
+runs. The easiest way to achieve this is to create a pytest configuration file
+with this information.
 
-Create a file called ``pytest.ini`` in your project root directory that contains::
+Create a file called ``pytest.ini`` in your project root directory that
+contains:
+
+.. code-block:: ini
 
     [pytest]
-    DJANGO_SETTINGS_MODULE=yourproject.settings
+    DJANGO_SETTINGS_MODULE = yourproject.settings
 
 You can also specify your Django settings by setting the
 ``DJANGO_SETTINGS_MODULE`` environment variable or specifying the
-``--ds=yourproject.settings`` command line flag when running the tests. See the
-full documentation on :ref:`configuring_django_settings`.
+``--ds=yourproject.settings`` command line flag when running the tests.
+See the full documentation on :ref:`configuring_django_settings`.
+
+Optionally, also add the following line to the ``[pytest]`` section to
+instruct pytest to collect tests in Django's default app layouts, too.
+See the FAQ at :ref:`faq-tests-not-being-picked-up` for more infos.
+
+.. code-block:: ini
+
+    python_files = tests.py test_*.py *_tests.py
 
 Step 3: Run your test suite
 ---------------------------
 
 Tests are invoked directly with the ``pytest`` command, instead of ``manage.py
-test``, that you might be used to::
+test``, that you might be used to:
+
+.. code-block:: bash
 
     pytest
 
@@ -73,7 +89,7 @@ pytest-django also provides some :ref:`helpers` to make it easier to write
 Django tests.
 
 Consult the `pytest documentation <http://pytest.org/>`_ for more information
-in pytest itself.
+on pytest itself.
 
 Stuck? Need help?
 -----------------

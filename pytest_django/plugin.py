@@ -388,6 +388,22 @@ def _django_setup_unittest(request, django_db_blocker):
 
         cls = request.node.cls
 
+        # implement missing (as of 1.10) debug() method for django's TestCase
+        # see pytest-dev/pytest-django#406
+        def _cleaning_debug(self):
+            testMethod = getattr(self, self._testMethodName)
+            skipped = (
+                getattr(self.__class__, "__unittest_skip__", False) or
+                getattr(testMethod, "__unittest_skip__", False))
+
+            if not skipped:
+                self._pre_setup()
+            super(cls, self).debug()
+            if not skipped:
+                self._post_teardown()
+
+        cls.debug = _cleaning_debug
+
         _restore_class_methods(cls)
         cls.setUpClass()
         _disable_class_methods(cls)
@@ -400,12 +416,22 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
-@pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox(django_test_environment):
-    """Clear the django outbox, internal to pytest-django."""
-    if django_settings_is_configured():
-        from django.core import mail
-        del mail.outbox[:]
+@pytest.fixture(scope='function', autouse=True)
+def _dj_autoclear_mailbox():
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    del mail.outbox[:]
+
+
+@pytest.fixture(scope='function')
+def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    return mail.outbox
 
 
 @pytest.fixture(autouse=True, scope='function')
@@ -515,6 +541,20 @@ def _template_string_if_invalid_marker(request):
                 dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_clear_site_cache():
+    """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
+    unexpected behavior with cached site objects.
+    """
+
+    if django_settings_is_configured():
+        from django.conf import settings as dj_settings
+
+        if 'django.contrib.sites' in dj_settings.INSTALLED_APPS:
+            from django.contrib.sites.models import Site
+            Site.objects.clear_cache()
 
 # ############### Helper Functions ################
 

@@ -3,8 +3,12 @@ from __future__ import with_statement
 import os
 
 import pytest
+from django.contrib.sites.models import Site
+from django.contrib.sites import models as site_models
 from django.core import mail
 from django.db import connection
+from django.test import TestCase
+from pytest_django.lazy_django import get_django_version
 
 from pytest_django_test.app.models import Item
 
@@ -14,20 +18,31 @@ from pytest_django_test.app.models import Item
 # This is possible with some of the testdir magic, but this is the lazy way
 # to do it.
 
-
-def test_mail():
+@pytest.mark.parametrize('subject', ['subject1', 'subject2'])
+def test_autoclear_mailbox(subject):
     assert len(mail.outbox) == 0
-    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    mail.send_mail(subject, 'body', 'from@example.com', ['to@example.com'])
     assert len(mail.outbox) == 1
+
     m = mail.outbox[0]
-    assert m.subject == 'subject'
+    assert m.subject == subject
     assert m.body == 'body'
     assert m.from_email == 'from@example.com'
-    assert list(m.to) == ['to@example.com']
+    assert m.to == ['to@example.com']
 
 
-def test_mail_again():
-    test_mail()
+class TestDirectAccessWorksForDjangoTestCase(TestCase):
+
+    def _do_test(self):
+        assert len(mail.outbox) == 0
+        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        assert len(mail.outbox) == 1
+
+    def test_one(self):
+        self._do_test()
+
+    def test_two(self):
+        self._do_test()
 
 
 @pytest.mark.django_project(extra_settings="""
@@ -199,3 +214,26 @@ class TestrunnerVerbosity:
             "*PASSED*"])
         assert ("*Destroying test database for alias 'default' ('*')...*"
                 not in result.stdout.str())
+
+
+@pytest.mark.skipif(
+    get_django_version() < (1, 8),
+    reason='Django 1.7 requires settings.SITE_ID to be set, so this test is invalid'
+)
+@pytest.mark.django_db
+@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+def test_clear_site_cache(site_name, rf, monkeypatch):
+    request = rf.get('/')
+    monkeypatch.setattr(request, 'get_host', lambda: 'foo.com')
+    Site.objects.create(domain='foo.com', name=site_name)
+    assert Site.objects.get_current(request=request).name == site_name
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+def test_clear_site_cache_check_site_cache_size(site_name, settings):
+    assert len(site_models.SITE_CACHE) == 0
+    site = Site.objects.create(domain='foo.com', name=site_name)
+    settings.SITE_ID = site.id
+    assert Site.objects.get_current() == site
+    assert len(site_models.SITE_CACHE) == 1
