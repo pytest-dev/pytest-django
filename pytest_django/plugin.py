@@ -15,6 +15,7 @@ import py
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_assert_num_queries  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_db_keepdb  # noqa
