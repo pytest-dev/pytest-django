@@ -218,8 +218,9 @@ Example
         settings.USE_TZ = True
         assert settings.USE_TZ
 
-``assert_num_queries``
-~~~~~~~~~~~~~~~~~~~~~~
+
+``django_assert_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This fixture allows to check for an expected number of DB queries.
 It currently only supports the default database.
@@ -231,10 +232,11 @@ Example
 ::
 
     def test_queries(assert_num_queries):
-        with assert_num_queries(3):
+        with django_assert_num_queries(3):
             Item.objects.create('foo')
             Item.objects.create('bar')
             Item.objects.create('baz')
+
 
 ``mailoutbox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
