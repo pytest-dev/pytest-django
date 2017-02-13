@@ -241,7 +241,7 @@ Example
 ``mailoutbox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A clean mail outbox where django emails are being sent.
+A clean mail outbox where Django emails are being sent to.
 
 Example
 """""""
