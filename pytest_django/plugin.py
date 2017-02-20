@@ -5,6 +5,7 @@ test database and provides some useful text fixtures.
 """
 
 import contextlib
+from distutils.util import strtobool
 import inspect
 from functools import reduce
 import os
@@ -105,6 +106,13 @@ def pytest_addoption(parser):
         dest="nomigrations",
         default=False,
         help="Enable Django migrations on test setup",
+    )
+    group._addoption(
+        "--django-debug",
+        action="store",
+        dest="djangodebug",
+        default="None",
+        help="Configure the DEBUG setting. Defaults to False"
     )
     parser.addini(
         CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
@@ -466,7 +474,9 @@ def django_test_environment(request):
         from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        dj_settings.DEBUG = False
+        if request.config.getvalue('djangodebug') != 'None':
+            dj_settings.DEBUG = bool(strtobool(request.config.getvalue('djangodebug')))
+
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
