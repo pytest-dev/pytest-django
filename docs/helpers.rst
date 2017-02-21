@@ -231,7 +231,7 @@ Example
 
 ::
 
-    def test_queries(assert_num_queries):
+    def test_queries(django_assert_num_queries):
         with django_assert_num_queries(3):
             Item.objects.create('foo')
             Item.objects.create('bar')
