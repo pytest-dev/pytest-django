@@ -8,7 +8,7 @@ from __future__ import with_statement
 
 import pytest
 
-from django.db import connection
+from django.db import connection, transaction
 from django.conf import settings as real_settings
 from django.core import mail
 from django.test.client import Client, RequestFactory
@@ -48,6 +48,68 @@ def test_admin_user_no_db_marker(admin_user, django_user_model):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+
+
+@pytest.mark.django_db
+def test_django_assert_num_queries_db(django_assert_num_queries):
+    with django_assert_num_queries(3):
+        Item.objects.create(name='foo')
+        Item.objects.create(name='bar')
+        Item.objects.create(name='baz')
+
+    with pytest.raises(pytest.fail.Exception):
+        with django_assert_num_queries(2):
+            Item.objects.create(name='quux')
+
+
+@pytest.mark.django_db(transaction=True)
+def test_django_assert_num_queries_transactional_db(transactional_db, django_assert_num_queries):
+    with transaction.atomic():
+
+        with django_assert_num_queries(3):
+            Item.objects.create(name='foo')
+            Item.objects.create(name='bar')
+            Item.objects.create(name='baz')
+
+        with pytest.raises(pytest.fail.Exception):
+            with django_assert_num_queries(2):
+                Item.objects.create(name='quux')
+
+
+def test_django_assert_num_queries_output(django_testdir):
+    django_testdir.create_test_module("""
+        from django.contrib.contenttypes.models import ContentType
+        import pytest
+
+        @pytest.mark.django_db
+        def test_queries(django_assert_num_queries):
+            with django_assert_num_queries(1):
+                list(ContentType.objects.all())
+                ContentType.objects.count()
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short')
+    result.stdout.fnmatch_lines(['*Expected to perform 1 queries but 2 were done*'])
+    assert result.ret == 1
+
+
+def test_django_assert_num_queries_output_verbose(django_testdir):
+    django_testdir.create_test_module("""
+        from django.contrib.contenttypes.models import ContentType
+        import pytest
+
+        @pytest.mark.django_db
+        def test_queries(django_assert_num_queries):
+            with django_assert_num_queries(11):
+                list(ContentType.objects.all())
+                ContentType.objects.count()
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
+    result.stdout.fnmatch_lines([
+        '*Expected to perform 11 queries but 2 were done*',
+        '*Queries:*',
+        '*========*',
+    ])
+    assert result.ret == 1
 
 
 class TestSettings:

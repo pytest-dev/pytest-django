@@ -218,10 +218,30 @@ Example
         settings.USE_TZ = True
         assert settings.USE_TZ
 
+
+``django_assert_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture allows to check for an expected number of DB queries.
+It currently only supports the default database.
+
+
+Example
+"""""""
+
+::
+
+    def test_queries(django_assert_num_queries):
+        with django_assert_num_queries(3):
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+            Item.objects.create('baz')
+
+
 ``mailoutbox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A clean mail outbox where django emails are being sent.
+A clean mail outbox where Django emails are being sent to.
 
 Example
 """""""
