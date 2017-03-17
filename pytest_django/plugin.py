@@ -527,7 +527,7 @@ def _fail_for_invalid_template_variable(request):
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
-                pytest.fail(msg, pytrace=False)
+                pytest.fail(msg)
             else:
                 return msg
 

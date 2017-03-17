@@ -97,7 +97,7 @@ def test_invalid_template_variable(django_testdir):
         origin = "'invalid_template.html'"
     result.stdout.fnmatch_lines_random([
         "tpkg/test_the_test.py F.",
-        "Undefined template variable 'invalid_var' in {}".format(origin)
+        "E * Failed: Undefined template variable 'invalid_var' in {}".format(origin)
     ])
 
 
