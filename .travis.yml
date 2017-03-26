@@ -6,18 +6,21 @@ matrix:
   fast_finish: true
   include:
 
-    - python: 3.5
-      env: TOXENV=py35-pytest30-djangomaster-postgres
+    - python: 3.6
+      env: TOXENV=py36-pytest30-djangomaster-postgres
+    - python: 3.6
+      env: TOXENV=py36-pytest30-django1.11-postgres
+    - python: 3.6
+      env: TOXENV=py36-pytest30-django1.10-postgres
+    - python: 3.6
+      env: TOXENV=py36-pytest30-django1.9-postgres
+    - python: 3.6
+      env: TOXENV=py36-pytest30-django1.8-postgres
+    - python: 3.6
+      env: TOXENV=py36-checkqa
+
     - python: 3.5
       env: TOXENV=py35-pytest30-django1.11-postgres
-    - python: 3.5
-      env: TOXENV=py35-pytest30-django1.10-postgres
-    - python: 3.5
-      env: TOXENV=py35-pytest30-django1.9-postgres
-    - python: 3.5
-      env: TOXENV=py35-pytest30-django1.8-postgres
-    - python: 3.5
-      env: TOXENV=py35-checkqa
 
     - python: 3.4
       env: TOXENV=py34-pytest30-django1.11-postgres
@@ -51,7 +54,7 @@ matrix:
       env: TOXENV=pypy3-pytest30-django1.10-sqlite_file
 
   allow_failures:
-    - env: TOXENV=py35-pytest30-djangomaster-postgres
+    - env: TOXENV=py36-pytest30-djangomaster-postgres
 
     # Temporary.
     # https://github.com/pytest-dev/pytest-django/pull/445
