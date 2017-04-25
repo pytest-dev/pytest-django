@@ -106,7 +106,7 @@ def django_db_setup(
                 verbosity=pytest.config.option.verbose,
             )
 
-    if not django_db_keepdb:
+    if not request.config.getvalue('reuse_db'):
         request.addfinalizer(teardown_database)
 
 
