@@ -74,7 +74,7 @@ when trying to access the database.
 
      @pytest.mark.urls('myapp.test_urls')
      def test_something(client):
-         assert 'Success!' in client.get('/some_url_defined_in_test_urls/')
+         assert 'Success!' in client.get('/some_url_defined_in_test_urls/').content
 
 
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
