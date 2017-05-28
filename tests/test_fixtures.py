@@ -497,13 +497,43 @@ def test_mail_again(mailoutbox):
     """)
 def test_custom_user_model_email_as_username(django_testdir):
     django_testdir.create_app_file("""
-        from django.contrib.auth.models import AbstractUser
+        from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                                PermissionsMixin)
+        from django.utils import timezone
         from django.db import models
 
-        class MyCustomUser(AbstractUser):
-            email = models.EmailField(unique=True)
+        class UserManager(BaseUserManager):
+            use_in_migrations = True
+
+            def _create_user(self, username, email, password, **extra_fields):
+                email = self.normalize_email(email)
+                user = self.model(username=username, email=email, **extra_fields)
+                user.set_password(password)
+                user.save(using=self._db)
+                return user
+
+            def create_user(self, username, email, password=None, **extra_fields):
+                extra_fields.setdefault('is_superuser', False)
+                return self._create_user(username, email, password, **extra_fields)
+
+            def create_superuser(self, username, email, password, **extra_fields):
+                extra_fields.setdefault('is_superuser', True)
+                extra_fields.setdefault('is_staff', True)
+
+                return self._create_user(username, email, password, **extra_fields)
+
+
+        class MyCustomUser(AbstractBaseUser, PermissionsMixin):
+            username = models.CharField(max_length=30, unique=True)
+            email = models.EmailField(blank=False, unique=True)
+            is_staff = models.BooleanField(default=False)
+            is_active = models.BooleanField(default=True)
+            date_joined = models.DateTimeField(default=timezone.now)
+
+            objects = UserManager()
 
             USERNAME_FIELD = 'email'
+            REQUIRED_FIELDS = ['username']
         """, 'models.py')
     django_testdir.create_app_file("""
         from django.conf.urls import url
@@ -563,8 +593,6 @@ class Migration(migrations.Migration):
                 ('last_login', models.DateTimeField(null=True, verbose_name='last login', blank=True)),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
                 ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),
-                ('first_name', models.CharField(max_length=30, verbose_name='first name', blank=True)),
-                ('last_name', models.CharField(max_length=30, verbose_name='last name', blank=True)),
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
