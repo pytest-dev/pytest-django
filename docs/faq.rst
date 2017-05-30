@@ -16,7 +16,7 @@ for more information.
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
-Create a `pytest fixture <http://pytest.org/latest/fixture.html>`_ that is
+Create a `pytest fixture <http://pytest.org/en/latest/fixture.html>`_ that is
 automatically run before each test case. To run all tests with the english
 locale, put the following code in your project's `conftest.py`_ file:
 

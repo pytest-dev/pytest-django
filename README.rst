@@ -43,11 +43,11 @@ Why would I use this instead of Django's `manage.py test` command?
 Running your test suite with pytest-django allows you to tap into the features
 that are already present in pytest. Here are some advantages:
 
-* `Manage test dependencies with pytest fixtures. <http://pytest.org/latest/fixture.html>`_
+* `Manage test dependencies with pytest fixtures. <http://pytest.org/en/latest/fixture.html>`_
 * Less boilerplate tests: no need to import unittest, create a subclass with methods. Write tests as regular functions.
 * Database re-use: no need to re-create the test database for every test run.
 * Run tests in multiple processes for increased speed (with the pytest-xdist plugin).
-* Make use of other `pytest plugins <http://pytest.org/latest/plugins.html>`_.
+* Make use of other `pytest plugins <http://pytest.org/en/latest/plugins.html>`_.
 * Works with both worlds: Existing unittest-style TestCase's still work without any modifications.
 
-See the `pytest documentation <http://pytest.org/latest/>`_ for more information on pytest itself.
+See the `pytest documentation <http://pytest.org/en/latest/>`_ for more information on pytest itself.

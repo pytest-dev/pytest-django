@@ -21,7 +21,7 @@ Talks, articles and blog posts
    John Costa
    <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.
 
-For general information and tutorials on pytest, see the `pytest tutorial page <http://pytest.org/latest/getting-started.html>`_.
+For general information and tutorials on pytest, see the `pytest tutorial page <http://pytest.org/en/latest/getting-started.html>`_.
 
 
 Step 1: Installation
