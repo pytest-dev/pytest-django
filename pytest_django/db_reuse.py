@@ -17,6 +17,7 @@ def test_database_exists_from_previous_run(connection):
 
     orig_db_name = connection.settings_dict['NAME']
     connection.settings_dict['NAME'] = test_db_name
+    connection.connection = None # force reconnection
 
     # With SQLite memory databases the db never exists.
     if connection.settings_dict['NAME'] == ':memory:':
