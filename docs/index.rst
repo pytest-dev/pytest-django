@@ -5,7 +5,7 @@ pytest-django Documentation
 pytest-django is a plugin for `pytest`_ that provides a set of useful tools
 for testing `Django`_ applications and projects.
 
-.. _pytest: http://pytest.org/
+.. _pytest: https://pytest.org/
 .. _Django: https://www.djangoproject.com/
 
 Quick Start
