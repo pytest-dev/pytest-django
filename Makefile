@@ -19,6 +19,7 @@ $(VENV)/bin/pytest: $(VENV)/bin/python requirements.txt
 
 $(VENV)/bin/sphinx-build: $(VENV)/bin/pip
 	$(VENV)/bin/pip install sphinx
+	$(VENV)/bin/pip install Flask-Sphinx-Themes
 
 docs: $(VENV)/bin/sphinx-build
 	SPHINXBUILD=../$(VENV)/bin/sphinx-build $(MAKE) -C docs html
