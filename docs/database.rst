@@ -340,10 +340,34 @@ Put this into ``conftest.py``::
 Populate the database with initial test data
 """"""""""""""""""""""""""""""""""""""""""""
 
-This example shows how you can populate the test database with test data. The
-test data will be saved in the database, i.e. it will not just be part of a
-transactions. This example uses Django's fixture loading mechanism, but it can
-be replaced with any way of loading data into the database.
+In some cases you want to populate the test database before you
+start the tests. Because of different ways you may use the test database,
+there are different ways to populate it.
+
+Populate the test database if you don't use transactions or live_server.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using the :func:`pytest.mark.django_db` marker or :fixture:`db`
+fixture, you probably don't want to explictly handle transactions in your
+tests. In this case, it is sufficient to populate your database only
+once. You can put code like this in ``conftest.py``::
+
+    import pytest
+
+    from django.core.management import call_command
+
+    @pytest.fixture(scope='module')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker.unblock():
+            call_command('loaddata', 'your_data_fixture.json')
+
+This piece of code will load a fixture called ``your_data_fixture.json``
+using a Django command once per ``conftest.py`` module import (the scope
+of the fixture). All this data will be available to tests marked with
+:func:`pytest.mark.django_db` decorator, or tests which use :fixture:`db`
+fixture. The test data will be saved in the database, i.e. it will not just be
+part of a transactions. This example uses Django's fixture loading mechanism,
+but it can be replaced with any way of loading data into the database.
 
 Notice that :fixture:`django_db_setup` is in the argument list. This may look
 odd at first, but it will make sure that the sure that the original
@@ -351,16 +375,31 @@ pytest-django fixture is used to create the test database. When
 ``call_command`` is invoked, the test database is already prepared and
 configured.
 
-Put this in ``conftest.py``::
+Populate the test database if you use transactions or live_server.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case you want to use transactions in your tests (you use
+`pytest.mark.django_db(transaction=True)` marker or
+:fixture:`transactional_db` fixture), you need to populate your database
+every single time a function starts, because - by the time of this writing -
+pytest-django uses ``TRUNCATE`` SQL command for transaction-enabled tests
+to remove data from the database between tests.
+
+In case you use :fixture:`live_server` fixture, it enforces using
+:fixture:`transactional_db`, so you also need to populate the test database
+this way. Put this code into ``conftest.py``. Please note, that even if it
+is very similar to previous one, the scope is changed from ``module`` to
+``function``::
 
     import pytest
 
-    from django.core.management import call_command
+    from myapp.models import Widget
 
-    @pytest.fixture(scope='session')
+    @pytest.fixture(scope='function')
     def django_db_setup(django_db_setup, django_db_blocker):
         with django_db_blocker.unblock():
-            call_command('loaddata', 'your_data_fixture.json')
+            Widget.objects.create(...)
+
 
 Use the same database for all xdist processes
 """""""""""""""""""""""""""""""""""""""""""""
