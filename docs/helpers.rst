@@ -16,27 +16,27 @@ on what marks are and for notes on using_ them.
 ``pytest.mark.django_db(transaction=False)`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. :py:function:: pytest.mark.django_db:
+.. py:function:: pytest.mark.django_db(transaction=False)
 
-This is used to mark a test function as requiring the database. It
-will ensure the database is setup correctly for the test. Each test
-will run in its own transaction which will be rolled back at the end
-of the test. This behavior is the same as Django's standard
-`django.test.TestCase`_ class.
+    This is used to mark a test function as requiring the database. It
+    will ensure the database is setup correctly for the test. Each test
+    will run in its own transaction which will be rolled back at the end
+    of the test. This behavior is the same as Django's standard
+    `django.test.TestCase`_ class.
 
-In order for a test to have access to the database it must either
-be marked using the ``django_db`` mark or request one of the ``db``
-or ``transactional_db`` fixtures.  Otherwise the test will fail
-when trying to access the database.
+    In order for a test to have access to the database it must either
+    be marked using the ``django_db`` mark or request one of the ``db``
+    or ``transactional_db`` fixtures.  Otherwise the test will fail
+    when trying to access the database.
 
-:type transaction: bool
-:param transaction:
- The ``transaction`` argument will allow the test to use real transactions.
- With ``transaction=False`` (the default when not specified), transaction
- operations are noops during the test. This is the same behavior that
- `django.test.TestCase`_
- uses. When ``transaction=True``, the behavior will be the same as
- `django.test.TransactionTestCase`_
+    :type transaction: bool
+    :param transaction:
+     The ``transaction`` argument will allow the test to use real transactions.
+     With ``transaction=False`` (the default when not specified), transaction
+     operations are noops during the test. This is the same behavior that
+     `django.test.TestCase`_
+     uses. When ``transaction=True``, the behavior will be the same as
+     `django.test.TransactionTestCase`_
 
 .. note::
 
@@ -175,15 +175,18 @@ The user model used by Django. This handles different versions of Django.
 
 The field name used for the username on the user model.
 
+.. fixture:: db
+
+
 ``db``
 ~~~~~~~
 
-.. fixture:: db
-
 This fixture will ensure the Django database is set up.  This only
 required for fixtures which want to use the database themselves.  A
-test function should normally use the :py:func:`~pytest.mark.django_db`
+test function should normally use the :py:func:`pytest.mark.django_db`
 mark to signal it needs the database.
+
+.. fixture:: transactional_db
 
 ``transactional_db``
 ~~~~~~~~~~~~~~~~~~~~
@@ -191,7 +194,9 @@ mark to signal it needs the database.
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
-:py:func:`~pytest.mark.django_db` mark to signal it needs the database.
+:py:func:`pytest.mark.django_db` mark to signal it needs the database.
+
+.. fixture:: live_server
 
 ``live_server``
 ~~~~~~~~~~~~~~~
