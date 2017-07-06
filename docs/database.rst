@@ -356,14 +356,14 @@ once. You can put code like this in ``conftest.py``::
 
     from django.core.management import call_command
 
-    @pytest.fixture(scope='module')
+    @pytest.fixture(scope='session')
     def django_db_setup(django_db_setup, django_db_blocker):
         with django_db_blocker.unblock():
             call_command('loaddata', 'your_data_fixture.json')
 
 This piece of code will load a fixture called ``your_data_fixture.json``
-using a Django command once per ``conftest.py`` module import (the scope
-of the fixture). All this data will be available to tests marked with
+using a Django command once per test session - because of the scope
+of this fixture. All this data will be available to tests marked with
 :func:`pytest.mark.django_db` decorator, or tests which use :fixture:`db`
 fixture. The test data will be saved in the database, i.e. it will not just be
 part of a transactions. This example uses Django's fixture loading mechanism,
@@ -379,16 +379,18 @@ Populate the test database if you use transactions or live_server.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In case you want to use transactions in your tests (you use
-`pytest.mark.django_db(transaction=True)` marker or
+:py:func:`pytest.mark.django_db` marker with ``transactional=True`` argument or
 :fixture:`transactional_db` fixture), you need to populate your database
-every single time a function starts, because - by the time of this writing -
-pytest-django uses ``TRUNCATE`` SQL command for transaction-enabled tests
-to remove data from the database between tests.
+every single time a function starts, because pytest-django uses ``TRUNCATE``
+SQL command for transaction-enabled tests to remove data from the database
+etween tests.
 
 In case you use :fixture:`live_server` fixture, it enforces using
 :fixture:`transactional_db`, so you also need to populate the test database
-this way. Put this code into ``conftest.py``. Please note, that even if it
-is very similar to previous one, the scope is changed from ``module`` to
+this way.
+
+Put this code into ``conftest.py``. Please note, that even if it
+is very similar to previous one, the scope is changed from ``session`` to
 ``function``::
 
     import pytest
