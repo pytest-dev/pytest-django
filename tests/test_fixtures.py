@@ -319,8 +319,8 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + '/static/a_file.txt').read()
 
-    @pytest.mark.skipif(get_django_version() < (1, 11),
-                        reason='Django >= 1.11 required')
+    @pytest.mark.skipif(get_django_version() < (1, 11) or get_django_version() >= (1, 11, 2),
+                        reason='Django >= 1.11 < 1.11.2 required')
     def test_specified_port_error_message_django_111(self, django_testdir):
         django_testdir.create_test_module("""
         def test_with_live_server(live_server):
@@ -329,7 +329,20 @@ class TestLiveServer:
 
         result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234')
         result.stdout.fnmatch_lines([
-            '*Specifying a live server port is not supported in Django 1.11. This '
+            '*Specifying a live server port is not supported in Django >= 1.11 < 1.11.2.'
+        ])
+
+    @pytest.mark.skipif(get_django_version() < (1, 11),
+                        reason='Django >= 1.11 required')
+    def test_specified_port_range_error_message_django_111(self, django_testdir):
+        django_testdir.create_test_module("""
+        def test_with_live_server(live_server):
+            pass
+        """)
+
+        result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234-2345')
+        result.stdout.fnmatch_lines([
+            '*Specifying multiple live server ports is not supported in Django 1.11. This '
             'will be an error in a future pytest-django release.*'
         ])
 

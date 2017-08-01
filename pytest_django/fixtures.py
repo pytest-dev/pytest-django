@@ -302,10 +302,17 @@ def live_server(request):
     addr = (request.config.getvalue('liveserver') or
             os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS'))
 
-    if addr and django.VERSION >= (1, 11) and ':' in addr:
-        request.config.warn('D001', 'Specifying a live server port is not supported '
-                            'in Django 1.11. This will be an error in a future '
-                            'pytest-django release.')
+    if addr and ':' in addr:
+        if django.VERSION >= (1, 11):
+            ports = addr.split(':')[1]
+            if '-' in ports or ',' in ports:
+                request.config.warn('D001',
+                                    'Specifying multiple live server ports is not supported '
+                                    'in Django 1.11. This will be an error in a future '
+                                    'pytest-django release.')
+            elif django.VERSION < (1, 11, 2):
+                request.config.warn('D001', 'Specifying a live server port is not supported '
+                                    'in Django >= 1.11 < 1.11.2.')
 
     if not addr:
         if django.VERSION < (1, 11):
