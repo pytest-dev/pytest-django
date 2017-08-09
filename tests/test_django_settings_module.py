@@ -275,6 +275,30 @@ def test_debug_false(testdir, monkeypatch):
     assert r.ret == 0
 
 
+def test_override_debug_to_true(testdir, monkeypatch):
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    testdir.makeconftest("""
+        from django.conf import settings
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DEBUG=True,
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """)
+
+    testdir.makepyfile("""
+        from django.conf import settings
+        def test_debug_is_true():
+            assert settings.DEBUG is True
+    """)
+
+    r = testdir.runpytest_subprocess('--debug-mode')
+    assert r.ret == 0
+
+
 @pytest.mark.skipif(not hasattr(django, 'setup'),
                     reason="This Django version does not support app loading")
 @pytest.mark.django_project(extra_settings="""
