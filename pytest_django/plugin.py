@@ -336,10 +336,17 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
+        from distutils.version import StrictVersion
+        import django
         from django.conf import settings as dj_settings
         from django.test.utils import (setup_test_environment,
                                        teardown_test_environment)
-        setup_test_environment(debug=request.config.getvalue('debug_mode'))
+        debug_mode = request.config.getvalue('debug_mode')
+        if StrictVersion(django.get_version()) >= StrictVersion('1.11'):
+            setup_test_environment(debug=debug_mode)
+        else:
+            dj_settings.DEBUG = debug_mode
+            setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
 
