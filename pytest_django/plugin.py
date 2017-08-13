@@ -440,12 +440,23 @@ def _dj_autoclear_mailbox():
 
 
 @pytest.fixture(scope='function')
-def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
+def mailoutbox(monkeypatch, django_mail_patch_dns, _dj_autoclear_mailbox):
     if not django_settings_is_configured():
         return
 
     from django.core import mail
     return mail.outbox
+
+
+@pytest.fixture(scope='function')
+def django_mail_patch_dns(monkeypatch, django_mail_dnsname):
+    from django.core import mail
+    monkeypatch.setattr(mail.message, 'DNS_NAME', django_mail_dnsname)
+
+
+@pytest.fixture(scope='function')
+def django_mail_dnsname(monkeypatch):
+    return 'fake-tests.example.com'
 
 
 @pytest.fixture(autouse=True, scope='function')

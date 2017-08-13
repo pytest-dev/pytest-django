@@ -499,3 +499,65 @@ def test_mail(mailoutbox):
 
 def test_mail_again(mailoutbox):
     test_mail(mailoutbox)
+
+
+def test_mail_message_uses_mocked_DNS_NAME(mailoutbox):
+    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    m = mailoutbox[0]
+    message = m.message()
+    assert message['Message-ID'].endswith('@fake-tests.example.com>')
+
+
+def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
+    django_testdir.create_test_module("""
+        from django.core import mail
+        import pytest
+
+        @pytest.fixture
+        def django_mail_dnsname():
+            return 'from.django_mail_dnsname'
+
+        def test_mailbox_inner(mailoutbox):
+            mail.send_mail('subject', 'body', 'from@example.com',
+                           ['to@example.com'])
+            m = mailoutbox[0]
+            message = m.message()
+            assert message['Message-ID'].endswith('@from.django_mail_dnsname>')
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
+    result.stdout.fnmatch_lines(['*test_mailbox_inner*PASSED*'])
+    assert result.ret == 0
+
+
+def test_mail_message_dns_patching_can_be_skipped(django_testdir):
+    django_testdir.create_test_module("""
+        from django.core import mail
+        import pytest
+
+        @pytest.fixture
+        def django_mail_dnsname():
+            raise Exception('should not get called')
+
+        @pytest.fixture
+        def django_mail_patch_dns():
+            print('\\ndjango_mail_dnsname_mark')
+
+        def test_mailbox_inner(mailoutbox, monkeypatch):
+            def mocked_make_msgid(*args, **kwargs):
+                mocked_make_msgid.called += [(args, kwargs)]
+            mocked_make_msgid.called = []
+
+            monkeypatch.setattr(mail.message, 'make_msgid', mocked_make_msgid)
+            mail.send_mail('subject', 'body', 'from@example.com',
+                           ['to@example.com'])
+            m = mailoutbox[0]
+            assert len(mocked_make_msgid.called) == 1
+
+            assert mocked_make_msgid.called[0][1]['domain'] is mail.DNS_NAME
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-s')
+    result.stdout.fnmatch_lines([
+        '*test_mailbox_inner*',
+        'django_mail_dnsname_mark',
+        'PASSED*'])
+    assert result.ret == 0
