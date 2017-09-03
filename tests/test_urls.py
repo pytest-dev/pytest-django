@@ -1,6 +1,6 @@
 import pytest
 from django.conf import settings
-from django.core.urlresolvers import is_valid_path
+from pytest_django.django_compat import is_valid_path
 from django.utils.encoding import force_text
 
 
@@ -28,7 +28,7 @@ def test_urls_cache_is_cleared(testdir):
     """)
 
     testdir.makepyfile("""
-        from django.core.urlresolvers import reverse, NoReverseMatch
+        from pytest_django.django_compat import reverse, NoReverseMatch
         import pytest
 
         @pytest.mark.urls('myurls')
