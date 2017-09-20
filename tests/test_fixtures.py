@@ -37,6 +37,14 @@ def test_admin_client_no_db_marker(admin_client):
     assert force_text(resp.content) == 'You are an admin'
 
 
+def test_admin_client_existing_user(db, django_user_model, django_username_field):
+    from pytest_django.fixtures import admin_client, admin_user
+    django_user_model._default_manager.create_superuser('admin', None, None)
+    user = admin_user(db, django_user_model, django_username_field)
+    client = admin_client(db, user)
+    test_admin_client(client)
+
+
 @pytest.mark.django_db
 def test_admin_user(admin_user, django_user_model):
     assert isinstance(admin_user, django_user_model)
