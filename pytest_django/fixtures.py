@@ -227,7 +227,7 @@ def admin_client(db, admin_user):
     from django.test.client import Client
 
     client = Client()
-    client.login(username=admin_user.username, password='password')
+    client.force_login(admin_user)
     return client
 
 
