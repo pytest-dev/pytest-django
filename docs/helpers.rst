@@ -158,14 +158,18 @@ Example
         response = client.get('/')
         assert response.content == 'Foobar'
 
-To use `client` as an authenticated standard user, call its `login()` method before accessing a URL:
+To use `client` as an authenticated standard user, call its `force_login()` or
+`login()` method before accessing a URL:
 
 ::
 
     def test_with_authenticated_client(client, django_user_model):
         username = "user1"
         password = "bar"
-        django_user_model.objects.create_user(username=username, password=password)
+        user = django_user_model.objects.create_user(username=username, password=password)
+        # Use this:
+        client.force_login(user)
+        # Or this:
         client.login(username=username, password=password)
         response = client.get('/private')
         assert response.content == 'Protected Area'
