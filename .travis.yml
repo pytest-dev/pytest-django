@@ -5,7 +5,6 @@ language: python
 matrix:
   fast_finish: true
   include:
-
     - python: 3.6
       env: TOXENV=py36-pytest3-djangomaster-postgres
     - python: 3.6
@@ -75,7 +74,27 @@ install:
   - diff tox.ini tox.ini.bak && return 1 || true
 
   - pip install tox==2.7.0
+  - |
+    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+      export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
+      export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
+    fi
 
 script:
   - tox
   - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
+
+after_success:
+  - |
+    set -ex
+    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+      pip install codecov
+      coverage combine
+      coverage xml
+      coverage report -m --skip-covered
+
+      codecov_flags=${TOXENV//./}
+      codecov_flags=${codecov_flags//-/ }
+      codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
+    fi
+    set +x
