@@ -69,9 +69,8 @@ install:
   - printf '\necho "Using pip-wrapper.." >&2\ntravis_retry pip "$@"' >> bin/travis_retry_pip
   - chmod +x bin/travis_retry_pip
   - sed -i.bak 's/^\[testenv\]/\0\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
-  - diff tox.ini tox.ini.bak && return 1 || true
-  - sed -i.bak 's/whitelist_externals =/\0\n    travis_retry_pip/' tox.ini
-  - diff tox.ini tox.ini.bak && return 1 || true
+  - if diff tox.ini tox.ini.bak; then exit 1; fi
+  - printf '\nwhitelist_externals = travis_retry_pip' >> tox.ini
 
   - pip install tox==2.7.0
   - |
