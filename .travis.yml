@@ -56,12 +56,6 @@ matrix:
   allow_failures:
     - env: TOXENV=py36-pytest3-djangomaster-postgres
 
-    # Temporary.
-    # https://github.com/pytest-dev/pytest-django/pull/445
-    # https://github.com/pytest-dev/pytest-django/issues/448
-    - env: TOXENV=pypy3-pytest3-django1.8-sqlite
-    - env: TOXENV=pypy3-pytest3-django1.10-sqlite_file
-
 cache:
   directories:
     - "${TRAVIS_BUILD_DIR}/.tox"
