@@ -30,8 +30,6 @@ matrix:
       env: TOXENV=py34-pytest3-dj18-postgres
 
     - python: 2.7
-      env: TOXENV=py27-pytest3-dj20-postgres
-    - python: 2.7
       env: TOXENV=py27-pytest3-dj111-mysql_innodb
     - python: 2.7
       env: TOXENV=py27-pytest3-dj111-mysql_myisam
