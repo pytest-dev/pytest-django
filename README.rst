@@ -4,6 +4,9 @@
 .. image:: https://img.shields.io/pypi/v/pytest-django.svg?style=flat
    :alt: PyPI Version
    :target: https://pypi.python.org/pypi/pytest-django
+.. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
+   :alt: Coverage
+   :target: https://codecov.io/gh/pytest-dev/pytest-django
 
 Welcome to pytest-django!
 =========================
