@@ -1,6 +1,4 @@
 # This file cannot be imported from until Django sets up
-from django.db.backends.base.base import BaseDatabaseWrapper
-
 try:
     # Django 1.11
     from django.test.utils import setup_databases, teardown_databases  # noqa

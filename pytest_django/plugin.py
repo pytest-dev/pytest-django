@@ -600,7 +600,7 @@ class _DatabaseBlocker(object):
 
     @property
     def _dj_db_wrapper(self):
-        from .compat import BaseDatabaseWrapper
+        from django.db.backends.base.base import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
         # reference to the real implementation.
