@@ -1,4 +1,5 @@
 # This file cannot be imported from until Django sets up
+from django.db.backends.base.base import BaseDatabaseWrapper
 
 try:
     # Django 1.11
@@ -11,9 +12,3 @@ except ImportError:
         (_DiscoverRunner(verbosity=verbosity,
                          interactive=False)
          .teardown_databases(db_cfg))
-
-try:
-    from django.db.backends.base.base import BaseDatabaseWrapper  # noqa
-except ImportError:
-    # Django 1.7.
-    from django.db.backends import BaseDatabaseWrapper  # noqa

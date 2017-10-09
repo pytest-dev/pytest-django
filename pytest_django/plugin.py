@@ -34,8 +34,7 @@ from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 from .pytest_compat import getfixturevalue
 
-from .lazy_django import (django_settings_is_configured,
-                          get_django_version, skip_if_no_django)
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -63,10 +62,10 @@ def pytest_addoption(parser):
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
-                     help='Disable Django 1.7+ migrations on test setup')
+                     help='Disable Django migrations on test setup')
     group._addoption('--migrations',
                      action='store_false', dest='nomigrations', default=False,
-                     help='Enable Django 1.7+ migrations on test setup')
+                     help='Enable Django migrations on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -540,7 +539,7 @@ def _fail_for_invalid_template_variable(request):
             django_settings_is_configured()):
         from django.conf import settings as dj_settings
 
-        if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+        if dj_settings.TEMPLATES:
             dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = (
                 InvalidVarException())
         else:
@@ -556,7 +555,7 @@ def _template_string_if_invalid_marker(request):
         if marker and django_settings_is_configured():
             from django.conf import settings as dj_settings
 
-            if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+            if dj_settings.TEMPLATES:
                 dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False

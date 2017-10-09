@@ -13,7 +13,7 @@ from . import live_server_helper
 from .django_compat import is_django_unittest
 from .pytest_compat import getfixturevalue
 
-from .lazy_django import get_django_version, skip_if_no_django
+from .lazy_django import skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
@@ -83,14 +83,7 @@ def django_db_setup(
         _disable_native_migrations()
 
     if django_db_keepdb:
-        if get_django_version() >= (1, 8):
-            setup_databases_args['keepdb'] = True
-        else:
-            # Django 1.7 compatibility
-            from .db_reuse import monkey_patch_creation_for_db_reuse
-
-            with django_db_blocker.unblock():
-                monkey_patch_creation_for_db_reuse()
+        setup_databases_args['keepdb'] = True
 
     with django_db_blocker.unblock():
         db_cfg = setup_databases(

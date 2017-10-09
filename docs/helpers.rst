@@ -85,7 +85,7 @@ when trying to access the database.
   If you run pytest using the ``--fail-on-template-vars`` option,
   tests will fail should your templates contain any invalid variables.
   This marker will disable this feature by setting ``settings.TEMPLATE_STRING_IF_INVALID=None``
-  or the ``string_if_invalid`` template option in Django>=1.7
+  or the ``string_if_invalid`` template option
 
   Example usage::
 

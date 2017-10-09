@@ -42,8 +42,6 @@ matrix:
     - python: 2.7
       env: TOXENV=py27-pytest3-dj18-postgres
     - python: 2.7
-      env: TOXENV=py27-pytest3-dj17-postgres
-    - python: 2.7
       env: TOXENV=py27-checkqa
 
     - python: pypy

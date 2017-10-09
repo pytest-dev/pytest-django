@@ -137,10 +137,10 @@ writing), running them all will take a long time. All valid configurations can
 be found in `tox.ini`. To test against a few of them, invoke tox with the `-e`
 flag::
 
-    $ tox -e python3.3-1.7-postgres,python2.7-1.9-sqlite
+    $ tox -e python3.6-1.11-postgres,python2.7-1.11-mysql_innodb
 
-This will run the tests on Python 3.3/Django 1.7/PostgeSQL and Python
-2.7/Django 1.9/SQLite.
+This will run the tests on Python 3.6/Django 1.11/PostgeSQL and Python
+2.7/Django 1.11/MySQL.
 
 
 Measuring test coverage
