@@ -43,6 +43,8 @@ def django_testdir(request, testdir, monkeypatch):
         db_settings['default']['TEST']['NAME'] = TEST_DB_NAME
 
     test_settings = dedent('''
+        import django
+
         # Pypy compatibility
         try:
             from psycopg2ct import compat
@@ -60,13 +62,16 @@ def django_testdir(request, testdir, monkeypatch):
         ]
         SECRET_KEY = 'foobar'
 
-        MIDDLEWARE_CLASSES = (
+        MIDDLEWARE = [
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.messages.middleware.MessageMiddleware',
-        )
+        ]
+
+        if django.VERSION < (1, 10):
+            MIDDLEWARE_CLASSES = MIDDLEWARE
 
         TEMPLATES = [
             {
