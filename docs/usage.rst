@@ -7,20 +7,20 @@ Basic usage
 -----------
 
 When using pytest-django, django-admin.py or manage.py is not used to run
-tests. This makes it possible to invoke py.test and other plugins with all its
+tests. This makes it possible to invoke pytest and other plugins with all its
 different options directly.
 
-Running a test suite is done by invoking the py.test command directly::
+Running a test suite is done by invoking the pytest command directly::
 
-    py.test
+    pytest
 
 Specific test files or directories can be selected by specifying the test file names directly on
 the command line::
 
-    py.test test_something.py a_directory
+    pytest test_something.py a_directory
 
-See the `py.test documentation on Usage and invocations
-<http://pytest.org/latest/usage.html>`_ for more help on available parameters.
+See the `pytest documentation on Usage and invocations
+<https://pytest.org/en/latest/usage.html>`_ for more help on available parameters.
 
 Additional command line options
 -------------------------------
@@ -42,7 +42,7 @@ installed with::
 
 You can then run the tests by running::
 
-    py.test -n <number of processes>
+    pytest -n <number of processes>
 
 When tests are invoked with xdist, pytest-django will create a separate test
 database for each process. Each test database will be given a suffix
@@ -51,6 +51,6 @@ is set to "foo", the test database with xdist will be "test_foo_gw0",
 "test_foo_gw1" etc.
 
 See the full documentation on `pytest-xdist
-<http://pytest.org/latest/xdist.html>`_ for more information. Among other
+<https://pytest.org/en/latest/xdist.html>`_ for more information. Among other
 features, pytest-xdist can distribute/coordinate test execution on remote
 machines.

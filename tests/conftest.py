@@ -6,8 +6,7 @@ import py
 import pytest
 from django.conf import settings
 
-from pytest_django_test.db_helpers import (create_empty_production_database,
-                                           DB_NAME, get_db_engine)
+from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
 
 pytest_plugins = 'pytester'
 
@@ -36,19 +35,16 @@ def django_testdir(request, testdir, monkeypatch):
 
     options = _marker_apifun(**(marker.kwargs if marker else {}))
 
-    db_engine = get_db_engine()
-    if db_engine in ('mysql', 'postgresql_psycopg2') \
-            or (db_engine == 'sqlite3' and DB_NAME != ':memory:'):
-        # Django requires the production database to exist.
-        create_empty_production_database()
-
     if hasattr(request.node.cls, 'db_settings'):
         db_settings = request.node.cls.db_settings
     else:
         db_settings = copy.deepcopy(settings.DATABASES)
         db_settings['default']['NAME'] = DB_NAME
+        db_settings['default']['TEST']['NAME'] = TEST_DB_NAME
 
     test_settings = dedent('''
+        import django
+
         # Pypy compatibility
         try:
             from psycopg2ct import compat
@@ -66,13 +62,16 @@ def django_testdir(request, testdir, monkeypatch):
         ]
         SECRET_KEY = 'foobar'
 
-        MIDDLEWARE_CLASSES = (
+        MIDDLEWARE = [
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.messages.middleware.MessageMiddleware',
-        )
+        ]
+
+        if django.VERSION < (1, 10):
+            MIDDLEWARE_CLASSES = MIDDLEWARE
 
         TEMPLATES = [
             {
@@ -130,6 +129,7 @@ def django_testdir(request, testdir, monkeypatch):
 @pytest.fixture
 def django_testdir_initial(django_testdir):
     """A django_testdir fixture which provides initial_data."""
+    django_testdir.project_root.join('tpkg/app/migrations').remove()
     django_testdir.makefile('.json', initial_data="""
         [{
             "pk": 1,

@@ -19,7 +19,7 @@ def read(fname):
 setup(
     name='pytest-django',
     use_scm_version=True,
-    description='A Django plugin for py.test.',
+    description='A Django plugin for pytest.',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
     maintainer="Andreas Pelme",
@@ -28,8 +28,8 @@ setup(
     license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
-    setup_requires=['setuptools_scm==1.8.0'],
-    install_requires=['pytest>=2.5'],
+    setup_requires=['setuptools_scm>=1.11.1'],
+    install_requires=['pytest>=2.9'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
@@ -37,11 +37,12 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing',
-                 'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.2',
                  'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: 3.4',
+                 'Programming Language :: Python :: 3.5',
+                 'Programming Language :: Python :: 3.6',
                  ],
-    # the following makes a plugin available to py.test
+    # the following makes a plugin available to pytest
     entry_points={'pytest11': ['django = pytest_django.plugin']})

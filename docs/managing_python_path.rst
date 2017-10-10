@@ -7,7 +7,7 @@ pytest needs to be able to import the code in your project. Normally, when
 interacting with Django code, the interaction happens via ``manage.py``, which
 will implicilty add that directory to the Python path.
 
-However, when Python is started via the ``py.test`` command, some extra care is
+However, when Python is started via the ``pytest`` command, some extra care is
 needed to have the Python path setup properly. There are two ways to handle
 this problem, described below.
 

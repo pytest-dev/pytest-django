@@ -1,4 +1,4 @@
-"""A py.test plugin which helps testing Django applications
+"""A pytest plugin which helps testing Django applications
 
 This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
@@ -14,17 +14,28 @@ import types
 import py
 import pytest
 
-from .django_compat import is_django_unittest
-from .fixtures import (_django_db_setup, _live_server_helper, admin_client,
-                       admin_user, client, db, django_user_model,
-                       django_username_field, live_server, rf, settings,
-                       transactional_db)
-from .lazy_django import django_settings_is_configured, skip_if_no_django
+from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
+from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_modify_db_settings  # noqa
+from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
+from .fixtures import _live_server_helper  # noqa
+from .fixtures import admin_client  # noqa
+from .fixtures import admin_user  # noqa
+from .fixtures import client  # noqa
+from .fixtures import db  # noqa
+from .fixtures import django_user_model  # noqa
+from .fixtures import django_username_field  # noqa
+from .fixtures import live_server  # noqa
+from .fixtures import rf  # noqa
+from .fixtures import settings  # noqa
+from .fixtures import transactional_db  # noqa
+from .pytest_compat import getfixturevalue
 
-# Silence linters for imported fixtures.
-(_django_db_setup, _live_server_helper, admin_client, admin_user, client, db,
- django_user_model, django_username_field, live_server, rf, settings,
- transactional_db)
+from .lazy_django import (django_settings_is_configured,
+                          get_django_version, skip_if_no_django)
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
@@ -45,10 +56,10 @@ def pytest_addoption(parser):
                      help='Re-create the database, even if it exists. This '
                           'option can be used to override --reuse-db.')
     group._addoption('--ds',
-                     action='store', type='string', dest='ds', default=None,
+                     action='store', type=str, dest='ds', default=None,
                      help='Set DJANGO_SETTINGS_MODULE.')
     group._addoption('--dc',
-                     action='store', type='string', dest='dc', default=None,
+                     action='store', type=str, dest='dc', default=None,
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
@@ -66,13 +77,13 @@ def pytest_addoption(parser):
     parser.addini('django_find_project',
                   'Automatically find and add a Django project to the '
                   'Python path.',
-                  default=True)
+                  type='bool', default=True)
     group._addoption('--fail-on-template-vars',
                      action='store_true', dest='itv', default=False,
                      help='Fail for invalid variables in templates.')
     parser.addini(INVALID_TEMPLATE_VARS_ENV,
                   'Fail for invalid variables in templates.',
-                  default=False)
+                  type='bool', default=False)
 
 
 def _exists(path, ignore=EnvironmentError):
@@ -132,29 +143,29 @@ def _setup_django():
 
     import django.conf
 
-    # Avoid trying to force-load Django when settings is not properly configured
+    # Avoid force-loading Django when settings are not properly configured.
     if not django.conf.settings.configured:
         return
 
     django.setup()
+    _blocking_manager.block()
 
 
-def _parse_django_find_project_ini(x):
+def _get_boolean_value(x, name, default=None):
+    if x is None:
+        return default
     if x in (True, False):
         return x
-
-    x = x.lower()
     possible_values = {'true': True,
                        'false': False,
                        '1': True,
                        '0': False}
-
     try:
-        return possible_values[x]
+        return possible_values[x.lower()]
     except KeyError:
-        raise ValueError('%s is not a valid value for django_find_project. '
-                         'It must be one of %s.'
-                         % (x, ', '.join(possible_values.keys())))
+        raise ValueError('{} is not a valid value for {}. '
+                         'It must be one of {}.'
+                         % (x, name, ', '.join(possible_values.keys())))
 
 
 def pytest_load_initial_conftests(early_config, parser, args):
@@ -177,24 +188,21 @@ def pytest_load_initial_conftests(early_config, parser, args):
     if options.version or options.help:
         return
 
-    django_find_project = _parse_django_find_project_ini(
-        early_config.getini('django_find_project'))
+    django_find_project = _get_boolean_value(
+        early_config.getini('django_find_project'), 'django_find_project')
 
     if django_find_project:
         _django_project_scan_outcome = _add_django_project_to_path(args)
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
-    # Configure FAIL_INVALID_TEMPLATE_VARS
-    itv = (options.itv or
-           os.environ.get(INVALID_TEMPLATE_VARS_ENV) in ['true', 'True', '1'] or
-           early_config.getini(INVALID_TEMPLATE_VARS_ENV))
-
-    if itv:
+    if (options.itv or
+            _get_boolean_value(os.environ.get(INVALID_TEMPLATE_VARS_ENV),
+                               INVALID_TEMPLATE_VARS_ENV) or
+            early_config.getini(INVALID_TEMPLATE_VARS_ENV)):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
-
     if options.ds:
         ds_source = 'command line option'
         ds = options.ds
@@ -209,7 +217,8 @@ def pytest_load_initial_conftests(early_config, parser, args):
         ds_source = None
 
     if ds:
-        early_config._dsm_report_header = 'django settings: %s (from %s)' % (ds, ds_source)
+        early_config._dsm_report_header = 'Django settings: %s (from %s)' % (
+            ds, ds_source)
     else:
         early_config._dsm_report_header = None
 
@@ -228,12 +237,12 @@ def pytest_load_initial_conftests(early_config, parser, args):
             import configurations.importer
             configurations.importer.install()
 
-        # Forcefully load django settings, throws ImportError or
+        # Forcefully load Django settings, throws ImportError or
         # ImproperlyConfigured if settings cannot be loaded.
-        from django.conf import settings
+        from django.conf import settings as dj_settings
 
         with _handle_import_error(_django_project_scan_outcome):
-            settings.DATABASES
+            dj_settings.DATABASES
 
     _setup_django()
 
@@ -257,7 +266,8 @@ def _method_is_defined_at_leaf(cls, method_name):
         if hasattr(base_cls, method_name):
             super_method = getattr(base_cls, method_name)
 
-    assert super_method is not None, '%s could not be found in base class' % method_name
+    assert super_method is not None, (
+        '%s could not be found in base class' % method_name)
 
     return getattr(cls, method_name).__func__ is not super_method.__func__
 
@@ -310,7 +320,7 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture(autouse=True, scope='session')
-def _django_test_environment(request):
+def django_test_environment(request):
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -323,28 +333,32 @@ def _django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.conf import settings
-        from django.test.utils import setup_test_environment, teardown_test_environment
-        settings.DEBUG = False
+        from django.conf import settings as dj_settings
+        from django.test.utils import (setup_test_environment,
+                                       teardown_test_environment)
+        dj_settings.DEBUG = False
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
 
-@pytest.fixture(autouse=True, scope='session')
-def _django_cursor_wrapper(request):
-    """Wrapper around Django's database access, internal to pytest-django.
+@pytest.fixture(scope='session')
+def django_db_blocker():
+    """Wrapper around Django's database access.
 
-    This will globally disable all database access. The object
-    returned has a .enable() and a .disable() method which can be used
-    to temporarily enable database access.
+    This object can be used to re-enable database access.  This fixture is used
+    internally in pytest-django to build the other fixtures and can be used for
+    special database handling.
+
+    The object is a context manager and provides the methods
+    .unblock()/.block() and .restore() to temporarily enable database access.
+
+    This is an advanced feature that is meant to be used to implement database
+    fixtures.
     """
     if not django_settings_is_configured():
         return None
 
-    manager = BlockDjangoDatabaseManager()
-    manager.disable()
-    request.addfinalizer(manager.restore)
-    return manager
+    return _blocking_manager
 
 
 @pytest.fixture(autouse=True)
@@ -358,21 +372,37 @@ def _django_db_marker(request):
     if marker:
         validate_django_db(marker)
         if marker.transaction:
-            request.getfuncargvalue('transactional_db')
+            getfixturevalue(request, 'transactional_db')
         else:
-            request.getfuncargvalue('db')
+            getfixturevalue(request, 'db')
 
 
 @pytest.fixture(autouse=True, scope='class')
-def _django_setup_unittest(request, _django_cursor_wrapper):
+def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        request.getfuncargvalue('_django_test_environment')
-        request.getfuncargvalue('_django_db_setup')
+        getfixturevalue(request, 'django_test_environment')
+        getfixturevalue(request, 'django_db_setup')
 
-        _django_cursor_wrapper.enable()
+        django_db_blocker.unblock()
 
         cls = request.node.cls
+
+        # implement missing (as of 1.10) debug() method for django's TestCase
+        # see pytest-dev/pytest-django#406
+        def _cleaning_debug(self):
+            testMethod = getattr(self, self._testMethodName)
+            skipped = (
+                getattr(self.__class__, "__unittest_skip__", False) or
+                getattr(testMethod, "__unittest_skip__", False))
+
+            if not skipped:
+                self._pre_setup()
+            super(cls, self).debug()
+            if not skipped:
+                self._post_teardown()
+
+        cls.debug = _cleaning_debug
 
         _restore_class_methods(cls)
         cls.setUpClass()
@@ -381,17 +411,27 @@ def _django_setup_unittest(request, _django_cursor_wrapper):
         def teardown():
             _restore_class_methods(cls)
             cls.tearDownClass()
-            _django_cursor_wrapper.restore()
+            django_db_blocker.restore()
 
         request.addfinalizer(teardown)
 
 
-@pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox():
-    """Clear the django outbox, internal to pytest-django."""
-    if django_settings_is_configured():
-        from django.core import mail
-        mail.outbox = []
+@pytest.fixture(scope='function', autouse=True)
+def _dj_autoclear_mailbox():
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    del mail.outbox[:]
+
+
+@pytest.fixture(scope='function')
+def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    return mail.outbox
 
 
 @pytest.fixture(autouse=True, scope='function')
@@ -401,7 +441,11 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches, set_urlconf
+        try:
+            from django.urls import clear_url_caches, set_urlconf
+        except ImportError:
+            # Removed in Django 2.0
+            from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -443,10 +487,25 @@ def _fail_for_invalid_template_variable(request):
             """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
             return key == '%s'
 
-        def _get_template(self):
+        @staticmethod
+        def _get_origin():
+            stack = inspect.stack()
+
+            # Try to use topmost `self.origin` first (Django 1.9+, and with
+            # TEMPLATE_DEBUG)..
+            for f in stack[2:]:
+                func = f[3]
+                if func == 'render':
+                    frame = f[0]
+                    try:
+                        origin = frame.f_locals['self'].origin
+                    except (AttributeError, KeyError):
+                        continue
+                    if origin is not None:
+                        return origin
+
             from django.template import Template
 
-            stack = inspect.stack()
             # finding the ``render`` needle in the stack
             frame = reduce(
                 lambda x, y: y[3] == 'render' and 'base.py' in y[1] and y or x,
@@ -462,28 +521,30 @@ def _fail_for_invalid_template_variable(request):
             # ``django.template.base.Template``
             template = f_locals['self']
             if isinstance(template, Template):
-                return template
+                return template.name
 
         def __mod__(self, var):
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
-            template = self._get_template()
-            if template:
-                msg = "Undefined template variable '%s' in '%s'" % (var, template.name)
+            origin = self._get_origin()
+            if origin:
+                msg = "Undefined template variable '%s' in '%s'" % (
+                    var, origin)
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
-                pytest.fail(msg, pytrace=False)
+                pytest.fail(msg)
             else:
                 return msg
-    if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
-        if django_settings_is_configured():
-            import django
-            from django.conf import settings
 
-            if django.VERSION >= (1, 8) and settings.TEMPLATES:
-                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = InvalidVarException()
-            else:
-                settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
+    if (os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true' and
+            django_settings_is_configured()):
+        from django.conf import settings as dj_settings
+
+        if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+            dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = (
+                InvalidVarException())
+        else:
+            dj_settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
 
 
 @pytest.fixture(autouse=True)
@@ -493,36 +554,61 @@ def _template_string_if_invalid_marker(request):
     marker = request.keywords.get('ignore_template_errors', None)
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true':
         if marker and django_settings_is_configured():
-            import django
-            from django.conf import settings
+            from django.conf import settings as dj_settings
 
-            if django.VERSION >= (1, 8) and settings.TEMPLATES:
-                settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
+            if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+                dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
-                settings.TEMPLATE_STRING_IF_INVALID.fail = False
+                dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_clear_site_cache():
+    """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
+    unexpected behavior with cached site objects.
+    """
+
+    if django_settings_is_configured():
+        from django.conf import settings as dj_settings
+
+        if 'django.contrib.sites' in dj_settings.INSTALLED_APPS:
+            from django.contrib.sites.models import Site
+            Site.objects.clear_cache()
 
 # ############### Helper Functions ################
 
 
-class BlockDjangoDatabaseManager(object):
+class _DatabaseBlockerContextManager(object):
+    def __init__(self, db_blocker):
+        self._db_blocker = db_blocker
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._db_blocker.restore()
+
+
+class _DatabaseBlocker(object):
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
-    This is the object returned by _django_cursor_wrapper.
-
-    If created with None as django.db.backends.util the object is a
-    no-op.
+    This is the object returned by django_db_blocker.
     """
 
     def __init__(self):
-        try:
-            from django.db.backends.base.base import BaseDatabaseWrapper
-        except ImportError:
-            # Django 1.7.
-            from django.db.backends import BaseDatabaseWrapper
-
-        self._dj_db_wrapper = BaseDatabaseWrapper
-        self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
         self._history = []
+        self._real_ensure_connection = None
+
+    @property
+    def _dj_db_wrapper(self):
+        from .compat import BaseDatabaseWrapper
+
+        # The first time the _dj_db_wrapper is accessed, we will save a
+        # reference to the real implementation.
+        if self._real_ensure_connection is None:
+            self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
+
+        return BaseDatabaseWrapper
 
     def _save_active_wrapper(self):
         return self._history.append(self._dj_db_wrapper.ensure_connection)
@@ -531,26 +617,26 @@ class BlockDjangoDatabaseManager(object):
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
         pytest.fail('Database access not allowed, '
-                    'use the "django_db" mark to enable it.')
+                    'use the "django_db" mark, or the '
+                    '"db" or "transactional_db" fixtures to enable it.')
 
-    def enable(self):
+    def unblock(self):
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
+        return _DatabaseBlockerContextManager(self)
 
-    def disable(self):
+    def block(self):
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
+        return _DatabaseBlockerContextManager(self)
 
     def restore(self):
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
-    def __enter__(self):
-        self.enable()
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.restore()
+_blocking_manager = _DatabaseBlocker()
 
 
 def validate_django_db(marker):

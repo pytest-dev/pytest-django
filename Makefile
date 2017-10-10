@@ -1,25 +1,27 @@
 .PHONY: docs test clean isort
 
+VENV:=build/venv
+
 export DJANGO_SETTINGS_MODULE?=pytest_django_test.settings_sqlite_file
 
-testenv: bin/py.test
+testenv: $(VENV)/bin/pytest
 
-test: bin/py.test
-	bin/pip install -e .
-	bin/py.test
+test: $(VENV)/bin/pytest
+	$(VENV)/bin/pip install -e .
+	$(VENV)/bin/py.test
 
-bin/python bin/pip:
-	virtualenv .
+$(VENV)/bin/python $(VENV)/bin/pip:
+	virtualenv $(VENV)
 
-bin/py.test: bin/python requirements.txt
-	bin/pip install -Ur requirements.txt
+$(VENV)/bin/pytest: $(VENV)/bin/python requirements.txt
+	$(VENV)/bin/pip install -Ur requirements.txt
 	touch $@
 
-bin/sphinx-build: bin/pip
-	bin/pip install sphinx
+$(VENV)/bin/sphinx-build: $(VENV)/bin/pip
+	$(VENV)/bin/pip install sphinx
 
-docs: bin/sphinx-build
-	SPHINXBUILD=../bin/sphinx-build $(MAKE) -C docs html
+docs: $(VENV)/bin/sphinx-build
+	SPHINXBUILD=../$(VENV)/bin/sphinx-build $(MAKE) -C docs html
 
 # See setup.cfg for configuration.
 isort:
