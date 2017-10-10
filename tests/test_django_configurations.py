@@ -15,9 +15,9 @@ except ImportError as e:
                     'https://github.com/jezdez/django-configurations/issues/65')  # noqa
 
 BARE_SETTINGS = '''
-from configurations import Settings
+from configurations import Configuration
 
-class MySettings(Settings):
+class MySettings(Configuration):
     # At least one database must be configured
     DATABASES = {
         'default': {

@@ -9,8 +9,8 @@ Markers
 ``pytest-django`` registers and uses markers.  See the pytest documentation_
 on what marks are and for notes on using_ them.
 
-.. _documentation: http://pytest.org/latest/mark.html
-.. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
+.. _documentation: https://pytest.org/en/latest/mark.html
+.. _using: https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules
 
 
 ``pytest.mark.django_db(transaction=False)`` - request database access
@@ -74,7 +74,7 @@ when trying to access the database.
 
      @pytest.mark.urls('myapp.test_urls')
      def test_something(client):
-         assert 'Success!' in client.get('/some_url_defined_in_test_urls/')
+         assert 'Success!' in client.get('/some_url_defined_in_test_urls/').content
 
 
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
@@ -99,7 +99,7 @@ Fixtures
 
 pytest-django provides some pytest fixtures to provide dependencies for tests.
 More information on fixtures is available in the `pytest documentation
-<http://pytest.org/latest/fixture.html>`_.
+<https://pytest.org/en/latest/fixture.html>`_.
 
 
 ``rf`` - ``RequestFactory``
@@ -218,10 +218,30 @@ Example
         settings.USE_TZ = True
         assert settings.USE_TZ
 
+
+``django_assert_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture allows to check for an expected number of DB queries.
+It currently only supports the default database.
+
+
+Example
+"""""""
+
+::
+
+    def test_queries(django_assert_num_queries):
+        with django_assert_num_queries(3):
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+            Item.objects.create('baz')
+
+
 ``mailoutbox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A clean mail outbox where django emails are being sent.
+A clean mail outbox where Django emails are being sent to.
 
 Example
 """""""
@@ -254,3 +274,11 @@ Clearing of site cache
 If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
 be cleared for each test to avoid hitting the cache and cause wrong Site
 object to be returned by ``Site.objects.get_current()``.
+
+
+Clearing of mail.outbox
+~~~~~~~~~~~~~~~~~~~~~~~
+
+``mail.outbox`` will be cleared for each pytest, to give tests a empty
+mailbox. It is however more pytestic to use the ``mailoutbox`` fixture
+to access ``mail.outbox``.

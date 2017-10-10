@@ -15,6 +15,7 @@ import py
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_assert_num_queries  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_db_keepdb  # noqa
@@ -417,44 +418,22 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
-class _DirectMailboxAccessProtector(list):
-
-    def _raise_assertion(*args, **kwargs):
-        __tracebackhide__ = True
-        raise AssertionError('''To access mail.outbox, use the mailoutbox fixture.
-See http://pytest-django.readthedocs.io/en/latest/helpers.html#mailoutbox for more information.''')
-
-    __len__ = _raise_assertion
-    __getitem__ = _raise_assertion
-    __nonzero__ = _raise_assertion
-    __bool__ = _raise_assertion
-    __eq__ = _raise_assertion
-    __ne__ = _raise_assertion
-    __iter__ = _raise_assertion
-
-
-@pytest.fixture(autouse=True)
-def _error_on_direct_mail_outbox_access(monkeypatch):
+@pytest.fixture(scope='function', autouse=True)
+def _dj_autoclear_mailbox():
     if not django_settings_is_configured():
         return
 
     from django.core import mail
-
-    outbox = _DirectMailboxAccessProtector()
-    monkeypatch.setattr(mail, 'outbox', outbox)
-    return outbox
+    del mail.outbox[:]
 
 
 @pytest.fixture(scope='function')
-def mailoutbox(monkeypatch, _error_on_direct_mail_outbox_access):
+def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
     if not django_settings_is_configured():
         return
 
     from django.core import mail
-
-    outbox = list()
-    monkeypatch.setattr(mail, 'outbox', outbox)
-    return outbox
+    return mail.outbox
 
 
 @pytest.fixture(autouse=True, scope='function')
@@ -464,7 +443,11 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches, set_urlconf
+        try:
+            from django.urls import clear_url_caches, set_urlconf
+        except ImportError:
+            # Removed in Django 2.0
+            from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -506,10 +489,25 @@ def _fail_for_invalid_template_variable(request):
             """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
             return key == '%s'
 
-        def _get_template(self):
+        @staticmethod
+        def _get_origin():
+            stack = inspect.stack()
+
+            # Try to use topmost `self.origin` first (Django 1.9+, and with
+            # TEMPLATE_DEBUG)..
+            for f in stack[2:]:
+                func = f[3]
+                if func == 'render':
+                    frame = f[0]
+                    try:
+                        origin = frame.f_locals['self'].origin
+                    except (AttributeError, KeyError):
+                        continue
+                    if origin is not None:
+                        return origin
+
             from django.template import Template
 
-            stack = inspect.stack()
             # finding the ``render`` needle in the stack
             frame = reduce(
                 lambda x, y: y[3] == 'render' and 'base.py' in y[1] and y or x,
@@ -525,18 +523,18 @@ def _fail_for_invalid_template_variable(request):
             # ``django.template.base.Template``
             template = f_locals['self']
             if isinstance(template, Template):
-                return template
+                return template.name
 
         def __mod__(self, var):
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
-            template = self._get_template()
-            if template:
+            origin = self._get_origin()
+            if origin:
                 msg = "Undefined template variable '%s' in '%s'" % (
-                    var, template.name)
+                    var, origin)
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
-                pytest.fail(msg, pytrace=False)
+                pytest.fail(msg)
             else:
                 return msg
 

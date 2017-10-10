@@ -16,10 +16,11 @@ for more information.
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
-Create a `pytest fixture <http://pytest.org/latest/fixture.html>`_ that is
+Create a `pytest fixture <https://pytest.org/en/latest/fixture.html>`_ that is
 automatically run before each test case. To run all tests with the english
-locale, put the following code in your project's `conftest.py
-<http://pytest.org/latest/plugins.html>`_ file::
+locale, put the following code in your project's `conftest.py`_ file:
+
+.. code-block:: python
 
     from django.utils.translation import activate
 
@@ -27,21 +28,34 @@ locale, put the following code in your project's `conftest.py
     def set_default_language():
         activate('en')
 
+.. _conftest.py: http://docs.pytest.org/en/latest/plugins.html
+
 .. _faq-tests-not-being-picked-up:
 
-My tests are not being found. Why not?
--------------------------------------------------------------------------------------
- By default, pytest looks for tests in files named ``test_*.py`` (note that
- this is not the same as ``test*.py``).  If you have your tests in files with
- other names, they will not be collected. It is common to put tests under
- ``app_directory/tests/views.py``. To find those tests, create a ``pytest.ini``
- file in your project root with the contents::
+My tests are not being found. Why?
+----------------------------------
+
+By default, pytest looks for tests in files named ``test_*.py`` (note that
+this is not the same as ``test*.py``) and ``*_test.py``.  If you have your
+tests in files with other names, they will not be collected.  Note that
+Django's ``startapp`` manage command creates an ``app_dir/tests.py`` file.
+Also, it is common to put tests under ``app_dir/tests/views.py``, etc.
+
+To find those tests, create a ``pytest.ini`` file in your project root and add
+an appropriate ``python_files`` line to it:
+
+.. code-block:: ini
 
     [pytest]
-    python_files=*.py
+    python_files = tests.py test_*.py *_tests.py
 
-When debugging test collection problems, the ``--collectonly`` flag and ``-rs``
-(report skipped tests) can be helpful.
+See the `related pytest docs`_ for more details.
+
+When debugging test collection problems, the ``--collectonly`` flag and
+``-rs`` (report skipped tests) can be helpful.
+
+.. _related pytest docs:
+    http://docs.pytest.org/en/latest/example/pythoncollection.html#changing-naming-conventions
 
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
@@ -58,7 +72,9 @@ How can I use ``manage.py test`` with pytest-django?
 
 pytest-django is designed to work with the ``pytest`` command, but if you
 really need integration with ``manage.py test``, you can create a simple
-test runner like this::
+test runner like this:
+
+.. code-block:: python
 
     class PytestTestRunner(object):
         """Runs pytest to discover and run tests."""
@@ -90,11 +106,15 @@ test runner like this::
             argv.extend(test_labels)
             return pytest.main(argv)
 
-Add the path to this class in your Django settings::
+Add the path to this class in your Django settings:
+
+.. code-block:: python
 
     TEST_RUNNER = 'my_project.runner.PytestTestRunner'
 
-Usage::
+Usage:
+
+.. code-block:: bash
 
     ./manage.py test <django args> -- <pytest args>
 
@@ -106,7 +126,9 @@ variables or the ``--settings`` command line option.
 How can I give database access to all my tests without the `django_db` marker?
 ------------------------------------------------------------------------------
 
-Create an autouse fixture and put it in `conftest.py` in your project root::
+Create an autouse fixture and put it in ``conftest.py`` in your project root:
+
+.. code-block:: python
 
     @pytest.fixture(autouse=True)
     def enable_db_access_for_all_tests(db):
@@ -115,11 +137,14 @@ Create an autouse fixture and put it in `conftest.py` in your project root::
 How/where can I get help with pytest/pytest-django?
 ---------------------------------------------------
 
-Usage questions can be asked on StackOverflow with the `pytest tag
-<http://stackoverflow.com/search?q=pytest>`_.
+Usage questions can be asked on StackOverflow with the `pytest tag`_.
 
 If you think you've found a bug or something that is wrong in the
-documentation, feel free to `open an issue on the Github project for
-pytest-django <https://github.com/pytest-dev/pytest-django/issues/>`_.
+documentation, feel free to `open an issue on the GitHub project`_ for
+pytest-django.
 
 Direct help can be found in the #pylib IRC channel on irc.freenode.org.
+
+.. _pytest tag: http://stackoverflow.com/search?q=pytest
+.. _open an issue on the GitHub project:
+    https://github.com/pytest-dev/pytest-django/issues/

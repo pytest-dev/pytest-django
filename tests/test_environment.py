@@ -18,42 +18,17 @@ from pytest_django_test.app.models import Item
 # This is possible with some of the testdir magic, but this is the lazy way
 # to do it.
 
+@pytest.mark.parametrize('subject', ['subject1', 'subject2'])
+def test_autoclear_mailbox(subject):
+    assert len(mail.outbox) == 0
+    mail.send_mail(subject, 'body', 'from@example.com', ['to@example.com'])
+    assert len(mail.outbox) == 1
 
-class Test_direct_mailbox_access_not_allowed():
-
-    def test_len(self):
-        with pytest.raises(AssertionError):
-            len(mail.outbox)
-
-    def test_indexing(self):
-        with pytest.raises(AssertionError):
-            mail.outbox[0]
-
-    def test_bool(self):
-        with pytest.raises(AssertionError):
-            if mail.outbox:
-                pass
-
-    def test_equality(self):
-        with pytest.raises(AssertionError):
-            mail.outbox == 'whatever'
-
-    def test_not_equality(self):
-        with pytest.raises(AssertionError):
-            mail.outbox != 'whatever'
-
-    def test_unpacking(self):
-        with pytest.raises(AssertionError):
-            (foo,) = mail.outbox
-
-    def test_iteration(self):
-        with pytest.raises(AssertionError):
-            for x in mail.outbox:
-                pass
-
-
-def test_direct_mailbox_proection_should_not_break_sending_mail():
-    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    m = mail.outbox[0]
+    assert m.subject == subject
+    assert m.body == 'body'
+    assert m.from_email == 'from@example.com'
+    assert m.to == ['to@example.com']
 
 
 class TestDirectAccessWorksForDjangoTestCase(TestCase):
@@ -98,6 +73,10 @@ def test_invalid_template_variable(django_testdir):
         """, 'views.py')
     django_testdir.create_app_file(
         "<div>{{ invalid_var }}</div>",
+        'templates/invalid_template_base.html'
+    )
+    django_testdir.create_app_file(
+        "{% extends 'invalid_template_base.html' %}",
         'templates/invalid_template.html'
     )
     django_testdir.create_test_module('''
@@ -111,9 +90,14 @@ def test_invalid_template_variable(django_testdir):
             client.get('/invalid_template/')
         ''')
     result = django_testdir.runpytest_subprocess('-s', '--fail-on-template-vars')
+
+    if get_django_version() >= (1, 9):
+        origin = "'*/tpkg/app/templates/invalid_template_base.html'"
+    else:
+        origin = "'invalid_template.html'"
     result.stdout.fnmatch_lines_random([
         "tpkg/test_the_test.py F.",
-        "Undefined template variable 'invalid_var' in 'invalid_template.html'",
+        "E * Failed: Undefined template variable 'invalid_var' in {}".format(origin)
     ])
 
 
