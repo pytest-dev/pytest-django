@@ -10,11 +10,6 @@ _build
 /.coverage.*
 /.coverage
 /htmlcov/
-/bin/
-/include/
-/lib/
-/src/
-/share/
 .cache
 .Python
 .eggs

@@ -4,9 +4,8 @@ import sys
 class LiveServer(object):
     """The liveserver fixture
 
-    This is the object which is returned to the actual user when they
-    request the ``live_server`` fixture.  The fixture handles creation
-    and stopping however.
+    This is the object that the ``live_server`` fixture returns.
+    The ``live_server`` fixture that handles creation and stopping.
     """
 
     def __init__(self, addr):

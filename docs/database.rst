@@ -12,7 +12,7 @@ what code uses the database and catches any mistakes.
 Enabling database access in tests
 ---------------------------------
 
-You can use `pytest marks <http://pytest.org/latest/mark.html>`_ to
+You can use `pytest marks <https://pytest.org/en/latest/mark.html>`_ to
 tell ``pytest-django`` your test needs database access::
 
    import pytest
@@ -26,7 +26,7 @@ It is also possible to mark all tests in a class or module at once.
 This demonstrates all the ways of marking, even though they overlap.
 Just one of these marks would have been sufficient.  See the `pytest
 documentation
-<http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules>`_
+<https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules>`_
 for detail::
 
    import pytest

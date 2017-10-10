@@ -21,7 +21,7 @@ Talks, articles and blog posts
    John Costa
    <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.
 
-For general information and tutorials on pytest, see the `pytest tutorial page <http://pytest.org/latest/getting-started.html>`_.
+For general information and tutorials on pytest, see the `pytest tutorial page <https://pytest.org/en/latest/getting-started.html>`_.
 
 
 Step 1: Installation
@@ -88,7 +88,7 @@ The :ref:`usage` section describes more ways to interact with your test suites.
 pytest-django also provides some :ref:`helpers` to make it easier to write
 Django tests.
 
-Consult the `pytest documentation <http://pytest.org/>`_ for more information
+Consult the `pytest documentation <https://pytest.org/>`_ for more information
 on pytest itself.
 
 Stuck? Need help?

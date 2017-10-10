@@ -73,6 +73,10 @@ def test_invalid_template_variable(django_testdir):
         """, 'views.py')
     django_testdir.create_app_file(
         "<div>{{ invalid_var }}</div>",
+        'templates/invalid_template_base.html'
+    )
+    django_testdir.create_app_file(
+        "{% extends 'invalid_template_base.html' %}",
         'templates/invalid_template.html'
     )
     django_testdir.create_test_module('''
@@ -86,9 +90,14 @@ def test_invalid_template_variable(django_testdir):
             client.get('/invalid_template/')
         ''')
     result = django_testdir.runpytest_subprocess('-s', '--fail-on-template-vars')
+
+    if get_django_version() >= (1, 9):
+        origin = "'*/tpkg/app/templates/invalid_template_base.html'"
+    else:
+        origin = "'invalid_template.html'"
     result.stdout.fnmatch_lines_random([
         "tpkg/test_the_test.py F.",
-        "Undefined template variable 'invalid_var' in 'invalid_template.html'",
+        "E * Failed: Undefined template variable 'invalid_var' in {}".format(origin)
     ])
 
 
