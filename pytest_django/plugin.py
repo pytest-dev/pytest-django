@@ -15,6 +15,7 @@ import py
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
+from .fixtures import django_assert_num_queries  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_db_keepdb  # noqa
@@ -390,6 +391,22 @@ def _django_setup_unittest(request, django_db_blocker):
 
         cls = request.node.cls
 
+        # implement missing (as of 1.10) debug() method for django's TestCase
+        # see pytest-dev/pytest-django#406
+        def _cleaning_debug(self):
+            testMethod = getattr(self, self._testMethodName)
+            skipped = (
+                getattr(self.__class__, "__unittest_skip__", False) or
+                getattr(testMethod, "__unittest_skip__", False))
+
+            if not skipped:
+                self._pre_setup()
+            super(cls, self).debug()
+            if not skipped:
+                self._post_teardown()
+
+        cls.debug = _cleaning_debug
+
         _restore_class_methods(cls)
         cls.setUpClass()
         _disable_class_methods(cls)
@@ -402,12 +419,22 @@ def _django_setup_unittest(request, django_db_blocker):
         request.addfinalizer(teardown)
 
 
-@pytest.fixture(autouse=True, scope='function')
-def _django_clear_outbox(django_test_environment):
-    """Clear the django outbox, internal to pytest-django."""
-    if django_settings_is_configured():
-        from django.core import mail
-        del mail.outbox[:]
+@pytest.fixture(scope='function', autouse=True)
+def _dj_autoclear_mailbox():
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    del mail.outbox[:]
+
+
+@pytest.fixture(scope='function')
+def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
+    if not django_settings_is_configured():
+        return
+
+    from django.core import mail
+    return mail.outbox
 
 
 @pytest.fixture(autouse=True, scope='function')
@@ -417,7 +444,11 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches, set_urlconf
+        try:
+            from django.urls import clear_url_caches, set_urlconf
+        except ImportError:
+            # Removed in Django 2.0
+            from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -459,10 +490,25 @@ def _fail_for_invalid_template_variable(request):
             """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
             return key == '%s'
 
-        def _get_template(self):
+        @staticmethod
+        def _get_origin():
+            stack = inspect.stack()
+
+            # Try to use topmost `self.origin` first (Django 1.9+, and with
+            # TEMPLATE_DEBUG)..
+            for f in stack[2:]:
+                func = f[3]
+                if func == 'render':
+                    frame = f[0]
+                    try:
+                        origin = frame.f_locals['self'].origin
+                    except (AttributeError, KeyError):
+                        continue
+                    if origin is not None:
+                        return origin
+
             from django.template import Template
 
-            stack = inspect.stack()
             # finding the ``render`` needle in the stack
             frame = reduce(
                 lambda x, y: y[3] == 'render' and 'base.py' in y[1] and y or x,
@@ -478,18 +524,18 @@ def _fail_for_invalid_template_variable(request):
             # ``django.template.base.Template``
             template = f_locals['self']
             if isinstance(template, Template):
-                return template
+                return template.name
 
         def __mod__(self, var):
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
-            template = self._get_template()
-            if template:
+            origin = self._get_origin()
+            if origin:
                 msg = "Undefined template variable '%s' in '%s'" % (
-                    var, template.name)
+                    var, origin)
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
-                pytest.fail(msg, pytrace=False)
+                pytest.fail(msg)
             else:
                 return msg
 
@@ -517,6 +563,20 @@ def _template_string_if_invalid_marker(request):
                 dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
+
+
+@pytest.fixture(autouse=True, scope='function')
+def _django_clear_site_cache():
+    """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
+    unexpected behavior with cached site objects.
+    """
+
+    if django_settings_is_configured():
+        from django.conf import settings as dj_settings
+
+        if 'django.contrib.sites' in dj_settings.INSTALLED_APPS:
+            from django.contrib.sites.models import Site
+            Site.objects.clear_cache()
 
 # ############### Helper Functions ################
 
