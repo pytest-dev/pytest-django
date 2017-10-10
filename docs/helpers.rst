@@ -9,8 +9,8 @@ Markers
 ``pytest-django`` registers and uses markers.  See the pytest documentation_
 on what marks are and for notes on using_ them.
 
-.. _documentation: http://pytest.org/latest/mark.html
-.. _using: http://pytest.org/latest/example/markers.html#marking-whole-classes-or-modules
+.. _documentation: https://pytest.org/en/latest/mark.html
+.. _using: https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules
 
 
 ``pytest.mark.django_db(transaction=False)`` - request database access
@@ -74,7 +74,7 @@ when trying to access the database.
 
      @pytest.mark.urls('myapp.test_urls')
      def test_something(client):
-         assert 'Success!' in client.get('/some_url_defined_in_test_urls/')
+         assert 'Success!' in client.get('/some_url_defined_in_test_urls/').content
 
 
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
@@ -99,7 +99,7 @@ Fixtures
 
 pytest-django provides some pytest fixtures to provide dependencies for tests.
 More information on fixtures is available in the `pytest documentation
-<http://pytest.org/latest/fixture.html>`_.
+<https://pytest.org/en/latest/fixture.html>`_.
 
 
 ``rf`` - ``RequestFactory``

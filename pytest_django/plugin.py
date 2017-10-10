@@ -441,7 +441,11 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-        from django.core.urlresolvers import clear_url_caches, set_urlconf
+        try:
+            from django.urls import clear_url_caches, set_urlconf
+        except ImportError:
+            # Removed in Django 2.0
+            from django.core.urlresolvers import clear_url_caches, set_urlconf
 
         validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -483,7 +487,8 @@ def _fail_for_invalid_template_variable(request):
             """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
             return key == '%s'
 
-        def _get_origin(self):
+        @staticmethod
+        def _get_origin():
             stack = inspect.stack()
 
             # Try to use topmost `self.origin` first (Django 1.9+, and with

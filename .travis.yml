@@ -5,62 +5,55 @@ language: python
 matrix:
   fast_finish: true
   include:
-
     - python: 3.6
-      env: TOXENV=py36-pytest30-djangomaster-postgres
+      env: TOXENV=py36-pytest3-djangomaster-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest30-django1.11-postgres
+      env: TOXENV=py36-pytest3-django1.11-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest30-django1.10-postgres
+      env: TOXENV=py36-pytest3-django1.10-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest30-django1.9-postgres
+      env: TOXENV=py36-pytest3-django1.9-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest30-django1.8-postgres
+      env: TOXENV=py36-pytest3-django1.8-postgres
     - python: 3.6
       env: TOXENV=py36-checkqa
 
     - python: 3.5
-      env: TOXENV=py35-pytest30-django1.11-postgres
+      env: TOXENV=py35-pytest3-django1.11-postgres
 
     - python: 3.4
-      env: TOXENV=py34-pytest30-django1.11-postgres
+      env: TOXENV=py34-pytest3-django1.11-postgres
 
     - python: 3.3
-      env: TOXENV=py34-pytest30-django1.8-postgres
+      env: TOXENV=py34-pytest3-django1.8-postgres
 
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.11-mysql_innodb
+      env: TOXENV=py27-pytest3-django1.11-mysql_innodb
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.11-mysql_myisam
+      env: TOXENV=py27-pytest3-django1.11-mysql_myisam
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.11-postgres
+      env: TOXENV=py27-pytest3-django1.11-postgres
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.10-postgres
+      env: TOXENV=py27-pytest3-django1.10-postgres
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.9-postgres
+      env: TOXENV=py27-pytest3-django1.9-postgres
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.8-postgres
+      env: TOXENV=py27-pytest3-django1.8-postgres
     - python: 2.7
-      env: TOXENV=py27-pytest30-django1.7-postgres
+      env: TOXENV=py27-pytest3-django1.7-postgres
     - python: 2.7
       env: TOXENV=py27-checkqa
 
     - python: pypy
-      env: TOXENV=pypy-pytest30-django1.11-sqlite_file
+      env: TOXENV=pypy-pytest3-django1.11-sqlite_file
 
     - python: pypy3
-      env: TOXENV=pypy3-pytest30-django1.8-sqlite
+      env: TOXENV=pypy3-pytest3-django1.8-sqlite
     - python: pypy3
-      env: TOXENV=pypy3-pytest30-django1.10-sqlite_file
+      env: TOXENV=pypy3-pytest3-django1.10-sqlite_file
 
   allow_failures:
-    - env: TOXENV=py36-pytest30-djangomaster-postgres
-
-    # Temporary.
-    # https://github.com/pytest-dev/pytest-django/pull/445
-    # https://github.com/pytest-dev/pytest-django/issues/448
-    - env: TOXENV=pypy3-pytest30-django1.8-sqlite
-    - env: TOXENV=pypy3-pytest30-django1.10-sqlite_file
+    - env: TOXENV=py36-pytest3-djangomaster-postgres
 
 cache:
   directories:
@@ -76,12 +69,31 @@ install:
   - printf '\necho "Using pip-wrapper.." >&2\ntravis_retry pip "$@"' >> bin/travis_retry_pip
   - chmod +x bin/travis_retry_pip
   - sed -i.bak 's/^\[testenv\]/\0\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
-  - diff tox.ini tox.ini.bak && return 1 || true
-  - sed -i.bak 's/whitelist_externals =/\0\n    travis_retry_pip/' tox.ini
-  - diff tox.ini tox.ini.bak && return 1 || true
+  - if diff tox.ini tox.ini.bak; then exit 1; fi
+  - printf '\nwhitelist_externals = travis_retry_pip' >> tox.ini
 
-  - pip install tox==2.3.1
+  - pip install tox==2.7.0
+  - |
+    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+      export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
+      export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
+    fi
 
 script:
   - tox
   - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
+
+after_success:
+  - |
+    set -ex
+    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+      pip install codecov
+      coverage combine
+      coverage xml
+      coverage report -m --skip-covered
+
+      codecov_flags=${TOXENV//./}
+      codecov_flags=${codecov_flags//-/ }
+      codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
+    fi
+    set +x
