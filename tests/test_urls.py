@@ -74,7 +74,10 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
     """)
 
     testdir.makepyfile("""
-        from django.core.urlresolvers import reverse, NoReverseMatch
+        try:
+            from django.urls import reverse, NoReverseMatch
+        except ImportError:  # Django < 2.0
+            from django.core.urlresolvers import reverse, NoReverseMatch
         import pytest
 
         @pytest.mark.urls('myurls')
