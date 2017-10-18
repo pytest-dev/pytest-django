@@ -57,7 +57,7 @@ matrix:
 
 cache:
   directories:
-    - "${TRAVIS_BUILD_DIR}/.tox"
+    - "${TRAVIS_BUILD_DIR}/.tox/${TOXENV}"
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
@@ -72,7 +72,7 @@ install:
   - if diff tox.ini tox.ini.bak; then exit 1; fi
   - printf '\nwhitelist_externals = travis_retry_pip' >> tox.ini
 
-  - pip install tox==2.7.0
+  - pip install tox==2.9.1
   - |
     if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
@@ -81,7 +81,6 @@ install:
 
 script:
   - tox
-  - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
 
 after_success:
   - |
@@ -97,3 +96,6 @@ after_success:
       codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
     fi
     set +x
+
+before_cache:
+  - "find ${TRAVIS_BUILD_DIR}/.tox/${TOXENV} -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
