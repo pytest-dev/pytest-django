@@ -76,7 +76,7 @@ def test_invalid_template_variable(django_testdir):
         'templates/invalid_template_base.html'
     )
     django_testdir.create_app_file(
-        "{% extends 'invalid_template_base.html' %}",
+        "{% include 'invalid_template_base.html' %}",
         'templates/invalid_template.html'
     )
     django_testdir.create_test_module('''
