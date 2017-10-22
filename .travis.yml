@@ -87,9 +87,9 @@ after_success:
     set -ex
     if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
       pip install codecov
+
       coverage combine
       coverage xml
-      coverage report -m --skip-covered
 
       codecov_flags=${TOXENV//./}
       codecov_flags=${codecov_flags//-/ }
