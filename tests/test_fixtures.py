@@ -310,8 +310,6 @@ class TestLiveServer:
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
         assert result.ret == 0
 
-    @pytest.mark.skipif(get_django_version() < (1, 7),
-                        reason="Django >= 1.7 required")
     def test_serve_static_dj17_without_staticfiles_app(self, live_server,
                                                        settings):
         """

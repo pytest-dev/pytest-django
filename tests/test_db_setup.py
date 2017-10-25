@@ -223,7 +223,7 @@ def test_initial_data(django_testdir_initial):
 
 
 class TestNativeMigrations(object):
-    """ Tests for Django 1.7 Migrations """
+    """ Tests for Django Migrations """
 
     def test_no_migrations(self, django_testdir):
         django_testdir.create_test_module('''
