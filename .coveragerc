@@ -1,4 +1,5 @@
 [run]
 parallel = true
-source = pytest_django,pytest_django_test,tests
+source = .
+include = pytest_django/*,pytest_django_test/*,tests/*
 branch = true
