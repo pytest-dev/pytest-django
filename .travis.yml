@@ -1,6 +1,7 @@
 # Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
+dist: trusty
 
 matrix:
   fast_finish: true
