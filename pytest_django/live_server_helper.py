@@ -5,7 +5,7 @@ class LiveServer(object):
     """The liveserver fixture
 
     This is the object that the ``live_server`` fixture returns.
-    The ``live_server`` fixture that handles creation and stopping.
+    The ``live_server`` fixture handles creation and stopping.
     """
 
     def __init__(self, addr):
