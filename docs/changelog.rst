@@ -6,7 +6,7 @@ Unreleased
 
 Features
 ^^^^^^^^
-* Added a new option `--debug-mode` to set the DEBUG setting to True prior to
+* Added a new option `--django-debug` to set the DEBUG setting to True prior to
   running tests.
 
 3.1.2

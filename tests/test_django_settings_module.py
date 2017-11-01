@@ -295,7 +295,7 @@ def test_override_debug_to_true(testdir, monkeypatch):
             assert settings.DEBUG is True
     """)
 
-    r = testdir.runpytest_subprocess('--debug-mode')
+    r = testdir.runpytest_subprocess('--django-debug')
     assert r.ret == 0
 
 
