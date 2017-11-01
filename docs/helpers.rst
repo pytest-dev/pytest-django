@@ -85,7 +85,7 @@ when trying to access the database.
   If you run pytest using the ``--fail-on-template-vars`` option,
   tests will fail should your templates contain any invalid variables.
   This marker will disable this feature by setting ``settings.TEMPLATE_STRING_IF_INVALID=None``
-  or the ``string_if_invalid`` template option in Django>=1.7
+  or the ``string_if_invalid`` template option
 
   Example usage::
 
@@ -164,6 +164,7 @@ case there is no "admin" user yet).
 
 As an extra bonus this will automatically mark the database using the
 ``django_db`` mark.
+
 
 ``django_user_model``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -282,3 +283,43 @@ Clearing of mail.outbox
 ``mail.outbox`` will be cleared for each pytest, to give tests a empty
 mailbox. It is however more pytestic to use the ``mailoutbox`` fixture
 to access ``mail.outbox``.
+
+
+Examples
+--------
+
+
+Example with ``rf``, ``admin_user``, fixture and class-based views
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+::
+
+    import pytest
+
+    from django.core.urlresolvers import reverse
+    from myapp.models import Thing
+    from myapp.views import ThingDetailView
+
+    @pytest.fixture
+    def thing(admin_user):
+        (thing_object, created) = Thing.objects.get_or_create(name="test",
+                                                              created_by=admin_user)
+        return thing_object
+
+    def test_detail_view_logged_in(rf, admin_user, thing):
+        # set kwargs for reverse and for view
+        kwargs_thing = {
+            'pk': thing.id,
+        }
+
+        url = reverse("thing_detail", kwargs=kwargs_thing)
+
+        # bind url to request factory
+        request = rf.get(url)
+
+        # set user in request to admin_user
+        request.user = admin_user
+
+        # creates response, given request and kwargs needed for view
+        response = ThingDetailView.as_view()(request, **kwargs_thing)
+        assert response.status_code == 200

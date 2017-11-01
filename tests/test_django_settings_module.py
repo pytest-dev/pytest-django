@@ -315,14 +315,22 @@ def test_django_setup_sequence(django_testdir):
             name = 'tpkg.app'
 
             def ready(self):
-                print ('READY(): populating=%r' % apps._lock.locked())
+                try:
+                    populating = apps.loading
+                except AttributeError:  # Django < 2.0
+                    populating = apps._lock.locked()
+                print('READY(): populating=%r' % populating)
         """, 'apps.py')
 
     django_testdir.create_app_file("""
         from django.apps import apps
 
-        print ('IMPORT: populating=%r,ready=%r' % (
-            apps._lock.locked(), apps.ready))
+        try:
+            populating = apps.loading
+        except AttributeError:  # Django < 2.0
+            populating = apps._lock.locked()
+
+        print('IMPORT: populating=%r,ready=%r' % (populating, apps.ready))
         SOME_THING = 1234
         """, 'models.py')
 
@@ -332,14 +340,21 @@ def test_django_setup_sequence(django_testdir):
         from tpkg.app.models import SOME_THING
 
         def test_anything():
-            print ('TEST: populating=%r,ready=%r' % (
-                apps._lock.locked(), apps.ready))
+            try:
+                populating = apps.loading
+            except AttributeError:  # Django < 2.0
+                populating = apps._lock.locked()
+
+            print('TEST: populating=%r,ready=%r' % (populating, apps.ready))
         """)
 
     result = django_testdir.runpytest_subprocess('-s', '--tb=line')
     result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
     result.stdout.fnmatch_lines(['*READY(): populating=True*'])
-    result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
+    if django.VERSION < (2, 0):
+        result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
+    else:
+        result.stdout.fnmatch_lines(['*TEST: populating=True,ready=True*'])
     assert result.ret == 0
 
 

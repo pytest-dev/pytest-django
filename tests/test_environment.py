@@ -76,7 +76,7 @@ def test_invalid_template_variable(django_testdir):
         'templates/invalid_template_base.html'
     )
     django_testdir.create_app_file(
-        "{% extends 'invalid_template_base.html' %}",
+        "{% include 'invalid_template_base.html' %}",
         'templates/invalid_template.html'
     )
     django_testdir.create_test_module('''
@@ -225,10 +225,6 @@ class TestrunnerVerbosity:
                 not in result.stdout.str())
 
 
-@pytest.mark.skipif(
-    get_django_version() < (1, 8),
-    reason='Django 1.7 requires settings.SITE_ID to be set, so this test is invalid'
-)
 @pytest.mark.django_db
 @pytest.mark.parametrize('site_name', ['site1', 'site2'])
 def test_clear_site_cache(site_name, rf, monkeypatch):
