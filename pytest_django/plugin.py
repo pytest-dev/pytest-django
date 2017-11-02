@@ -68,7 +68,7 @@ def pytest_addoption(parser):
                      help='Enable Django migrations on test setup')
     group._addoption('--django-debug',
                      action='store_true', dest='debug_mode', default=False,
-                     help='Set DEBUG to true prior to run tests')
+                     help='Set DEBUG to True prior to run tests')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
