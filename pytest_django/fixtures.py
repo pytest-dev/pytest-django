@@ -310,9 +310,6 @@ def live_server(request):
                                     'Specifying multiple live server ports is not supported '
                                     'in Django 1.11. This will be an error in a future '
                                     'pytest-django release.')
-            elif django.VERSION < (1, 11, 2):
-                request.config.warn('D001', 'Specifying a live server port is not supported '
-                                    'in Django >= 1.11 < 1.11.2.')
 
     if not addr:
         if django.VERSION < (1, 11):

@@ -37,9 +37,6 @@ class LiveServer(object):
             host, possible_ports = parse_addr(addr)
             self.thread = LiveServerThread(host, possible_ports,
                                            **liveserver_kwargs)
-        elif django.VERSION < (1, 11, 2):
-            host = addr
-            self.thread = LiveServerThread(host, **liveserver_kwargs)
         else:
             try:
                 host, port = addr.split(':')
