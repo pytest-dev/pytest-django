@@ -6,6 +6,8 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
+import socket
+
 import pytest
 
 from django.db import connection, transaction
@@ -332,6 +334,23 @@ class TestLiveServer:
             '*Specifying multiple live server ports is not supported in Django 1.11. This '
             'will be an error in a future pytest-django release.*'
         ])
+
+    @pytest.mark.skipif(get_django_version() < (1, 11, 2),
+                        reason='Django >= 1.11.2 required')
+    def test_specified_port_django_111(self, django_testdir):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.bind(('', 0))
+            __, port = sock.getsockname()
+        finally:
+            sock.close()
+
+        django_testdir.create_test_module("""
+        def test_with_live_server(live_server):
+            assert live_server.port == %d
+        """ % port)
+
+        django_testdir.runpytest_subprocess('--liveserver=localhost:%s' % port)
 
 
 @pytest.mark.django_project(extra_settings="""
