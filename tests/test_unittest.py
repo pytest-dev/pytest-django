@@ -136,8 +136,8 @@ class TestUnittestMethods:
 
         result = django_testdir.runpytest_subprocess('-v', '-s')
         result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py::TestFoo::test_pass ERROR",
-            "E           Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
+            "* ERROR at setup of TestFoo.test_pass *",
+            "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
         ])
         assert result.ret == 1
 

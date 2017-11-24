@@ -270,10 +270,11 @@ def _method_is_defined_at_leaf(cls, method_name):
 
     method = getattr(cls, method_name)
     try:
-        f = method.__func__
+        return method.__func__ is not super_method.__func__
     except AttributeError:
-        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
-    return f is not super_method.__func__
+        if not (inspect.ismethod(method) and method.__self__ is cls):
+            pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+        raise
 
 
 _disabled_classmethods = {}
