@@ -4,6 +4,8 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 
+__package__ = "pytest_django"
+
 import contextlib
 import inspect
 from functools import reduce
