@@ -6,7 +6,7 @@ Unreleased
 Bugfixes
 ^^^^^^^^
 
-* Added a new option `--django-debug` to specify the default DEBUG setting (#228)
+* Added a new option `--django-debug-mode` to specify the default DEBUG setting (#228)
 
 3.4.8 (2019-02-26)
 ------------------

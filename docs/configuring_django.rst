@@ -113,7 +113,7 @@ But sometimes, especially for functional tests, you might want to avoid this, to
 
 Command Line Option::
 
-    $ py.test --django-debug True|False|None
+    $ py.test --django-debug-mode True|False|None
 
 ``None`` ensure there is no override of the test settings DEBUG value
 ``True`` override DEBUG to True

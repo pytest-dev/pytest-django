@@ -108,9 +108,9 @@ def pytest_addoption(parser):
         help="Enable Django migrations on test setup",
     )
     group._addoption(
-        "--django-debug",
+        "--django-debug-mode",
         action="store",
-        dest="djangodebug",
+        dest="djangodebugmode",
         default="None",
         help="Configure the DEBUG setting. Defaults to False"
     )
@@ -474,8 +474,8 @@ def django_test_environment(request):
         from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        if request.config.getvalue('djangodebug') != 'None':
-            dj_settings.DEBUG = bool(strtobool(request.config.getvalue('djangodebug')))
+        if request.config.getvalue('djangodebugmode') != 'None':
+            dj_settings.DEBUG = bool(strtobool(request.config.getvalue('djangodebugmode')))
 
         setup_test_environment()
         request.addfinalizer(teardown_test_environment)

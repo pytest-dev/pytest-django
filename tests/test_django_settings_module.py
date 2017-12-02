@@ -329,7 +329,7 @@ def test_no_debug_override(testdir, monkeypatch):
             assert settings.DEBUG is True
     """)
 
-    r = testdir.runpytest_subprocess('--django-debug=None')
+    r = testdir.runpytest_subprocess('--django-debug-mode=None')
     assert r.ret == 0
 
 
@@ -354,7 +354,7 @@ def test_override_debug_to_false(testdir, monkeypatch):
             assert settings.DEBUG is False
     """)
 
-    r = testdir.runpytest_subprocess('--django-debug=False')
+    r = testdir.runpytest_subprocess('--django-debug-mode=False')
     assert r.ret == 0
 
 
@@ -379,7 +379,7 @@ def test_override_debug_to_true(testdir, monkeypatch):
             assert settings.DEBUG is True
     """)
 
-    r = testdir.runpytest_subprocess('--django-debug=True')
+    r = testdir.runpytest_subprocess('--django-debug-mode=True')
     assert r.ret == 0
 
 
