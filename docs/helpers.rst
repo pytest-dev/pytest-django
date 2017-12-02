@@ -265,6 +265,24 @@ Example
             Item.objects.create('baz')
 
 
+``django_assert_max_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture allows to check for an expected maximum number of DB queries.
+It currently only supports the default database.
+
+
+Example
+"""""""
+
+::
+
+    def test_max_queries(django_assert_max_num_queries):
+        with django_assert_max_num_queries(3):
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+
+
 ``mailoutbox``
 ~~~~~~~~~~~~~~
 

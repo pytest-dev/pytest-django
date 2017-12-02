@@ -64,8 +64,22 @@ def test_django_assert_num_queries_db(django_assert_num_queries):
             Item.objects.create(name='quux')
 
 
+@pytest.mark.django_db
+def test_django_assert_max_num_queries_db(django_assert_max_num_queries):
+    with django_assert_max_num_queries(2):
+        Item.objects.create(name='1-foo')
+        Item.objects.create(name='2-bar')
+
+    with pytest.raises(pytest.fail.Exception):
+        with django_assert_max_num_queries(2):
+            Item.objects.create(name='1-foo')
+            Item.objects.create(name='2-bar')
+            Item.objects.create(name='3-quux')
+
+
 @pytest.mark.django_db(transaction=True)
-def test_django_assert_num_queries_transactional_db(transactional_db, django_assert_num_queries):
+def test_django_assert_num_queries_transactional_db(
+        transactional_db, django_assert_num_queries):
     with transaction.atomic():
 
         with django_assert_num_queries(3):

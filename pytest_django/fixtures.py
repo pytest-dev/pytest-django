@@ -3,6 +3,7 @@
 from __future__ import with_statement
 
 import os
+from functools import partial
 
 import pytest
 
@@ -17,7 +18,8 @@ from .lazy_django import skip_if_no_django
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           '_live_server_helper', 'django_assert_num_queries',
+           'django_assert_max_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -352,22 +354,34 @@ def _live_server_helper(request):
     request.addfinalizer(live_server._live_server_modified_settings.disable)
 
 
-@pytest.fixture(scope='function')
-def django_assert_num_queries(pytestconfig):
+@contextmanager
+def _assert_num_queries(config, num, exact=True):
     from django.db import connection
     from django.test.utils import CaptureQueriesContext
+    verbose = config.getoption('verbose') > 0
+    with CaptureQueriesContext(connection) as context:
+        yield
+        num_queries = len(context)
+        failed = num != num_queries if exact else num < num_queries
+        if failed:
+            msg = "Expected to perform {} queries {}{}".format(
+                num,
+                '' if exact else 'or less ',
+                'but {} were done'.format(num_queries)
+            )
+            if verbose:
+                sqls = (q['sql'] for q in context.captured_queries)
+                msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
+            else:
+                msg += " (add -v option to show queries)"
+            pytest.fail(msg)
 
-    @contextmanager
-    def _assert_num_queries(num):
-        with CaptureQueriesContext(connection) as context:
-            yield
-            if num != len(context):
-                msg = "Expected to perform %s queries but %s were done" % (num, len(context))
-                if pytestconfig.getoption('verbose') > 0:
-                    sqls = (q['sql'] for q in context.captured_queries)
-                    msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
-                else:
-                    msg += " (add -v option to show queries)"
-                pytest.fail(msg)
 
-    return _assert_num_queries
+@pytest.fixture(scope='function')
+def django_assert_num_queries(pytestconfig):
+    return partial(_assert_num_queries, pytestconfig)
+
+
+@pytest.fixture(scope='function')
+def django_assert_max_num_queries(pytestconfig):
+    return partial(_assert_num_queries, pytestconfig, exact=False)
