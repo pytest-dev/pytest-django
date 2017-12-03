@@ -117,7 +117,7 @@ class TestUnittestMethods:
             "CALLED: setUpClass",
             "CALLED: setUp",
             "CALLED: tearDown",
-            "PASSED",
+            "PASSED*",
             "CALLED: tearDownClass",
         ])
         assert result.ret == 0
@@ -215,7 +215,7 @@ class TestUnittestMethods:
             "CALLED: setUpClass",
             "CALLED: setUp",
             "CALLED: tearDown",
-            "PASSED",
+            "PASSED*",
             "CALLED: tearDownClass",
         ])
         assert result.ret == 0
