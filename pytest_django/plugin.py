@@ -375,7 +375,7 @@ def _django_db_marker(request):
         else:
             getfixturevalue(request, 'db')
         if marker.serialized_rollback:
-            request.getfixturevalue(request, 'serialized_rollback')
+            getfixturevalue(request, 'serialized_rollback')
 
 
 @pytest.fixture(autouse=True, scope='class')
