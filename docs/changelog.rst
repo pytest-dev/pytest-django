@@ -1,6 +1,31 @@
 Changelog
 =========
 
+3.2.0
+-----
+
+Features
+^^^^^^^^
+
+* Added new fixture `django_assert_num_queries` for testing the number of
+  database queries (#387).
+* `--fail-on-template-vars` has been improved and should now return
+  full/absolute path (#470).
+* Support for setting the live server port (#500).
+* unittest: help with setUpClass not being a classmethod (#544).
+
+Bug fixes
+^^^^^^^^^
+
+* Fix --reuse-db and --create-db not working together (#411).
+* Numerous fixes in the documentation. These should not go unnoticed 🌟
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Support for Django 2.0 has been added.
+* Support for Django before 1.8 has been dropped.
+
 3.1.2
 -----
 
