@@ -103,7 +103,8 @@ def django_db_setup(
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(transactional, request, django_db_blocker):
+def _django_db_fixture_helper(transactional, serialized_rollback,
+                              request, django_db_blocker):
     if is_django_unittest(request):
         return
 
@@ -120,6 +121,7 @@ def _django_db_fixture_helper(transactional, request, django_db_blocker):
         from django.test import TestCase as django_case
 
     test_case = django_case(methodName='__init__')
+    test_case.serialized_rollback = serialized_rollback
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
@@ -152,7 +154,9 @@ def db(request, django_db_setup, django_db_blocker):
             or 'live_server' in request.funcargnames:
         getfixturevalue(request, 'transactional_db')
     else:
-        _django_db_fixture_helper(False, request, django_db_blocker)
+        _django_db_fixture_helper(
+            transactional=False, serialized_rollback=False,
+            request=request, django_db_blocker=django_db_blocker)
 
 
 @pytest.fixture(scope='function')
@@ -167,7 +171,23 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     database setup will behave as only ``transactional_db`` was
     requested.
     """
-    _django_db_fixture_helper(True, request, django_db_blocker)
+    serialized_rollback = False
+    if 'serialized_rollback' in request.funcargnames:
+        serialized_rollback = getfixturevalue(request, 'serialized_rollback')
+
+    _django_db_fixture_helper(
+        transactional=True, serialized_rollback=serialized_rollback,
+        request=request, django_db_blocker=django_db_blocker)
+
+
+@pytest.fixture(scope='function')
+def serialized_rollback(request):
+    """Enable serialized rollback after transaction test cases
+
+    This fixture only has an effect when the ``transactional_db``
+    fixture is active, which happen as a side-effect of requesting
+    ``live_server``.
+    """
 
 
 @pytest.fixture()

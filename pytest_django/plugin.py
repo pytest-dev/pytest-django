@@ -374,6 +374,8 @@ def _django_db_marker(request):
             getfixturevalue(request, 'transactional_db')
         else:
             getfixturevalue(request, 'db')
+        if marker.serialized_rollback:
+            request.getfixturevalue(request, 'serialized_rollback')
 
 
 @pytest.fixture(autouse=True, scope='class')
@@ -644,8 +646,9 @@ def validate_django_db(marker):
     It checks the signature and creates the `transaction` attribute on
     the marker which will have the correct value.
     """
-    def apifun(transaction=False):
+    def apifun(transaction=False, serialized_rollback=False):
         marker.transaction = transaction
+        marker.serialized_rollback = serialized_rollback
     apifun(*marker.args, **marker.kwargs)
 
 
