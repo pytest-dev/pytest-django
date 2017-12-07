@@ -18,7 +18,8 @@ from .lazy_django import skip_if_no_django
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           'serialized_rollback', '_live_server_helper',
+           'django_assert_num_queries']
 
 
 @pytest.fixture(scope='session')

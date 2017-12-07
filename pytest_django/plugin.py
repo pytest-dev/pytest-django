@@ -22,6 +22,7 @@ from .fixtures import django_db_keepdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
+from .fixtures import serialized_rollback # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
 from .fixtures import client  # noqa
