@@ -6,7 +6,7 @@ Changelog
 
 Features
 ^^^^^^^^
-* A new fixture `django_assert_num_queries` was introduced, to allow to test against the number of database queries.
+* Added new fixture `django_assert_num_queries` for testing the number of database queries.
 * `--fail-on-template-vars` has been improved and should now return full/absolute path.
 
 Bug fixes
