@@ -61,8 +61,12 @@ def django_db_use_migrations(request):
 
 @pytest.fixture(scope='session')
 def django_db_keepdb(request):
-    return (request.config.getvalue('reuse_db') and not
-            request.config.getvalue('create_db'))
+    return request.config.getvalue('reuse_db')
+
+
+@pytest.fixture(scope='session')
+def django_db_createdb(request):
+    return request.config.getvalue('create_db')
 
 
 @pytest.fixture(scope='session')
@@ -72,6 +76,7 @@ def django_db_setup(
     django_db_blocker,
     django_db_use_migrations,
     django_db_keepdb,
+    django_db_createdb,
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
@@ -82,7 +87,7 @@ def django_db_setup(
     if not django_db_use_migrations:
         _disable_native_migrations()
 
-    if django_db_keepdb:
+    if django_db_keepdb and not django_db_createdb:
         setup_databases_args['keepdb'] = True
 
     with django_db_blocker.unblock():

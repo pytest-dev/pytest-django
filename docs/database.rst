@@ -229,6 +229,15 @@ command line options.
 
 This fixture is by default requested from :fixture:`django_db_setup`.
 
+django_db_createdb
+""""""""""""""""
+
+.. fixture:: django_db_createdb
+
+Returns whether or not the database is to be re-created before running any tests.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
 django_db_blocker
 """""""""""""""""
 
