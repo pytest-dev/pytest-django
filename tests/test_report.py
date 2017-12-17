@@ -109,4 +109,4 @@ class TestQueryCount(object):
             '--querycount=5'
         )
 
-        assert '(# queries executed: 1)' in result.stdout.str()
+        assert '(# of queries executed: 1)' in result.stdout.str()

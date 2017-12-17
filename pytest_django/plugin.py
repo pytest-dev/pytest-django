@@ -353,19 +353,26 @@ def pytest_fixture_setup(fixturedef, request):
     from django.test.utils import CaptureQueriesContext
     from django.db import connection
 
-    with CaptureQueriesContext(connection) as context:
+    _blocking_manager.unblock()
+
+    try:
+        with CaptureQueriesContext(connection) as context:
+            yield
+    except Exception:
         yield
+    else:
+        querycount = len(context.captured_queries)
 
-    querycount = len(context.captured_queries)
+        if querycount:
+            capman = config.pluginmanager.getplugin('capturemanager')
+            capman.suspend_global_capture()
 
-    if querycount:
-        capman = config.pluginmanager.getplugin('capturemanager')
-        capman.suspendcapture()
+            tw = config.get_terminal_writer()
+            tw.write(' (# of queries executed: {})'.format(querycount))
 
-        tw = config.get_terminal_writer()
-        tw.write(' (# queries executed: {})'.format(querycount))
-
-        capman.resumecapture()
+            capman.resume_global_capture()
+    finally:
+        _blocking_manager.restore()
 
 
 @pytest.hookimpl(hookwrapper=True)
