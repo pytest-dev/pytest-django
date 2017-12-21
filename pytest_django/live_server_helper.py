@@ -38,7 +38,12 @@ class LiveServer(object):
             self.thread = LiveServerThread(host, possible_ports,
                                            **liveserver_kwargs)
         else:
-            host = addr
+            try:
+                host, port = addr.split(':')
+            except ValueError:
+                host = addr
+            else:
+                liveserver_kwargs['port'] = int(port)
             self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
