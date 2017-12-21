@@ -4,7 +4,7 @@
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest-django.svg
     :alt: Supported Python versions
-    :target: https://pypi.python.org/pypi/pytest-dgango
+    :target: https://pypi.python.org/pypi/pytest-django
 
 .. image:: https://travis-ci.org/pytest-dev/pytest-django.svg?branch=master
     :alt: Build Status
