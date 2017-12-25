@@ -28,6 +28,7 @@ setup(
     license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     setup_requires=['setuptools_scm>=1.11.1'],
     install_requires=['pytest>=2.9'],
     classifiers=['Development Status :: 5 - Production/Stable',
@@ -38,11 +39,11 @@ setup(
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Testing',
                  'Programming Language :: Python :: 2.7',
-                 'Programming Language :: Python :: 3.2',
-                 'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: 3.4',
                  'Programming Language :: Python :: 3.5',
                  'Programming Language :: Python :: 3.6',
+                 'Programming Language :: Python :: Implementation :: CPython',
+                 'Programming Language :: Python :: Implementation :: PyPy',
                  ],
     # the following makes a plugin available to pytest
     entry_points={'pytest11': ['django = pytest_django.plugin']})
