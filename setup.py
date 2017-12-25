@@ -28,7 +28,7 @@ setup(
     license='BSD-3-Clause',
     packages=['pytest_django'],
     long_description=read('README.rst'),
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.* !=3.3.*',
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     setup_requires=['setuptools_scm>=1.11.1'],
     install_requires=['pytest>=2.9'],
     classifiers=['Development Status :: 5 - Production/Stable',
