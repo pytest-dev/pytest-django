@@ -42,6 +42,8 @@ SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
 
+PY2 = sys.version_info[0] == 2
+
 
 # ############### pytest hooks ################
 
@@ -259,7 +261,7 @@ def pytest_configure():
     _setup_django()
 
 
-def _method_is_defined_at_leaf(cls, method_name):
+def _classmethod_is_defined_at_leaf(cls, method_name):
     super_method = None
 
     for base_cls in cls.__bases__:
@@ -269,7 +271,15 @@ def _method_is_defined_at_leaf(cls, method_name):
     assert super_method is not None, (
         '%s could not be found in base class' % method_name)
 
-    return getattr(cls, method_name).__func__ is not super_method.__func__
+    method = getattr(cls, method_name)
+
+    try:
+        f = method.__func__
+    except AttributeError:
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    if PY2 and not (inspect.ismethod(method) and method.__self__ is cls):
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    return f is not super_method.__func__
 
 
 _disabled_classmethods = {}
@@ -281,9 +291,9 @@ def _disable_class_methods(cls):
 
     _disabled_classmethods[cls] = (
         cls.setUpClass,
-        _method_is_defined_at_leaf(cls, 'setUpClass'),
+        _classmethod_is_defined_at_leaf(cls, 'setUpClass'),
         cls.tearDownClass,
-        _method_is_defined_at_leaf(cls, 'tearDownClass'),
+        _classmethod_is_defined_at_leaf(cls, 'tearDownClass'),
     )
 
     cls.setUpClass = types.MethodType(lambda cls: None, cls)

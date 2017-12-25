@@ -122,6 +122,25 @@ class TestUnittestMethods:
         ])
         assert result.ret == 0
 
+    def test_setUpClass_not_being_a_classmethod(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+            class TestFoo(TestCase):
+                def setUpClass(self):
+                    pass
+
+                def test_pass(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "* ERROR at setup of TestFoo.test_pass *",
+            "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
+        ])
+        assert result.ret == 1
+
     def test_multi_inheritance_setUpClass(self, django_testdir):
         django_testdir.create_test_module('''
             from django.test import TestCase
