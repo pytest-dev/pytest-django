@@ -12,8 +12,6 @@ matrix:
       env: TOXENV=py36-dj20-postgres
     - python: 3.6
       env: TOXENV=py36-dj111-sqlite
-    - python: 3.6
-      env: TOXENV=py36-checkqa
 
     - python: 3.5
       env: TOXENV=py35-dj110-postgres
@@ -27,14 +25,15 @@ matrix:
       env: TOXENV=py27-dj111-mysql_myisam
     - python: 2.7
       env: TOXENV=py27-dj18-postgres
-    - python: 2.7
-      env: TOXENV=py27-checkqa
 
     # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
       env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3
       env: TOXENV=pypy3-dj110-sqlite
+
+    - python: 3.6
+      env: TOXENV=checkqa
 
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
@@ -58,7 +57,7 @@ install:
   - pip install tox==2.9.1
   - |
     # Setup coverage tracking, but not with "checkqa" nor "pypy*".
-    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
+    if [[ "$TOXENV" != "checkqa" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
       PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
