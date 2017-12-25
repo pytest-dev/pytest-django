@@ -19,7 +19,7 @@ on what marks are and for notes on using_ them.
 .. :py:function:: pytest.mark.django_db:
 
 This is used to mark a test function as requiring the database. It
-will ensure the database is setup correctly for the test. Each test
+will ensure the database is set up correctly for the test. Each test
 will run in its own transaction which will be rolled back at the end
 of the test. This behavior is the same as Django's standard
 `django.test.TestCase`_ class.
@@ -137,12 +137,23 @@ Example
         response = client.get('/')
         assert response.content == 'Foobar'
 
+To use `client` as an authenticated standard user, call its `login()` method before accessing a URL:
+
+::
+
+    def test_with_authenticated_client(client, django_user_model):
+        username = "user1"
+        password = "bar"
+        django_user_model.objects.create(username=username, password=password)
+        client.login(username=username, password=password)
+        response = client.get('/private')
+        assert response.content == 'Protected Area'
+
 
 ``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.Client`_,
-that is logged in as an admin user.
+An instance of a `django.test.Client`_, logged in as an admin user.
 
 Example
 """""""
@@ -153,8 +164,8 @@ Example
         response = admin_client.get('/admin/')
         assert response.status_code == 200
 
-As an extra bonus this will automatically mark the database using the
-``django_db`` mark.
+Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
+``django_db`` mark).
 
 ``admin_user`` - a admin user (superuser)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,27 +173,40 @@ As an extra bonus this will automatically mark the database using the
 An instance of a superuser, with username "admin" and password "password" (in
 case there is no "admin" user yet).
 
-As an extra bonus this will automatically mark the database using the
-``django_db`` mark.
+Using the `admin_user` fixture will cause the test to automatically be marked for database use (no need to specify the
+``django_db`` mark).
 
 
 ``django_user_model``
 ~~~~~~~~~~~~~~~~~~~~~
 
-The user model used by Django. This handles different versions of Django.
+A shortcut to the User model configured for use by the current Django project (aka the model referenced by
+`settings.AUTH_USER_MODEL`). Use this fixture to make pluggable apps testable regardless what User model is configured
+in the containing Django project.
+
+Example
+"""""""
+
+::
+
+    def test_new_user(django_user_model):
+        django_user_model.objects.create(username="someone", password="something")
+
 
 ``django_username_field``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The field name used for the username on the user model.
+This fixture extracts the field name used for the username on the user model, i.e. resolves to the current
+``settings.USERNAME_FIELD``. Use this fixture to make pluggable apps testable regardless what the username field
+is configured to be in the containing Django project.
 
 ``db``
 ~~~~~~~
 
 .. fixture:: db
 
-This fixture will ensure the Django database is set up.  This only
-required for fixtures which want to use the database themselves.  A
+This fixture will ensure the Django database is set up.  Only
+required for fixtures that want to use the database themselves.  A
 test function should normally use the :py:func:`~pytest.mark.django_db`
 mark to signal it needs the database.
 
@@ -242,7 +266,7 @@ Example
 ``mailoutbox``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A clean mail outbox where Django emails are being sent to.
+A clean email outbox to which Django-generated emails are sent.
 
 Example
 """""""
@@ -261,65 +285,23 @@ Example
         assert list(m.to) == ['to@example.com']
 
 
-Environment autouse fixtures
-----------------------------
+Automatic cleanup
+-----------------
 
-pytest-django provides some pytest fixtures that are of autouse
-nature. They provide functionality to assure a clean environment
+pytest-django provides some functionality to assure a clean and consistent environment
 during tests.
-
 
 Clearing of site cache
 ~~~~~~~~~~~~~~~~~~~~~~
 
 If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
-be cleared for each test to avoid hitting the cache and cause wrong Site
+be cleared for each test to avoid hitting the cache and causing the wrong Site
 object to be returned by ``Site.objects.get_current()``.
 
 
 Clearing of mail.outbox
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-``mail.outbox`` will be cleared for each pytest, to give tests a empty
-mailbox. It is however more pytestic to use the ``mailoutbox`` fixture
-to access ``mail.outbox``.
-
-
-Examples
---------
-
-
-Example with ``rf``, ``admin_user``, fixture and class-based views
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-::
-
-    import pytest
-
-    from django.core.urlresolvers import reverse
-    from myapp.models import Thing
-    from myapp.views import ThingDetailView
-
-    @pytest.fixture
-    def thing(admin_user):
-        (thing_object, created) = Thing.objects.get_or_create(name="test",
-                                                              created_by=admin_user)
-        return thing_object
-
-    def test_detail_view_logged_in(rf, admin_user, thing):
-        # set kwargs for reverse and for view
-        kwargs_thing = {
-            'pk': thing.id,
-        }
-
-        url = reverse("thing_detail", kwargs=kwargs_thing)
-
-        # bind url to request factory
-        request = rf.get(url)
-
-        # set user in request to admin_user
-        request.user = admin_user
-
-        # creates response, given request and kwargs needed for view
-        response = ThingDetailView.as_view()(request, **kwargs_thing)
-        assert response.status_code == 200
+``mail.outbox`` will be cleared for each pytest, to give each new test an empty
+mailbox to work with. However, it's more "pytestic" to use the ``mailoutbox`` fixture described above
+than to access ``mail.outbox``.
