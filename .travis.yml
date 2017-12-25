@@ -1,4 +1,3 @@
-# Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
 dist: trusty
@@ -38,10 +37,6 @@ matrix:
 
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
-
-cache:
-  directories:
-    - "${TRAVIS_BUILD_DIR}/.tox/${TOXENV}"
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
@@ -83,6 +78,3 @@ after_success:
       codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
     fi
     set +x
-
-before_cache:
-  - "find ${TRAVIS_BUILD_DIR}/.tox/${TOXENV} -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
