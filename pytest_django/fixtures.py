@@ -16,10 +16,11 @@ from .pytest_compat import getfixturevalue
 from .lazy_django import skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
-           'django_user_model', 'django_username_field',
-           'client', 'admin_client', 'user_client', 'rf', 'settings',
-           'django_user', 'rf_unauth', 'rf_user', 'rf_admin', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           'django_user_model', 'django_username_field', 'client',
+           'admin_client', 'django_user_client', 'rf', 'settings',
+           'django_user', 'django_rf_unauth', 'django_rf_user',
+           'django_rf_admin', 'live_server', '_live_server_helper',
+           'django_assert_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -251,7 +252,7 @@ def django_user(db, django_user_model, django_username_field):
 
 
 @pytest.fixture()
-def user_client(db, django_user):
+def django_user_client(db, django_user):
     """A Django test client logged in as a normal user."""
     from django.test.client import Client
 
@@ -271,7 +272,7 @@ def rf():
 
 
 @pytest.fixture
-def rf_unauth():
+def django_rf_unauth():
     """Anonymous user request factory.
 
     This does two things to the request object:
@@ -303,7 +304,7 @@ def rf_unauth():
 
 
 @pytest.fixture
-def rf_admin(admin_user):
+def django_rf_admin(admin_user):
     """Admin user request facctory.
 
     Mimics AuthenticationMiddleware. Also adds a memory-backed session store
@@ -322,7 +323,7 @@ def rf_admin(admin_user):
 
 
 @pytest.fixture
-def rf_user(django_user):
+def django_rf_user(django_user):
     """Normal user request factory.
 
     Mimics AuthenticationMiddleware. Also adds a memory-backed session store

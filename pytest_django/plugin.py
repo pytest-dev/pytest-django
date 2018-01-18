@@ -32,12 +32,12 @@ from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
-from .fixtures import rf_admin  # noqa
-from .fixtures import rf_user  # noqa
-from .fixtures import rf_unauth  # noqa
+from .fixtures import django_rf_admin  # noqa
+from .fixtures import django_rf_user  # noqa
+from .fixtures import django_rf_unauth  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-from .fixtures import user_client  # noqa
+from .fixtures import django_user_client  # noqa
 from .pytest_compat import getfixturevalue
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django

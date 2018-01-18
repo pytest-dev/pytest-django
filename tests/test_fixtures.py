@@ -35,9 +35,9 @@ def test_admin_client(admin_client):
 
 
 @pytest.mark.django_db
-def test_user_client(user_client):
-    assert isinstance(user_client, Client)
-    resp = user_client.get('/admin-required/')
+def test_user_client(django_user_client):
+    assert isinstance(django_user_client, Client)
+    resp = django_user_client.get('/admin-required/')
     assert force_text(resp.content) == 'Access denied'
 
 
@@ -47,9 +47,9 @@ def test_admin_client_no_db_marker(admin_client):
     assert force_text(resp.content) == 'You are an admin'
 
 
-def test_user_client_no_db_marker(user_client):
-    assert isinstance(user_client, Client)
-    resp = user_client.get('/admin-required/')
+def test_user_client_no_db_marker(django_user_client):
+    assert isinstance(django_user_client, Client)
+    resp = django_user_client.get('/admin-required/')
     assert force_text(resp.content) == 'Access denied'
 
 
@@ -75,23 +75,23 @@ def test_rf(rf):
     assert isinstance(rf, RequestFactory)
 
 
-def test_rf_user(rf_user, django_user_model):
-    assert isinstance(rf_user, RequestFactory)
-    request = rf_user.get('/admin-required/')
+def test_rf_user(django_rf_user, django_user_model):
+    assert isinstance(django_rf_user, RequestFactory)
+    request = django_rf_user.get('/admin-required/')
     assert isinstance(request.user, django_user_model)
     assert isinstance(request.session, SessionBase)
 
 
-def test_rf_admin(rf_admin, django_user_model):
-    assert isinstance(rf_admin, RequestFactory)
-    request = rf_admin.get('/admin-required/')
+def test_rf_admin(django_rf_admin, django_user_model):
+    assert isinstance(django_rf_admin, RequestFactory)
+    request = django_rf_admin.get('/admin-required/')
     assert isinstance(request.user, django_user_model)
     assert isinstance(request.session, SessionBase)
 
 
-def test_rf_unauth(rf_unauth, django_user_model):
-    assert isinstance(rf_unauth, RequestFactory)
-    request = rf_unauth.get('/admin-required/')
+def test_rf_unauth(django_rf_unauth, django_user_model):
+    assert isinstance(django_rf_unauth, RequestFactory)
+    request = django_rf_unauth.get('/admin-required/')
     assert hasattr(request, 'user')
     # AnonymousUser is a plain-object (duck-typed)
     assert not isinstance(request.user, django_user_model)

@@ -121,8 +121,8 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
-``rf_user``, ``rf_admin``, ``rf_unauth``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_rf_user``, ``django_rf_admin``, ``django_rf_unauth``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Additional instances of RequestFactory, which mimic the behavior of these
 two middlewares:
@@ -136,16 +136,16 @@ This will add two attributes to the ``request`` object,
 - ``request.session`` is an in-memory `SessionBase`_ object.
 - ``request.user`` depends on the fixture being used:
 
-  - ``rf_unauth``: an `AnonymousUser`_
-  - ``rf_user``: a normal user with no additional privileges
-  - ``rf_admin``: an admin user
+  - ``django_rf_unauth``: an `AnonymousUser`_
+  - ``django_rf_user``: a normal user with no additional privileges
+  - ``django_rf_admin``: an admin user
 
 ::
 
     from myapp.views import my_view
 
-    def test_details(rf_unauth):
-        request = rf_unauth.get('/customer/details')
+    def test_details(django_rf_unauth):
+        request = django_rf_unauth.get('/customer/details')
         response = my_view(request)
         assert response.status_code == 200
 
@@ -200,8 +200,8 @@ Example
 Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
 ``django_db`` mark).
 
-``user_client`` - ``django.test.Client`` logged in as normal user
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_user_client`` - ``django.test.Client`` logged in as normal user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Same as ``admin_client``, but for a regular user.
 
@@ -210,7 +210,7 @@ Example
 
 ::
 
-    def test_an_admin_view(user_client):
+    def test_an_admin_view(django_user_client):
         response = user_client.get('/admin/')
         assert response.status_code == 403
 
