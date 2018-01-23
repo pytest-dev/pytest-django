@@ -37,7 +37,7 @@ to display a list of all tests ordered by the number of queries executed.
 
 Using it in conjunction with `--setup-show` will display the number of
 queries executed by each fixture (when the number of queries executed by the
-fixture is greater than zero).
+fixture is greater than zero). Use `--noquerycount` to force the disable of it.
 
 Running tests in parallel with pytest-xdist
 -------------------------------------------

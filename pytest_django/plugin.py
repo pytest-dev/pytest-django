@@ -87,9 +87,14 @@ def pytest_addoption(parser):
                   type='bool', default=False)
 
     group._addoption('--querycount',
-                     action='store', type=int, default=None, metavar='N',
+                     action='store', dest='querycount', type=int,
+                     default=None, metavar='N',
                      help='Show top N tests with most queries '
                           '(N=0 for all).')
+    group._addoption('--noquerycount', '--no-querycount',
+                     action='store_const', dest='querycount',
+                     const=None, default=None,
+                     help='Disable --querycount, when both are used.')
 
 
 def _exists(path, ignore=EnvironmentError):

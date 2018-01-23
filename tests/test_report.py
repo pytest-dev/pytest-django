@@ -19,7 +19,18 @@ class TestQueryCount(object):
         ''')
 
         result = django_testdir.runpytest_subprocess()
-        assert 'top tests with most queries' not in result.stdout.str()
+        assert 'tests with most queries' not in result.stdout.str()
+
+    def test_disabled_when_noquerycount_is_also_used(self, django_testdir):
+        django_testdir.create_test_module('''
+            def test_zero_queries():
+                pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess(
+            '--querycount=5 --noquerycount'
+        )
+        assert 'tests with most queries' not in result.stdout.str()
 
     def test_querycount_report_lines(self, django_testdir):
         django_testdir.create_test_module('''
