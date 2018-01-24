@@ -32,6 +32,30 @@ class TestQueryCount(object):
         )
         assert 'tests with most queries' not in result.stdout.str()
 
+    def test_query_optimization_tips_for_the_current_version_of_django(
+        self,
+        django_testdir
+    ):
+        django_testdir.create_test_module('''
+            def test_zero_queries():
+                pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('--querycount=5')
+
+        import django
+        major, minor = django.VERSION[0:2]
+
+        url = (
+            'https://docs.djangoproject.com'
+            '/en/{major}.{minor}/topics/db/optimization/'
+        ).format(
+            major=major,
+            minor=minor
+        )
+
+        assert url in result.stdout.str()
+
     def test_querycount_report_lines(self, django_testdir):
         django_testdir.create_test_module('''
             import pytest

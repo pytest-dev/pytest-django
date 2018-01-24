@@ -432,6 +432,18 @@ def pytest_terminal_summary(terminalreporter):
             nodeid=nodeid
         ))
 
+    import django
+    major, minor = django.VERSION[0:2]
+
+    terminalreporter.write_line('')
+    terminalreporter.write_line(
+        '-- Docs: https://docs.djangoproject.com'
+        '/en/{major}.{minor}/topics/db/optimization/'.format(
+            major=major,
+            minor=minor
+        )
+    )
+
 
 @pytest.fixture(autouse=True, scope='session')
 def django_test_environment(request):
