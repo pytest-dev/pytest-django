@@ -69,6 +69,9 @@ def pytest_addoption(parser):
     group._addoption('--migrations',
                      action='store_false', dest='nomigrations', default=False,
                      help='Enable Django migrations on test setup')
+    group._addoption('--django-debug',
+                     action='store_true', dest='debug_mode', default=False,
+                     help='Set DEBUG to True prior to run tests')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -343,11 +346,17 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
+        from distutils.version import StrictVersion
+        import django
         from django.conf import settings as dj_settings
         from django.test.utils import (setup_test_environment,
                                        teardown_test_environment)
-        dj_settings.DEBUG = False
-        setup_test_environment()
+        debug_mode = request.config.getvalue('debug_mode')
+        if StrictVersion(django.get_version()) >= StrictVersion('1.11'):
+            setup_test_environment(debug=debug_mode)
+        else:
+            dj_settings.DEBUG = debug_mode
+            setup_test_environment()
         request.addfinalizer(teardown_test_environment)
 
 
