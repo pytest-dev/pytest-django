@@ -1,6 +1,6 @@
-# Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
+dist: trusty
 
 matrix:
   fast_finish: true
@@ -10,15 +10,13 @@ matrix:
     - python: 3.6
       env: TOXENV=py36-dj20-postgres
     - python: 3.6
-      env: TOXENV=py36-dj111-postgres
-    - python: 3.6
-      env: TOXENV=py36-checkqa
+      env: TOXENV=py36-dj111-sqlite
 
     - python: 3.5
       env: TOXENV=py35-dj110-postgres
 
     - python: 3.4
-      env: TOXENV=py34-dj19-postgres
+      env: TOXENV=py34-dj19-sqlite_file
 
     - python: 2.7
       env: TOXENV=py27-dj111-mysql_innodb
@@ -26,21 +24,18 @@ matrix:
       env: TOXENV=py27-dj111-mysql_myisam
     - python: 2.7
       env: TOXENV=py27-dj18-postgres
-    - python: 2.7
-      env: TOXENV=py27-checkqa
 
+    # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
       env: TOXENV=pypy-dj111-sqlite_file
-
     - python: pypy3
       env: TOXENV=pypy3-dj110-sqlite
 
+    - python: 3.6
+      env: TOXENV=checkqa
+
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
-
-cache:
-  directories:
-    - "${TRAVIS_BUILD_DIR}/.tox/${TOXENV}"
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
@@ -56,9 +51,13 @@ install:
 
   - pip install tox==2.9.1
   - |
-    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+    # Setup coverage tracking, but not with "checkqa" nor "pypy*".
+    if [[ "$TOXENV" != "checkqa" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
+      PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
+    else
+      PYTEST_DJANGO_COVERAGE=0
     fi
 
 script:
@@ -67,7 +66,7 @@ script:
 after_success:
   - |
     set -ex
-    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+    if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
       pip install codecov
 
       coverage combine
@@ -78,6 +77,3 @@ after_success:
       codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
     fi
     set +x
-
-before_cache:
-  - "find ${TRAVIS_BUILD_DIR}/.tox/${TOXENV} -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"

@@ -75,6 +75,7 @@ def test_db_reuse(django_testdir):
     ])
 
     # Make sure the database has been re-created and the mark is gone
+    assert db_exists()
     assert not mark_exists()
 
 

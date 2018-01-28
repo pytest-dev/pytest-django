@@ -1,12 +1,18 @@
-.. image:: https://secure.travis-ci.org/pytest-dev/pytest-django.png?branch=master
-   :alt: Build Status
-   :target: https://travis-ci.org/pytest-dev/pytest-django
 .. image:: https://img.shields.io/pypi/v/pytest-django.svg?style=flat
-   :alt: PyPI Version
-   :target: https://pypi.python.org/pypi/pytest-django
+    :alt: PyPI Version
+    :target: https://pypi.python.org/pypi/pytest-django
+
+.. image:: https://img.shields.io/pypi/pyversions/pytest-django.svg
+    :alt: Supported Python versions
+    :target: https://pypi.python.org/pypi/pytest-django
+
+.. image:: https://travis-ci.org/pytest-dev/pytest-django.svg?branch=master
+    :alt: Build Status
+    :target: https://travis-ci.org/pytest-dev/pytest-django
+
 .. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
-   :alt: Coverage
-   :target: https://codecov.io/gh/pytest-dev/pytest-django
+    :alt: Coverage
+    :target: https://codecov.io/gh/pytest-dev/pytest-django
 
 Welcome to pytest-django!
 =========================
@@ -22,14 +28,14 @@ pytest-django allows you to test your Django project/applications with the
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
 * Version compatibility:
 
-  * Django: 1.8-1.11 and latest master branch (compatible at the time of each release)
-  * Python: CPython 2.7,3.3-3.6 or PyPy 2,3
+  * Django: 1.8-1.11, 2.0 and latest master branch (compatible at the time of each release)
+  * Python: CPython 2.7, 3.4-3.6 or PyPy 2, 3
   * pytest: >2.9.x
 
 * Licence: BSD
 * Project maintainers: Andreas Pelme, Floris Bruynooghe and Daniel Hahler
 * `All contributors <https://github.com/pytest-dev/pytest-django/contributors>`_
-* Github repository: https://github.com/pytest-dev/pytest-django
+* GitHub repository: https://github.com/pytest-dev/pytest-django
 * `Issue tracker <http://github.com/pytest-dev/pytest-django/issues>`_
 * `Python Package Index (PyPI) <https://pypi.python.org/pypi/pytest-django/>`_
 
