@@ -120,7 +120,11 @@ def _django_db_fixture_helper(transactional, request, django_db_blocker):
     request.addfinalizer(django_db_blocker.restore)
 
     if transactional:
-        from django.test import TransactionTestCase as django_case
+        from django.conf import settings
+        from django.test import TransactionTestCase
+
+        class django_case(TransactionTestCase):
+            available_apps = settings.INSTALLED_APPS
     else:
         from django.test import TestCase as django_case
 
