@@ -69,6 +69,7 @@ after_success:
     if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
       pip install codecov
 
+      coverage --version
       coverage combine
       coverage xml
 
