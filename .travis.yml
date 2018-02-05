@@ -5,8 +5,9 @@ dist: trusty
 jobs:
   fast_finish: true
   include:
-    - python: 3.6
-      env: TOXENV=py36-djmaster-postgres
+    - python: 3.7
+      env: TOXENV=py37-djmaster-postgres
+
     - python: 3.6
       env: TOXENV=py36-dj20-postgres
     - python: 3.6
@@ -51,7 +52,7 @@ jobs:
         distributions: "sdist bdist_wheel"
 
   allow_failures:
-    - env: TOXENV=py36-djmaster-postgres
+    - env: TOXENV=py37-djmaster-postgres
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
