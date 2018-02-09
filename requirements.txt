@@ -8,3 +8,4 @@ wheel
 twine
 flake8
 Flask-Sphinx-Themes
+pytest
