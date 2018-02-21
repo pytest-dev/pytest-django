@@ -76,7 +76,7 @@ def test_invalid_template_variable(django_testdir):
         'templates/invalid_template_base.html'
     )
     django_testdir.create_app_file(
-        "{% extends 'invalid_template_base.html' %}",
+        "{% include 'invalid_template_base.html' %}",
         'templates/invalid_template.html'
     )
     django_testdir.create_test_module('''
@@ -96,7 +96,7 @@ def test_invalid_template_variable(django_testdir):
     else:
         origin = "'invalid_template.html'"
     result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py F.",
+        "tpkg/test_the_test.py F.*",
         "E * Failed: Undefined template variable 'invalid_var' in {}".format(origin)
     ])
 
@@ -143,7 +143,7 @@ def test_invalid_template_variable_opt_in(django_testdir):
         ''')
     result = django_testdir.runpytest_subprocess('-s')
     result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py ..",
+        "tpkg/test_the_test.py ..*",
     ])
 
 
@@ -190,13 +190,13 @@ class TestrunnerVerbosity:
         """Not verbose by default."""
         result = testdir.runpytest_subprocess('-s')
         result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py ."])
+            "tpkg/test_the_test.py .*"])
 
     def test_vq_verbosity_0(self, testdir):
         """-v and -q results in verbosity 0."""
         result = testdir.runpytest_subprocess('-s', '-v', '-q')
         result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py ."])
+            "tpkg/test_the_test.py .*"])
 
     def test_verbose_with_v(self, testdir):
         """Verbose output with '-v'."""
@@ -225,10 +225,6 @@ class TestrunnerVerbosity:
                 not in result.stdout.str())
 
 
-@pytest.mark.skipif(
-    get_django_version() < (1, 8),
-    reason='Django 1.7 requires settings.SITE_ID to be set, so this test is invalid'
-)
 @pytest.mark.django_db
 @pytest.mark.parametrize('site_name', ['site1', 'site2'])
 def test_clear_site_cache(site_name, rf, monkeypatch):

@@ -19,6 +19,7 @@ from .fixtures import django_assert_num_queries  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_createdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
@@ -34,13 +35,14 @@ from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 from .pytest_compat import getfixturevalue
 
-from .lazy_django import (django_settings_is_configured,
-                          get_django_version, skip_if_no_django)
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
+
+PY2 = sys.version_info[0] == 2
 
 
 # ############### pytest hooks ################
@@ -63,10 +65,10 @@ def pytest_addoption(parser):
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
-                     help='Disable Django 1.7+ migrations on test setup')
+                     help='Disable Django migrations on test setup')
     group._addoption('--migrations',
                      action='store_false', dest='nomigrations', default=False,
-                     help='Enable Django 1.7+ migrations on test setup')
+                     help='Enable Django migrations on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -259,7 +261,7 @@ def pytest_configure():
     _setup_django()
 
 
-def _method_is_defined_at_leaf(cls, method_name):
+def _classmethod_is_defined_at_leaf(cls, method_name):
     super_method = None
 
     for base_cls in cls.__bases__:
@@ -269,7 +271,15 @@ def _method_is_defined_at_leaf(cls, method_name):
     assert super_method is not None, (
         '%s could not be found in base class' % method_name)
 
-    return getattr(cls, method_name).__func__ is not super_method.__func__
+    method = getattr(cls, method_name)
+
+    try:
+        f = method.__func__
+    except AttributeError:
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    if PY2 and not (inspect.ismethod(method) and method.__self__ is cls):
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    return f is not super_method.__func__
 
 
 _disabled_classmethods = {}
@@ -281,9 +291,9 @@ def _disable_class_methods(cls):
 
     _disabled_classmethods[cls] = (
         cls.setUpClass,
-        _method_is_defined_at_leaf(cls, 'setUpClass'),
+        _classmethod_is_defined_at_leaf(cls, 'setUpClass'),
         cls.tearDownClass,
-        _method_is_defined_at_leaf(cls, 'tearDownClass'),
+        _classmethod_is_defined_at_leaf(cls, 'tearDownClass'),
     )
 
     cls.setUpClass = types.MethodType(lambda cls: None, cls)
@@ -540,7 +550,7 @@ def _fail_for_invalid_template_variable(request):
             django_settings_is_configured()):
         from django.conf import settings as dj_settings
 
-        if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+        if dj_settings.TEMPLATES:
             dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = (
                 InvalidVarException())
         else:
@@ -556,7 +566,7 @@ def _template_string_if_invalid_marker(request):
         if marker and django_settings_is_configured():
             from django.conf import settings as dj_settings
 
-            if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+            if dj_settings.TEMPLATES:
                 dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
@@ -601,7 +611,7 @@ class _DatabaseBlocker(object):
 
     @property
     def _dj_db_wrapper(self):
-        from .compat import BaseDatabaseWrapper
+        from django.db.backends.base.base import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
         # reference to the real implementation.

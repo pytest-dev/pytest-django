@@ -71,7 +71,7 @@ add this directly to your project's requirements.txt file like this::
 
     # requirements.txt
     -e .
-    django>=1.7
+    django>=1.11
     pytest-django
 
 

@@ -5,7 +5,7 @@ class LiveServer(object):
     """The liveserver fixture
 
     This is the object that the ``live_server`` fixture returns.
-    The ``live_server`` fixture that handles creation and stopping.
+    The ``live_server`` fixture handles creation and stopping.
     """
 
     def __init__(self, addr):
@@ -38,7 +38,12 @@ class LiveServer(object):
             self.thread = LiveServerThread(host, possible_ports,
                                            **liveserver_kwargs)
         else:
-            host = addr
+            try:
+                host, port = addr.split(':')
+            except ValueError:
+                host = addr
+            else:
+                liveserver_kwargs['port'] = int(port)
             self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(

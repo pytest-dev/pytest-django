@@ -1,63 +1,41 @@
-# Use container-based environment (faster startup, allows caches).
 sudo: false
 language: python
+dist: trusty
 
 matrix:
   fast_finish: true
   include:
     - python: 3.6
-      env: TOXENV=py36-pytest3-djangomaster-postgres
+      env: TOXENV=py36-djmaster-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest3-django1.11-postgres
+      env: TOXENV=py36-dj20-postgres
     - python: 3.6
-      env: TOXENV=py36-pytest3-django1.10-postgres
-    - python: 3.6
-      env: TOXENV=py36-pytest3-django1.9-postgres
-    - python: 3.6
-      env: TOXENV=py36-pytest3-django1.8-postgres
-    - python: 3.6
-      env: TOXENV=py36-checkqa
+      env: TOXENV=py36-dj111-sqlite
 
     - python: 3.5
-      env: TOXENV=py35-pytest3-django1.11-postgres
+      env: TOXENV=py35-dj110-postgres
 
     - python: 3.4
-      env: TOXENV=py34-pytest3-django1.11-postgres
-
-    - python: 3.3
-      env: TOXENV=py34-pytest3-django1.8-postgres
+      env: TOXENV=py34-dj19-sqlite_file
 
     - python: 2.7
-      env: TOXENV=py27-pytest3-django1.11-mysql_innodb
+      env: TOXENV=py27-dj111-mysql_innodb
     - python: 2.7
-      env: TOXENV=py27-pytest3-django1.11-mysql_myisam
+      env: TOXENV=py27-dj111-mysql_myisam
     - python: 2.7
-      env: TOXENV=py27-pytest3-django1.11-postgres
-    - python: 2.7
-      env: TOXENV=py27-pytest3-django1.10-postgres
-    - python: 2.7
-      env: TOXENV=py27-pytest3-django1.9-postgres
-    - python: 2.7
-      env: TOXENV=py27-pytest3-django1.8-postgres
-    - python: 2.7
-      env: TOXENV=py27-pytest3-django1.7-postgres
-    - python: 2.7
-      env: TOXENV=py27-checkqa
+      env: TOXENV=py27-dj18-postgres
 
+    # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
-      env: TOXENV=pypy-pytest3-django1.11-sqlite_file
+      env: TOXENV=pypy-dj111-sqlite_file
+    - python: pypy3
+      env: TOXENV=pypy3-dj110-sqlite
 
-    - python: pypy3
-      env: TOXENV=pypy3-pytest3-django1.8-sqlite
-    - python: pypy3
-      env: TOXENV=pypy3-pytest3-django1.10-sqlite_file
+    - python: 3.6
+      env: TOXENV=checkqa
 
   allow_failures:
-    - env: TOXENV=py36-pytest3-djangomaster-postgres
-
-cache:
-  directories:
-    - "${TRAVIS_BUILD_DIR}/.tox"
+    - env: TOXENV=py36-djmaster-postgres
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
@@ -68,29 +46,32 @@ install:
   - declare -f travis_retry >> bin/travis_retry_pip
   - printf '\necho "Using pip-wrapper.." >&2\ntravis_retry pip "$@"' >> bin/travis_retry_pip
   - chmod +x bin/travis_retry_pip
-  - sed -i.bak 's/^\[testenv\]/\0\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
+  - sed -i.bak 's/^\[testenv\]/\0\nwhitelist_externals = travis_retry_pip\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
   - if diff tox.ini tox.ini.bak; then exit 1; fi
-  - printf '\nwhitelist_externals = travis_retry_pip' >> tox.ini
 
-  - pip install tox==2.7.0
+  - pip install tox==2.9.1
   - |
-    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+    # Setup coverage tracking, but not with "checkqa" nor "pypy*".
+    if [[ "$TOXENV" != "checkqa" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
+      PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
+    else
+      PYTEST_DJANGO_COVERAGE=0
     fi
 
 script:
   - tox
-  - "find ${TRAVIS_BUILD_DIR}/.tox -name 'log' -o -name '__pycache__' -type d | xargs -I {} rm -rf {}"
 
 after_success:
   - |
     set -ex
-    if [[ "${TOXENV%-checkqa}" == "$TOXENV" ]]; then
+    if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
       pip install codecov
+
+      coverage --version
       coverage combine
       coverage xml
-      coverage report -m --skip-covered
 
       codecov_flags=${TOXENV//./}
       codecov_flags=${codecov_flags//-/ }

@@ -229,6 +229,16 @@ command line options.
 
 This fixture is by default requested from :fixture:`django_db_setup`.
 
+django_db_createdb
+""""""""""""""""""
+
+.. fixture:: django_db_createdb
+
+Returns whether or not the database is to be re-created before running any
+tests.
+
+This fixture is by default requested from :fixture:`django_db_setup`.
+
 django_db_blocker
 """""""""""""""""
 
@@ -346,10 +356,9 @@ transactions. This example uses Django's fixture loading mechanism, but it can
 be replaced with any way of loading data into the database.
 
 Notice that :fixture:`django_db_setup` is in the argument list. This may look
-odd at first, but it will make sure that the sure that the original
-pytest-django fixture is used to create the test database. When
-``call_command`` is invoked, the test database is already prepared and
-configured.
+odd at first, but it will make sure that the original pytest-django fixture
+is used to create the test database. When ``call_command`` is invoked, the
+test database is already prepared and configured.
 
 Put this in ``conftest.py``::
 
