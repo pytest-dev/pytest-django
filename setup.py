@@ -30,7 +30,11 @@ setup(
     long_description=read('README.rst'),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     setup_requires=['setuptools_scm>=1.11.1'],
-    install_requires=['pytest>=3.6'],
+    install_requires=[
+        'pytest>=3.6',
+        'pathlib;python_version<"3.4"',
+        'six',
+    ],
     extras_require={
         'docs': [
             'sphinx',

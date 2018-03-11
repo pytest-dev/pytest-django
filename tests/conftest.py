@@ -2,15 +2,16 @@ import copy
 import shutil
 from textwrap import dedent
 
-import py
+import pathlib
 import pytest
+import six
 from django.conf import settings
 
 from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
 
 pytest_plugins = 'pytester'
 
-REPOSITORY_ROOT = py.path.local(__file__).join('..')
+REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 
 def pytest_configure(config):
@@ -99,12 +100,12 @@ def django_testdir(request, testdir, monkeypatch):
 
     tpkg_path.ensure('__init__.py')
 
-    app_source = REPOSITORY_ROOT.dirpath('pytest_django_test/app')
+    app_source = REPOSITORY_ROOT / '../pytest_django_test/app'
     test_app_path = tpkg_path.join('app')
 
     # Copy the test app to make it available in the new test run
-    shutil.copytree(py.builtin._totext(app_source),
-                    py.builtin._totext(test_app_path))
+    shutil.copytree(six.text_type(app_source),
+                    six.text_type(test_app_path))
     tpkg_path.join("the_settings.py").write(test_settings)
 
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.the_settings')
