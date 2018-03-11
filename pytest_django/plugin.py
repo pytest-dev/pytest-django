@@ -127,6 +127,9 @@ def _add_django_project_to_path(args):
         for arg in args:
             if is_django_project(arg):
                 return arg
+            for child in arg.iterdir():
+                if is_django_project(child):
+                    return child
             for parent in arg.parents:
                 if is_django_project(parent):
                     return parent
