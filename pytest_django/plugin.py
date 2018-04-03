@@ -23,6 +23,7 @@ from .fixtures import django_db_createdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
+from .fixtures import serialized_rollback # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
 from .fixtures import client  # noqa
@@ -385,6 +386,8 @@ def _django_db_marker(request):
             getfixturevalue(request, 'transactional_db')
         else:
             getfixturevalue(request, 'db')
+        if marker.serialized_rollback:
+            getfixturevalue(request, 'serialized_rollback')
 
 
 @pytest.fixture(autouse=True, scope='class')
@@ -655,8 +658,9 @@ def validate_django_db(marker):
     It checks the signature and creates the `transaction` attribute on
     the marker which will have the correct value.
     """
-    def apifun(transaction=False):
+    def apifun(transaction=False, serialized_rollback=False):
         marker.transaction = transaction
+        marker.serialized_rollback = serialized_rollback
     apifun(*marker.args, **marker.kwargs)
 
 

@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.2.0
+-----
+
+Features
+^^^^^^^^
+* Add support for serialized rollback in transactional tests.
+  Thanks to Piotr Karkut for `the bug report
+  <https://github.com/pytest-dev/pytest-django/issues/329>`_.
+
 3.1.2
 -----
 
