@@ -9,6 +9,12 @@ jobs:
 
     - stage: PyPI Release
       before_deploy: echo before_deploy
+      deploy: &pypi
+        provider: pypi
+        user: blueyed
+        password:
+          secure: "DZz5qJMyXB/GVaT8dEpHnMjB+g+udbLSZfGl+g+Dr6B0iNEi9sSj1QEMSq9cLoPJJEJ/Q/LdpWGmVH6EGxKNVHRFS8xIdzaPSyGmMZD2qA6v7YSYrpXpdrFzqi9hFlY5MpVTrUoOo05AhgUEhFZvN1XM6z5tqCJtdMAHzNJfqNA="
+        distributions: "sdist bdist_wheel"
       after_deploy: echo before_deploy
 
   allow_failures:
@@ -18,10 +24,3 @@ install: true
 
 script:
   - true
-
-deploy: &pypi
-  provider: pypi
-  user: blueyed
-  password:
-    secure: "DZz5qJMyXB/GVaT8dEpHnMjB+g+udbLSZfGl+g+Dr6B0iNEi9sSj1QEMSq9cLoPJJEJ/Q/LdpWGmVH6EGxKNVHRFS8xIdzaPSyGmMZD2qA6v7YSYrpXpdrFzqi9hFlY5MpVTrUoOo05AhgUEhFZvN1XM6z5tqCJtdMAHzNJfqNA="
-  distributions: "sdist bdist_wheel"
