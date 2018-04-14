@@ -10,6 +10,7 @@ jobs:
 
     - stage: PyPI Release
       if: tag IS NOT present
+      before_deploy: echo before_deploy
       deploy: &pypi
         provider: pypi
         user: blueyed
@@ -18,6 +19,7 @@ jobs:
         on:
           tags: false
         distributions: "sdist bdist_wheel"
+      after_deploy: echo before_deploy
 
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
