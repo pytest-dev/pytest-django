@@ -8,7 +8,6 @@ jobs:
       env: TOXENV=py36-dj20-postgres
 
     - stage: PyPI Release
-      if: tag IS NOT present
       before_deploy: echo before_deploy
       after_deploy: echo before_deploy
 
