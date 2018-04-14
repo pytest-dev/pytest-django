@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.2.1
+-----
+
+Fix automatic deployment to PyPI.
+
 3.2.0
 -----
 
