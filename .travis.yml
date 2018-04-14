@@ -10,8 +10,6 @@ jobs:
 
     - stage: PyPI Release
       if: tag IS NOT present
-      script: skip
-      install: skip
       deploy: &pypi
         provider: pypi
         user: blueyed
