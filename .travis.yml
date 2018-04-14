@@ -2,25 +2,14 @@ sudo: false
 language: python
 dist: trusty
 
-jobs:
-  include:
-    - python: 3.6
-      env: TOXENV=py36-dj20-postgres
-
-    - stage: PyPI Release
-      before_deploy: echo before_deploy
-      deploy: &pypi
-        provider: pypi
-        user: blueyed
-        password:
-          secure: "DZz5qJMyXB/GVaT8dEpHnMjB+g+udbLSZfGl+g+Dr6B0iNEi9sSj1QEMSq9cLoPJJEJ/Q/LdpWGmVH6EGxKNVHRFS8xIdzaPSyGmMZD2qA6v7YSYrpXpdrFzqi9hFlY5MpVTrUoOo05AhgUEhFZvN1XM6z5tqCJtdMAHzNJfqNA="
-        distributions: "sdist bdist_wheel"
-      after_deploy: echo before_deploy
-
-  allow_failures:
-    - env: TOXENV=py36-djmaster-postgres
-
 install: true
+script: true
 
-script:
-  - true
+before_deploy: echo before_deploy
+deploy: &pypi
+  provider: pypi
+  user: blueyed
+  password:
+    secure: "DZz5qJMyXB/GVaT8dEpHnMjB+g+udbLSZfGl+g+Dr6B0iNEi9sSj1QEMSq9cLoPJJEJ/Q/LdpWGmVH6EGxKNVHRFS8xIdzaPSyGmMZD2qA6v7YSYrpXpdrFzqi9hFlY5MpVTrUoOo05AhgUEhFZvN1XM6z5tqCJtdMAHzNJfqNA="
+  distributions: "sdist bdist_wheel"
+after_deploy: echo before_deploy
