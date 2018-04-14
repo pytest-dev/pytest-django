@@ -3,7 +3,6 @@ language: python
 dist: trusty
 
 jobs:
-  fast_finish: true
   include:
     - python: 3.6
       env: TOXENV=py36-dj20-postgres
