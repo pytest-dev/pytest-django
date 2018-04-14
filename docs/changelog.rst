@@ -1,6 +1,23 @@
 Changelog
 =========
 
+3.2
+-----
+
+Features
+^^^^^^^^
+* Added new fixture `django_assert_num_queries` for testing the number of database queries.
+* `--fail-on-template-vars` has been improved and should now return full/absolute path.
+
+Bug fixes
+^^^^^^^^^
+* Numerous fixes in the documentation. These should not go unnoticed 🌟
+
+Compatibility
+^^^^^^^^^^^^^
+* Django 2.0 support has been added 🎉
+* Django < 1.8 support has been dropped.
+
 3.1.2
 -----
 
