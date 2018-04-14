@@ -47,6 +47,3 @@ install:
 
 script:
   - true
-
-after_success:
-  - echo after_success
