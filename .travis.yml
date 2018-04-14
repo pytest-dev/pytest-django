@@ -22,28 +22,7 @@ jobs:
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
 
-install:
-  # Create pip wrapper script, using travis_retry (a function) and
-  # inject it into tox.ini.
-  - mkdir -p bin
-  - PATH=$PWD/bin:$PATH
-  - printf '#!/bin/sh\n' > bin/travis_retry_pip
-  - declare -f travis_retry >> bin/travis_retry_pip
-  - printf '\necho "Using pip-wrapper.." >&2\ntravis_retry pip "$@"' >> bin/travis_retry_pip
-  - chmod +x bin/travis_retry_pip
-  - sed -i.bak 's/^\[testenv\]/\0\nwhitelist_externals = travis_retry_pip\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
-  - if diff tox.ini tox.ini.bak; then exit 1; fi
-
-  - pip install tox==2.9.1
-  - |
-    # Setup coverage tracking, but not with "checkqa" nor "pypy*".
-    if [[ "$TOXENV" != "checkqa" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
-      PYTEST_DJANGO_COVERAGE=1
-      export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
-      export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
-    else
-      PYTEST_DJANGO_COVERAGE=0
-    fi
+install: true
 
 script:
   - true
