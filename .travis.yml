@@ -39,7 +39,7 @@ jobs:
       script: skip
       install: skip
       after_success: skip
-      deploy:
+      deploy: &pypi
         provider: pypi
         user: blueyed
         password:
