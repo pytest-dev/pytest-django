@@ -12,7 +12,6 @@ jobs:
       if: tag IS NOT present
       script: skip
       install: skip
-      after_success: true
       deploy: &pypi
         provider: pypi
         user: blueyed
