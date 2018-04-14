@@ -52,17 +52,4 @@ script:
   - true
 
 after_success:
-  - |
-    set -ex
-    if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
-      pip install codecov
-
-      coverage --version
-      coverage combine
-      coverage xml
-
-      codecov_flags=${TOXENV//./}
-      codecov_flags=${codecov_flags//-/ }
-      codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
-    fi
-    set +x
+  - echo after_success
