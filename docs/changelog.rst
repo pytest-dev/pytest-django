@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Features
+^^^^^^^^
+* pytest-django now searches the immediate subdirectories of the current
+  working directory when trying to find the Django project.
+
 3.1.2
 -----
 
