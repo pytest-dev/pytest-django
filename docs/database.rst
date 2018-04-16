@@ -71,16 +71,20 @@ Tests requiring multiple databases
 ----------------------------------
 
 Currently ``pytest-django`` does not specifically support Django's
-multi-database support.  You can however use normal Django
-``TestCase`` instances to use it's `multi_db
-<https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#tests-and-multiple-databases>`_
-support.
+multi-database support.
+
+You can however use normal :class:`~django.test.TestCase` instances to use its
+:ref:`django:topics-testing-advanced-multidb` support.
+In particular, if your database is configured for replication, be sure to read
+about :ref:`django:topics-testing-primaryreplica`.
 
 If you have any ideas about the best API to support multiple databases
 directly in ``pytest-django`` please get in touch, we are interested
 in eventually supporting this but unsure about simply following
 Django's approach.
 
+See `https://github.com/pytest-dev/pytest-django/pull/431` for an idea /
+discussion to approach this.
 
 ``--reuse-db`` - reuse the testing database between test runs
 --------------------------------------------------------------
