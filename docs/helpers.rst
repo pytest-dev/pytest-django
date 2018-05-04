@@ -285,6 +285,23 @@ Example
         assert list(m.to) == ['to@example.com']
 
 
+``q``
+~~~~~
+
+A mutable instance of ``django.http.QueryDict``.
+
+Example
+"""""""
+
+::
+
+    def test_api_view(client, q):
+        q['first_name'] = 'james'
+        response = client.get(
+            '{}?{}'.format(reverse('user-list'), q.urlencode())
+        )
+        assert 'james' in response.data['result']
+
 Automatic cleanup
 -----------------
 
