@@ -18,7 +18,7 @@ from .lazy_django import skip_if_no_django
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
            'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           '_live_server_helper', 'django_assert_num_queries', 'q']
 
 
 @pytest.fixture(scope='session')
@@ -364,3 +364,28 @@ def django_assert_num_queries(pytestconfig):
                 pytest.fail(msg)
 
     return _assert_num_queries
+
+
+@pytest.fixture(scope='function')
+def q():
+    """
+    Django's QueryDict has a very helpful function, urlencode(), which
+    greatly helps in constructing urls with query parameters.
+
+    However, by default it is not mutable. This fixture creates a mutable
+    instance of QueryDict.
+
+    You can add items to it like so:
+    >>> q.update(other_dict)
+    or
+    >>> q['param'] = "value"
+
+    To render the items in a url string:
+    >>> '{}?{}'.format(reverse('some-route', kwargs={'pk': obj.id}), q.urlencode())
+
+
+    Please check the original documentation under:
+    https://docs.djangoproject.com/en/2.0/ref/request-response/#querydict-objects
+    """
+    from django.http import QueryDict
+    return QueryDict(mutable=True)
