@@ -33,6 +33,7 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .fixtures import q  # noqa
 from .pytest_compat import getfixturevalue
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
