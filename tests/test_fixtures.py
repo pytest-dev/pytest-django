@@ -28,7 +28,10 @@ def test_client(client):
 
 def test_q(q):
     from django.http import QueryDict
+
     assert isinstance(q, QueryDict)
+    q['some_key'] = 'some value'
+    q.update({'other_key': 'other_value'})
 
 
 @pytest.mark.django_db
