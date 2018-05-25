@@ -1,6 +1,11 @@
 Changelog
 =========
 
+unreleased
+----------
+
+* Fix test for classmethod with Django TestCases (#597, #598).
+
 3.2.1
 -----
 

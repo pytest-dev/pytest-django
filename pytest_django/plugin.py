@@ -277,7 +277,9 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
         f = method.__func__
     except AttributeError:
         pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
-    if PY2 and not (inspect.ismethod(method) and method.__self__ is cls):
+    if PY2 and not (inspect.ismethod(method) and
+                    inspect.isclass(method.__self__) and
+                    issubclass(cls, method.__self__)):
         pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
     return f is not super_method.__func__
 
@@ -290,9 +292,11 @@ def _disable_class_methods(cls):
         return
 
     _disabled_classmethods[cls] = (
-        cls.setUpClass,
+        # Get the classmethod object (not the resulting bound method),
+        # otherwise inheritence will be broken when restoring.
+        cls.__dict__.get('setUpClass'),
         _classmethod_is_defined_at_leaf(cls, 'setUpClass'),
-        cls.tearDownClass,
+        cls.__dict__.get('tearDownClass'),
         _classmethod_is_defined_at_leaf(cls, 'tearDownClass'),
     )
 
