@@ -9,3 +9,10 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Unmanaged(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False

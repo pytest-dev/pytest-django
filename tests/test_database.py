@@ -1,11 +1,11 @@
 from __future__ import with_statement
 
 import pytest
-from django.db import connection
+from django.db import connection, DatabaseError
 from django.test.testcases import connections_support_transactions
 
 from pytest_django.pytest_compat import getfixturevalue
-from pytest_django_test.app.models import Item
+from pytest_django_test.app.models import Item, Unmanaged
 
 
 def test_noaccess():
@@ -139,6 +139,28 @@ class TestDatabaseMarker:
             pytest.skip('transactions required for this test')
 
         assert not connection.in_atomic_block
+
+
+@pytest.mark.django_db
+class TestUseModel:
+    """Tests for django_use_model marker"""
+
+    def test_unmanaged_missing(self):
+        """Test that Unmanaged model is not created by default"""
+        with pytest.raises(DatabaseError):
+            # If table does not exists, django will raise DatabaseError
+            # but the message will depend on the backend.
+            # Probably nothing else can be asserted here.
+            Unmanaged.objects.exists()
+
+    @pytest.mark.django_use_model(Unmanaged)
+    def test_unmanaged_created(self):
+        """Make sure unmanaged models are created"""
+        assert Unmanaged.objects.count() == 0
+
+    def test_unmanaged_destroyed(self):
+        """Test that Unmanaged model was destroyed after last use"""
+        self.test_unmanaged_missing()
 
 
 def test_unittest_interaction(django_testdir):
