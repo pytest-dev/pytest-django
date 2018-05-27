@@ -5,11 +5,9 @@ from __future__ import with_statement
 import os
 import sys
 from contextlib import contextmanager
-from io import BytesIO
+from io import StringIO
 
 import pytest
-
-from contextlib import contextmanager
 
 from . import live_server_helper
 
@@ -122,9 +120,9 @@ def run_checks(request):
         return
     run_checks.ran = True
 
-    out = BytesIO()
+    out = StringIO()
     try:
-        call_command('check', out=out, err=out)
+        call_command('check', stdout=out, stderr=out)
     except SystemCheckError as ex:
         run_checks.exc = ex
 
@@ -138,16 +136,6 @@ def run_checks(request):
             # Ensure we get the EXIT_TESTSFAILED exit code
             request.session.testsfailed += 1
             request.session.shouldstop = True
-
-
-@contextmanager
-def disable_input_capture(request):
-    capmanager = request.config.pluginmanager.getplugin('capturemanager')
-    capmanager.suspendcapture()
-    try:
-        yield
-    finally:
-        capmanager.resumecapture()
 
 
 def _django_db_fixture_helper(transactional, request, django_db_blocker):
