@@ -115,22 +115,24 @@ def run_checks(request):
     from django.core.management import call_command
     from django.core.management.base import SystemCheckError
 
+    config = request.config
+
     # Only run once per process
-    if getattr(run_checks, 'ran', False):
+    if getattr(config, '_pytest_django_checks_ran', False):
         return
-    run_checks.ran = True
+    config._pytest_django_checks_ran = True
 
     out = StringIO()
     try:
         call_command('check', stdout=out, stderr=out)
-    except SystemCheckError as ex:
-        run_checks.exc = ex
+    except SystemCheckError as exc:
+        config._pytest_django_checks_exc = exc
 
         if hasattr(request.config, 'slaveinput'):
             # Kill the xdist test process horribly
             # N.B. 'shouldstop' may be obeyed properly in the future as hinted at in
             # https://github.com/pytest-dev/pytest-xdist/commit/e8fa73719662d1be5074a0750329fe0c35583484
-            print(ex.args[0])
+            print(exc.args[0])
             sys.exit(1)
         else:
             # Ensure we get the EXIT_TESTSFAILED exit code

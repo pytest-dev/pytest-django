@@ -331,7 +331,8 @@ def pytest_runtest_setup(item):
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus):
-    check_exc = getattr(run_checks, 'exc', None)
+    config = terminalreporter.config
+    check_exc = getattr(config, '_pytest_django_checks_exc', None)
     if check_exc:
         terminalreporter.write('\n')
         terminalreporter.write(str(check_exc))
