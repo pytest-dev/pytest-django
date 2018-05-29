@@ -141,6 +141,79 @@ class TestUnittestMethods:
         ])
         assert result.ret == 1
 
+    def test_setUpClass_multiple_subclasses(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(cls):
+                    super(TestFoo, cls).setUpClass()
+
+                def test_shared(self):
+                    pass
+
+
+            class TestBar(TestFoo):
+                def test_bar1(self):
+                    pass
+
+
+            class TestBar2(TestFoo):
+                def test_bar21(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_shared Creating test database for*",
+            "PASSED",
+            "*TestBar::test_bar1 PASSED",
+            "*TestBar::test_shared PASSED",
+            "*TestBar2::test_bar21 PASSED",
+            "*TestBar2::test_shared PASSED*",
+        ])
+        assert result.ret == 0
+
+    def test_setUpClass_skip(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+            import pytest
+
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(cls):
+                    if cls is TestFoo:
+                        raise pytest.skip("Skip base class")
+                    super(TestFoo, cls).setUpClass()
+
+                def test_shared(self):
+                    pass
+
+
+            class TestBar(TestFoo):
+                def test_bar1(self):
+                    pass
+
+
+            class TestBar2(TestFoo):
+                def test_bar21(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_shared Creating test database for*",
+            "SKIPPED",
+            "*TestBar::test_bar1 PASSED",
+            "*TestBar::test_shared PASSED",
+            "*TestBar2::test_bar21 PASSED",
+            "*TestBar2::test_shared PASSED*",
+        ])
+        assert result.ret == 0
+
     def test_multi_inheritance_setUpClass(self, django_testdir):
         django_testdir.create_test_module('''
             from django.test import TestCase
