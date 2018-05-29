@@ -11,6 +11,7 @@ _build
 /.coverage
 /htmlcov/
 .cache
+.pytest_cache/
 .Python
 .eggs
 *.egg
