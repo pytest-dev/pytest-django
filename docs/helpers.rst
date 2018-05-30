@@ -65,7 +65,7 @@ when trying to access the database.
 
    Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
 
-   :type urls: string
+   :type urls: str
    :param urls:
      The urlconf module to use for the test, e.g. ``myapp.test_urls``.  This is
      similar to Django's ``TestCase.urls`` attribute.
