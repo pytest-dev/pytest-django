@@ -32,7 +32,7 @@ jobs:
       env: TOXENV=pypy3-dj110-sqlite
 
     - python: 3.6
-      env: TOXENV=checkqa
+      env: TOXENV=checkqa,docs
 
     - stage: PyPI Release
       if: tag IS present
