@@ -382,10 +382,10 @@ def _django_db_marker(request):
     This will dynamically request the ``db`` or ``transactional_db``
     fixtures as required by the django_db marker.
     """
-    marker = request.keywords.get('django_db', None)
+    marker = request.node.get_closest_marker('django_db')
     if marker:
-        validate_django_db(marker)
-        if marker.transaction:
+        transaction = validate_django_db(marker)
+        if transaction:
             getfixturevalue(request, 'transactional_db')
         else:
             getfixturevalue(request, 'db')
@@ -451,7 +451,7 @@ def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
 @pytest.fixture(autouse=True, scope='function')
 def _django_set_urlconf(request):
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
-    marker = request.keywords.get('urls', None)
+    marker = request.node.get_closest_marker('urls')
     if marker:
         skip_if_no_django()
         import django.conf
@@ -461,9 +461,9 @@ def _django_set_urlconf(request):
             # Removed in Django 2.0
             from django.core.urlresolvers import clear_url_caches, set_urlconf
 
-        validate_urls(marker)
+        urls = validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
-        django.conf.settings.ROOT_URLCONF = marker.urls
+        django.conf.settings.ROOT_URLCONF = urls
         clear_url_caches()
         set_urlconf(None)
 
@@ -660,8 +660,8 @@ def validate_django_db(marker):
     the marker which will have the correct value.
     """
     def apifun(transaction=False):
-        marker.transaction = transaction
-    apifun(*marker.args, **marker.kwargs)
+        return transaction
+    return apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
@@ -671,5 +671,5 @@ def validate_urls(marker):
     marker which will have the correct value.
     """
     def apifun(urls):
-        marker.urls = urls
-    apifun(*marker.args, **marker.kwargs)
+        return urls
+    return apifun(*marker.args, **marker.kwargs)

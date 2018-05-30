@@ -1,10 +1,11 @@
 Changelog
 =========
 
-unreleased
-----------
+3.3.0 (unreleased)
+------------------
 
 * Fix test for classmethod with Django TestCases (#597, #598).
+* Fix RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
 
 3.2.1
 -----
