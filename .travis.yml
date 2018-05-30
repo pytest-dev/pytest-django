@@ -27,12 +27,12 @@ jobs:
 
     # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
-      env: TOXENV=pypy-dj111-sqlite_file
+      env: TOXENV=pypy-dj111-sqlite_file SKIP_COVERAGE=1
     - python: pypy3
-      env: TOXENV=pypy3-dj110-sqlite
+      env: TOXENV=pypy3-dj110-sqlite SKIP_COVERAGE=1
 
     - python: 3.6
-      env: TOXENV=checkqa
+      env: TOXENV=checkqa,docs SKIP_COVERAGE=1
 
     - stage: PyPI Release
       if: tag IS present
@@ -65,8 +65,8 @@ install:
 
   - pip install tox==2.9.1
   - |
-    # Setup coverage tracking, but not with "checkqa" nor "pypy*".
-    if [[ "$TOXENV" != "checkqa" ]] && [[ "${TOXENV#pypy}" == "$TOXENV" ]]; then
+    # Setup coverage tracking.
+    if [[ "$SKIP_COVERAGE" != "1" ]]; then
       PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov

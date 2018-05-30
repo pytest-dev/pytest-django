@@ -207,7 +207,7 @@ is configured to be in the containing Django project.
 
 This fixture will ensure the Django database is set up.  Only
 required for fixtures that want to use the database themselves.  A
-test function should normally use the :py:func:`~pytest.mark.django_db`
+test function should normally use the ``pytest.mark.django_db``
 mark to signal it needs the database.
 
 ``transactional_db``
@@ -216,7 +216,7 @@ mark to signal it needs the database.
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function would normally use the
-:py:func:`~pytest.mark.django_db` mark to signal it needs the database.
+``pytest.mark.django_db`` mark to signal it needs the database.
 
 ``live_server``
 ~~~~~~~~~~~~~~~

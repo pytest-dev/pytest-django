@@ -25,7 +25,7 @@ first file is found.
 
 If you have a custom project setup, have none or multiple ``manage.py`` files
 in your project, the automatic detection may not be correct. See
-:ref:`managing_the_python_path_explicilty` for more details on how to configure
+:ref:`managing_the_python_path_explicitly` for more details on how to configure
 your environment in that case.
 
 .. _managing_the_python_path_explicitly:
