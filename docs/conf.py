@@ -14,6 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext"))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
     'pytestdocs',
 ]
 
@@ -60,3 +61,9 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pytest-djangodoc'
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'django': ('http://docs.djangoproject.com/en/dev/',
+               'http://docs.djangoproject.com/en/dev/_objects/'),
+}
