@@ -504,7 +504,7 @@ def _fail_for_invalid_template_variable(request):
     It does not raise an exception, but fails, as the stack trace doesn't
     offer any helpful information to debug.
     This behavior can be switched off using the marker:
-    ``ignore_template_errors``
+    ``pytest.mark.ignore_template_errors``
     """
     class InvalidVarException(object):
         """Custom handler for invalid strings in templates."""
