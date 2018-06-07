@@ -184,6 +184,10 @@ def pytest_load_initial_conftests(early_config, parser, args):
         'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
         'a string specifying the module of a URL config, e.g. '
         '"my_app.test_urls".')
+    early_config.addinivalue_line(
+        'markers',
+        'ignore_template_errors(): ignore errors from invalid template '
+        'variables (if --fail-on-template-vars is used).')
 
     options = parser.parse_known_args(args)
 
@@ -500,7 +504,7 @@ def _fail_for_invalid_template_variable(request):
     It does not raise an exception, but fails, as the stack trace doesn't
     offer any helpful information to debug.
     This behavior can be switched off using the marker:
-    ``ignore_template_errors``
+    ``pytest.mark.ignore_template_errors``
     """
     class InvalidVarException(object):
         """Custom handler for invalid strings in templates."""

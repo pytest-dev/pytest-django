@@ -17,6 +17,8 @@ Bug fixes
 
 * Fixed test for classmethod with Django TestCases (#597, #598).
 * Fixed RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
+* Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
+  which is required with ``pytest --strict`` (#609).
 
 3.2.1
 -----
