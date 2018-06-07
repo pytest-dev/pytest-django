@@ -4,13 +4,24 @@ Changelog
 3.3.0 (unreleased)
 ------------------
 
-* Fix test for classmethod with Django TestCases (#597, #598).
-* Fix RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
+Features
+^^^^^^^^
+
+* Added new fixtures ``django_mail_dnsname`` and ``django_mail_patch_dns``,
+  used by ``mailoutbox`` to monkeypatch the ``DNS_NAME`` used in
+  :py:mod:`django.core.mail` to improve performance and
+  reproducibility.
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed test for classmethod with Django TestCases (#597, #598).
+* Fixed RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
 
 3.2.1
 -----
 
-Fix automatic deployment to PyPI.
+* Fixed automatic deployment to PyPI.
 
 3.2.0
 -----

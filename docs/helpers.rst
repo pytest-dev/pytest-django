@@ -264,7 +264,7 @@ Example
 
 
 ``mailoutbox``
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 A clean email outbox to which Django-generated emails are sent.
 
@@ -283,6 +283,12 @@ Example
         assert m.body == 'body'
         assert m.from_email == 'from@example.com'
         assert list(m.to) == ['to@example.com']
+
+
+This uses the ``django_mail_patch_dns`` fixture, which patches
+``DNS_NAME`` used by :py:mod:`django.core.mail` with the value from
+the ``django_mail_dnsname`` fixture, which defaults to
+"fake-tests.example.com".
 
 
 Automatic cleanup
