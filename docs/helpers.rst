@@ -82,10 +82,12 @@ when trying to access the database.
 
 .. py:function:: pytest.mark.ignore_template_errors
 
-  If you run pytest using the ``--fail-on-template-vars`` option,
-  tests will fail should your templates contain any invalid variables.
-  This marker will disable this feature by setting ``settings.TEMPLATE_STRING_IF_INVALID=None``
-  or the ``string_if_invalid`` template option
+  Ignore errors when using the ``--fail-on-template-vars`` option, i.e.
+  do not cause tests to fail if your templates contain invalid variables.
+
+  This marker sets the ``string_if_invalid`` template option, or
+  the older ``settings.TEMPLATE_STRING_IF_INVALID=None`` (Django up to 1.10).
+  See :ref:`django:invalid-template-variables`.
 
   Example usage::
 

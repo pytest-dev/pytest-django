@@ -1,7 +1,16 @@
 Changelog
 =========
 
-3.3.1 (2018-06-21)
+unreleased
+------------------
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
+  which is required with ``pytest --strict`` (#609).
+
+3.3.2 (2018-06-21)
 ------------------
 
 Bug fixes
