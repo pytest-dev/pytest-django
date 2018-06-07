@@ -184,6 +184,10 @@ def pytest_load_initial_conftests(early_config, parser, args):
         'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
         'a string specifying the module of a URL config, e.g. '
         '"my_app.test_urls".')
+    early_config.addinivalue_line(
+        'markers',
+        'ignore_template_errors(): ignore errors from invalid template '
+        'variables (if --fail-on-template-vars is used).')
 
     options = parser.parse_known_args(args)
 
