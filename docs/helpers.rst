@@ -121,6 +121,39 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
+``django_rf_user``, ``django_rf_admin``, ``django_rf_unauth``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional instances of RequestFactory, which mimic the behavior of these
+two middlewares:
+
+- `django.contrib.sessions.middleware.SessionMiddleware`_
+- `django.contrib.auth.middleware.AuthenticationMiddleware`_
+
+This will add two attributes to the ``request`` object,
+``request.user`` and ``request.session``.
+
+- ``request.session`` is an in-memory `SessionBase`_ object.
+- ``request.user`` depends on the fixture being used:
+
+  - ``django_rf_unauth``: an `AnonymousUser`_
+  - ``django_rf_user``: a normal user with no additional privileges
+  - ``django_rf_admin``: an admin user
+
+::
+
+    from myapp.views import my_view
+
+    def test_details(django_rf_unauth):
+        request = django_rf_unauth.get('/customer/details')
+        response = my_view(request)
+        assert response.status_code == 200
+
+.. _django.contrib.sessions.middleware.SessionMiddleware: https://docs.djangoproject.com/en/2.0/ref/middleware/#django.contrib.sessions.middleware.SessionMiddleware
+.. _django.contrib.auth.middleware.AuthenticationMiddleware: https://docs.djangoproject.com/en/2.0/ref/middleware/#django.contrib.auth.middleware.AuthenticationMiddleware
+.. _SessionBase: https://docs.djangoproject.com/en/2.0/topics/http/sessions/#django.contrib.sessions.backends.base.SessionBase
+.. _AnonymousUser: https://docs.djangoproject.com/en/2.0/ref/contrib/auth/#django.contrib.auth.models.AnonymousUser
+
 ``client`` - ``django.test.Client``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -167,6 +200,20 @@ Example
 Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
 ``django_db`` mark).
 
+``django_user_client`` - ``django.test.Client`` logged in as normal user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Same as ``admin_client``, but for a regular user.
+
+Example
+"""""""
+
+::
+
+    def test_an_admin_view(django_user_client):
+        response = user_client.get('/admin/')
+        assert response.status_code == 403
+
 ``admin_user`` - a admin user (superuser)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -176,6 +223,11 @@ case there is no "admin" user yet).
 Using the `admin_user` fixture will cause the test to automatically be marked for database use (no need to specify the
 ``django_db`` mark).
 
+
+``django_user`` - a normal user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Same as ``admin_user``, but for a regular user.
 
 ``django_user_model``
 ~~~~~~~~~~~~~~~~~~~~~

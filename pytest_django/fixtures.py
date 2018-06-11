@@ -16,9 +16,11 @@ from .pytest_compat import getfixturevalue
 from .lazy_django import skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
-           'django_user_model', 'django_username_field',
-           'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           'django_user_model', 'django_username_field', 'client',
+           'admin_client', 'django_user_client', 'rf', 'settings',
+           'django_user', 'django_rf_unauth', 'django_rf_user',
+           'django_rf_admin', 'live_server', '_live_server_helper',
+           'django_assert_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -230,6 +232,36 @@ def admin_client(db, admin_user):
 
 
 @pytest.fixture()
+def django_user(db, django_user_model, django_username_field):
+    """A Django user.
+    This uses an existing user with username "user", or creates a new one with
+    password "password".
+    """
+    UserModel = django_user_model
+    username_field = django_username_field
+
+    try:
+        user = UserModel._default_manager.get(**{username_field: 'user'})
+    except UserModel.DoesNotExist:
+        extra_fields = {}
+        if username_field != 'username':
+            extra_fields[username_field] = 'user'
+        user = UserModel._default_manager.create_user(
+            'user', 'user@example.com', 'password', **extra_fields)
+    return user
+
+
+@pytest.fixture()
+def django_user_client(db, django_user):
+    """A Django test client logged in as a normal user."""
+    from django.test.client import Client
+
+    client = Client()
+    client.login(username=django_user.username, password='password')
+    return client
+
+
+@pytest.fixture()
 def rf():
     """RequestFactory instance"""
     skip_if_no_django()
@@ -237,6 +269,76 @@ def rf():
     from django.test.client import RequestFactory
 
     return RequestFactory()
+
+
+@pytest.fixture
+def django_rf_unauth():
+    """Anonymous user request factory.
+
+    This does two things to the request object:
+
+    1. Adds an anonymous user per Django's doc examples on request
+       factories:
+
+       https://docs.djangoproject.com/en/2.0/topics/testing/advanced/#example
+
+       This simiulates ``django.contrib.auth.middleware.AuthenticationMiddleware``.
+
+    2. Adds a naive session storage object to request.
+
+       This simiulates ``django.contrib.sessions.middleware.SessionMiddleware``,
+       and prevents errors on stuff like SessionWizardView in django-formtools.
+    """
+    from django.test.client import RequestFactory
+    from django.contrib.auth.models import AnonymousUser
+    from django.contrib.sessions.backends.base import SessionBase
+
+    class UnauthRequestFactory(RequestFactory):
+        def request(self, **request):
+            r = super(UnauthRequestFactory, self).request(**request)
+            r.user = AnonymousUser()
+            r.session = SessionBase()
+            return r
+
+    return UnauthRequestFactory()
+
+
+@pytest.fixture
+def django_rf_admin(admin_user):
+    """Admin user request facctory.
+
+    Mimics AuthenticationMiddleware. Also adds a memory-backed session store
+    to the request object."""
+    from django.test.client import RequestFactory
+    from django.contrib.sessions.backends.base import SessionBase
+
+    class AdminRequestFactory(RequestFactory):
+        def request(self, **request):
+            r = super(AdminRequestFactory, self).request(**request)
+            r.user = admin_user
+            r.session = SessionBase()
+            return r
+
+    return AdminRequestFactory()
+
+
+@pytest.fixture
+def django_rf_user(django_user):
+    """Normal user request factory.
+
+    Mimics AuthenticationMiddleware. Also adds a memory-backed session store
+    to the request object."""
+    from django.test.client import RequestFactory
+    from django.contrib.sessions.backends.base import SessionBase
+
+    class UserRequestFactory(RequestFactory):
+        def request(self, **request):
+            r = super(UserRequestFactory, self).request(**request)
+            r.user = django_user
+            r.session = SessionBase()
+            return r
+
+    return UserRequestFactory()
 
 
 class SettingsWrapper(object):
