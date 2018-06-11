@@ -49,7 +49,6 @@ class LiveServer(object):
         self._live_server_modified_settings = modify_settings(
             ALLOWED_HOSTS={'append': host},
         )
-        self._live_server_modified_settings.enable()
 
         self.thread.daemon = True
         self.thread.start()
@@ -62,7 +61,6 @@ class LiveServer(object):
         """Stop the server"""
         self.thread.terminate()
         self.thread.join()
-        self._live_server_modified_settings.disable()
 
     @property
     def url(self):

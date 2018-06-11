@@ -223,8 +223,33 @@ class TestSettings:
 
 
 class TestLiveServer:
+    def test_settings_before(self):
+        from django.conf import settings
+
+        assert '%s.%s' % (
+            settings.__class__.__module__,
+            settings.__class__.__name__) == 'django.conf.Settings'
+        TestLiveServer._test_settings_before_run = True
+
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
+
+    def test_change_settings(self, live_server, settings):
+        assert live_server.url == force_text(live_server)
+
+    def test_settings_restored(self):
+        """Ensure that settings are restored after test_settings_before."""
+        import django
+        from django.conf import settings
+
+        assert TestLiveServer._test_settings_before_run is True
+        assert '%s.%s' % (
+            settings.__class__.__module__,
+            settings.__class__.__name__) == 'django.conf.Settings'
+        if django.VERSION >= (1, 11):
+            assert settings.ALLOWED_HOSTS == ['testserver']
+        else:
+            assert settings.ALLOWED_HOSTS == ['*']
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():

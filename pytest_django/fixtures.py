@@ -340,9 +340,17 @@ def _live_server_helper(request):
     The separate helper is required since live_server can not request
     transactional_db directly since it is session scoped instead of
     function-scoped.
+
+    It will also override settings only for the duration of the test.
     """
-    if 'live_server' in request.funcargnames:
-        getfixturevalue(request, 'transactional_db')
+    if 'live_server' not in request.funcargnames:
+        return
+
+    getfixturevalue(request, 'transactional_db')
+
+    live_server = getfixturevalue(request, 'live_server')
+    live_server._live_server_modified_settings.enable()
+    request.addfinalizer(live_server._live_server_modified_settings.disable)
 
 
 @pytest.fixture(scope='function')
