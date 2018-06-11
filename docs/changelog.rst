@@ -17,6 +17,8 @@ Bug fixes
 
 * Fixed test for classmethod with Django TestCases (#597, #598).
 * Fixed RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
+* Fixed scope of overridden settings with live_server fixture: previously they
+  were visible to following tests (#612).
 
 3.2.1
 -----
