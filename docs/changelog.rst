@@ -1,6 +1,14 @@
 Changelog
 =========
 
+unreleased
+------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Support Django 2.1 (no changes necessary) (#614).
+
 3.3.0 (2018-06-15)
 ------------------
 

@@ -10,6 +10,8 @@ jobs:
     - python: 3.6
       env: TOXENV=py36-dj20-postgres
     - python: 3.6
+      env: TOXENV=py36-dj21-postgres
+    - python: 3.6
       env: TOXENV=py36-dj111-sqlite
 
     - python: 3.5
