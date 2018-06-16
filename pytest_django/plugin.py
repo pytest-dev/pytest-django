@@ -33,7 +33,6 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-from .pytest_compat import getfixturevalue
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
@@ -386,17 +385,17 @@ def _django_db_marker(request):
     if marker:
         transaction = validate_django_db(marker)
         if transaction:
-            getfixturevalue(request, 'transactional_db')
+            request.getfixturevalue('transactional_db')
         else:
-            getfixturevalue(request, 'db')
+            request.getfixturevalue('db')
 
 
 @pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        getfixturevalue(request, 'django_test_environment')
-        getfixturevalue(request, 'django_db_setup')
+        request.getfixturevalue('django_test_environment')
+        request.getfixturevalue('django_db_setup')
 
         django_db_blocker.unblock()
 
