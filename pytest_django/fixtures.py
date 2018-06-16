@@ -11,7 +11,6 @@ from contextlib import contextmanager
 from . import live_server_helper
 
 from .django_compat import is_django_unittest
-from .pytest_compat import getfixturevalue
 
 from .lazy_django import skip_if_no_django
 
@@ -155,7 +154,7 @@ def db(request, django_db_setup, django_db_blocker):
     """
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
-        getfixturevalue(request, 'transactional_db')
+        request.getfixturevalue('transactional_db')
     else:
         _django_db_fixture_helper(False, request, django_db_blocker)
 
@@ -346,9 +345,9 @@ def _live_server_helper(request):
     if 'live_server' not in request.funcargnames:
         return
 
-    getfixturevalue(request, 'transactional_db')
+    request.getfixturevalue('transactional_db')
 
-    live_server = getfixturevalue(request, 'live_server')
+    live_server = request.getfixturevalue('live_server')
     live_server._live_server_modified_settings.enable()
     request.addfinalizer(live_server._live_server_modified_settings.disable)
 
