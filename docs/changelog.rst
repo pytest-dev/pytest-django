@@ -20,6 +20,11 @@ Bug fixes
 * Fixed scope of overridden settings with live_server fixture: previously they
   were visible to following tests (#612).
 
+Compatibility
+^^^^^^^^^^^^^
+
+ * `pytest` requirements changed from >=2.9 to >=3.6
+
 3.2.1
 -----
 
