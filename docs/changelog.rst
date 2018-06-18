@@ -4,6 +4,12 @@ Changelog
 unreleased
 ------------------
 
+Bug fixes
+^^^^^^^^^
+
+* Fixed test for classmethod with Django TestCases again (#618,
+  introduced in #598 (3.3.0)).
+
 Compatibility
 ^^^^^^^^^^^^^
 

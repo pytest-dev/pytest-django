@@ -176,6 +176,34 @@ class TestUnittestMethods:
         ])
         assert result.ret == 0
 
+    def test_setUpClass_mixin(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+            class TheMixin(object):
+                @classmethod
+                def setUpClass(cls):
+                    super(TheMixin, cls).setUpClass()
+
+
+            class TestFoo(TheMixin, TestCase):
+                def test_foo(self):
+                    pass
+
+
+            class TestBar(TheMixin, TestCase):
+                def test_bar(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '-s', '--pdb')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_foo Creating test database for*",
+            "PASSED",
+            "*TestBar::test_bar PASSED*",
+        ])
+        assert result.ret == 0
+
     def test_setUpClass_skip(self, django_testdir):
         django_testdir.create_test_module('''
             from django.test import TestCase
