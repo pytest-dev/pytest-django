@@ -263,7 +263,7 @@ def pytest_configure():
 def _classmethod_is_defined_at_leaf(cls, method_name):
     super_method = None
 
-    for base_cls in cls.__mro__[1:]:
+    for base_cls in cls.__mro__[1:]:  # pragma: no branch
         if hasattr(base_cls, method_name):
             super_method = getattr(base_cls, method_name)
             break
