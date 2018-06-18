@@ -168,7 +168,7 @@ Using the `admin_client` fixture will cause the test to automatically be marked 
 ``django_db`` mark).
 
 ``admin_user`` - an admin user (superuser)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a superuser, with username "admin" and password "password" (in
 case there is no "admin" user yet).
