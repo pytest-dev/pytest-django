@@ -1,7 +1,7 @@
 Changelog
 =========
 
-unreleased
+3.3.1 (2018-06-21)
 ------------------
 
 Bug fixes
