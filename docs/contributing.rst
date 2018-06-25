@@ -124,7 +124,7 @@ Django. The virtualenv can then be activated with::
 
 Then, simply invoke pytest to run the test suite::
 
-    $ pytest --ds=tests.settings_sqlite
+    $ pytest --ds=pytest_django_test.settings_sqlite
 
 
 tox can be used to run the test suite under different configurations by
@@ -137,7 +137,7 @@ writing), running them all will take a long time. All valid configurations can
 be found in `tox.ini`. To test against a few of them, invoke tox with the `-e`
 flag::
 
-    $ tox -e python3.6-1.11-postgres,python2.7-1.11-mysql_innodb
+    $ tox -e py36-dj111-postgres,py27-dj111-mysql_innodb
 
 This will run the tests on Python 3.6/Django 1.11/PostgeSQL and Python
 2.7/Django 1.11/MySQL.
@@ -160,7 +160,7 @@ but please don't include them in your pull requests.
 
 After this short initial setup you're ready to run tests::
 
-    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=tests.postgres_settings
+    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=pytest_django_test.settings_postgres
 
 You should repeat the above step for sqlite and mysql before the next step.
 This step will create a lot of ``.coverage`` files with additional suffixes for
