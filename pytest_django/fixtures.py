@@ -2,6 +2,8 @@
 
 from __future__ import with_statement
 
+__package__ = "pytest_django"
+
 import os
 
 import pytest
