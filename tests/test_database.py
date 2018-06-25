@@ -7,6 +7,12 @@ from django.test.testcases import connections_support_transactions
 from pytest_django_test.app.models import Item
 
 
+def db_supports_reset_sequences():
+    """Return if the current db engine supports `reset_sequences`."""
+    return (connection.features.supports_transactions and
+            connection.features.supports_sequence_reset)
+
+
 def test_noaccess():
     with pytest.raises(pytest.fail.Exception):
         Item.objects.create(name='spam')
@@ -27,20 +33,34 @@ def test_noaccess_fixture(noaccess):
     pass
 
 
-class TestDatabaseFixtures:
-    """Tests for the db and transactional_db fixtures"""
+@pytest.fixture
+def non_zero_sequences_counter(db):
+    """Ensure that the db's internal sequence counter is > 1.
 
-    @pytest.fixture(params=['db', 'transactional_db'])
-    def both_dbs(self, request):
-        if request.param == 'transactional_db':
-            return request.getfixturevalue('transactional_db')
+    This is used to test the `reset_sequences` feature.
+    """
+    item_1 = Item.objects.create(name='item_1')
+    item_2 = Item.objects.create(name='item_2')
+    item_1.delete()
+    item_2.delete()
+
+
+class TestDatabaseFixtures:
+    """Tests for the different database fixtures."""
+
+    @pytest.fixture(params=['db', 'transactional_db', 'django_db_reset_sequences'])
+    def all_dbs(self, request):
+        if request.param == 'django_db_reset_sequences':
+            return request.getfuncargvalue('django_db_reset_sequences')
+        elif request.param == 'transactional_db':
+            return request.getfuncargvalue('transactional_db')
         elif request.param == 'db':
             return request.getfixturevalue('db')
 
-    def test_access(self, both_dbs):
+    def test_access(self, all_dbs):
         Item.objects.create(name='spam')
 
-    def test_clean_db(self, both_dbs):
+    def test_clean_db(self, all_dbs):
         # Relies on the order: test_access created an object
         assert Item.objects.count() == 0
 
@@ -56,8 +76,39 @@ class TestDatabaseFixtures:
 
         assert not connection.in_atomic_block
 
+    def test_transactions_enabled_via_reset_seq(
+            self, django_db_reset_sequences):
+        if not connections_support_transactions():
+            pytest.skip('transactions required for this test')
+
+        assert not connection.in_atomic_block
+
+    def test_django_db_reset_sequences_fixture(
+            self, db, django_testdir, non_zero_sequences_counter):
+
+        if not db_supports_reset_sequences():
+            pytest.skip('transactions and reset_sequences must be supported '
+                        'by the database to run this test')
+
+        # The test runs on a database that already contains objects, so its
+        # id counter is > 1. We check for the ids of newly created objects.
+        django_testdir.create_test_module('''
+            import pytest
+            from .app.models import Item
+
+            def test_django_db_reset_sequences_requested(
+                    django_db_reset_sequences):
+                item = Item.objects.create(name='new_item')
+                assert item.id == 1
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '--reuse-db')
+        result.stdout.fnmatch_lines([
+            "*test_django_db_reset_sequences_requested PASSED*",
+        ])
+
     @pytest.fixture
-    def mydb(self, both_dbs):
+    def mydb(self, all_dbs):
         # This fixture must be able to access the database
         Item.objects.create(name='spam')
 
@@ -69,13 +120,13 @@ class TestDatabaseFixtures:
         item = Item.objects.get(name='spam')
         assert item
 
-    def test_fixture_clean(self, both_dbs):
+    def test_fixture_clean(self, all_dbs):
         # Relies on the order: test_mydb created an object
         # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, request, both_dbs):
+    def fin(self, request, all_dbs):
         # This finalizer must be able to access the database
         request.addfinalizer(lambda: Item.objects.create(name='spam'))
 
@@ -138,6 +189,18 @@ class TestDatabaseMarker:
             pytest.skip('transactions required for this test')
 
         assert not connection.in_atomic_block
+
+    @pytest.mark.django_db
+    def test_reset_sequences_disabled(self, request):
+        marker = request.keywords['django_db']
+
+        assert not marker.kwargs
+
+    @pytest.mark.django_db(reset_sequences=True)
+    def test_reset_sequences_enabled(self, request):
+        marker = request.keywords['django_db']
+
+        assert marker.kwargs['reset_sequences']
 
 
 def test_unittest_interaction(django_testdir):

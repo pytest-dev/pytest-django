@@ -13,10 +13,10 @@ on what marks are and for notes on using_ them.
 .. _using: https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules
 
 
-``pytest.mark.django_db(transaction=False)`` - request database access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``pytest.mark.django_db`` - request database access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. :py:function:: pytest.mark.django_db:
+.. :py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False]):
 
 This is used to mark a test function as requiring the database. It
 will ensure the database is set up correctly for the test. Each test
@@ -25,9 +25,9 @@ of the test. This behavior is the same as Django's standard
 `django.test.TestCase`_ class.
 
 In order for a test to have access to the database it must either
-be marked using the ``django_db`` mark or request one of the ``db``
-or ``transactional_db`` fixtures.  Otherwise the test will fail
-when trying to access the database.
+be marked using the ``django_db`` mark or request one of the ``db``,
+``transactional_db`` or ``reset_sequences_db`` fixtures.  Otherwise the
+test will fail when trying to access the database.
 
 :type transaction: bool
 :param transaction:
@@ -38,14 +38,23 @@ when trying to access the database.
  uses. When ``transaction=True``, the behavior will be the same as
  `django.test.TransactionTestCase`_
 
+
+:type reset_sequences: bool
+:param reset_sequences:
+ The ``reset_sequences`` argument will ask to reset auto increment sequence
+ values (e.g. primary keys) before running the test.  Defaults to
+ ``False``.  Must be used together with ``transaction=True`` to have an
+ effect.  Please be aware that not all databases support this feature.
+ For details see `django.test.TransactionTestCase.reset_sequences`_
+
 .. note::
 
   If you want access to the Django database *inside a fixture*
   this marker will not help even if the function requesting your
   fixture has this marker applied.  To access the database in a
-  fixture, the fixture itself will have to request the ``db`` or
-  ``transactional_db`` fixture.  See below for a description of
-  them.
+  fixture, the fixture itself will have to request the ``db``,
+  ``transactional_db`` or ``reset_sequences_db`` fixture.  See below
+  for a description of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
@@ -54,6 +63,7 @@ when trying to access the database.
  Test classes that subclass Python's ``unittest.TestCase`` need to have the
  marker applied in order to access the database.
 
+.. _django.test.TransactionTestCase.reset_sequences: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#django.test.TransactionTestCase.reset_sequences
 .. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
 .. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
 
@@ -217,8 +227,17 @@ mark to signal it needs the database.
 
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
-database access themselves.  A test function would normally use the
-``pytest.mark.django_db`` mark to signal it needs the database.
+database access themselves.  A test function should normally use the
+``pytest.mark.django_db``  mark with ``transaction=True``.
+
+``reset_sequences_db``
+~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture provides the same transactional database access as
+``transactional_db``, with additional support for reset of auto increment
+sequences (if your database supports it). This is only required for
+fixtures which need database access themselves. A test function should
+normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``reset_sequences=True``.
 
 ``live_server``
 ~~~~~~~~~~~~~~~
@@ -228,6 +247,18 @@ server's URL can be retrieved using the ``live_server.url`` attribute
 or by requesting it's string value: ``unicode(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
+
+.. note:: Combining database access fixtures.
+
+  When using multiple database fixtures together, only one of them is
+  used.  Their order of precedence is as follows (the last one wins):
+
+  * ``db``
+  * ``transactional_db``
+  * ``reset_sequences_db``
+
+  In addition, using ``live_server`` will also trigger transactional
+  database access, if not specified.
 
 ``settings``
 ~~~~~~~~~~~~
