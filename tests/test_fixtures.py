@@ -34,15 +34,15 @@ def test_custom_client_class(django_testdir):
         class CustomClient(Client):
             pass
 
-        @pytest.fixture()
+        @pytest.fixture
         def django_client_class():
             return CustomClient
 
         def test_client(client):
             assert type(client) is CustomClient
     """)
-    r = django_testdir.runpytest_subprocess()
-    assert r.ret == 0
+    result = django_testdir.runpytest_subprocess('--tb=short')
+    assert result.ret == 0
 
 
 @pytest.mark.django_db

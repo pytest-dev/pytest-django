@@ -174,7 +174,7 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     _django_db_fixture_helper(True, request, django_db_blocker)
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def django_client_class():
     """Django test client class."""
     skip_if_no_django()
