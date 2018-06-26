@@ -26,7 +26,7 @@ of the test. This behavior is the same as Django's standard
 
 In order for a test to have access to the database it must either
 be marked using the ``django_db`` mark or request one of the ``db``,
-``transactional_db`` or ``reset_sequences_db`` fixtures.  Otherwise the
+``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
 test will fail when trying to access the database.
 
 :type transaction: bool
@@ -53,7 +53,7 @@ test will fail when trying to access the database.
   this marker will not help even if the function requesting your
   fixture has this marker applied.  To access the database in a
   fixture, the fixture itself will have to request the ``db``,
-  ``transactional_db`` or ``reset_sequences_db`` fixture.  See below
+  ``transactional_db`` or ``django_db_reset_sequences`` fixture.  See below
   for a description of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
@@ -230,8 +230,8 @@ transaction support.  This is only required for fixtures which need
 database access themselves.  A test function should normally use the
 ``pytest.mark.django_db``  mark with ``transaction=True``.
 
-``reset_sequences_db``
-~~~~~~~~~~~~~~~~~~~~~~
+``django_db_reset_sequences``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This fixture provides the same transactional database access as
 ``transactional_db``, with additional support for reset of auto increment
@@ -255,7 +255,7 @@ also directly concatenate a string to form a URL: ``live_server +
 
   * ``db``
   * ``transactional_db``
-  * ``reset_sequences_db``
+  * ``django_db_reset_sequences``
 
   In addition, using ``live_server`` will also trigger transactional
   database access, if not specified.
