@@ -135,13 +135,17 @@ class TestDatabaseFixtures:
         pass
 
 
-class TestDatabaseFixturesBothOrder:
+class TestDatabaseFixturesAllOrder:
     @pytest.fixture
     def fixture_with_db(self, db):
         Item.objects.create(name='spam')
 
     @pytest.fixture
     def fixture_with_transdb(self, transactional_db):
+        Item.objects.create(name='spam')
+
+    @pytest.fixture
+    def fixture_with_reset_sequences(self, django_db_reset_sequences):
         Item.objects.create(name='spam')
 
     def test_trans(self, fixture_with_transdb):
@@ -154,6 +158,10 @@ class TestDatabaseFixturesBothOrder:
         pass
 
     def test_trans_db(self, fixture_with_transdb, fixture_with_db):
+        pass
+
+    def test_reset_sequences(self, fixture_with_reset_sequences,
+                             fixture_with_transdb, fixture_with_db):
         pass
 
 
