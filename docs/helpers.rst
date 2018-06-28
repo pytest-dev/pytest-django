@@ -45,7 +45,7 @@ test will fail when trying to access the database.
  values (e.g. primary keys) before running the test.  Defaults to
  ``False``.  Must be used together with ``transaction=True`` to have an
  effect.  Please be aware that not all databases support this feature.
- For details see `django.test.TransactionTestCase.reset_sequences`_
+ For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
 
 .. note::
 
@@ -63,7 +63,6 @@ test will fail when trying to access the database.
  Test classes that subclass Python's ``unittest.TestCase`` need to have the
  marker applied in order to access the database.
 
-.. _django.test.TransactionTestCase.reset_sequences: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#django.test.TransactionTestCase.reset_sequences
 .. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
 .. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
 
