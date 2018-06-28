@@ -34,25 +34,8 @@ copyright = u'%d, Andreas Pelme and contributors' % datetime.date.today().year
 exclude_patterns = ['_build']
 
 pygments_style = 'sphinx'
-html_theme = 'flask'
-html_theme_options = {
-    # 'index_logo': '',
-    'github_fork': 'pytest-dev/pytest-django',
-}
-html_sidebars = {
-    'index': [
-        'sidebarintro.html',
-        'globaltoc.html',
-        'searchbox.html'
-    ],
-    '**': [
-        'globaltoc.html',
-        'relations.html',
-        'searchbox.html'
-    ]
-}
-# html_style = 'rtd.css'
-# RTD_NEW_THEME = True
+
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
