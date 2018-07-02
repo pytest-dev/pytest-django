@@ -34,7 +34,7 @@ setup(
     extras_require={
         'docs': [
             'sphinx',
-            'Flask-Sphinx-Themes',
+            'sphinx_rtd_theme',
         ]
     },
     classifiers=['Development Status :: 5 - Production/Stable',
