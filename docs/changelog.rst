@@ -9,6 +9,7 @@ Bug fixes
 
 * Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
   which is required with ``pytest --strict`` (#609).
+* Fix another regression with unittest (#624, #625).
 
 3.3.2 (2018-06-21)
 ------------------

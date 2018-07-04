@@ -337,6 +337,34 @@ class TestUnittestMethods:
         ])
         assert result.ret == 0
 
+    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import testcases
+
+            class CMSTestCase(testcases.TestCase):
+                pass
+
+            class FooBarTestCase(testcases.TestCase):
+
+                @classmethod
+                def setUpClass(cls):
+                    print('FooBarTestCase.setUpClass')
+                    super(FooBarTestCase, cls).setUpClass()
+
+            class TestContact(CMSTestCase, FooBarTestCase):
+
+                def test_noop(self):
+                    print('test_noop')
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-q', '-s')
+        result.stdout.fnmatch_lines([
+            "*FooBarTestCase.setUpClass*",
+            "*test_noop*",
+            "1 passed*",
+        ])
+        assert result.ret == 0
+
 
 class TestCaseWithDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures('db')
