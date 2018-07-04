@@ -273,7 +273,7 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
             break
 
     assert super_method is not None, (
-        '%s could not be found in base class' % method_name)
+        '%s could not be found in base classes' % method_name)
 
     method = getattr(cls, method_name)
 
