@@ -165,13 +165,12 @@ class TestUnittestMethods:
                     pass
         ''')
 
-        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result = django_testdir.runpytest_subprocess('-v')
         result.stdout.fnmatch_lines([
-            "*TestFoo::test_shared Creating test database for*",
-            "PASSED",
-            "*TestBar::test_bar1 PASSED",
-            "*TestBar::test_shared PASSED",
-            "*TestBar2::test_bar21 PASSED",
+            "*TestFoo::test_shared PASSED*",
+            "*TestBar::test_bar1 PASSED*",
+            "*TestBar::test_shared PASSED*",
+            "*TestBar2::test_bar21 PASSED*",
             "*TestBar2::test_shared PASSED*",
         ])
         assert result.ret == 0
@@ -196,10 +195,9 @@ class TestUnittestMethods:
                     pass
         ''')
 
-        result = django_testdir.runpytest_subprocess('-v', '-s', '--pdb')
+        result = django_testdir.runpytest_subprocess('-v')
         result.stdout.fnmatch_lines([
-            "*TestFoo::test_foo Creating test database for*",
-            "PASSED",
+            "*TestFoo::test_foo PASSED*",
             "*TestBar::test_bar PASSED*",
         ])
         assert result.ret == 0
@@ -231,13 +229,12 @@ class TestUnittestMethods:
                     pass
         ''')
 
-        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result = django_testdir.runpytest_subprocess('-v')
         result.stdout.fnmatch_lines([
-            "*TestFoo::test_shared Creating test database for*",
-            "SKIPPED",
-            "*TestBar::test_bar1 PASSED",
-            "*TestBar::test_shared PASSED",
-            "*TestBar2::test_bar21 PASSED",
+            "*TestFoo::test_shared SKIPPED*",
+            "*TestBar::test_bar1 PASSED*",
+            "*TestBar::test_shared PASSED*",
+            "*TestBar2::test_bar21 PASSED*",
             "*TestBar2::test_shared PASSED*",
         ])
         assert result.ret == 0
