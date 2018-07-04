@@ -124,6 +124,8 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.project_root = project_root
 
     monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
+    # Unset COV_CORE_SOURCE to not trigger pytest-cov in inner runs.
+    monkeypatch.delenv('COV_CORE_SOURCE', raising=False)
 
     # Monkeypatch runpytest_subprocess to include --strict always.
     orig = testdir.runpytest_subprocess
