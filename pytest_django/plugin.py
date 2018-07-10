@@ -149,7 +149,10 @@ def _setup_django():
     if not django.conf.settings.configured:
         return
 
-    django.setup()
+    import django.apps
+    if not django.apps.apps.ready:
+        django.setup()
+
     _blocking_manager.block()
 
 
