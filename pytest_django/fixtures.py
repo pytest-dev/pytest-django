@@ -15,7 +15,7 @@ from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
 __all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
-           'django_user_model', 'django_username_field',
+           'django_user_model', 'django_username_field', 'django_client_class',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper', 'django_assert_num_queries']
 
@@ -174,14 +174,20 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     _django_db_fixture_helper(True, request, django_db_blocker)
 
 
-@pytest.fixture()
-def client():
-    """A Django test client instance."""
+@pytest.fixture(scope='session')
+def django_client_class():
+    """Django test client class."""
     skip_if_no_django()
 
     from django.test.client import Client
 
-    return Client()
+    return Client
+
+
+@pytest.fixture()
+def client(django_client_class):
+    """A Django test client instance."""
+    return django_client_class()
 
 
 @pytest.fixture()
@@ -219,11 +225,9 @@ def admin_user(db, django_user_model, django_username_field):
 
 
 @pytest.fixture()
-def admin_client(db, admin_user):
+def admin_client(db, django_client_class, admin_user):
     """A Django test client logged in as an admin user."""
-    from django.test.client import Client
-
-    client = Client()
+    client = django_client_class()
     client.login(username=admin_user.username, password='password')
     return client
 

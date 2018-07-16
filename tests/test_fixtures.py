@@ -26,6 +26,25 @@ def test_client(client):
     assert isinstance(client, Client)
 
 
+def test_custom_client_class(django_testdir):
+    django_testdir.makepyfile("""
+        import pytest
+        from django.test.client import Client
+
+        class CustomClient(Client):
+            pass
+
+        @pytest.fixture
+        def django_client_class():
+            return CustomClient
+
+        def test_client(client):
+            assert type(client) is CustomClient
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short')
+    assert result.ret == 0
+
+
 @pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)

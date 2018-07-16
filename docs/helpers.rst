@@ -123,6 +123,29 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
+``django_client_class`` - ``django.test.Client.__class__``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Type of a `django.test.Client`_. In case you use a custom client class this can be overridden.
+
+.. _django.test.Client: https://docs.djangoproject.com/en/dev/topics/testing/tools/#the-test-client
+
+Example
+"""""""
+
+::
+
+    import pytest
+    from django.test.client import Client
+
+    class CustomClient(Client):
+        pass
+
+    @pytest.fixture()
+    def django_client_class():
+        return CustomClient
+
+
 ``client`` - ``django.test.Client``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
