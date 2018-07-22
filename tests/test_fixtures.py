@@ -222,6 +222,65 @@ class TestSettings:
         ])
 
 
+@pytest.mark.django_project(extra_settings="""
+    INSTALLED_APPS = ['tpkg.app']
+""")
+class TestChecks:
+
+    def test_checks_are_run(self, django_testdir):
+        django_testdir.create_app_file("""
+            from django.core.checks import Error, register
+
+            @register()
+            def succeed(app_configs, **kwargs):
+                succeed.did_run = True
+                return []
+            """, '__init__.py')
+        django_testdir.makepyfile("""
+            from tpkg.app import succeed
+
+            def test_simple(db):
+                assert getattr(succeed, 'did_run', None) is True
+            """)
+
+        result = django_testdir.runpytest_subprocess('-s')
+        assert result.ret == 0
+
+    def test_failing_checks_fail_tests(self, django_testdir):
+        django_testdir.create_app_file("""
+            from django.core.checks import Error, register
+
+            @register()
+            def fail(app_configs, **kwargs):
+                return [Error('My failure message', id='test.001')]
+            """, '__init__.py')
+        django_testdir.makepyfile("""
+            def test_simple(db):
+                assert True
+            """)
+
+        result = django_testdir.runpytest_subprocess('-s')
+        assert result.ret != 0
+        result.stdout.fnmatch_lines(['*My failure message*'])
+
+    def test_failing_checks_fail_tests_on_xdist(self, django_testdir):
+        django_testdir.create_app_file("""
+            from django.core.checks import Error, register
+
+            @register()
+            def fail(app_configs, **kwargs):
+                return [Error('My failure message', id='test.001')]
+            """, '__init__.py')
+        django_testdir.makepyfile("""
+            def test_simple(db):
+                assert True
+            """)
+
+        result = django_testdir.runpytest_subprocess('-s', '-n2')
+        assert result.ret != 0
+        result.stdout.fnmatch_lines(['*My failure message*'])
+
+
 class TestLiveServer:
     def test_settings_before(self):
         from django.conf import settings

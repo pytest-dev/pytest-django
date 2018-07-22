@@ -3,10 +3,11 @@
 from __future__ import with_statement
 
 import os
+import sys
+from contextlib import contextmanager
+from io import StringIO
 
 import pytest
-
-from contextlib import contextmanager
 
 from . import live_server_helper
 
@@ -96,6 +97,8 @@ def django_db_setup(
             **setup_databases_args
         )
 
+        run_checks(request)
+
     def teardown_database():
         with django_db_blocker.unblock():
             teardown_databases(
@@ -105,6 +108,35 @@ def django_db_setup(
 
     if not django_db_keepdb:
         request.addfinalizer(teardown_database)
+
+
+def run_checks(request):
+    from django.core.management import call_command
+    from django.core.management.base import SystemCheckError
+
+    config = request.config
+
+    # Only run once per process
+    if getattr(config, '_pytest_django_checks_ran', False):
+        return
+    config._pytest_django_checks_ran = True
+
+    out = StringIO()
+    try:
+        call_command('check', stdout=out, stderr=out)
+    except SystemCheckError as exc:
+        config._pytest_django_checks_exc = exc
+
+        if hasattr(request.config, 'slaveinput'):
+            # Kill the xdist test process horribly
+            # N.B. 'shouldstop' may be obeyed properly in the future as hinted at in
+            # https://github.com/pytest-dev/pytest-xdist/commit/e8fa73719662d1be5074a0750329fe0c35583484
+            print(exc.args[0])
+            sys.exit(1)
+        else:
+            # Ensure we get the EXIT_TESTSFAILED exit code
+            request.session.testsfailed += 1
+            request.session.shouldstop = True
 
 
 def _django_db_fixture_helper(transactional, request, django_db_blocker):
