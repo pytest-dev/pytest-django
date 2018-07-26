@@ -268,12 +268,12 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
     super_method = None
 
     for base_cls in cls.__mro__[1:]:  # pragma: no branch
-        if hasattr(base_cls, method_name):
-            super_method = getattr(base_cls, method_name)
+        super_method = base_cls.__dict__.get(method_name)
+        if super_method is not None:
             break
 
     assert super_method is not None, (
-        '%s could not be found in base class' % method_name)
+        '%s could not be found in base classes' % method_name)
 
     method = getattr(cls, method_name)
 
@@ -297,7 +297,7 @@ def _disable_class_methods(cls):
 
     _disabled_classmethods[cls] = (
         # Get the classmethod object (not the resulting bound method),
-        # otherwise inheritence will be broken when restoring.
+        # otherwise inheritance will be broken when restoring.
         cls.__dict__.get('setUpClass'),
         _classmethod_is_defined_at_leaf(cls, 'setUpClass'),
         cls.__dict__.get('tearDownClass'),
