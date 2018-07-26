@@ -360,14 +360,16 @@ def _assert_num_queries(config, num, exact=True):
     from django.test.utils import CaptureQueriesContext
     verbose = config.getoption('verbose') > 0
     with CaptureQueriesContext(connection) as context:
-        yield
+        yield context
         num_queries = len(context)
         failed = num != num_queries if exact else num < num_queries
         if failed:
             msg = "Expected to perform {} queries {}{}".format(
                 num,
                 '' if exact else 'or less ',
-                'but {} were done'.format(num_queries)
+                'but {} done'.format(
+                    num_queries == 1 and '1 was' or '%d were' % (num_queries,)
+                )
             )
             if verbose:
                 sqls = (q['sql'] for q in context.captured_queries)

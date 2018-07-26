@@ -259,10 +259,12 @@ Example
 ::
 
     def test_queries(django_assert_num_queries):
-        with django_assert_num_queries(3):
+        with django_assert_num_queries(3) as captured:
             Item.objects.create('foo')
             Item.objects.create('bar')
             Item.objects.create('baz')
+
+        assert 'foo' in captured.captured_queries[0]['sql']
 
 
 ``django_assert_max_num_queries``

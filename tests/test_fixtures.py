@@ -59,9 +59,13 @@ def test_django_assert_num_queries_db(django_assert_num_queries):
         Item.objects.create(name='bar')
         Item.objects.create(name='baz')
 
-    with pytest.raises(pytest.fail.Exception):
-        with django_assert_num_queries(2):
+    with pytest.raises(pytest.fail.Exception) as excinfo:
+        with django_assert_num_queries(2) as captured:
             Item.objects.create(name='quux')
+    assert excinfo.value.args == (
+        'Expected to perform 2 queries but 1 was done '
+        '(add -v option to show queries)',)
+    assert len(captured.captured_queries) == 1
 
 
 @pytest.mark.django_db
@@ -70,11 +74,17 @@ def test_django_assert_max_num_queries_db(django_assert_max_num_queries):
         Item.objects.create(name='1-foo')
         Item.objects.create(name='2-bar')
 
-    with pytest.raises(pytest.fail.Exception):
-        with django_assert_max_num_queries(2):
+    with pytest.raises(pytest.fail.Exception) as excinfo:
+        with django_assert_max_num_queries(2) as captured:
             Item.objects.create(name='1-foo')
             Item.objects.create(name='2-bar')
             Item.objects.create(name='3-quux')
+
+    assert excinfo.value.args == (
+        'Expected to perform 2 queries or less but 3 were done '
+        '(add -v option to show queries)',)
+    assert len(captured.captured_queries) == 3
+    assert '1-foo' in captured.captured_queries[0]['sql']
 
 
 @pytest.mark.django_db(transaction=True)
