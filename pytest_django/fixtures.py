@@ -355,9 +355,12 @@ def _live_server_helper(request):
 
 
 @contextmanager
-def _assert_num_queries(config, num, exact=True):
-    from django.db import connection
+def _assert_num_queries(config, num, exact=True, connection=None):
     from django.test.utils import CaptureQueriesContext
+
+    if connection is None:
+        from django.db import connection
+
     verbose = config.getoption('verbose') > 0
     with CaptureQueriesContext(connection) as context:
         yield context

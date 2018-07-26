@@ -138,6 +138,21 @@ def test_django_assert_num_queries_output_verbose(django_testdir):
     assert result.ret == 1
 
 
+@pytest.mark.django_db
+def test_django_assert_num_queries_db_connection(django_assert_num_queries):
+    from django.db import connection
+
+    with django_assert_num_queries(1, connection=connection):
+        Item.objects.create(name='foo')
+
+    with django_assert_num_queries(1, connection=None):
+        Item.objects.create(name='foo')
+
+    with pytest.raises(AttributeError):
+        with django_assert_num_queries(1, connection=False):
+            pass
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 

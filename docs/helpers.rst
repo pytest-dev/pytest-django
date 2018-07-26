@@ -249,8 +249,13 @@ Example
 ``django_assert_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. fixture:: django_assert_num_queries
+
 This fixture allows to check for an expected number of DB queries.
-It currently only supports the default database.
+
+It wraps `django.test.utils.CaptureQueriesContext`.  A non-default DB
+connection can be passed in using the `connection` keyword argument, and it
+will yield the wrapped CaptureQueriesContext instance.
 
 
 Example
@@ -270,8 +275,11 @@ Example
 ``django_assert_max_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. fixture:: django_assert_max_num_queries
+
 This fixture allows to check for an expected maximum number of DB queries.
-It currently only supports the default database.
+
+It is a specialized version of :fixture:`django_assert_num_queries`.
 
 
 Example
