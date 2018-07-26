@@ -33,13 +33,19 @@ setup(
     install_requires=[
         'pytest>=3.6',
         'pathlib;python_version<"3.4"',
-        'six',
     ],
     extras_require={
         'docs': [
             'sphinx',
             'sphinx_rtd_theme',
-        ]
+        ],
+        'testing': [
+            'pytest>=3.6',
+            'Django',
+            'django-configurations==2.0',
+            'pytest-xdist==1.15',
+            'six',
+        ],
     },
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
