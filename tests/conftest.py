@@ -128,9 +128,9 @@ def django_testdir(request, testdir, monkeypatch):
     # Monkeypatch runpytest_subprocess to include --strict always.
     orig = testdir.runpytest_subprocess
 
-    def runpytest_subprocess(self, *args, **kwargs):
+    def runpytest_subprocess(*args, **kwargs):
         args = ('--strict',) + args
-        return orig(self, *args, **kwargs)
+        return orig(*args, **kwargs)
     testdir.runpytest_subprocess = runpytest_subprocess
 
     return testdir
