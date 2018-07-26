@@ -1,7 +1,7 @@
 Changelog
 =========
 
-unreleased
+3.3.3 (2018-07-26)
 ------------------
 
 Bug fixes
@@ -9,7 +9,13 @@ Bug fixes
 
 * Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
   which is required with ``pytest --strict`` (#609).
-* Fix another regression with unittest (#624, #625).
+* Fixed another regression with unittest (#624, #625).
+
+Docs
+^^^^
+
+* Use sphinx_rtf_theme (#621).
+* Minor fixes.
 
 3.3.2 (2018-06-21)
 ------------------
