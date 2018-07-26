@@ -5,9 +5,11 @@ dist: trusty
 jobs:
   fast_finish: true
   include:
+    # py37 is not available in trusty dist, and requires sudo=true with xenial.
     - python: 3.7
       env: TOXENV=py37-dj21-postgres
       dist: xenial
+      sudo: true
 
     - python: 3.6
       env: TOXENV=py36-djmaster-postgres
