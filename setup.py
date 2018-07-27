@@ -30,12 +30,22 @@ setup(
     long_description=read('README.rst'),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     setup_requires=['setuptools_scm>=1.11.1'],
-    install_requires=['pytest>=3.6'],
+    install_requires=[
+        'pytest>=3.6',
+        'pathlib;python_version<"3.4"',
+    ],
     extras_require={
         'docs': [
             'sphinx',
             'sphinx_rtd_theme',
-        ]
+        ],
+        'testing': [
+            'pytest>=3.6',
+            'Django',
+            'django-configurations==2.0',
+            'pytest-xdist==1.15',
+            'six',
+        ],
     },
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Framework :: Django',
