@@ -1,6 +1,16 @@
 Changelog
 =========
 
+unreleased
+------------------
+
+Features
+^^^^^^^^
+
+* Added new fixture :fixture:`django_assert_max_num_queries` (#547).
+* Assed support for ``connection`` and returning the wrapped context manager
+  with :fixture:`django_assert_num_queries` (#547).
+
 3.3.3 (2018-07-26)
 ------------------
 
