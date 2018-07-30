@@ -8,8 +8,10 @@ Features
 ^^^^^^^^
 
 * Added new fixture :fixture:`django_assert_max_num_queries` (#547).
-* Assed support for ``connection`` and returning the wrapped context manager
+* Added support for ``connection`` and returning the wrapped context manager
   with :fixture:`django_assert_num_queries` (#547).
+* Added support for resetting sequences via
+  :fixture:`django_db_reset_sequences` (#619).
 
 3.3.3 (2018-07-26)
 ------------------
