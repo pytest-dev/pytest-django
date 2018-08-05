@@ -44,4 +44,15 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'django': ('https://docs.djangoproject.com/en/dev/',
                'https://docs.djangoproject.com/en/dev/_objects/'),
+    'pytest': ('https://docs.pytest.org/en/latest/', None),
 }
+
+
+def setup(app):
+    # Allow linking to pytest's confvals.
+    app.add_description_unit(
+        "confval",
+        "pytest-confval",
+        objname="configuration value",
+        indextemplate="pair: %s; configuration value",
+    )
