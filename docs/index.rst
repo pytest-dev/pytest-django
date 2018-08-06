@@ -40,7 +40,6 @@ Running the test suite with pytest offers some features that are not present in 
 
 * Less boilerplate: no need to import unittest, create a subclass with methods. Just write tests as regular functions.
 * `Manage test dependencies with fixtures`_.
-* Database re-use: no need to re-create the test database for every test run.
 * Run tests in multiple processes for increased speed.
 * There are a lot of other nice plugins available for pytest.
 * Easy switching: Existing unittest-style tests will still work without any modifications.
