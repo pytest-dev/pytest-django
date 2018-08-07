@@ -6,6 +6,8 @@ fixtures are tested in test_database.
 
 from __future__ import with_statement
 
+import socket
+
 import pytest
 
 from django.db import connection, transaction
@@ -57,13 +59,37 @@ def test_django_assert_num_queries_db(django_assert_num_queries):
         Item.objects.create(name='bar')
         Item.objects.create(name='baz')
 
-    with pytest.raises(pytest.fail.Exception):
-        with django_assert_num_queries(2):
+    with pytest.raises(pytest.fail.Exception) as excinfo:
+        with django_assert_num_queries(2) as captured:
             Item.objects.create(name='quux')
+    assert excinfo.value.args == (
+        'Expected to perform 2 queries but 1 was done '
+        '(add -v option to show queries)',)
+    assert len(captured.captured_queries) == 1
+
+
+@pytest.mark.django_db
+def test_django_assert_max_num_queries_db(django_assert_max_num_queries):
+    with django_assert_max_num_queries(2):
+        Item.objects.create(name='1-foo')
+        Item.objects.create(name='2-bar')
+
+    with pytest.raises(pytest.fail.Exception) as excinfo:
+        with django_assert_max_num_queries(2) as captured:
+            Item.objects.create(name='1-foo')
+            Item.objects.create(name='2-bar')
+            Item.objects.create(name='3-quux')
+
+    assert excinfo.value.args == (
+        'Expected to perform 2 queries or less but 3 were done '
+        '(add -v option to show queries)',)
+    assert len(captured.captured_queries) == 3
+    assert '1-foo' in captured.captured_queries[0]['sql']
 
 
 @pytest.mark.django_db(transaction=True)
-def test_django_assert_num_queries_transactional_db(transactional_db, django_assert_num_queries):
+def test_django_assert_num_queries_transactional_db(
+        transactional_db, django_assert_num_queries):
     with transaction.atomic():
 
         with django_assert_num_queries(3):
@@ -110,6 +136,21 @@ def test_django_assert_num_queries_output_verbose(django_testdir):
         '*========*',
     ])
     assert result.ret == 1
+
+
+@pytest.mark.django_db
+def test_django_assert_num_queries_db_connection(django_assert_num_queries):
+    from django.db import connection
+
+    with django_assert_num_queries(1, connection=connection):
+        Item.objects.create(name='foo')
+
+    with django_assert_num_queries(1, connection=None):
+        Item.objects.create(name='foo')
+
+    with pytest.raises(AttributeError):
+        with django_assert_num_queries(1, connection=False):
+            pass
 
 
 class TestSettings:
@@ -221,8 +262,33 @@ class TestSettings:
 
 
 class TestLiveServer:
+    def test_settings_before(self):
+        from django.conf import settings
+
+        assert '%s.%s' % (
+            settings.__class__.__module__,
+            settings.__class__.__name__) == 'django.conf.Settings'
+        TestLiveServer._test_settings_before_run = True
+
     def test_url(self, live_server):
         assert live_server.url == force_text(live_server)
+
+    def test_change_settings(self, live_server, settings):
+        assert live_server.url == force_text(live_server)
+
+    def test_settings_restored(self):
+        """Ensure that settings are restored after test_settings_before."""
+        import django
+        from django.conf import settings
+
+        assert TestLiveServer._test_settings_before_run is True
+        assert '%s.%s' % (
+            settings.__class__.__module__,
+            settings.__class__.__name__) == 'django.conf.Settings'
+        if django.VERSION >= (1, 11):
+            assert settings.ALLOWED_HOSTS == ['testserver']
+        else:
+            assert settings.ALLOWED_HOSTS == ['*']
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():
@@ -310,8 +376,6 @@ class TestLiveServer:
         result.stdout.fnmatch_lines(['*test_a*PASSED*'])
         assert result.ret == 0
 
-    @pytest.mark.skipif(get_django_version() < (1, 7),
-                        reason="Django >= 1.7 required")
     def test_serve_static_dj17_without_staticfiles_app(self, live_server,
                                                        settings):
         """
@@ -323,17 +387,34 @@ class TestLiveServer:
 
     @pytest.mark.skipif(get_django_version() < (1, 11),
                         reason='Django >= 1.11 required')
-    def test_specified_port_error_message_django_111(self, django_testdir):
+    def test_specified_port_range_error_message_django_111(self, django_testdir):
         django_testdir.create_test_module("""
         def test_with_live_server(live_server):
             pass
         """)
 
-        result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234')
+        result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234-2345')
         result.stdout.fnmatch_lines([
-            '*Specifying a live server port is not supported in Django 1.11. This '
+            '*Specifying multiple live server ports is not supported in Django 1.11. This '
             'will be an error in a future pytest-django release.*'
         ])
+
+    @pytest.mark.skipif(get_django_version() < (1, 11, 2),
+                        reason='Django >= 1.11.2 required')
+    def test_specified_port_django_111(self, django_testdir):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.bind(('', 0))
+            __, port = sock.getsockname()
+        finally:
+            sock.close()
+
+        django_testdir.create_test_module("""
+        def test_with_live_server(live_server):
+            assert live_server.port == %d
+        """ % port)
+
+        django_testdir.runpytest_subprocess('--liveserver=localhost:%s' % port)
 
 
 @pytest.mark.django_project(extra_settings="""
@@ -482,3 +563,65 @@ def test_mail(mailoutbox):
 
 def test_mail_again(mailoutbox):
     test_mail(mailoutbox)
+
+
+def test_mail_message_uses_mocked_DNS_NAME(mailoutbox):
+    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    m = mailoutbox[0]
+    message = m.message()
+    assert message['Message-ID'].endswith('@fake-tests.example.com>')
+
+
+def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
+    django_testdir.create_test_module("""
+        from django.core import mail
+        import pytest
+
+        @pytest.fixture
+        def django_mail_dnsname():
+            return 'from.django_mail_dnsname'
+
+        def test_mailbox_inner(mailoutbox):
+            mail.send_mail('subject', 'body', 'from@example.com',
+                           ['to@example.com'])
+            m = mailoutbox[0]
+            message = m.message()
+            assert message['Message-ID'].endswith('@from.django_mail_dnsname>')
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
+    result.stdout.fnmatch_lines(['*test_mailbox_inner*PASSED*'])
+    assert result.ret == 0
+
+
+def test_mail_message_dns_patching_can_be_skipped(django_testdir):
+    django_testdir.create_test_module("""
+        from django.core import mail
+        import pytest
+
+        @pytest.fixture
+        def django_mail_dnsname():
+            raise Exception('should not get called')
+
+        @pytest.fixture
+        def django_mail_patch_dns():
+            print('\\ndjango_mail_dnsname_mark')
+
+        def test_mailbox_inner(mailoutbox, monkeypatch):
+            def mocked_make_msgid(*args, **kwargs):
+                mocked_make_msgid.called += [(args, kwargs)]
+            mocked_make_msgid.called = []
+
+            monkeypatch.setattr(mail.message, 'make_msgid', mocked_make_msgid)
+            mail.send_mail('subject', 'body', 'from@example.com',
+                           ['to@example.com'])
+            m = mailoutbox[0]
+            assert len(mocked_make_msgid.called) == 1
+
+            assert mocked_make_msgid.called[0][1]['domain'] is mail.DNS_NAME
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-s')
+    result.stdout.fnmatch_lines([
+        '*test_mailbox_inner*',
+        'django_mail_dnsname_mark',
+        'PASSED*'])
+    assert result.ret == 0

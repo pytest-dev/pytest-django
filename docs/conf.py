@@ -14,6 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "_ext"))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
     'pytestdocs',
 ]
 
@@ -33,30 +34,25 @@ copyright = u'%d, Andreas Pelme and contributors' % datetime.date.today().year
 exclude_patterns = ['_build']
 
 pygments_style = 'sphinx'
-html_theme = 'flask'
-html_theme_options = {
-    # 'index_logo': '',
-    'github_fork': 'pytest-dev/pytest-django',
-}
-html_sidebars = {
-    'index': [
-        'sidebarintro.html',
-        'globaltoc.html',
-        'searchbox.html'
-    ],
-    '**': [
-        'globaltoc.html',
-        'relations.html',
-        'searchbox.html'
-    ]
-}
-# html_style = 'rtd.css'
-# RTD_NEW_THEME = True
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_theme = 'sphinx_rtd_theme'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pytest-djangodoc'
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'django': ('https://docs.djangoproject.com/en/dev/',
+               'https://docs.djangoproject.com/en/dev/_objects/'),
+    'pytest': ('https://docs.pytest.org/en/latest/', None),
+}
+
+
+def setup(app):
+    # Allow linking to pytest's confvals.
+    app.add_description_unit(
+        "confval",
+        "pytest-confval",
+        objname="configuration value",
+        indextemplate="pair: %s; configuration value",
+    )

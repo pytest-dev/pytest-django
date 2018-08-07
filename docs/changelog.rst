@@ -1,6 +1,102 @@
 Changelog
 =========
 
+unreleased
+------------------
+
+Features
+^^^^^^^^
+
+* Added new fixture :fixture:`django_assert_max_num_queries` (#547).
+* Added support for ``connection`` and returning the wrapped context manager
+  with :fixture:`django_assert_num_queries` (#547).
+* Added support for resetting sequences via
+  :fixture:`django_db_reset_sequences` (#619).
+
+3.3.3 (2018-07-26)
+------------------
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
+  which is required with ``pytest --strict`` (#609).
+* Fixed another regression with unittest (#624, #625).
+
+Docs
+^^^^
+
+* Use sphinx_rtf_theme (#621).
+* Minor fixes.
+
+3.3.2 (2018-06-21)
+------------------
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed test for classmethod with Django TestCases again (#618,
+  introduced in #598 (3.3.0)).
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Support Django 2.1 (no changes necessary) (#614).
+
+3.3.0 (2018-06-15)
+------------------
+
+Features
+^^^^^^^^
+
+* Added new fixtures ``django_mail_dnsname`` and ``django_mail_patch_dns``,
+  used by ``mailoutbox`` to monkeypatch the ``DNS_NAME`` used in
+  :py:mod:`django.core.mail` to improve performance and
+  reproducibility.
+
+Bug fixes
+^^^^^^^^^
+
+* Fixed test for classmethod with Django TestCases (#597, #598).
+* Fixed RemovedInPytest4Warning: MarkInfo objects are deprecated (#596, #603)
+* Fixed scope of overridden settings with live_server fixture: previously they
+  were visible to following tests (#612).
+
+Compatibility
+^^^^^^^^^^^^^
+
+* The required `pytest` version changed from >=2.9 to >=3.6.
+
+3.2.1
+-----
+
+* Fixed automatic deployment to PyPI.
+
+3.2.0
+-----
+
+Features
+^^^^^^^^
+
+* Added new fixture `django_assert_num_queries` for testing the number of
+  database queries (#387).
+* `--fail-on-template-vars` has been improved and should now return
+  full/absolute path (#470).
+* Support for setting the live server port (#500).
+* unittest: help with setUpClass not being a classmethod (#544).
+
+Bug fixes
+^^^^^^^^^
+
+* Fix --reuse-db and --create-db not working together (#411).
+* Numerous fixes in the documentation. These should not go unnoticed 🌟
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Support for Django 2.0 has been added.
+* Support for Django before 1.8 has been dropped.
+
 3.1.2
 -----
 
@@ -94,7 +190,7 @@ Compatibility
   database access was prevented on the cursor level. To be safer and prevent
   more cases, it is now prevented at the connection level. If you previously
   had tests which interacted with the databases without a database cursor, you
-  will need to mark them with the :func:`pytest.mark.django_db` marker or
+  will need to mark them with the ``pytest.mark.django_db`` marker or
   request the ``db`` fixture.
 
 * The previously undocumented internal fixtures ``_django_db_setup``,

@@ -5,7 +5,7 @@ class LiveServer(object):
     """The liveserver fixture
 
     This is the object that the ``live_server`` fixture returns.
-    The ``live_server`` fixture that handles creation and stopping.
+    The ``live_server`` fixture handles creation and stopping.
     """
 
     def __init__(self, addr):
@@ -38,13 +38,17 @@ class LiveServer(object):
             self.thread = LiveServerThread(host, possible_ports,
                                            **liveserver_kwargs)
         else:
-            host = addr
+            try:
+                host, port = addr.split(':')
+            except ValueError:
+                host = addr
+            else:
+                liveserver_kwargs['port'] = int(port)
             self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
             ALLOWED_HOSTS={'append': host},
         )
-        self._live_server_modified_settings.enable()
 
         self.thread.daemon = True
         self.thread.start()
@@ -55,11 +59,8 @@ class LiveServer(object):
 
     def stop(self):
         """Stop the server"""
-        # .terminate() was added in Django 1.7
-        terminate = getattr(self.thread, 'terminate', lambda: None)
-        terminate()
+        self.thread.terminate()
         self.thread.join()
-        self._live_server_modified_settings.disable()
 
     @property
     def url(self):

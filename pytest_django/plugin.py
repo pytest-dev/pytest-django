@@ -11,14 +11,16 @@ import os
 import sys
 import types
 
-import py
+import pathlib
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
 from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import django_assert_max_num_queries  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_createdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
@@ -29,18 +31,19 @@ from .fixtures import db  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-from .pytest_compat import getfixturevalue
 
-from .lazy_django import (django_settings_is_configured,
-                          get_django_version, skip_if_no_django)
+from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 SETTINGS_MODULE_ENV = 'DJANGO_SETTINGS_MODULE'
 CONFIGURATION_ENV = 'DJANGO_CONFIGURATION'
 INVALID_TEMPLATE_VARS_ENV = 'FAIL_INVALID_TEMPLATE_VARS'
+
+PY2 = sys.version_info[0] == 2
 
 
 # ############### pytest hooks ################
@@ -63,10 +66,10 @@ def pytest_addoption(parser):
                      help='Set DJANGO_CONFIGURATION.')
     group._addoption('--nomigrations', '--no-migrations',
                      action='store_true', dest='nomigrations', default=False,
-                     help='Disable Django 1.7+ migrations on test setup')
+                     help='Disable Django migrations on test setup')
     group._addoption('--migrations',
                      action='store_false', dest='nomigrations', default=False,
-                     help='Enable Django 1.7+ migrations on test setup')
+                     help='Enable Django migrations on test setup')
     parser.addini(CONFIGURATION_ENV,
                   'django-configurations class to use by pytest-django.')
     group._addoption('--liveserver', default=None,
@@ -84,13 +87,6 @@ def pytest_addoption(parser):
     parser.addini(INVALID_TEMPLATE_VARS_ENV,
                   'Fail for invalid variables in templates.',
                   type='bool', default=False)
-
-
-def _exists(path, ignore=EnvironmentError):
-    try:
-        return path.check()
-    except ignore:
-        return False
 
 
 PROJECT_FOUND = ('pytest-django found a Django project in %s '
@@ -119,21 +115,28 @@ def _handle_import_error(extra_message):
 
 
 def _add_django_project_to_path(args):
-    args = [x for x in args if not str(x).startswith("-")]
+    def is_django_project(path):
+        return path.is_dir() and (path / 'manage.py').exists()
 
-    if not args:
-        args = [py.path.local()]
+    def find_django_path(args):
+        args = [pathlib.Path(x) for x in args if not str(x).startswith("-")]
+        args = [p for p in args if p.is_dir()]
 
-    for arg in args:
-        arg = py.path.local(arg)
+        if not args:
+            args = [pathlib.Path.cwd()]
 
-        for base in arg.parts(reverse=True):
-            manage_py_try = base.join('manage.py')
+        for arg in args:
+            if is_django_project(arg):
+                return arg
+            for parent in arg.parents:
+                if is_django_project(parent):
+                    return parent
+        return None
 
-            if _exists(manage_py_try):
-                sys.path.insert(0, str(base))
-                return PROJECT_FOUND % base
-
+    project_dir = find_django_path(args)
+    if project_dir:
+        sys.path.insert(0, str(project_dir))
+        return PROJECT_FOUND % project_dir
     return PROJECT_NOT_FOUND
 
 
@@ -147,7 +150,10 @@ def _setup_django():
     if not django.conf.settings.configured:
         return
 
-    django.setup()
+    import django.apps
+    if not django.apps.apps.ready:
+        django.setup()
+
     _blocking_manager.block()
 
 
@@ -182,6 +188,10 @@ def pytest_load_initial_conftests(early_config, parser, args):
         'the `urls` attribute of Django `TestCase` objects.  *modstr* is '
         'a string specifying the module of a URL config, e.g. '
         '"my_app.test_urls".')
+    early_config.addinivalue_line(
+        'markers',
+        'ignore_template_errors(): ignore errors from invalid template '
+        'variables (if --fail-on-template-vars is used).')
 
     options = parser.parse_known_args(args)
 
@@ -259,17 +269,28 @@ def pytest_configure():
     _setup_django()
 
 
-def _method_is_defined_at_leaf(cls, method_name):
+def _classmethod_is_defined_at_leaf(cls, method_name):
     super_method = None
 
-    for base_cls in cls.__bases__:
-        if hasattr(base_cls, method_name):
-            super_method = getattr(base_cls, method_name)
+    for base_cls in cls.__mro__[1:]:  # pragma: no branch
+        super_method = base_cls.__dict__.get(method_name)
+        if super_method is not None:
+            break
 
     assert super_method is not None, (
-        '%s could not be found in base class' % method_name)
+        '%s could not be found in base classes' % method_name)
 
-    return getattr(cls, method_name).__func__ is not super_method.__func__
+    method = getattr(cls, method_name)
+
+    try:
+        f = method.__func__
+    except AttributeError:
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    if PY2 and not (inspect.ismethod(method) and
+                    inspect.isclass(method.__self__) and
+                    issubclass(cls, method.__self__)):
+        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    return f is not super_method.__func__
 
 
 _disabled_classmethods = {}
@@ -280,10 +301,12 @@ def _disable_class_methods(cls):
         return
 
     _disabled_classmethods[cls] = (
-        cls.setUpClass,
-        _method_is_defined_at_leaf(cls, 'setUpClass'),
-        cls.tearDownClass,
-        _method_is_defined_at_leaf(cls, 'tearDownClass'),
+        # Get the classmethod object (not the resulting bound method),
+        # otherwise inheritance will be broken when restoring.
+        cls.__dict__.get('setUpClass'),
+        _classmethod_is_defined_at_leaf(cls, 'setUpClass'),
+        cls.__dict__.get('tearDownClass'),
+        _classmethod_is_defined_at_leaf(cls, 'tearDownClass'),
     )
 
     cls.setUpClass = types.MethodType(lambda cls: None, cls)
@@ -365,24 +388,26 @@ def django_db_blocker():
 def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
-    This will dynamically request the ``db`` or ``transactional_db``
-    fixtures as required by the django_db marker.
+    This will dynamically request the ``db``, ``transactional_db`` or
+    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
     """
-    marker = request.keywords.get('django_db', None)
+    marker = request.node.get_closest_marker('django_db')
     if marker:
-        validate_django_db(marker)
-        if marker.transaction:
-            getfixturevalue(request, 'transactional_db')
+        transaction, reset_sequences = validate_django_db(marker)
+        if reset_sequences:
+            request.getfixturevalue('django_db_reset_sequences')
+        elif transaction:
+            request.getfixturevalue('transactional_db')
         else:
-            getfixturevalue(request, 'db')
+            request.getfixturevalue('db')
 
 
 @pytest.fixture(autouse=True, scope='class')
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if django_settings_is_configured() and is_django_unittest(request):
-        getfixturevalue(request, 'django_test_environment')
-        getfixturevalue(request, 'django_db_setup')
+        request.getfixturevalue('django_test_environment')
+        request.getfixturevalue('django_db_setup')
 
         django_db_blocker.unblock()
 
@@ -426,7 +451,7 @@ def _dj_autoclear_mailbox():
 
 
 @pytest.fixture(scope='function')
-def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
+def mailoutbox(monkeypatch, django_mail_patch_dns, _dj_autoclear_mailbox):
     if not django_settings_is_configured():
         return
 
@@ -434,10 +459,21 @@ def mailoutbox(monkeypatch, _dj_autoclear_mailbox):
     return mail.outbox
 
 
+@pytest.fixture(scope='function')
+def django_mail_patch_dns(monkeypatch, django_mail_dnsname):
+    from django.core import mail
+    monkeypatch.setattr(mail.message, 'DNS_NAME', django_mail_dnsname)
+
+
+@pytest.fixture(scope='function')
+def django_mail_dnsname(monkeypatch):
+    return 'fake-tests.example.com'
+
+
 @pytest.fixture(autouse=True, scope='function')
 def _django_set_urlconf(request):
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
-    marker = request.keywords.get('urls', None)
+    marker = request.node.get_closest_marker('urls')
     if marker:
         skip_if_no_django()
         import django.conf
@@ -447,9 +483,9 @@ def _django_set_urlconf(request):
             # Removed in Django 2.0
             from django.core.urlresolvers import clear_url_caches, set_urlconf
 
-        validate_urls(marker)
+        urls = validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
-        django.conf.settings.ROOT_URLCONF = marker.urls
+        django.conf.settings.ROOT_URLCONF = urls
         clear_url_caches()
         set_urlconf(None)
 
@@ -475,7 +511,7 @@ def _fail_for_invalid_template_variable(request):
     It does not raise an exception, but fails, as the stack trace doesn't
     offer any helpful information to debug.
     This behavior can be switched off using the marker:
-    ``ignore_template_errors``
+    ``pytest.mark.ignore_template_errors``
     """
     class InvalidVarException(object):
         """Custom handler for invalid strings in templates."""
@@ -540,7 +576,7 @@ def _fail_for_invalid_template_variable(request):
             django_settings_is_configured()):
         from django.conf import settings as dj_settings
 
-        if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+        if dj_settings.TEMPLATES:
             dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = (
                 InvalidVarException())
         else:
@@ -556,7 +592,7 @@ def _template_string_if_invalid_marker(request):
         if marker and django_settings_is_configured():
             from django.conf import settings as dj_settings
 
-            if get_django_version() >= (1, 8) and dj_settings.TEMPLATES:
+            if dj_settings.TEMPLATES:
                 dj_settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'].fail = False
             else:
                 dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
@@ -601,7 +637,7 @@ class _DatabaseBlocker(object):
 
     @property
     def _dj_db_wrapper(self):
-        from .compat import BaseDatabaseWrapper
+        from django.db.backends.base.base import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
         # reference to the real implementation.
@@ -642,12 +678,15 @@ _blocking_manager = _DatabaseBlocker()
 def validate_django_db(marker):
     """Validate the django_db marker.
 
-    It checks the signature and creates the `transaction` attribute on
-    the marker which will have the correct value.
+    It checks the signature and creates the ``transaction`` and
+    ``reset_sequences`` attributes on the marker which will have the
+    correct values.
+
+    A sequence reset is only allowed when combined with a transaction.
     """
-    def apifun(transaction=False):
-        marker.transaction = transaction
-    apifun(*marker.args, **marker.kwargs)
+    def apifun(transaction=False, reset_sequences=False):
+        return transaction, reset_sequences
+    return apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker):
@@ -657,5 +696,5 @@ def validate_urls(marker):
     marker which will have the correct value.
     """
     def apifun(urls):
-        marker.urls = urls
-    apifun(*marker.args, **marker.kwargs)
+        return urls
+    return apifun(*marker.args, **marker.kwargs)

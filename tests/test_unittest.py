@@ -117,8 +117,125 @@ class TestUnittestMethods:
             "CALLED: setUpClass",
             "CALLED: setUp",
             "CALLED: tearDown",
-            "PASSED",
+            "PASSED*",
             "CALLED: tearDownClass",
+        ])
+        assert result.ret == 0
+
+    def test_setUpClass_not_being_a_classmethod(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+            class TestFoo(TestCase):
+                def setUpClass(self):
+                    pass
+
+                def test_pass(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v', '-s')
+        result.stdout.fnmatch_lines([
+            "* ERROR at setup of TestFoo.test_pass *",
+            "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
+        ])
+        assert result.ret == 1
+
+    def test_setUpClass_multiple_subclasses(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(cls):
+                    super(TestFoo, cls).setUpClass()
+
+                def test_shared(self):
+                    pass
+
+
+            class TestBar(TestFoo):
+                def test_bar1(self):
+                    pass
+
+
+            class TestBar2(TestFoo):
+                def test_bar21(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_shared PASSED*",
+            "*TestBar::test_bar1 PASSED*",
+            "*TestBar::test_shared PASSED*",
+            "*TestBar2::test_bar21 PASSED*",
+            "*TestBar2::test_shared PASSED*",
+        ])
+        assert result.ret == 0
+
+    def test_setUpClass_mixin(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+
+            class TheMixin(object):
+                @classmethod
+                def setUpClass(cls):
+                    super(TheMixin, cls).setUpClass()
+
+
+            class TestFoo(TheMixin, TestCase):
+                def test_foo(self):
+                    pass
+
+
+            class TestBar(TheMixin, TestCase):
+                def test_bar(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_foo PASSED*",
+            "*TestBar::test_bar PASSED*",
+        ])
+        assert result.ret == 0
+
+    def test_setUpClass_skip(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import TestCase
+            import pytest
+
+
+            class TestFoo(TestCase):
+                @classmethod
+                def setUpClass(cls):
+                    if cls is TestFoo:
+                        raise pytest.skip("Skip base class")
+                    super(TestFoo, cls).setUpClass()
+
+                def test_shared(self):
+                    pass
+
+
+            class TestBar(TestFoo):
+                def test_bar1(self):
+                    pass
+
+
+            class TestBar2(TestFoo):
+                def test_bar21(self):
+                    pass
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-v')
+        result.stdout.fnmatch_lines([
+            "*TestFoo::test_shared SKIPPED*",
+            "*TestBar::test_bar1 PASSED*",
+            "*TestBar::test_shared PASSED*",
+            "*TestBar2::test_bar21 PASSED*",
+            "*TestBar2::test_shared PASSED*",
         ])
         assert result.ret == 0
 
@@ -215,8 +332,36 @@ class TestUnittestMethods:
             "CALLED: setUpClass",
             "CALLED: setUp",
             "CALLED: tearDown",
-            "PASSED",
+            "PASSED*",
             "CALLED: tearDownClass",
+        ])
+        assert result.ret == 0
+
+    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir):
+        django_testdir.create_test_module('''
+            from django.test import testcases
+
+            class CMSTestCase(testcases.TestCase):
+                pass
+
+            class FooBarTestCase(testcases.TestCase):
+
+                @classmethod
+                def setUpClass(cls):
+                    print('FooBarTestCase.setUpClass')
+                    super(FooBarTestCase, cls).setUpClass()
+
+            class TestContact(CMSTestCase, FooBarTestCase):
+
+                def test_noop(self):
+                    print('test_noop')
+        ''')
+
+        result = django_testdir.runpytest_subprocess('-q', '-s')
+        result.stdout.fnmatch_lines([
+            "*FooBarTestCase.setUpClass*",
+            "*test_noop*",
+            "1 passed*",
         ])
         assert result.ret == 0
 

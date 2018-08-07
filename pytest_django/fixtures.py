@@ -3,6 +3,7 @@
 from __future__ import with_statement
 
 import os
+from functools import partial
 
 import pytest
 
@@ -11,14 +12,14 @@ from contextlib import contextmanager
 from . import live_server_helper
 
 from .django_compat import is_django_unittest
-from .pytest_compat import getfixturevalue
 
-from .lazy_django import get_django_version, skip_if_no_django
+from .lazy_django import skip_if_no_django
 
-__all__ = ['django_db_setup', 'db', 'transactional_db', 'admin_user',
-           'django_user_model', 'django_username_field',
+__all__ = ['django_db_setup', 'db', 'transactional_db', 'django_db_reset_sequences',
+           'admin_user', 'django_user_model', 'django_username_field',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries']
+           '_live_server_helper', 'django_assert_num_queries',
+           'django_assert_max_num_queries']
 
 
 @pytest.fixture(scope='session')
@@ -61,8 +62,12 @@ def django_db_use_migrations(request):
 
 @pytest.fixture(scope='session')
 def django_db_keepdb(request):
-    return (request.config.getvalue('reuse_db') and not
-            request.config.getvalue('create_db'))
+    return request.config.getvalue('reuse_db')
+
+
+@pytest.fixture(scope='session')
+def django_db_createdb(request):
+    return request.config.getvalue('create_db')
 
 
 @pytest.fixture(scope='session')
@@ -72,6 +77,7 @@ def django_db_setup(
     django_db_blocker,
     django_db_use_migrations,
     django_db_keepdb,
+    django_db_createdb,
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
@@ -82,15 +88,8 @@ def django_db_setup(
     if not django_db_use_migrations:
         _disable_native_migrations()
 
-    if django_db_keepdb:
-        if get_django_version() >= (1, 8):
-            setup_databases_args['keepdb'] = True
-        else:
-            # Django 1.7 compatibility
-            from .db_reuse import monkey_patch_creation_for_db_reuse
-
-            with django_db_blocker.unblock():
-                monkey_patch_creation_for_db_reuse()
+    if django_db_keepdb and not django_db_createdb:
+        setup_databases_args['keepdb'] = True
 
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
@@ -110,7 +109,8 @@ def django_db_setup(
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(transactional, request, django_db_blocker):
+def _django_db_fixture_helper(request, django_db_blocker,
+                              transactional=False, reset_sequences=False):
     if is_django_unittest(request):
         return
 
@@ -123,6 +123,11 @@ def _django_db_fixture_helper(transactional, request, django_db_blocker):
 
     if transactional:
         from django.test import TransactionTestCase as django_case
+
+        if reset_sequences:
+            class ResetSequenceTestCase(django_case):
+                reset_sequences = True
+            django_case = ResetSequenceTestCase
     else:
         from django.test import TestCase as django_case
 
@@ -142,7 +147,7 @@ def _disable_native_migrations():
 
 @pytest.fixture(scope='function')
 def db(request, django_db_setup, django_db_blocker):
-    """Require a django test database
+    """Require a django test database.
 
     This database will be setup with the default fixtures and will have
     the transaction management disabled. At the end of the test the outer
@@ -151,30 +156,54 @@ def db(request, django_db_setup, django_db_blocker):
     This is more limited than the ``transactional_db`` resource but
     faster.
 
-    If both this and ``transactional_db`` are requested then the
-    database setup will behave as only ``transactional_db`` was
-    requested.
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``django_db_reset_sequences``.
     """
+    if 'django_db_reset_sequences' in request.funcargnames:
+        request.getfixturevalue('django_db_reset_sequences')
     if 'transactional_db' in request.funcargnames \
             or 'live_server' in request.funcargnames:
-        getfixturevalue(request, 'transactional_db')
+        request.getfixturevalue('transactional_db')
     else:
-        _django_db_fixture_helper(False, request, django_db_blocker)
+        _django_db_fixture_helper(request, django_db_blocker, transactional=False)
 
 
 @pytest.fixture(scope='function')
 def transactional_db(request, django_db_setup, django_db_blocker):
-    """Require a django test database with transaction support
+    """Require a django test database with transaction support.
 
     This will re-initialise the django database for each test and is
     thus slower than the normal ``db`` fixture.
 
     If you want to use the database with transactions you must request
-    this resource.  If both this and ``db`` are requested then the
-    database setup will behave as only ``transactional_db`` was
-    requested.
+    this resource.
+
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``django_db_reset_sequences``.
     """
-    _django_db_fixture_helper(True, request, django_db_blocker)
+    if 'django_db_reset_sequences' in request.funcargnames:
+        request.getfuncargvalue('django_db_reset_sequences')
+    _django_db_fixture_helper(request, django_db_blocker,
+                              transactional=True)
+
+
+@pytest.fixture(scope='function')
+def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
+    """Require a transactional test database with sequence reset support.
+
+    This behaves like the ``transactional_db`` fixture, with the addition
+    of enforcing a reset of all auto increment sequences.  If the enquiring
+    test relies on such values (e.g. ids as primary keys), you should
+    request this resource to ensure they are consistent across tests.
+
+    If multiple database fixtures are requested, they take precedence
+    over each other in the following order (the last one wins): ``db``,
+    ``transactional_db``, ``django_db_reset_sequences``.
+    """
+    _django_db_fixture_helper(request, django_db_blocker,
+                              transactional=True, reset_sequences=True)
 
 
 @pytest.fixture()
@@ -290,7 +319,7 @@ def live_server(request):
     --liveserver command line option or if this is not provided from
     the DJANGO_LIVE_TEST_SERVER_ADDRESS environment variable.  If
     neither is provided ``localhost:8081,8100-8200`` is used.  See the
-    Django documentation for it's full syntax.
+    Django documentation for its full syntax.
 
     NOTE: If the live server needs database access to handle a request
           your test will have to request database access.  Furthermore
@@ -309,10 +338,14 @@ def live_server(request):
     addr = (request.config.getvalue('liveserver') or
             os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS'))
 
-    if addr and django.VERSION >= (1, 11) and ':' in addr:
-        request.config.warn('D001', 'Specifying a live server port is not supported '
-                            'in Django 1.11. This will be an error in a future '
-                            'pytest-django release.')
+    if addr and ':' in addr:
+        if django.VERSION >= (1, 11):
+            ports = addr.split(':')[1]
+            if '-' in ports or ',' in ports:
+                request.config.warn('D001',
+                                    'Specifying multiple live server ports is not supported '
+                                    'in Django 1.11. This will be an error in a future '
+                                    'pytest-django release.')
 
     if not addr:
         if django.VERSION < (1, 11):
@@ -338,27 +371,52 @@ def _live_server_helper(request):
     The separate helper is required since live_server can not request
     transactional_db directly since it is session scoped instead of
     function-scoped.
+
+    It will also override settings only for the duration of the test.
     """
-    if 'live_server' in request.funcargnames:
-        getfixturevalue(request, 'transactional_db')
+    if 'live_server' not in request.funcargnames:
+        return
+
+    request.getfixturevalue('transactional_db')
+
+    live_server = request.getfixturevalue('live_server')
+    live_server._live_server_modified_settings.enable()
+    request.addfinalizer(live_server._live_server_modified_settings.disable)
+
+
+@contextmanager
+def _assert_num_queries(config, num, exact=True, connection=None):
+    from django.test.utils import CaptureQueriesContext
+
+    if connection is None:
+        from django.db import connection
+
+    verbose = config.getoption('verbose') > 0
+    with CaptureQueriesContext(connection) as context:
+        yield context
+        num_queries = len(context)
+        failed = num != num_queries if exact else num < num_queries
+        if failed:
+            msg = "Expected to perform {} queries {}{}".format(
+                num,
+                '' if exact else 'or less ',
+                'but {} done'.format(
+                    num_queries == 1 and '1 was' or '%d were' % (num_queries,)
+                )
+            )
+            if verbose:
+                sqls = (q['sql'] for q in context.captured_queries)
+                msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
+            else:
+                msg += " (add -v option to show queries)"
+            pytest.fail(msg)
 
 
 @pytest.fixture(scope='function')
 def django_assert_num_queries(pytestconfig):
-    from django.db import connection
-    from django.test.utils import CaptureQueriesContext
+    return partial(_assert_num_queries, pytestconfig)
 
-    @contextmanager
-    def _assert_num_queries(num):
-        with CaptureQueriesContext(connection) as context:
-            yield
-            if num != len(context):
-                msg = "Expected to perform %s queries but %s were done" % (num, len(context))
-                if pytestconfig.getoption('verbose') > 0:
-                    sqls = (q['sql'] for q in context.captured_queries)
-                    msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
-                else:
-                    msg += " (add -v option to show queries)"
-                pytest.fail(msg)
 
-    return _assert_num_queries
+@pytest.fixture(scope='function')
+def django_assert_max_num_queries(pytestconfig):
+    return partial(_assert_num_queries, pytestconfig, exact=False)
