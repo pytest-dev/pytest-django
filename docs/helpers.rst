@@ -229,14 +229,8 @@ mark to signal it needs the database.
 
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
-<<<<<<< HEAD
 database access themselves.  A test function would normally use the
 :py:func:`pytest.mark.django_db` mark to signal it needs the database.
-
-.. fixture:: live_server
-=======
-database access themselves.  A test function should normally use the
-``pytest.mark.django_db``  mark with ``transaction=True``.
 
 ``django_db_reset_sequences``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -248,7 +242,8 @@ This fixture provides the same transactional database access as
 sequences (if your database supports it). This is only required for
 fixtures which need database access themselves. A test function should
 normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``reset_sequences=True``.
->>>>>>> a8c14aafc832f2b926c848eff00795637a527d34
+
+.. fixture:: live_server
 
 ``live_server``
 ~~~~~~~~~~~~~~~
