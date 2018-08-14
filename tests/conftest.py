@@ -126,13 +126,11 @@ def django_testdir(request, testdir, monkeypatch):
 
     monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
 
-    # Monkeypatch runpytest_subprocess to include --strict always.
-    orig = testdir.runpytest_subprocess
-
-    def runpytest_subprocess(*args, **kwargs):
-        args = ('--strict',) + args
-        return orig(*args, **kwargs)
-    testdir.runpytest_subprocess = runpytest_subprocess
+    testdir.makeini("""
+        [pytest]
+        addopts = --strict
+        console_output_style=classic
+    """)
 
     return testdir
 
