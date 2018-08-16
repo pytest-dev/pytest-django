@@ -1,7 +1,7 @@
 Changelog
 =========
 
-unreleased
+3.4.0 (2018-08-16)
 ------------------
 
 Features
@@ -12,6 +12,16 @@ Features
   with :fixture:`django_assert_num_queries` (#547).
 * Added support for resetting sequences via
   :fixture:`django_db_reset_sequences` (#619).
+
+Bugfixes
+^^^^^^^^
+
+* Made sure to not call django.setup() multiple times (#629, #531).
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Removed py dependency, use pathlib instead (#631).
 
 3.3.3 (2018-07-26)
 ------------------
