@@ -13,7 +13,7 @@ jobs:
       sudo: true
 
     - python: 3.6
-      env: TOXENV=py36-djmaster-postgres
+      env: TOXENV=py36-djmaster-sqlite
     - python: 3.6
       env: TOXENV=py36-dj20-postgres
     - python: 3.6
@@ -61,7 +61,7 @@ jobs:
   # NOTE: does not show up in "allowed failures" section, but is allowed to
   # fail (for the "test" stage).
   allow_failures:
-    - env: TOXENV=py36-djmaster-postgres
+    - env: TOXENV=py36-djmaster-sqlite
 
 stages:
   - name: test
