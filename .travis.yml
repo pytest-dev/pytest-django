@@ -6,7 +6,8 @@ jobs:
   fast_finish: true
   include:
     # py37 is not available in trusty dist, and requires sudo=true with xenial.
-    - python: 3.7
+    - stage: test
+      python: 3.7
       env: TOXENV=py37-dj21-sqlite
       dist: xenial
       sudo: true
@@ -40,8 +41,11 @@ jobs:
     - python: 3.6
       env: TOXENV=checkqa,docs SKIP_COVERAGE=1
 
-    - stage: PyPI Release
-      if: tag IS present
+    - stage: test_release
+      python: 3.6
+      env: TOXENV=py36-dj20-postgres
+
+    - stage: release
       script: skip
       install: skip
       after_success: true
@@ -54,8 +58,18 @@ jobs:
           tags: true
         distributions: "sdist bdist_wheel"
 
+  # NOTE: does not show up in "allowed failures" section, but is allowed to
+  # fail (for the "test" stage).
   allow_failures:
     - env: TOXENV=py36-djmaster-postgres
+
+stages:
+  - name: test
+    if: tag IS NOT present
+  - name: test_release
+    if: tag IS present
+  - name: release
+    if: tag IS present
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
