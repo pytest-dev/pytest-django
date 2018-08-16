@@ -65,11 +65,11 @@ jobs:
 
 stages:
   - name: test
-    if: tag IS NOT present
+    if: tag IS present
   - name: test_release
-    if: tag IS present
+    if: tag IS NOT present
   - name: release
-    if: tag IS present
+    if: tag IS NOT present
 
 install:
   # Create pip wrapper script, using travis_retry (a function) and
