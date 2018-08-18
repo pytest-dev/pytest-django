@@ -2,12 +2,16 @@ import copy
 import shutil
 from textwrap import dedent
 
-import pathlib2 as pathlib
 import pytest
 import six
 from django.conf import settings
 
 from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
+
+try:
+    import pathlib
+except ImportError:
+    import pathlib2 as pathlib
 
 pytest_plugins = 'pytester'
 
