@@ -11,7 +11,7 @@ import os
 import sys
 import types
 
-import pathlib
+import pathlib2 as pathlib
 import pytest
 
 from .django_compat import is_django_unittest  # noqa

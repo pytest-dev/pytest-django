@@ -2,7 +2,7 @@ import copy
 import shutil
 from textwrap import dedent
 
-import pathlib
+import pathlib2 as pathlib
 import pytest
 import six
 from django.conf import settings
