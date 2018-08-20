@@ -3,41 +3,24 @@ import pytest
 
 @pytest.mark.django_project(project_root='django_project_root',
                             create_manage_py=True)
-def test_django_project_found(django_testdir):
-    # XXX: Important: Do not chdir() to django_project_root since runpytest_subprocess
-    # will call "python /path/to/pytest.py", which will impliclity add cwd to
-    # the path. By instead calling "python /path/to/pytest.py
-    # django_project_root", we avoid impliclity adding the project to sys.path
-    # This matches the behaviour when pytest is called directly as an
-    # executable (cwd is not added to the Python path)
-
-    django_testdir.create_test_module("""
-    def test_foobar():
-        assert 1 + 1 == 2
-    """)
-
-    result = django_testdir.runpytest_subprocess('django_project_root')
-    assert result.ret == 0
-
-    outcomes = result.parseoutcomes()
-    assert outcomes['passed'] == 1
-
-
-@pytest.mark.django_project(project_root='django_project_root',
-                            create_manage_py=True)
-def test_django_project_found_absolute(django_testdir, monkeypatch):
+def test_django_project_found(django_testdir, monkeypatch):
+    # NOTE: Important: the chdir() to django_project_root causes
+    # runpytest_subprocess to call "python /path/to/pytest.py", which will
+    # impliclity add cwd to the path.
     django_testdir.create_test_module("""
     def test_foobar():
         import os, sys
 
-        # The one inserted by Python, see comment for test above.
-        assert sys.path[0] == os.getcwd()
+        cwd = os.getcwd()
+
+        # The one inserted by Python, see comment above.
+        assert sys.path[0] == cwd
 
         # The one inserted by us.  It should be absolute.
-        assert sys.path[1] == os.getcwd()
+        assert sys.path[1] == cwd
     """)
     monkeypatch.chdir('django_project_root')
-    result = django_testdir.runpytest_subprocess('-s', '.')
+    result = django_testdir.runpytest_subprocess('.')
     assert result.ret == 0
 
     outcomes = result.parseoutcomes()
