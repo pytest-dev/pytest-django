@@ -17,7 +17,12 @@ def test_django_project_found(django_testdir, monkeypatch):
         assert sys.path[0] == cwd
 
         # The one inserted by us.  It should be absolute.
-        assert sys.path[1] == cwd
+        # py37 has it in sys.path[1] already, but otherwise there is an empty
+        # entry first.
+        if sys.path[1] == '':
+            assert sys.path[2] == cwd
+        else:
+            assert sys.path[1] == cwd
     """)
     monkeypatch.chdir('django_project_root')
     result = django_testdir.runpytest_subprocess('.')
