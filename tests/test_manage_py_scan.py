@@ -25,6 +25,24 @@ def test_django_project_found(django_testdir):
 
 @pytest.mark.django_project(project_root='django_project_root',
                             create_manage_py=True)
+def test_django_project_found_absolute(django_testdir, monkeypatch):
+    """This only tests that "." is added as an absolute path (#637)."""
+    django_testdir.create_test_module("""
+    def test_dot_not_in_syspath():
+        import sys
+        assert '.' not in sys.path[:5]
+    """)
+    monkeypatch.chdir('django_project_root')
+    # NOTE: the "." here is important to test for an absolute path being used.
+    result = django_testdir.runpytest_subprocess('-s', '.')
+    assert result.ret == 0
+
+    outcomes = result.parseoutcomes()
+    assert outcomes['passed'] == 1
+
+
+@pytest.mark.django_project(project_root='django_project_root',
+                            create_manage_py=True)
 def test_django_project_found_invalid_settings(django_testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
 

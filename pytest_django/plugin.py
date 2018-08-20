@@ -139,7 +139,7 @@ def _add_django_project_to_path(args):
 
     project_dir = find_django_path(args)
     if project_dir:
-        sys.path.insert(0, str(project_dir))
+        sys.path.insert(0, str(project_dir.absolute()))
         return PROJECT_FOUND % project_dir
     return PROJECT_NOT_FOUND
 
