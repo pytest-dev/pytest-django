@@ -3,29 +3,38 @@ import pytest
 
 @pytest.mark.django_project(project_root='django_project_root',
                             create_manage_py=True)
-def test_django_project_found(django_testdir, monkeypatch):
-    # NOTE: Important: the chdir() to django_project_root causes
-    # runpytest_subprocess to call "python /path/to/pytest.py", which will
-    # impliclity add cwd to the path.
+def test_django_project_found(django_testdir):
+    # XXX: Important: Do not chdir() to django_project_root since runpytest_subprocess
+    # will call "python /path/to/pytest.py", which will impliclity add cwd to
+    # the path. By instead calling "python /path/to/pytest.py
+    # django_project_root", we avoid impliclity adding the project to sys.path
+    # This matches the behaviour when pytest is called directly as an
+    # executable (cwd is not added to the Python path)
+
     django_testdir.create_test_module("""
     def test_foobar():
-        import os, sys
+        assert 1 + 1 == 2
+    """)
 
-        cwd = os.getcwd()
+    result = django_testdir.runpytest_subprocess('django_project_root')
+    assert result.ret == 0
 
-        # The one inserted by Python, see comment above.
-        assert sys.path[0] == cwd
+    outcomes = result.parseoutcomes()
+    assert outcomes['passed'] == 1
 
-        # The one inserted by us.  It should be absolute.
-        # py37 has it in sys.path[1] already, but otherwise there is an empty
-        # entry first.
-        if sys.path[1] == '':
-            assert sys.path[2] == cwd
-        else:
-            assert sys.path[1] == cwd
+
+@pytest.mark.django_project(project_root='django_project_root',
+                            create_manage_py=True)
+def test_django_project_found_absolute(django_testdir, monkeypatch):
+    """This only tests that "." is added as an absolute path (#637)."""
+    django_testdir.create_test_module("""
+    def test_dot_not_in_syspath():
+        import sys
+        assert '.' not in sys.path[:5]
     """)
     monkeypatch.chdir('django_project_root')
-    result = django_testdir.runpytest_subprocess('.')
+    # NOTE: the "." here is important to test for an absolute path being used.
+    result = django_testdir.runpytest_subprocess('-s', '.')
     assert result.ret == 0
 
     outcomes = result.parseoutcomes()
