@@ -32,7 +32,7 @@ setup(
     setup_requires=['setuptools_scm>=1.11.1'],
     install_requires=[
         'pytest>=3.6',
-        'pathlib;python_version<"3.4"',
+        'pathlib2;python_version<"3.4"',
     ],
     extras_require={
         'docs': [
