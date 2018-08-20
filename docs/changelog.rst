@@ -1,6 +1,16 @@
 Changelog
 =========
 
+3.4.2 (2018-08-20)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Changed dependency for pathlib to pathlib2 (#636).
+* Fixed code for inserting the project to sys.path with pathlib to use an
+  absolute path, regression in 3.4.0 (#637, #638).
+
 3.4.0 (2018-08-16)
 ------------------
 
