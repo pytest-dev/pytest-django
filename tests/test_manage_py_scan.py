@@ -25,6 +25,27 @@ def test_django_project_found(django_testdir):
 
 @pytest.mark.django_project(project_root='django_project_root',
                             create_manage_py=True)
+def test_django_project_found_absolute(django_testdir, monkeypatch):
+    django_testdir.create_test_module("""
+    def test_foobar():
+        import os, sys
+
+        # The one inserted by Python, see comment for test above.
+        assert sys.path[0] == os.getcwd()
+
+        # The one inserted by us.  It should be absolute.
+        assert sys.path[1] == os.getcwd()
+    """)
+    monkeypatch.chdir('django_project_root')
+    result = django_testdir.runpytest_subprocess('-s', '.')
+    assert result.ret == 0
+
+    outcomes = result.parseoutcomes()
+    assert outcomes['passed'] == 1
+
+
+@pytest.mark.django_project(project_root='django_project_root',
+                            create_manage_py=True)
 def test_django_project_found_invalid_settings(django_testdir, monkeypatch):
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
 
