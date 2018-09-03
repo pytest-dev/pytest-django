@@ -45,11 +45,11 @@ The order of precedence is, from highest to lowest:
 
 * The command line option ``--ds``
 * The environment variable ``DJANGO_SETTINGS_MODULE``
-* The configuration file - ``pytest.ini``, or file that Pytest finds such as
-  ``tox.ini``
+* The ``DJANGO_SETTINGS_MODULE`` option in the configuration file -
+  ``pytest.ini``, or other file that Pytest finds such as ``tox.ini``
 
-If you want to override from the configuration file, you can use
-``addopts = --ds=yourtestsettings``.
+If you want to use the highest precedence in the configuration file, you can
+use ``addopts = --ds=yourtestsettings``.
 
 Using django-configurations
 ---------------------------
