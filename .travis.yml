@@ -43,7 +43,7 @@ jobs:
 
     - stage: test_release
       python: 3.6
-      env: TOXENV=py36-dj20-postgres
+      env: TOXENV=py36-dj20-postgres SKIP_COVERAGE=1
 
     - stage: release
       script: skip
