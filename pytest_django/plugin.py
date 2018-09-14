@@ -122,8 +122,14 @@ def _add_django_project_to_path(args):
     def is_django_project(path):
         return path.is_dir() and (path / 'manage.py').exists()
 
+    def arg_to_path(arg):
+        # Test classes or functions can be appended to paths separated by ::
+        arg = arg.split("::", 1)[0]
+        return pathlib.Path(arg)
+
     def find_django_path(args):
-        args = [pathlib.Path(x) for x in args if not str(x).startswith("-")]
+        args = map(str, args)
+        args = [arg_to_path(x) for x in args if not x.startswith("-")]
         args = [p for p in args if p.is_dir()]
 
         if not args:
