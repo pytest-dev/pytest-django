@@ -78,7 +78,7 @@ install:
     if [[ "$SKIP_COVERAGE" != "1" ]]; then
       PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
-      export _PYTESTDJANGO_TOX_EXTRA_DEPS=pytest-cov
+      export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.5.1'
     else
       PYTEST_DJANGO_COVERAGE=0
     fi
