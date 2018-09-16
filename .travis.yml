@@ -22,7 +22,7 @@ install:
   - |
     # Setup coverage tracking.
     if [[ "$SKIP_COVERAGE" != 1 ]]; then
-      export PYTEST_ADDOPTS="--cov=$PWD --cov-append --cov-report="
+      export PYTEST_ADDOPTS='--cov --cov-append --cov-report='
       export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.6.0'
     fi
 
