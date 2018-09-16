@@ -75,12 +75,9 @@ install:
   - pip install tox==3.3.0
   - |
     # Setup coverage tracking.
-    if [[ "$SKIP_COVERAGE" != "1" ]]; then
-      PYTEST_DJANGO_COVERAGE=1
-      export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
+    if [[ "$SKIP_COVERAGE" != 1 ]]; then
+      export PYTEST_ADDOPTS='--cov --cov-append --cov-report=xml --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.6.0'
-    else
-      PYTEST_DJANGO_COVERAGE=0
     fi
 
 script:
@@ -89,13 +86,8 @@ script:
 after_success:
   - |
     set -ex
-    if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
+    if [[ "$SKIP_COVERAGE" != 1 ]]; then
       pip install codecov
-
-      coverage --version
-      coverage combine
-      coverage xml
-
       codecov_flags=${TOXENV//./}
       codecov_flags=${codecov_flags//-/ }
       codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
