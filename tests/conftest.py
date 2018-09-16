@@ -129,6 +129,7 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.project_root = project_root
 
     monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
+    monkeypatch.delenv('COV_CORE_DATAFILE', raising=False)
 
     testdir.makeini("""
         [pytest]
