@@ -128,6 +128,8 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.create_app_file = create_app_file
     testdir.project_root = project_root
 
+    monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
+
     testdir.makeini("""
         [pytest]
         addopts = --strict
