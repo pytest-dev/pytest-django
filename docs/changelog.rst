@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.4.3 (2018-09-16)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fix OSError with arguments containing ``::`` on Windows (#641).
+
 3.4.2 (2018-08-20)
 ------------------
 

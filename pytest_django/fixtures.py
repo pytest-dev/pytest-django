@@ -184,7 +184,7 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     ``transactional_db``, ``django_db_reset_sequences``.
     """
     if 'django_db_reset_sequences' in request.funcargnames:
-        request.getfuncargvalue('django_db_reset_sequences')
+        request.getfixturevalue('django_db_reset_sequences')
     _django_db_fixture_helper(request, django_db_blocker,
                               transactional=True)
 
