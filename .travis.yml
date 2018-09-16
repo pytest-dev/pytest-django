@@ -83,7 +83,7 @@ install:
   - sed -i.bak 's/^\[testenv\]/\0\nwhitelist_externals = travis_retry_pip\ninstall_command = travis_retry_pip install {opts} {packages}/' tox.ini
   - if diff tox.ini tox.ini.bak; then exit 1; fi
 
-  - pip install tox==2.9.1
+  - pip install tox==3.3.0
   - |
     # Setup coverage tracking.
     if [[ "$SKIP_COVERAGE" != "1" ]]; then
