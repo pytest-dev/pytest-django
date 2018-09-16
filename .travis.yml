@@ -24,7 +24,7 @@ install:
     # Setup coverage tracking.
     if [[ "$SKIP_COVERAGE" != "1" ]]; then
       PYTEST_DJANGO_COVERAGE=1
-      export PYTEST_ADDOPTS='-x --cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
+      export PYTEST_ADDOPTS='-x --cov-branch --cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
       export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.6.0'
     else
       PYTEST_DJANGO_COVERAGE=0
