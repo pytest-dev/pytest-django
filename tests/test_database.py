@@ -51,9 +51,9 @@ class TestDatabaseFixtures:
     @pytest.fixture(params=['db', 'transactional_db', 'django_db_reset_sequences'])
     def all_dbs(self, request):
         if request.param == 'django_db_reset_sequences':
-            return request.getfuncargvalue('django_db_reset_sequences')
+            return request.getfixturevalue('django_db_reset_sequences')
         elif request.param == 'transactional_db':
-            return request.getfuncargvalue('transactional_db')
+            return request.getfixturevalue('transactional_db')
         elif request.param == 'db':
             return request.getfixturevalue('db')
 
@@ -200,14 +200,12 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_reset_sequences_disabled(self, request):
-        marker = request.keywords['django_db']
-
+        marker = request.node.get_closest_marker('django_db')
         assert not marker.kwargs
 
     @pytest.mark.django_db(reset_sequences=True)
     def test_reset_sequences_enabled(self, request):
-        marker = request.keywords['django_db']
-
+        marker = request.node.get_closest_marker('django_db')
         assert marker.kwargs['reset_sequences']
 
 

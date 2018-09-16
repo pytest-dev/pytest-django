@@ -36,7 +36,7 @@ def _marker_apifun(extra_settings='',
 
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
-    marker = request.node.get_marker('django_project')
+    marker = request.node.get_closest_marker('django_project')
 
     options = _marker_apifun(**(marker.kwargs if marker else {}))
 
