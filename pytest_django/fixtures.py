@@ -10,7 +10,7 @@ import pytest
 from contextlib import contextmanager
 
 from . import live_server_helper
-
+from .db_retry import wrap_creation_for_db_retry
 from .django_compat import is_django_unittest
 
 from .lazy_django import skip_if_no_django
@@ -90,6 +90,9 @@ def django_db_setup(
 
     if django_db_keepdb and not django_db_createdb:
         setup_databases_args['keepdb'] = True
+
+    if request.config.getvalue('retry_db'):
+        setup_databases = wrap_creation_for_db_retry(setup_databases)
 
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
