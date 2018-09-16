@@ -76,7 +76,7 @@ install:
   - |
     # Setup coverage tracking.
     if [[ "$SKIP_COVERAGE" != 1 ]]; then
-      export PYTEST_ADDOPTS='--cov --cov-append --cov-report=xml --cov-report=term-missing:skip-covered'
+      export PYTEST_ADDOPTS="--cov=pytest_django --cov=pytest_django_test --cov=tests --cov-append --cov-report="
       export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.6.0'
     fi
 
@@ -88,6 +88,11 @@ after_success:
     set -ex
     if [[ "$SKIP_COVERAGE" != 1 ]]; then
       pip install codecov
+
+      coverage combine || true
+      coverage xml
+      coverage report -m
+
       codecov_flags=${TOXENV//./}
       codecov_flags=${codecov_flags//-/ }
       codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
