@@ -202,27 +202,47 @@ class TestrunnerVerbosity:
         """Verbose output with '-v'."""
         result = testdir.runpytest_subprocess('-s', '-v')
         result.stdout.fnmatch_lines_random([
-            "tpkg/test_the_test.py:*",
-            "*PASSED*",
-            "*Destroying test database for alias 'default'...*"])
+            'tpkg/test_the_test.py:*',
+            '*PASSED*',
+        ])
+        if get_django_version() >= (2, 2):
+            result.stderr.fnmatch_lines([
+                "*Destroying test database for alias 'default'*"])
+        else:
+            result.stdout.fnmatch_lines([
+                "*Destroying test database for alias 'default'...*"])
 
     def test_more_verbose_with_vv(self, testdir):
         """More verbose output with '-v -v'."""
         result = testdir.runpytest_subprocess('-s', '-v', '-v')
-        result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py:*Creating test database for alias*",
+        result.stdout.fnmatch_lines_random([
+            'tpkg/test_the_test.py:*',
             '*Operations to perform:*',
-            "*Apply all migrations:*",
-            "*PASSED*Destroying test database for alias 'default' ('*')...*"])
+            '*Apply all migrations:*',
+            '*PASSED*'])
+        if get_django_version() >= (2, 2):
+            result.stderr.fnmatch_lines([
+                '*Creating test database for alias*',
+                "*Destroying test database for alias 'default'*"])
+        else:
+            result.stdout.fnmatch_lines([
+                '*Creating test database for alias*',
+                "*Destroying test database for alias 'default'*"])
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
         """More verbose output with '-v -v', and --create-db."""
         result = testdir.runpytest_subprocess('-s', '-v', '-v', '--create-db')
         result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py:*Creating test database for alias*",
-            "*PASSED*"])
-        assert ("*Destroying test database for alias 'default' ('*')...*"
-                not in result.stdout.str())
+            'tpkg/test_the_test.py:*',
+            '*PASSED*'])
+        if get_django_version() >= (2, 2):
+            result.stderr.fnmatch_lines(['*Creating test database for alias*'])
+            assert ("*Destroying test database for alias 'default' ('*')...*"
+                    not in result.stderr.str())
+        else:
+            result.stdout.fnmatch_lines(['*Creating test database for alias*'])
+            assert ("*Destroying test database for alias 'default' ('*')...*"
+                    not in result.stdout.str())
 
 
 @pytest.mark.django_db
