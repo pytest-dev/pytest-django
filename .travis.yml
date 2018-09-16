@@ -35,8 +35,10 @@ after_success:
     if [[ "$SKIP_COVERAGE" != 1 ]]; then
       pip install codecov
 
+      find -name '.coverage*' -ls
       coverage combine || true
       coverage xml
+      find -name '.coverage*' -ls
       coverage report -m
 
       codecov_flags=${TOXENV//./}
