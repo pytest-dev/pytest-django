@@ -34,14 +34,6 @@ def _marker_apifun(extra_settings='',
     }
 
 
-@pytest.fixture
-def testdir(testdir, monkeypatch):
-    """Delete coverage related envs for runpytest_subprocess."""
-    monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
-    monkeypatch.delenv('COV_CORE_DATAFILE', raising=False)
-    return testdir
-
-
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
     marker = request.node.get_closest_marker('django_project')
