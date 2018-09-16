@@ -2,13 +2,12 @@ include AUTHORS
 include README.rst
 include LICENSE
 
-recursive-include test *
+# Include tests for downstream testing (https://github.com/pytest-dev/pytest-django/issues/290).
+recursive-include tests *.py *.txt
+recursive-include pytest_django_test *.json *.py *.txt
 
-recursive-exclude pytest_django_test *
-recursive-exclude .tox *
-recursive-exclude bin *
-recursive-exclude src *
 recursive-exclude .git *
+recursive-exclude .tox *
 recursive-exclude bin *
 recursive-exclude include *
 recursive-exclude lib *
