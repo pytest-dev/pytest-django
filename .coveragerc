@@ -1,5 +1,4 @@
 [run]
-parallel = true
 source = .
 branch = true
 [report]
