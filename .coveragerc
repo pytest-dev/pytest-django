@@ -2,3 +2,5 @@
 parallel = true
 source = pytest_django,pytest_django_test,tests
 branch = true
+[report]
+include = pytest_django/*,pytest_django_test/*,tests/*
