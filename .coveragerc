@@ -2,5 +2,6 @@
 parallel = true
 source = .
 branch = true
+data_file = .coverage.eager
 [report]
 include = pytest_django/*,pytest_django_test/*,tests/*
