@@ -25,7 +25,7 @@ install:
     if [[ "$SKIP_COVERAGE" != "1" ]]; then
       PYTEST_DJANGO_COVERAGE=1
       export PYTEST_ADDOPTS='-x --cov-branch --cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
-      export _PYTESTDJANGO_TOX_EXTRA_DEPS='https://github.com/blueyed/pytest-cov/archive/48d6656.tar.gz'
+      export _PYTESTDJANGO_TOX_EXTRA_DEPS='https://github.com/blueyed/pytest-cov/archive/3d8cf61.tar.gz'
     else
       PYTEST_DJANGO_COVERAGE=0
     fi
