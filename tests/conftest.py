@@ -34,6 +34,12 @@ def _marker_apifun(extra_settings='',
     }
 
 
+@pytest.fixture
+def testdir(testdir, monkeypatch):
+    monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
+    return testdir
+
+
 @pytest.fixture(scope='function')
 def django_testdir(request, testdir, monkeypatch):
     marker = request.node.get_closest_marker('django_project')
@@ -127,8 +133,6 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.create_test_module = create_test_module
     testdir.create_app_file = create_app_file
     testdir.project_root = project_root
-
-    monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
 
     testdir.makeini("""
         [pytest]
