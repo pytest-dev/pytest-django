@@ -8,42 +8,42 @@ jobs:
     # py37 is not available in trusty dist, and requires sudo=true with xenial.
     - stage: test
       python: 3.7
-      env: TOXENV=py37-dj21-sqlite
+      env: TOXENV=py37-dj21-sqlite-coverage
       dist: xenial
       sudo: true
 
     - python: 3.6
-      env: TOXENV=py36-djmaster-sqlite
+      env: TOXENV=py36-djmaster-sqlite-coverage
     - python: 3.6
-      env: TOXENV=py36-dj20-postgres
+      env: TOXENV=py36-dj20-postgres-coverage
     - python: 3.6
-      env: TOXENV=py36-dj111-sqlite
+      env: TOXENV=py36-dj111-sqlite-coverage
 
     - python: 3.5
-      env: TOXENV=py35-dj110-postgres
+      env: TOXENV=py35-dj110-postgres-coverage
 
     - python: 3.4
-      env: TOXENV=py34-dj19-sqlite_file
+      env: TOXENV=py34-dj19-sqlite_file-coverage
 
     - python: 2.7
-      env: TOXENV=py27-dj111-mysql_innodb
+      env: TOXENV=py27-dj111-mysql_innodb-coverage
     - python: 2.7
-      env: TOXENV=py27-dj111-mysql_myisam
+      env: TOXENV=py27-dj111-mysql_myisam-coverage
     - python: 2.7
-      env: TOXENV=py27-dj18-postgres
+      env: TOXENV=py27-dj18-postgres-coverage
 
     # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
-      env: TOXENV=pypy-dj111-sqlite_file SKIP_COVERAGE=1
+      env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3
-      env: TOXENV=pypy3-dj110-sqlite SKIP_COVERAGE=1
+      env: TOXENV=pypy3-dj110-sqlite
 
     - python: 3.6
-      env: TOXENV=checkqa,docs SKIP_COVERAGE=1
+      env: TOXENV=checkqa,docs
 
     - stage: test_release
       python: 3.6
-      env: TOXENV=py36-dj20-postgres SKIP_COVERAGE=1
+      env: TOXENV=py36-dj20-postgres
 
     - stage: release
       script: skip
@@ -61,11 +61,12 @@ jobs:
   # NOTE: does not show up in "allowed failures" section, but is allowed to
   # fail (for the "test" stage).
   allow_failures:
-    - env: TOXENV=py36-djmaster-sqlite
+    - env: TOXENV=py36-djmaster-sqlite-coverage
 
 stages:
   - name: test
     if: tag IS NOT present
+
   - name: test_release
     if: tag IS present
   - name: release
@@ -73,15 +74,6 @@ stages:
 
 install:
   - pip install tox==3.3.0
-  - |
-    # Setup coverage tracking.
-    if [[ "$SKIP_COVERAGE" != "1" ]]; then
-      PYTEST_DJANGO_COVERAGE=1
-      export PYTEST_ADDOPTS='--cov=pytest_django --cov=tests --cov=pytest_django_test --cov-report=term-missing:skip-covered'
-      export _PYTESTDJANGO_TOX_EXTRA_DEPS='pytest-cov==2.5.1'
-    else
-      PYTEST_DJANGO_COVERAGE=0
-    fi
 
 script:
   - tox
@@ -89,15 +81,9 @@ script:
 after_success:
   - |
     set -ex
-    if [[ "$PYTEST_DJANGO_COVERAGE" = 1 ]]; then
-      pip install codecov
-
-      coverage --version
-      coverage combine
-      coverage xml
-
-      codecov_flags=${TOXENV//./}
-      codecov_flags=${codecov_flags//-/ }
-      codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
+    if [[ "${TOXENV%-coverage}" != "$TOXENV" ]]; then
+      codecov_flags=${TOXENV%-coverage}
+      codecov_flags=${codecov_flags//-/,}
+      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout -F "$codecov_flags"
     fi
     set +x
