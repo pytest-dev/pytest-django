@@ -5,8 +5,18 @@ dist: trusty
 jobs:
   fast_finish: true
   include:
-    # py37 is not available in trusty dist, and requires sudo=true with xenial.
+    - stage: baseline
+      python: 3.6
+      env: TOXENV=py36-dj20-postgres-coverage
+    - python: 3.6
+      env: TOXENV=py36-dj111-sqlite-coverage
+    - python: 2.7
+      env: TOXENV=py27-dj111-mysql_innodb-coverage
+    - python: 3.6
+      env: TOXENV=checkqa,docs
+
     - stage: test
+      # py37 is not available in trusty dist, and requires sudo=true with xenial.
       python: 3.7
       env: TOXENV=py37-dj21-sqlite-coverage
       dist: xenial
@@ -14,10 +24,6 @@ jobs:
 
     - python: 3.6
       env: TOXENV=py36-djmaster-sqlite-coverage
-    - python: 3.6
-      env: TOXENV=py36-dj20-postgres-coverage
-    - python: 3.6
-      env: TOXENV=py36-dj111-sqlite-coverage
 
     - python: 3.5
       env: TOXENV=py35-dj110-postgres-coverage
@@ -25,8 +31,6 @@ jobs:
     - python: 3.4
       env: TOXENV=py34-dj19-sqlite_file-coverage
 
-    - python: 2.7
-      env: TOXENV=py27-dj111-mysql_innodb-coverage
     - python: 2.7
       env: TOXENV=py27-dj111-mysql_myisam-coverage
     - python: 2.7
@@ -37,9 +41,6 @@ jobs:
       env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3
       env: TOXENV=pypy3-dj110-sqlite
-
-    - python: 3.6
-      env: TOXENV=checkqa,docs
 
     - stage: test_release
       python: 3.6
@@ -64,9 +65,10 @@ jobs:
     - env: TOXENV=py36-djmaster-sqlite-coverage
 
 stages:
+  - name: baseline
+    if: tag IS NOT present
   - name: test
     if: tag IS NOT present
-
   - name: test_release
     if: tag IS present
   - name: release
