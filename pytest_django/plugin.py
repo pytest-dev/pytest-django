@@ -118,7 +118,7 @@ def _handle_import_error(extra_message):
         raise ImportError(msg)
 
 
-def _add_django_project_to_path(args):
+def _add_django_project_to_path(early_config, args):
     def is_django_project(path):
         return path.is_dir() and (path / 'manage.py').exists()
 
@@ -133,7 +133,8 @@ def _add_django_project_to_path(args):
         args = [p for p in args if p.is_dir()]
 
         if not args:
-            args = [pathlib.Path.cwd()]
+            args = [pathlib.Path(x) for x in early_config.getini('testpaths')
+                    ] + [pathlib.Path.cwd()]
 
         for arg in args:
             if is_django_project(arg):
@@ -212,7 +213,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
         early_config.getini('django_find_project'), 'django_find_project')
 
     if django_find_project:
-        _django_project_scan_outcome = _add_django_project_to_path(args)
+        _django_project_scan_outcome = _add_django_project_to_path(early_config, args)
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
