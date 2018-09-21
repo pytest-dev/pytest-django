@@ -1,6 +1,6 @@
 [run]
 parallel = 1
-source = ${PYTESTDJANGO_COVERAGE_SRC}.
+source = pytest_django,pytest_django_test,tests/
 branch = 1
 
 [report]
