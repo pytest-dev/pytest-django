@@ -286,8 +286,10 @@ Example
 This fixture allows to check for an expected number of DB queries.
 
 It wraps `django.test.utils.CaptureQueriesContext`.  A non-default DB
-connection can be passed in using the `connection` keyword argument, and it
-will yield the wrapped CaptureQueriesContext instance.
+connection can be passed in using the `connection` keyword argument, an
+additional info message which is displayed on fail can be passed in using
+the `info` keyword argument, and it will yield the wrapped
+CaptureQueriesContext instance.
 
 
 Example

@@ -158,6 +158,32 @@ def test_django_assert_num_queries_db_connection(django_assert_num_queries):
             pass
 
 
+@pytest.mark.django_db
+def test_django_assert_num_queries_output_info(django_testdir):
+    django_testdir.create_test_module("""
+        from django.contrib.contenttypes.models import ContentType
+        import pytest
+
+        @pytest.mark.django_db
+        def test_queries(django_assert_num_queries):
+            with django_assert_num_queries(
+                num=2,
+                info="Expected: 1 for select all, 1 for count"
+            ):
+                list(ContentType.objects.all())
+                ContentType.objects.count()
+                ContentType.objects.first()  # additional wrong query
+    """)
+    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
+    result.stdout.fnmatch_lines([
+        '*Expected to perform 2 queries but 3 were done*',
+        '*Expected: 1 for select all, 1 for count*',
+        '*Queries:*',
+        '*========*',
+    ])
+    assert result.ret == 1
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 
