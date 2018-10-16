@@ -120,7 +120,10 @@ def _handle_import_error(extra_message):
 
 def _add_django_project_to_path(args):
     def is_django_project(path):
-        return path.is_dir() and (path / 'manage.py').exists()
+        try:
+            return path.is_dir() and (path / 'manage.py').exists()
+        except OSError:
+            return False
 
     def arg_to_path(arg):
         # Test classes or functions can be appended to paths separated by ::
@@ -130,7 +133,6 @@ def _add_django_project_to_path(args):
     def find_django_path(args):
         args = map(str, args)
         args = [arg_to_path(x) for x in args if not x.startswith("-")]
-        args = [p for p in args if p.is_dir()]
 
         if not args:
             args = [pathlib.Path.cwd()]
