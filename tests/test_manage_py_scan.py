@@ -83,3 +83,15 @@ def test_django_project_found_invalid_settings_version(django_testdir, monkeypat
     result = django_testdir.runpytest_subprocess('django_project_root', '--help')
     assert result.ret == 0
     result.stdout.fnmatch_lines(['*usage:*'])
+
+
+@pytest.mark.django_project(project_root='django_project_root',
+                            create_manage_py=True)
+def test_runs_without_error_on_long_args(django_testdir):
+    django_testdir.create_test_module("""
+    def test_this_is_a_long_message_which_caused_a_bug_when_scanning_for_manage_py_12346712341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234112341234112451234123412341234123412341234123412341234123412341234123412341234123412341234123412341234():
+        assert 1 + 1 == 2
+    """)
+
+    result = django_testdir.runpytest_subprocess('-k', 'this_is_a_long_message_which_caused_a_bug_when_scanning_for_manage_py_12346712341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234112341234112451234123412341234123412341234123412341234123412341234123412341234123412341234123412341234', 'django_project_root')
+    assert result.ret == 0
