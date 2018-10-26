@@ -419,8 +419,8 @@ Create the test database from a custom SQL script
 
 You can replace the :fixture:`django_db_setup` fixture and run any code in its
 place. This includes creating your database by hand by running a SQL script
-directly. This example shows how sqlite3's executescript method. In more a more
-general use cases you probably want to load the SQL statements from a file or
+directly. This example shows sqlite3's executescript method. In a more
+general use case, you probably want to load the SQL statements from a file or
 invoke the ``psql`` or the ``mysql`` command line tool.
 
 Put this in ``conftest.py``::
@@ -438,6 +438,11 @@ Put this in ``conftest.py``::
                 CREATE TABLE theapp_item (id, name);
                 INSERT INTO theapp_item (name) VALUES ('created from a sql script');
                 ''')
+
+.. warning::
+    This snippet shows ``cursor().executescript()`` which is `sqlite` specific, for
+    other database engines this method might differ. For instance, psycopg2 uses
+    ``cursor().execute()``.
 
 
 Use a read only database
