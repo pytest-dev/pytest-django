@@ -7,7 +7,7 @@ import django
 import pytest
 
 
-BARE_SETTINGS = '''
+BARE_SETTINGS = """
 # At least one database must be configured
 DATABASES = {
     'default': {
@@ -16,86 +16,103 @@ DATABASES = {
     },
 }
 SECRET_KEY = 'foobar'
-'''
+"""
 
 
 def test_ds_ini(testdir, monkeypatch):
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    testdir.makeini("""
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
        [pytest]
        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
-    """)
-    pkg = testdir.mkpydir('tpkg')
-    pkg.join('settings_ini.py').write(BARE_SETTINGS)
-    testdir.makepyfile("""
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    pkg.join("settings_ini.py").write(BARE_SETTINGS)
+    testdir.makepyfile(
+        """
         import os
 
         def test_ds():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
-    """)
+    """
+    )
     result = testdir.runpytest_subprocess()
-    assert result.parseoutcomes()['passed'] == 1
-    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_ini '
-                                 '(from ini file)*'])
+    assert result.parseoutcomes()["passed"] == 1
+    result.stdout.fnmatch_lines(
+        ["Django settings: tpkg.settings_ini " "(from ini file)*"]
+    )
     assert result.ret == 0
 
 
 def test_ds_env(testdir, monkeypatch):
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
-    pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_env.py')
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
+    pkg = testdir.mkpydir("tpkg")
+    settings = pkg.join("settings_env.py")
     settings.write(BARE_SETTINGS)
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import os
 
         def test_settings():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
-    """)
+    """
+    )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_env (from '
-                                 'environment variable)*'])
-    assert result.parseoutcomes()['passed'] == 1
+    result.stdout.fnmatch_lines(
+        ["Django settings: tpkg.settings_env (from " "environment variable)*"]
+    )
+    assert result.parseoutcomes()["passed"] == 1
 
 
 def test_ds_option(testdir, monkeypatch):
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DO_NOT_USE_env')
-    testdir.makeini("""
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
+    testdir.makeini(
+        """
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-    """)
-    pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_opt.py')
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    settings = pkg.join("settings_opt.py")
     settings.write(BARE_SETTINGS)
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import os
 
         def test_ds():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_opt'
-    """)
-    result = testdir.runpytest_subprocess('--ds=tpkg.settings_opt')
-    result.stdout.fnmatch_lines(['Django settings: tpkg.settings_opt '
-                                 '(from command line option)'])
-    assert result.parseoutcomes()['passed'] == 1
+    """
+    )
+    result = testdir.runpytest_subprocess("--ds=tpkg.settings_opt")
+    result.stdout.fnmatch_lines(
+        ["Django settings: tpkg.settings_opt " "(from command line option)"]
+    )
+    assert result.parseoutcomes()["passed"] == 1
 
 
 def test_ds_env_override_ini(testdir, monkeypatch):
     "DSM env should override ini."
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.settings_env')
-    testdir.makeini("""\
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
+    testdir.makeini(
+        """\
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-    """)
-    pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_env.py')
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    settings = pkg.join("settings_env.py")
     settings.write(BARE_SETTINGS)
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import os
 
         def test_ds():
             assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_env'
-    """)
+    """
+    )
     result = testdir.runpytest_subprocess()
-    assert result.parseoutcomes()['passed'] == 1
+    assert result.parseoutcomes()["passed"] == 1
     assert result.ret == 0
 
 
@@ -104,8 +121,8 @@ def test_ds_non_existent(testdir, monkeypatch):
     Make sure we do not fail with INTERNALERROR if an incorrect
     DJANGO_SETTINGS_MODULE is given.
     """
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
-    testdir.makepyfile('def test_ds(): pass')
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
+    testdir.makepyfile("def test_ds(): pass")
     result = testdir.runpytest_subprocess()
     result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
     assert result.ret != 0
@@ -116,21 +133,22 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     Test that the settings module can be imported, after pytest has adjusted
     the sys.path.
     """
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'settings_after_conftest')
-    testdir.makepyfile('def test_ds(): pass')
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "settings_after_conftest")
+    testdir.makepyfile("def test_ds(): pass")
     testdir.makepyfile(settings_after_conftest="SECRET_KEY='secret'")
     # testdir.makeconftest("import sys; print(sys.path)")
-    result = testdir.runpytest_subprocess('-v')
-    result.stdout.fnmatch_lines(['*1 passed*'])
+    result = testdir.runpytest_subprocess("-v")
+    result.stdout.fnmatch_lines(["*1 passed*"])
     assert result.ret == 0
 
 
 def test_ds_in_pytest_configure(testdir, monkeypatch):
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    pkg = testdir.mkpydir('tpkg')
-    settings = pkg.join('settings_ds.py')
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    pkg = testdir.mkpydir("tpkg")
+    settings = pkg.join("settings_ds.py")
     settings.write(BARE_SETTINGS)
-    testdir.makeconftest("""
+    testdir.makeconftest(
+        """
         import os
 
         from django.conf import settings
@@ -139,15 +157,18 @@ def test_ds_in_pytest_configure(testdir, monkeypatch):
             if not settings.configured:
                 os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                                       'tpkg.settings_ds')
-    """)
+    """
+    )
 
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         def test_anything():
             pass
-    """)
+    """
+    )
 
     r = testdir.runpytest_subprocess()
-    assert r.parseoutcomes()['passed'] == 1
+    assert r.parseoutcomes()["passed"] == 1
     assert r.ret == 0
 
 
@@ -157,9 +178,10 @@ def test_django_settings_configure(testdir, monkeypatch):
     DJANGO_SETTINGS_MODULE altogether, relying on calling
     django.conf.settings.configure() and then invoking pytest.
     """
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
-    p = testdir.makepyfile(run="""
+    p = testdir.makepyfile(
+        run="""
             from django.conf import settings
             settings.configure(SECRET_KEY='set from settings.configure()',
                                DATABASES={'default': {
@@ -172,9 +194,11 @@ def test_django_settings_configure(testdir, monkeypatch):
             import pytest
 
             pytest.main()
-    """)
+    """
+    )
 
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import pytest
 
         from django.conf import settings
@@ -199,16 +223,16 @@ def test_django_settings_configure(testdir, monkeypatch):
         def test_user_count():
             assert User.objects.count() == 0
 
-    """)
+    """
+    )
     result = testdir.runpython(p)
-    result.stdout.fnmatch_lines([
-        "*4 passed*",
-    ])
+    result.stdout.fnmatch_lines(["*4 passed*"])
 
 
 def test_settings_in_hook(testdir, monkeypatch):
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    testdir.makeconftest("""
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeconftest(
+        """
         from django.conf import settings
 
         def pytest_configure():
@@ -218,8 +242,10 @@ def test_settings_in_hook(testdir, monkeypatch):
                                    'NAME': ':memory:'}},
                                INSTALLED_APPS=['django.contrib.auth',
                                                'django.contrib.contenttypes',])
-    """)
-    testdir.makepyfile("""
+    """
+    )
+    testdir.makepyfile(
+        """
         import pytest
         from django.conf import settings
         from django.contrib.auth.models import User
@@ -230,7 +256,8 @@ def test_settings_in_hook(testdir, monkeypatch):
         @pytest.mark.django_db
         def test_user_count():
             assert User.objects.count() == 0
-    """)
+    """
+    )
     r = testdir.runpytest_subprocess()
     assert r.ret == 0
 
@@ -239,20 +266,23 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """
     Make sure Django is not imported at all if no Django settings is specified.
     """
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    testdir.makepyfile("""
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makepyfile(
+        """
         import sys
         def test_settings():
             assert 'django' not in sys.modules
-    """)
+    """
+    )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(['*1 passed*'])
+    result.stdout.fnmatch_lines(["*1 passed*"])
     assert result.ret == 0
 
 
 def test_debug_false(testdir, monkeypatch):
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    testdir.makeconftest("""
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeconftest(
+        """
         from django.conf import settings
 
         def pytest_configure():
@@ -263,27 +293,35 @@ def test_debug_false(testdir, monkeypatch):
                                    'NAME': ':memory:'}},
                                INSTALLED_APPS=['django.contrib.auth',
                                                'django.contrib.contenttypes',])
-    """)
+    """
+    )
 
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         from django.conf import settings
         def test_debug_is_false():
             assert settings.DEBUG is False
-    """)
+    """
+    )
 
     r = testdir.runpytest_subprocess()
     assert r.ret == 0
 
 
-@pytest.mark.skipif(not hasattr(django, 'setup'),
-                    reason="This Django version does not support app loading")
-@pytest.mark.django_project(extra_settings="""
+@pytest.mark.skipif(
+    not hasattr(django, "setup"),
+    reason="This Django version does not support app loading",
+)
+@pytest.mark.django_project(
+    extra_settings="""
     INSTALLED_APPS = [
         'tpkg.app.apps.TestApp',
     ]
-""")
+"""
+)
 def test_django_setup_sequence(django_testdir):
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file(
+        """
         from django.apps import apps, AppConfig
 
 
@@ -296,9 +334,12 @@ def test_django_setup_sequence(django_testdir):
                 except AttributeError:  # Django < 2.0
                     populating = apps._lock.locked()
                 print('READY(): populating=%r' % populating)
-        """, 'apps.py')
+        """,
+        "apps.py",
+    )
 
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file(
+        """
         from django.apps import apps
 
         try:
@@ -308,10 +349,13 @@ def test_django_setup_sequence(django_testdir):
 
         print('IMPORT: populating=%r,ready=%r' % (populating, apps.ready))
         SOME_THING = 1234
-        """, 'models.py')
+        """,
+        "models.py",
+    )
 
-    django_testdir.create_app_file("", '__init__.py')
-    django_testdir.makepyfile("""
+    django_testdir.create_app_file("", "__init__.py")
+    django_testdir.makepyfile(
+        """
         from django.apps import apps
         from tpkg.app.models import SOME_THING
 
@@ -322,15 +366,16 @@ def test_django_setup_sequence(django_testdir):
                 populating = apps._lock.locked()
 
             print('TEST: populating=%r,ready=%r' % (populating, apps.ready))
-        """)
+        """
+    )
 
-    result = django_testdir.runpytest_subprocess('-s', '--tb=line')
-    result.stdout.fnmatch_lines(['*IMPORT: populating=True,ready=False*'])
-    result.stdout.fnmatch_lines(['*READY(): populating=True*'])
+    result = django_testdir.runpytest_subprocess("-s", "--tb=line")
+    result.stdout.fnmatch_lines(["*IMPORT: populating=True,ready=False*"])
+    result.stdout.fnmatch_lines(["*READY(): populating=True*"])
     if django.VERSION < (2, 0):
-        result.stdout.fnmatch_lines(['*TEST: populating=False,ready=True*'])
+        result.stdout.fnmatch_lines(["*TEST: populating=False,ready=True*"])
     else:
-        result.stdout.fnmatch_lines(['*TEST: populating=True,ready=True*'])
+        result.stdout.fnmatch_lines(["*TEST: populating=True,ready=True*"])
     assert result.ret == 0
 
 
@@ -338,9 +383,10 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
     """pytest-django should not bail out, if "django" has been imported
     somewhere, e.g. via pytest-splinter."""
 
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import os
         import django
 
@@ -354,15 +400,16 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
 
         def test_cfg(pytestconfig):
             assert pytestconfig.option.ds is None
-    """)
-    r = testdir.runpytest_subprocess('-s')
+    """
+    )
+    r = testdir.runpytest_subprocess("-s")
     assert r.ret == 0
 
 
 def test_no_django_settings_but_django_imported(testdir, monkeypatch):
     """Make sure we do not crash when Django happens to be imported, but
     settings is not properly configured"""
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
-    testdir.makeconftest('import django')
-    r = testdir.runpytest_subprocess('--help')
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeconftest("import django")
+    r = testdir.runpytest_subprocess("--help")
     assert r.ret == 0

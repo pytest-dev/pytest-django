@@ -66,14 +66,14 @@ def drop_database(name=TEST_DB_NAME, suffix=None):
 
     if get_db_engine() == 'postgresql_psycopg2':
         r = run_cmd('psql', 'postgres', '-c', 'DROP DATABASE %s' % name)
-        assert ('DROP DATABASE' in force_text(r.std_out) or
-                'does not exist' in force_text(r.std_err))
+        assert "DROP DATABASE" in force_text(
+            r.std_out
+        ) or "does not exist" in force_text(r.std_err)
         return
 
     if get_db_engine() == 'mysql':
         r = run_mysql('-e', 'DROP DATABASE %s' % name)
-        assert ('database doesn\'t exist' in force_text(r.std_err) or
-                r.status_code == 0)
+        assert "database doesn't exist" in force_text(r.std_err) or r.status_code == 0
         return
 
     if get_db_engine() == 'sqlite3':
