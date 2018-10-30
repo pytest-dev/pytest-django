@@ -18,24 +18,24 @@ from pytest_django_test.app.models import Item
 # This is possible with some of the testdir magic, but this is the lazy way
 # to do it.
 
-@pytest.mark.parametrize('subject', ['subject1', 'subject2'])
+
+@pytest.mark.parametrize("subject", ["subject1", "subject2"])
 def test_autoclear_mailbox(subject):
     assert len(mail.outbox) == 0
-    mail.send_mail(subject, 'body', 'from@example.com', ['to@example.com'])
+    mail.send_mail(subject, "body", "from@example.com", ["to@example.com"])
     assert len(mail.outbox) == 1
 
     m = mail.outbox[0]
     assert m.subject == subject
-    assert m.body == 'body'
-    assert m.from_email == 'from@example.com'
-    assert m.to == ['to@example.com']
+    assert m.body == "body"
+    assert m.from_email == "from@example.com"
+    assert m.to == ["to@example.com"]
 
 
 class TestDirectAccessWorksForDjangoTestCase(TestCase):
-
     def _do_test(self):
         assert len(mail.outbox) == 0
-        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
         assert len(mail.outbox) == 1
 
     def test_one(self):
@@ -45,15 +45,18 @@ class TestDirectAccessWorksForDjangoTestCase(TestCase):
         self._do_test()
 
 
-@pytest.mark.django_project(extra_settings="""
+@pytest.mark.django_project(
+    extra_settings="""
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )
     ROOT_URLCONF = 'tpkg.app.urls'
-    """)
+    """
+)
 def test_invalid_template_variable(django_testdir):
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file(
+        """
         from django.conf.urls import url
         from pytest_django_test.compat import patterns
 
@@ -63,23 +66,27 @@ def test_invalid_template_variable(django_testdir):
             '',
             url(r'invalid_template/', views.invalid_template),
         )
-        """, 'urls.py')
-    django_testdir.create_app_file("""
+        """,
+        "urls.py",
+    )
+    django_testdir.create_app_file(
+        """
         from django.shortcuts import render
 
 
         def invalid_template(request):
             return render(request, 'invalid_template.html', {})
-        """, 'views.py')
-    django_testdir.create_app_file(
-        "<div>{{ invalid_var }}</div>",
-        'templates/invalid_template_base.html'
+        """,
+        "views.py",
     )
     django_testdir.create_app_file(
-        "{% include 'invalid_template_base.html' %}",
-        'templates/invalid_template.html'
+        "<div>{{ invalid_var }}</div>", "templates/invalid_template_base.html"
     )
-    django_testdir.create_test_module('''
+    django_testdir.create_app_file(
+        "{% include 'invalid_template_base.html' %}", "templates/invalid_template.html"
+    )
+    django_testdir.create_test_module(
+        """
         import pytest
 
         def test_for_invalid_template(client):
@@ -88,28 +95,36 @@ def test_invalid_template_variable(django_testdir):
         @pytest.mark.ignore_template_errors
         def test_ignore(client):
             client.get('/invalid_template/')
-        ''')
-    result = django_testdir.runpytest_subprocess('-s', '--fail-on-template-vars')
+        """
+    )
+    result = django_testdir.runpytest_subprocess("-s", "--fail-on-template-vars")
 
     if get_django_version() >= (1, 9):
         origin = "'*/tpkg/app/templates/invalid_template_base.html'"
     else:
         origin = "'invalid_template.html'"
-    result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py F.*",
-        "E * Failed: Undefined template variable 'invalid_var' in {}".format(origin)
-    ])
+    result.stdout.fnmatch_lines_random(
+        [
+            "tpkg/test_the_test.py F.*",
+            "E * Failed: Undefined template variable 'invalid_var' in {}".format(
+                origin
+            ),
+        ]
+    )
 
 
-@pytest.mark.django_project(extra_settings="""
+@pytest.mark.django_project(
+    extra_settings="""
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )
     ROOT_URLCONF = 'tpkg.app.urls'
-    """)
+    """
+)
 def test_invalid_template_variable_opt_in(django_testdir):
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file(
+        """
         from django.conf.urls import url
         from pytest_django_test.compat import patterns
 
@@ -119,19 +134,24 @@ def test_invalid_template_variable_opt_in(django_testdir):
             '',
             url(r'invalid_template/', views.invalid_template),
         )
-        """, 'urls.py')
-    django_testdir.create_app_file("""
+        """,
+        "urls.py",
+    )
+    django_testdir.create_app_file(
+        """
         from django.shortcuts import render
 
 
         def invalid_template(request):
             return render(request, 'invalid_template.html', {})
-        """, 'views.py')
-    django_testdir.create_app_file(
-        "<div>{{ invalid_var }}</div>",
-        'templates/invalid_template.html'
+        """,
+        "views.py",
     )
-    django_testdir.create_test_module('''
+    django_testdir.create_app_file(
+        "<div>{{ invalid_var }}</div>", "templates/invalid_template.html"
+    )
+    django_testdir.create_test_module(
+        """
         import pytest
 
         def test_for_invalid_template(client):
@@ -140,17 +160,16 @@ def test_invalid_template_variable_opt_in(django_testdir):
         @pytest.mark.ignore_template_errors
         def test_ignore(client):
             client.get('/invalid_template/')
-        ''')
-    result = django_testdir.runpytest_subprocess('-s')
-    result.stdout.fnmatch_lines_random([
-        "tpkg/test_the_test.py ..*",
-    ])
+        """
+    )
+    result = django_testdir.runpytest_subprocess("-s")
+    result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py ..*"])
 
 
 @pytest.mark.django_db
 def test_database_rollback():
     assert Item.objects.count() == 0
-    Item.objects.create(name='blah')
+    Item.objects.create(name="blah")
     assert Item.objects.count() == 1
 
 
@@ -161,8 +180,8 @@ def test_database_rollback_again():
 
 @pytest.mark.django_db
 def test_database_name():
-    dirname, name = os.path.split(connection.settings_dict['NAME'])
-    assert 'file:memorydb' in name or name == ':memory:' or name.startswith('test_')
+    dirname, name = os.path.split(connection.settings_dict["NAME"])
+    assert "file:memorydb" in name or name == ":memory:" or name.startswith("test_")
 
 
 def test_database_noaccess():
@@ -177,88 +196,98 @@ class TestrunnerVerbosity:
     @pytest.fixture
     def testdir(self, django_testdir):
         print("testdir")
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             import pytest
 
             @pytest.mark.django_db
             def test_inner_testrunner():
                 pass
-            ''')
+            """
+        )
         return django_testdir
 
     def test_default(self, testdir):
         """Not verbose by default."""
-        result = testdir.runpytest_subprocess('-s')
-        result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py .*"])
+        result = testdir.runpytest_subprocess("-s")
+        result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
     def test_vq_verbosity_0(self, testdir):
         """-v and -q results in verbosity 0."""
-        result = testdir.runpytest_subprocess('-s', '-v', '-q')
-        result.stdout.fnmatch_lines([
-            "tpkg/test_the_test.py .*"])
+        result = testdir.runpytest_subprocess("-s", "-v", "-q")
+        result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
     def test_verbose_with_v(self, testdir):
         """Verbose output with '-v'."""
-        result = testdir.runpytest_subprocess('-s', '-v')
-        result.stdout.fnmatch_lines_random([
-            'tpkg/test_the_test.py:*',
-            '*PASSED*',
-        ])
+        result = testdir.runpytest_subprocess("-s", "-v")
+        result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py:*", "*PASSED*"])
         if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines([
-                "*Destroying test database for alias 'default'*"])
+            result.stderr.fnmatch_lines(
+                ["*Destroying test database for alias 'default'*"]
+            )
         else:
-            result.stdout.fnmatch_lines([
-                "*Destroying test database for alias 'default'...*"])
+            result.stdout.fnmatch_lines(
+                ["*Destroying test database for alias 'default'...*"]
+            )
 
     def test_more_verbose_with_vv(self, testdir):
         """More verbose output with '-v -v'."""
-        result = testdir.runpytest_subprocess('-s', '-v', '-v')
-        result.stdout.fnmatch_lines_random([
-            'tpkg/test_the_test.py:*',
-            '*Operations to perform:*',
-            '*Apply all migrations:*',
-            '*PASSED*'])
+        result = testdir.runpytest_subprocess("-s", "-v", "-v")
+        result.stdout.fnmatch_lines_random(
+            [
+                "tpkg/test_the_test.py:*",
+                "*Operations to perform:*",
+                "*Apply all migrations:*",
+                "*PASSED*",
+            ]
+        )
         if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines([
-                '*Creating test database for alias*',
-                "*Destroying test database for alias 'default'*"])
+            result.stderr.fnmatch_lines(
+                [
+                    "*Creating test database for alias*",
+                    "*Destroying test database for alias 'default'*",
+                ]
+            )
         else:
-            result.stdout.fnmatch_lines([
-                '*Creating test database for alias*',
-                "*Destroying test database for alias 'default'*"])
+            result.stdout.fnmatch_lines(
+                [
+                    "*Creating test database for alias*",
+                    "*Destroying test database for alias 'default'*",
+                ]
+            )
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
         """More verbose output with '-v -v', and --create-db."""
-        result = testdir.runpytest_subprocess('-s', '-v', '-v', '--create-db')
-        result.stdout.fnmatch_lines([
-            'tpkg/test_the_test.py:*',
-            '*PASSED*'])
+        result = testdir.runpytest_subprocess("-s", "-v", "-v", "--create-db")
+        result.stdout.fnmatch_lines(["tpkg/test_the_test.py:*", "*PASSED*"])
         if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines(['*Creating test database for alias*'])
-            assert ("*Destroying test database for alias 'default' ('*')...*"
-                    not in result.stderr.str())
+            result.stderr.fnmatch_lines(["*Creating test database for alias*"])
+            assert (
+                "*Destroying test database for alias 'default' ('*')...*"
+                not in result.stderr.str()
+            )
         else:
-            result.stdout.fnmatch_lines(['*Creating test database for alias*'])
-            assert ("*Destroying test database for alias 'default' ('*')...*"
-                    not in result.stdout.str())
+            result.stdout.fnmatch_lines(["*Creating test database for alias*"])
+            assert (
+                "*Destroying test database for alias 'default' ('*')...*"
+                not in result.stdout.str()
+            )
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+@pytest.mark.parametrize("site_name", ["site1", "site2"])
 def test_clear_site_cache(site_name, rf, monkeypatch):
-    request = rf.get('/')
-    monkeypatch.setattr(request, 'get_host', lambda: 'foo.com')
-    Site.objects.create(domain='foo.com', name=site_name)
+    request = rf.get("/")
+    monkeypatch.setattr(request, "get_host", lambda: "foo.com")
+    Site.objects.create(domain="foo.com", name=site_name)
     assert Site.objects.get_current(request=request).name == site_name
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('site_name', ['site1', 'site2'])
+@pytest.mark.parametrize("site_name", ["site1", "site2"])
 def test_clear_site_cache_check_site_cache_size(site_name, settings):
     assert len(site_models.SITE_CACHE) == 0
-    site = Site.objects.create(domain='foo.com', name=site_name)
+    site = Site.objects.create(domain="foo.com", name=site_name)
     settings.SITE_ID = site.id
     assert Site.objects.get_current() == site
     assert len(site_models.SITE_CACHE) == 1

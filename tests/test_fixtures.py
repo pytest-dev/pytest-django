@@ -29,14 +29,14 @@ def test_client(client):
 @pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)
-    resp = admin_client.get('/admin-required/')
-    assert force_text(resp.content) == 'You are an admin'
+    resp = admin_client.get("/admin-required/")
+    assert force_text(resp.content) == "You are an admin"
 
 
 def test_admin_client_no_db_marker(admin_client):
     assert isinstance(admin_client, Client)
-    resp = admin_client.get('/admin-required/')
-    assert force_text(resp.content) == 'You are an admin'
+    resp = admin_client.get("/admin-required/")
+    assert force_text(resp.content) == "You are an admin"
 
 
 @pytest.mark.django_db
@@ -55,55 +55,59 @@ def test_rf(rf):
 @pytest.mark.django_db
 def test_django_assert_num_queries_db(django_assert_num_queries):
     with django_assert_num_queries(3):
-        Item.objects.create(name='foo')
-        Item.objects.create(name='bar')
-        Item.objects.create(name='baz')
+        Item.objects.create(name="foo")
+        Item.objects.create(name="bar")
+        Item.objects.create(name="baz")
 
     with pytest.raises(pytest.fail.Exception) as excinfo:
         with django_assert_num_queries(2) as captured:
-            Item.objects.create(name='quux')
+            Item.objects.create(name="quux")
     assert excinfo.value.args == (
-        'Expected to perform 2 queries but 1 was done '
-        '(add -v option to show queries)',)
+        "Expected to perform 2 queries but 1 was done "
+        "(add -v option to show queries)",
+    )
     assert len(captured.captured_queries) == 1
 
 
 @pytest.mark.django_db
 def test_django_assert_max_num_queries_db(django_assert_max_num_queries):
     with django_assert_max_num_queries(2):
-        Item.objects.create(name='1-foo')
-        Item.objects.create(name='2-bar')
+        Item.objects.create(name="1-foo")
+        Item.objects.create(name="2-bar")
 
     with pytest.raises(pytest.fail.Exception) as excinfo:
         with django_assert_max_num_queries(2) as captured:
-            Item.objects.create(name='1-foo')
-            Item.objects.create(name='2-bar')
-            Item.objects.create(name='3-quux')
+            Item.objects.create(name="1-foo")
+            Item.objects.create(name="2-bar")
+            Item.objects.create(name="3-quux")
 
     assert excinfo.value.args == (
-        'Expected to perform 2 queries or less but 3 were done '
-        '(add -v option to show queries)',)
+        "Expected to perform 2 queries or less but 3 were done "
+        "(add -v option to show queries)",
+    )
     assert len(captured.captured_queries) == 3
-    assert '1-foo' in captured.captured_queries[0]['sql']
+    assert "1-foo" in captured.captured_queries[0]["sql"]
 
 
 @pytest.mark.django_db(transaction=True)
 def test_django_assert_num_queries_transactional_db(
-        transactional_db, django_assert_num_queries):
+    transactional_db, django_assert_num_queries
+):
     with transaction.atomic():
 
         with django_assert_num_queries(3):
-            Item.objects.create(name='foo')
-            Item.objects.create(name='bar')
-            Item.objects.create(name='baz')
+            Item.objects.create(name="foo")
+            Item.objects.create(name="bar")
+            Item.objects.create(name="baz")
 
         with pytest.raises(pytest.fail.Exception):
             with django_assert_num_queries(2):
-                Item.objects.create(name='quux')
+                Item.objects.create(name="quux")
 
 
 def test_django_assert_num_queries_output(django_testdir):
-    django_testdir.create_test_module("""
+    django_testdir.create_test_module(
+        """
         from django.contrib.contenttypes.models import ContentType
         import pytest
 
@@ -112,14 +116,16 @@ def test_django_assert_num_queries_output(django_testdir):
             with django_assert_num_queries(1):
                 list(ContentType.objects.all())
                 ContentType.objects.count()
-    """)
-    result = django_testdir.runpytest_subprocess('--tb=short')
-    result.stdout.fnmatch_lines(['*Expected to perform 1 queries but 2 were done*'])
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--tb=short")
+    result.stdout.fnmatch_lines(["*Expected to perform 1 queries but 2 were done*"])
     assert result.ret == 1
 
 
 def test_django_assert_num_queries_output_verbose(django_testdir):
-    django_testdir.create_test_module("""
+    django_testdir.create_test_module(
+        """
         from django.contrib.contenttypes.models import ContentType
         import pytest
 
@@ -128,13 +134,12 @@ def test_django_assert_num_queries_output_verbose(django_testdir):
             with django_assert_num_queries(11):
                 list(ContentType.objects.all())
                 ContentType.objects.count()
-    """)
-    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
-    result.stdout.fnmatch_lines([
-        '*Expected to perform 11 queries but 2 were done*',
-        '*Queries:*',
-        '*========*',
-    ])
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result.stdout.fnmatch_lines(
+        ["*Expected to perform 11 queries but 2 were done*", "*Queries:*", "*========*"]
+    )
     assert result.ret == 1
 
 
@@ -143,10 +148,10 @@ def test_django_assert_num_queries_db_connection(django_assert_num_queries):
     from django.db import connection
 
     with django_assert_num_queries(1, connection=connection):
-        Item.objects.create(name='foo')
+        Item.objects.create(name="foo")
 
     with django_assert_num_queries(1, connection=None):
-        Item.objects.create(name='foo')
+        Item.objects.create(name="foo")
 
     with pytest.raises(AttributeError):
         with django_assert_num_queries(1, connection=False):
@@ -157,37 +162,37 @@ class TestSettings:
     """Tests for the settings fixture, order matters"""
 
     def test_modify_existing(self, settings):
-        assert settings.SECRET_KEY == 'foobar'
-        assert real_settings.SECRET_KEY == 'foobar'
-        settings.SECRET_KEY = 'spam'
-        assert settings.SECRET_KEY == 'spam'
-        assert real_settings.SECRET_KEY == 'spam'
+        assert settings.SECRET_KEY == "foobar"
+        assert real_settings.SECRET_KEY == "foobar"
+        settings.SECRET_KEY = "spam"
+        assert settings.SECRET_KEY == "spam"
+        assert real_settings.SECRET_KEY == "spam"
 
     def test_modify_existing_again(self, settings):
-        assert settings.SECRET_KEY == 'foobar'
-        assert real_settings.SECRET_KEY == 'foobar'
+        assert settings.SECRET_KEY == "foobar"
+        assert real_settings.SECRET_KEY == "foobar"
 
     def test_new(self, settings):
-        assert not hasattr(settings, 'SPAM')
-        assert not hasattr(real_settings, 'SPAM')
-        settings.SPAM = 'ham'
-        assert settings.SPAM == 'ham'
-        assert real_settings.SPAM == 'ham'
+        assert not hasattr(settings, "SPAM")
+        assert not hasattr(real_settings, "SPAM")
+        settings.SPAM = "ham"
+        assert settings.SPAM == "ham"
+        assert real_settings.SPAM == "ham"
 
     def test_new_again(self, settings):
-        assert not hasattr(settings, 'SPAM')
-        assert not hasattr(real_settings, 'SPAM')
+        assert not hasattr(settings, "SPAM")
+        assert not hasattr(real_settings, "SPAM")
 
     def test_deleted(self, settings):
-        assert hasattr(settings, 'SECRET_KEY')
-        assert hasattr(real_settings, 'SECRET_KEY')
+        assert hasattr(settings, "SECRET_KEY")
+        assert hasattr(real_settings, "SECRET_KEY")
         del settings.SECRET_KEY
-        assert not hasattr(settings, 'SECRET_KEY')
-        assert not hasattr(real_settings, 'SECRET_KEY')
+        assert not hasattr(settings, "SECRET_KEY")
+        assert not hasattr(real_settings, "SECRET_KEY")
 
     def test_deleted_again(self, settings):
-        assert hasattr(settings, 'SECRET_KEY')
-        assert hasattr(real_settings, 'SECRET_KEY')
+        assert hasattr(settings, "SECRET_KEY")
+        assert hasattr(real_settings, "SECRET_KEY")
 
     def test_signals(self, settings):
         result = []
@@ -196,24 +201,24 @@ class TestSettings:
             result.append((setting, value, enter))
 
         from django.test.signals import setting_changed
+
         setting_changed.connect(assert_signal)
 
         result = []
-        settings.SECRET_KEY = 'change 1'
-        settings.SECRET_KEY = 'change 2'
+        settings.SECRET_KEY = "change 1"
+        settings.SECRET_KEY = "change 2"
         assert result == [
-            ('SECRET_KEY', 'change 1', True),
-            ('SECRET_KEY', 'change 2', True),
+            ("SECRET_KEY", "change 1", True),
+            ("SECRET_KEY", "change 2", True),
         ]
 
         result = []
-        settings.FOOBAR = 'abc123'
-        assert sorted(result) == [
-            ('FOOBAR', 'abc123', True),
-        ]
+        settings.FOOBAR = "abc123"
+        assert sorted(result) == [("FOOBAR", "abc123", True)]
 
     def test_modification_signal(self, django_testdir):
-        django_testdir.create_test_module("""
+        django_testdir.create_test_module(
+            """
             import pytest
 
             from django.conf import settings
@@ -242,32 +247,40 @@ class TestSettings:
 
             def test_set_non_existent(settings):
                 settings.FOOBAR = 'abc123'
-         """)
+         """
+        )
 
-        result = django_testdir.runpytest_subprocess('--tb=short', '-v', '-s')
+        result = django_testdir.runpytest_subprocess("--tb=short", "-v", "-s")
 
         # test_set
-        result.stdout.fnmatch_lines([
-            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 1*',
-            '*Setting changed: enter=True,setting=SECRET_KEY,value=change 2*',
-            '*Setting changed: enter=False,setting=SECRET_KEY,value=change 1*',
-            '*Setting changed: enter=False,setting=SECRET_KEY,value=foobar*',
-        ])
+        result.stdout.fnmatch_lines(
+            [
+                "*Setting changed: enter=True,setting=SECRET_KEY,value=change 1*",
+                "*Setting changed: enter=True,setting=SECRET_KEY,value=change 2*",
+                "*Setting changed: enter=False,setting=SECRET_KEY,value=change 1*",
+                "*Setting changed: enter=False,setting=SECRET_KEY,value=foobar*",
+            ]
+        )
 
-        result.stdout.fnmatch_lines([
-            '*Setting changed: enter=True,setting=FOOBAR,value=abc123*',
-            ('*Setting changed: enter=False,setting=FOOBAR,value=None,'
-             'actual_value=<<does not exist>>*'),
-        ])
+        result.stdout.fnmatch_lines(
+            [
+                "*Setting changed: enter=True,setting=FOOBAR,value=abc123*",
+                (
+                    "*Setting changed: enter=False,setting=FOOBAR,value=None,"
+                    "actual_value=<<does not exist>>*"
+                ),
+            ]
+        )
 
 
 class TestLiveServer:
     def test_settings_before(self):
         from django.conf import settings
 
-        assert '%s.%s' % (
-            settings.__class__.__module__,
-            settings.__class__.__name__) == 'django.conf.Settings'
+        assert (
+            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            == "django.conf.Settings"
+        )
         TestLiveServer._test_settings_before_run = True
 
     def test_url(self, live_server):
@@ -282,63 +295,65 @@ class TestLiveServer:
         from django.conf import settings
 
         assert TestLiveServer._test_settings_before_run is True
-        assert '%s.%s' % (
-            settings.__class__.__module__,
-            settings.__class__.__name__) == 'django.conf.Settings'
+        assert (
+            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            == "django.conf.Settings"
+        )
         if django.VERSION >= (1, 11):
-            assert settings.ALLOWED_HOSTS == ['testserver']
+            assert settings.ALLOWED_HOSTS == ["testserver"]
         else:
-            assert settings.ALLOWED_HOSTS == ['*']
+            assert settings.ALLOWED_HOSTS == ["*"]
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():
-            pytest.skip('transactions required for this test')
+            pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
 
     def test_db_changes_visibility(self, live_server):
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 0'
-        Item.objects.create(name='foo')
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 1'
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 0"
+        Item.objects.create(name="foo")
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 1"
 
     def test_fixture_db(self, db, live_server):
-        Item.objects.create(name='foo')
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 1'
+        Item.objects.create(name="foo")
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 1"
 
     def test_fixture_transactional_db(self, transactional_db, live_server):
-        Item.objects.create(name='foo')
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 1'
+        Item.objects.create(name="foo")
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 1"
 
     @pytest.fixture
     def item(self):
         # This has not requested database access explicitly, but the
         # live_server fixture auto-uses the transactional_db fixture.
-        Item.objects.create(name='foo')
+        Item.objects.create(name="foo")
 
     def test_item(self, item, live_server):
         pass
 
     @pytest.fixture
     def item_db(self, db):
-        return Item.objects.create(name='foo')
+        return Item.objects.create(name="foo")
 
     def test_item_db(self, item_db, live_server):
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 1'
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 1"
 
     @pytest.fixture
     def item_transactional_db(self, transactional_db):
-        return Item.objects.create(name='foo')
+        return Item.objects.create(name="foo")
 
     def test_item_transactional_db(self, item_transactional_db, live_server):
-        response_data = urlopen(live_server + '/item_count/').read()
-        assert force_text(response_data) == 'Item count: 1'
+        response_data = urlopen(live_server + "/item_count/").read()
+        assert force_text(response_data) == "Item count: 1"
 
-    @pytest.mark.django_project(extra_settings="""
+    @pytest.mark.django_project(
+        extra_settings="""
         INSTALLED_APPS = [
             'django.contrib.auth',
             'django.contrib.contenttypes',
@@ -349,13 +364,15 @@ class TestLiveServer:
         ]
 
         STATIC_URL = '/static/'
-        """)
+        """
+    )
     def test_serve_static_with_staticfiles_app(self, django_testdir, settings):
         """
         LiveServer always serves statics with ``django.contrib.staticfiles``
         handler.
         """
-        django_testdir.create_test_module("""
+        django_testdir.create_test_module(
+            """
             import pytest
             from django.utils.encoding import force_text
 
@@ -371,53 +388,63 @@ class TestLiveServer:
                     response_data = urlopen(
                         live_server + '/static/a_file.txt').read()
                     assert force_text(response_data) == 'bla\\n'
-            """)
-        result = django_testdir.runpytest_subprocess('--tb=short', '-v')
-        result.stdout.fnmatch_lines(['*test_a*PASSED*'])
+            """
+        )
+        result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+        result.stdout.fnmatch_lines(["*test_a*PASSED*"])
         assert result.ret == 0
 
-    def test_serve_static_dj17_without_staticfiles_app(self, live_server,
-                                                       settings):
+    def test_serve_static_dj17_without_staticfiles_app(self, live_server, settings):
         """
         Because ``django.contrib.staticfiles`` is not installed
         LiveServer can not serve statics with django >= 1.7 .
         """
         with pytest.raises(HTTPError):
-            urlopen(live_server + '/static/a_file.txt').read()
+            urlopen(live_server + "/static/a_file.txt").read()
 
-    @pytest.mark.skipif(get_django_version() < (1, 11),
-                        reason='Django >= 1.11 required')
+    @pytest.mark.skipif(
+        get_django_version() < (1, 11), reason="Django >= 1.11 required"
+    )
     def test_specified_port_range_error_message_django_111(self, django_testdir):
-        django_testdir.create_test_module("""
+        django_testdir.create_test_module(
+            """
         def test_with_live_server(live_server):
             pass
-        """)
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('--liveserver=localhost:1234-2345')
-        result.stdout.fnmatch_lines([
-            '*Specifying multiple live server ports is not supported in Django 1.11. This '
-            'will be an error in a future pytest-django release.*'
-        ])
+        result = django_testdir.runpytest_subprocess("--liveserver=localhost:1234-2345")
+        result.stdout.fnmatch_lines(
+            [
+                "*Specifying multiple live server ports is not supported in Django 1.11. This "
+                "will be an error in a future pytest-django release.*"
+            ]
+        )
 
-    @pytest.mark.skipif(get_django_version() < (1, 11, 2),
-                        reason='Django >= 1.11.2 required')
+    @pytest.mark.skipif(
+        get_django_version() < (1, 11, 2), reason="Django >= 1.11.2 required"
+    )
     def test_specified_port_django_111(self, django_testdir):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            sock.bind(('', 0))
+            sock.bind(("", 0))
             __, port = sock.getsockname()
         finally:
             sock.close()
 
-        django_testdir.create_test_module("""
+        django_testdir.create_test_module(
+            """
         def test_with_live_server(live_server):
             assert live_server.port == %d
-        """ % port)
+        """
+            % port
+        )
 
-        django_testdir.runpytest_subprocess('--liveserver=localhost:%s' % port)
+        django_testdir.runpytest_subprocess("--liveserver=localhost:%s" % port)
 
 
-@pytest.mark.django_project(extra_settings="""
+@pytest.mark.django_project(
+    extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
     INSTALLED_APPS = [
         'django.contrib.auth',
@@ -427,9 +454,11 @@ class TestLiveServer:
         'tpkg.app',
     ]
     ROOT_URLCONF = 'tpkg.app.urls'
-    """)
+    """
+)
 def test_custom_user_model(django_testdir):
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file(
+        """
         from django.contrib.auth.models import AbstractUser
         from django.db import models
 
@@ -437,8 +466,11 @@ def test_custom_user_model(django_testdir):
             identifier = models.CharField(unique=True, max_length=100)
 
             USERNAME_FIELD = 'identifier'
-        """, 'models.py')
-    django_testdir.create_app_file("""
+        """,
+        "models.py",
+    )
+    django_testdir.create_app_file(
+        """
         from django.conf.urls import url
         from pytest_django_test.compat import patterns
         from tpkg.app import views
@@ -447,8 +479,11 @@ def test_custom_user_model(django_testdir):
             '',
             url(r'admin-required/', views.admin_required_view),
         )
-        """, 'urls.py')
-    django_testdir.create_app_file("""
+        """,
+        "urls.py",
+    )
+    django_testdir.create_app_file(
+        """
         from django.http import HttpResponse
         from django.template import Template
         from django.template.context import Context
@@ -460,18 +495,23 @@ def test_custom_user_model(django_testdir):
                     Template('You are an admin').render(Context()))
             return HttpResponse(
                     Template('Access denied').render(Context()))
-        """, 'views.py')
-    django_testdir.makepyfile("""
+        """,
+        "views.py",
+    )
+    django_testdir.makepyfile(
+        """
         from django.utils.encoding import force_text
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
             resp = admin_client.get('/admin-required/')
             assert force_text(resp.content) == 'You are an admin'
-        """)
+        """
+    )
 
-    django_testdir.create_app_file('', 'migrations/__init__.py')
-    django_testdir.create_app_file("""
+    django_testdir.create_app_file("", "migrations/__init__.py")
+    django_testdir.create_app_file(
+        """
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
@@ -514,10 +554,12 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-    """, 'migrations/0002_custom_user_model.py')  # noqa
+    """,
+        "migrations/0002_custom_user_model.py",
+    )  # noqa
 
-    result = django_testdir.runpytest_subprocess('-s')
-    result.stdout.fnmatch_lines(['*1 passed*'])
+    result = django_testdir.runpytest_subprocess("-s")
+    result.stdout.fnmatch_lines(["*1 passed*"])
     assert result.ret == 0
 
 
@@ -550,15 +592,17 @@ class Test_django_db_blocker:
 
 
 def test_mail(mailoutbox):
-    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
+    assert (
+        mailoutbox is mail.outbox
+    )  # check that mail.outbox and fixture value is same object
     assert len(mailoutbox) == 0
-    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
     assert len(mailoutbox) == 1
     m = mailoutbox[0]
-    assert m.subject == 'subject'
-    assert m.body == 'body'
-    assert m.from_email == 'from@example.com'
-    assert list(m.to) == ['to@example.com']
+    assert m.subject == "subject"
+    assert m.body == "body"
+    assert m.from_email == "from@example.com"
+    assert list(m.to) == ["to@example.com"]
 
 
 def test_mail_again(mailoutbox):
@@ -566,14 +610,15 @@ def test_mail_again(mailoutbox):
 
 
 def test_mail_message_uses_mocked_DNS_NAME(mailoutbox):
-    mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+    mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
     m = mailoutbox[0]
     message = m.message()
-    assert message['Message-ID'].endswith('@fake-tests.example.com>')
+    assert message["Message-ID"].endswith("@fake-tests.example.com>")
 
 
 def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
-    django_testdir.create_test_module("""
+    django_testdir.create_test_module(
+        """
         from django.core import mail
         import pytest
 
@@ -587,14 +632,16 @@ def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
             m = mailoutbox[0]
             message = m.message()
             assert message['Message-ID'].endswith('@from.django_mail_dnsname>')
-    """)
-    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
-    result.stdout.fnmatch_lines(['*test_mailbox_inner*PASSED*'])
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result.stdout.fnmatch_lines(["*test_mailbox_inner*PASSED*"])
     assert result.ret == 0
 
 
 def test_mail_message_dns_patching_can_be_skipped(django_testdir):
-    django_testdir.create_test_module("""
+    django_testdir.create_test_module(
+        """
         from django.core import mail
         import pytest
 
@@ -618,10 +665,10 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir):
             assert len(mocked_make_msgid.called) == 1
 
             assert mocked_make_msgid.called[0][1]['domain'] is mail.DNS_NAME
-    """)
-    result = django_testdir.runpytest_subprocess('--tb=short', '-vv', '-s')
-    result.stdout.fnmatch_lines([
-        '*test_mailbox_inner*',
-        'django_mail_dnsname_mark',
-        'PASSED*'])
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-s")
+    result.stdout.fnmatch_lines(
+        ["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"]
+    )
     assert result.ret == 0

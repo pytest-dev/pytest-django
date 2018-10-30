@@ -18,36 +18,40 @@ class LiveServer(object):
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
-            if (conn.settings_dict['ENGINE'] == 'django.db.backends.sqlite3' and
-                    conn.settings_dict['NAME'] == ':memory:'):
+            if (
+                conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3"
+                and conn.settings_dict["NAME"] == ":memory:"
+            ):
                 # Explicitly enable thread-shareability for this connection
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
-        liveserver_kwargs = {'connections_override': connections_override}
+        liveserver_kwargs = {"connections_override": connections_override}
         from django.conf import settings
-        if 'django.contrib.staticfiles' in settings.INSTALLED_APPS:
+
+        if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
             from django.contrib.staticfiles.handlers import StaticFilesHandler
-            liveserver_kwargs['static_handler'] = StaticFilesHandler
+
+            liveserver_kwargs["static_handler"] = StaticFilesHandler
         else:
             from django.test.testcases import _StaticFilesHandler
-            liveserver_kwargs['static_handler'] = _StaticFilesHandler
+
+            liveserver_kwargs["static_handler"] = _StaticFilesHandler
 
         if django.VERSION < (1, 11):
             host, possible_ports = parse_addr(addr)
-            self.thread = LiveServerThread(host, possible_ports,
-                                           **liveserver_kwargs)
+            self.thread = LiveServerThread(host, possible_ports, **liveserver_kwargs)
         else:
             try:
-                host, port = addr.split(':')
+                host, port = addr.split(":")
             except ValueError:
                 host = addr
             else:
-                liveserver_kwargs['port'] = int(port)
+                liveserver_kwargs["port"] = int(port)
             self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
-            ALLOWED_HOSTS={'append': host},
+            ALLOWED_HOSTS={"append": host}
         )
 
         self.thread.daemon = True
@@ -64,15 +68,18 @@ class LiveServer(object):
 
     @property
     def url(self):
-        return 'http://%s:%s' % (self.thread.host, self.thread.port)
+        return "http://%s:%s" % (self.thread.host, self.thread.port)
 
     if sys.version_info < (3, 0):
+
         def __unicode__(self):
             return self.url
 
         def __add__(self, other):
             return unicode(self) + other  # noqa: pyflakes on python3
+
     else:
+
         def __str__(self):
             return self.url
 
@@ -80,7 +87,7 @@ class LiveServer(object):
             return str(self) + other
 
     def __repr__(self):
-        return '<LiveServer listening at %s>' % self.url
+        return "<LiveServer listening at %s>" % self.url
 
 
 def parse_addr(specified_address):
@@ -93,10 +100,10 @@ def parse_addr(specified_address):
     # it down into a detailed list of all possible ports.
     possible_ports = []
     try:
-        host, port_ranges = specified_address.split(':')
-        for port_range in port_ranges.split(','):
+        host, port_ranges = specified_address.split(":")
+        for port_range in port_ranges.split(","):
             # A port range can be of either form: '8000' or '8000-8010'.
-            extremes = list(map(int, port_range.split('-')))
+            extremes = list(map(int, port_range.split("-")))
             assert len(extremes) in (1, 2)
             if len(extremes) == 1:
                 # Port range of the form '8000'
@@ -106,7 +113,6 @@ def parse_addr(specified_address):
                 for port in range(extremes[0], extremes[1] + 1):
                     possible_ports.append(port)
     except Exception:
-        raise Exception(
-            'Invalid address ("%s") for live server.' % specified_address)
+        raise Exception('Invalid address ("%s") for live server.' % specified_address)
 
     return host, possible_ports

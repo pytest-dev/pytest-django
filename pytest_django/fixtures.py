@@ -15,14 +15,26 @@ from .django_compat import is_django_unittest
 
 from .lazy_django import skip_if_no_django
 
-__all__ = ['django_db_setup', 'db', 'transactional_db', 'django_db_reset_sequences',
-           'admin_user', 'django_user_model', 'django_username_field',
-           'client', 'admin_client', 'rf', 'settings', 'live_server',
-           '_live_server_helper', 'django_assert_num_queries',
-           'django_assert_max_num_queries']
+__all__ = [
+    "django_db_setup",
+    "db",
+    "transactional_db",
+    "django_db_reset_sequences",
+    "admin_user",
+    "django_user_model",
+    "django_username_field",
+    "client",
+    "admin_client",
+    "rf",
+    "settings",
+    "live_server",
+    "_live_server_helper",
+    "django_assert_num_queries",
+    "django_assert_max_num_queries",
+]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
@@ -31,46 +43,46 @@ def django_db_modify_db_settings_xdist_suffix(request):
     for db_settings in settings.DATABASES.values():
 
         try:
-            test_name = db_settings['TEST']['NAME']
+            test_name = db_settings["TEST"]["NAME"]
         except KeyError:
             test_name = None
 
         if not test_name:
-            if db_settings['ENGINE'] == 'django.db.backends.sqlite3':
-                return ':memory:'
+            if db_settings["ENGINE"] == "django.db.backends.sqlite3":
+                return ":memory:"
             else:
-                test_name = 'test_{}'.format(db_settings['NAME'])
+                test_name = "test_{}".format(db_settings["NAME"])
 
         # Put a suffix like _gw0, _gw1 etc on xdist processes
-        xdist_suffix = getattr(request.config, 'slaveinput', {}).get('slaveid')
-        if test_name != ':memory:' and xdist_suffix is not None:
-            test_name = '{}_{}'.format(test_name, xdist_suffix)
+        xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
+        if test_name != ":memory:" and xdist_suffix is not None:
+            test_name = "{}_{}".format(test_name, xdist_suffix)
 
-        db_settings.setdefault('TEST', {})
-        db_settings['TEST']['NAME'] = test_name
+        db_settings.setdefault("TEST", {})
+        db_settings["TEST"]["NAME"] = test_name
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_modify_db_settings(django_db_modify_db_settings_xdist_suffix):
     skip_if_no_django()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_use_migrations(request):
-    return not request.config.getvalue('nomigrations')
+    return not request.config.getvalue("nomigrations")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_keepdb(request):
-    return request.config.getvalue('reuse_db')
+    return request.config.getvalue("reuse_db")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_createdb(request):
-    return request.config.getvalue('create_db')
+    return request.config.getvalue("create_db")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def django_db_setup(
     request,
     django_test_environment,
@@ -89,7 +101,7 @@ def django_db_setup(
         _disable_native_migrations()
 
     if django_db_keepdb and not django_db_createdb:
-        setup_databases_args['keepdb'] = True
+        setup_databases_args["keepdb"] = True
 
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
@@ -100,21 +112,19 @@ def django_db_setup(
 
     def teardown_database():
         with django_db_blocker.unblock():
-            teardown_databases(
-                db_cfg,
-                verbosity=pytest.config.option.verbose,
-            )
+            teardown_databases(db_cfg, verbosity=pytest.config.option.verbose)
 
     if not django_db_keepdb:
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(request, django_db_blocker,
-                              transactional=False, reset_sequences=False):
+def _django_db_fixture_helper(
+    request, django_db_blocker, transactional=False, reset_sequences=False
+):
     if is_django_unittest(request):
         return
 
-    if not transactional and 'live_server' in request.funcargnames:
+    if not transactional and "live_server" in request.funcargnames:
         # Do nothing, we get called with transactional=True, too.
         return
 
@@ -125,13 +135,15 @@ def _django_db_fixture_helper(request, django_db_blocker,
         from django.test import TransactionTestCase as django_case
 
         if reset_sequences:
+
             class ResetSequenceTestCase(django_case):
                 reset_sequences = True
+
             django_case = ResetSequenceTestCase
     else:
         from django.test import TestCase as django_case
 
-    test_case = django_case(methodName='__init__')
+    test_case = django_case(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
@@ -145,7 +157,8 @@ def _disable_native_migrations():
 
 # ############### User visible fixtures ################
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 def db(request, django_db_setup, django_db_blocker):
     """Require a django test database.
 
@@ -160,16 +173,18 @@ def db(request, django_db_setup, django_db_blocker):
     over each other in the following order (the last one wins): ``db``,
     ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if 'django_db_reset_sequences' in request.funcargnames:
-        request.getfixturevalue('django_db_reset_sequences')
-    if 'transactional_db' in request.funcargnames \
-            or 'live_server' in request.funcargnames:
-        request.getfixturevalue('transactional_db')
+    if "django_db_reset_sequences" in request.funcargnames:
+        request.getfixturevalue("django_db_reset_sequences")
+    if (
+        "transactional_db" in request.funcargnames
+        or "live_server" in request.funcargnames
+    ):
+        request.getfixturevalue("transactional_db")
     else:
         _django_db_fixture_helper(request, django_db_blocker, transactional=False)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def transactional_db(request, django_db_setup, django_db_blocker):
     """Require a django test database with transaction support.
 
@@ -183,13 +198,12 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     over each other in the following order (the last one wins): ``db``,
     ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if 'django_db_reset_sequences' in request.funcargnames:
-        request.getfixturevalue('django_db_reset_sequences')
-    _django_db_fixture_helper(request, django_db_blocker,
-                              transactional=True)
+    if "django_db_reset_sequences" in request.funcargnames:
+        request.getfixturevalue("django_db_reset_sequences")
+    _django_db_fixture_helper(request, django_db_blocker, transactional=True)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
     """Require a transactional test database with sequence reset support.
 
@@ -202,8 +216,9 @@ def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
     over each other in the following order (the last one wins): ``db``,
     ``transactional_db``, ``django_db_reset_sequences``.
     """
-    _django_db_fixture_helper(request, django_db_blocker,
-                              transactional=True, reset_sequences=True)
+    _django_db_fixture_helper(
+        request, django_db_blocker, transactional=True, reset_sequences=True
+    )
 
 
 @pytest.fixture()
@@ -220,6 +235,7 @@ def client():
 def django_user_model(db):
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
+
     return get_user_model()
 
 
@@ -240,13 +256,14 @@ def admin_user(db, django_user_model, django_username_field):
     username_field = django_username_field
 
     try:
-        user = UserModel._default_manager.get(**{username_field: 'admin'})
+        user = UserModel._default_manager.get(**{username_field: "admin"})
     except UserModel.DoesNotExist:
         extra_fields = {}
-        if username_field != 'username':
-            extra_fields[username_field] = 'admin'
+        if username_field != "username":
+            extra_fields[username_field] = "admin"
         user = UserModel._default_manager.create_superuser(
-            'admin', 'admin@example.com', 'password', **extra_fields)
+            "admin", "admin@example.com", "password", **extra_fields
+        )
     return user
 
 
@@ -256,7 +273,7 @@ def admin_client(db, admin_user):
     from django.test.client import Client
 
     client = Client()
-    client.login(username=admin_user.username, password='password')
+    client.login(username=admin_user.username, password="password")
     return client
 
 
@@ -275,23 +292,25 @@ class SettingsWrapper(object):
 
     def __delattr__(self, attr):
         from django.test import override_settings
+
         override = override_settings()
         override.enable()
         from django.conf import settings
+
         delattr(settings, attr)
 
         self._to_restore.append(override)
 
     def __setattr__(self, attr, value):
         from django.test import override_settings
-        override = override_settings(**{
-            attr: value
-        })
+
+        override = override_settings(**{attr: value})
         override.enable()
         self._to_restore.append(override)
 
     def __getattr__(self, item):
         from django.conf import settings
+
         return getattr(settings, item)
 
     def finalize(self):
@@ -311,7 +330,7 @@ def settings():
     wrapper.finalize()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def live_server(request):
     """Run a live Django server in the background during tests
 
@@ -335,30 +354,33 @@ def live_server(request):
 
     import django
 
-    addr = (request.config.getvalue('liveserver') or
-            os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS'))
+    addr = request.config.getvalue("liveserver") or os.getenv(
+        "DJANGO_LIVE_TEST_SERVER_ADDRESS"
+    )
 
-    if addr and ':' in addr:
+    if addr and ":" in addr:
         if django.VERSION >= (1, 11):
-            ports = addr.split(':')[1]
-            if '-' in ports or ',' in ports:
-                request.config.warn('D001',
-                                    'Specifying multiple live server ports is not supported '
-                                    'in Django 1.11. This will be an error in a future '
-                                    'pytest-django release.')
+            ports = addr.split(":")[1]
+            if "-" in ports or "," in ports:
+                request.config.warn(
+                    "D001",
+                    "Specifying multiple live server ports is not supported "
+                    "in Django 1.11. This will be an error in a future "
+                    "pytest-django release.",
+                )
 
     if not addr:
         if django.VERSION < (1, 11):
-            addr = 'localhost:8081,8100-8200'
+            addr = "localhost:8081,8100-8200"
         else:
-            addr = 'localhost'
+            addr = "localhost"
 
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
     return server
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True, scope="function")
 def _live_server_helper(request):
     """Helper to make live_server work, internal to pytest-django.
 
@@ -374,12 +396,12 @@ def _live_server_helper(request):
 
     It will also override settings only for the duration of the test.
     """
-    if 'live_server' not in request.funcargnames:
+    if "live_server" not in request.funcargnames:
         return
 
-    request.getfixturevalue('transactional_db')
+    request.getfixturevalue("transactional_db")
 
-    live_server = request.getfixturevalue('live_server')
+    live_server = request.getfixturevalue("live_server")
     live_server._live_server_modified_settings.enable()
     request.addfinalizer(live_server._live_server_modified_settings.disable)
 
@@ -391,7 +413,7 @@ def _assert_num_queries(config, num, exact=True, connection=None):
     if connection is None:
         from django.db import connection
 
-    verbose = config.getoption('verbose') > 0
+    verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(connection) as context:
         yield context
         num_queries = len(context)
@@ -399,24 +421,24 @@ def _assert_num_queries(config, num, exact=True, connection=None):
         if failed:
             msg = "Expected to perform {} queries {}{}".format(
                 num,
-                '' if exact else 'or less ',
-                'but {} done'.format(
-                    num_queries == 1 and '1 was' or '%d were' % (num_queries,)
-                )
+                "" if exact else "or less ",
+                "but {} done".format(
+                    num_queries == 1 and "1 was" or "%d were" % (num_queries,)
+                ),
             )
             if verbose:
-                sqls = (q['sql'] for q in context.captured_queries)
-                msg += '\n\nQueries:\n========\n\n%s' % '\n\n'.join(sqls)
+                sqls = (q["sql"] for q in context.captured_queries)
+                msg += "\n\nQueries:\n========\n\n%s" % "\n\n".join(sqls)
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def django_assert_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def django_assert_max_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig, exact=False)

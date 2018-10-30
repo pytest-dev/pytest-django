@@ -5,11 +5,11 @@ from pytest_django_test.app.models import Item
 
 
 class TestFixtures(TestCase):
-    fixtures = ['items']
+    fixtures = ["items"]
 
     def test_fixtures(self):
         assert Item.objects.count() == 1
-        assert Item.objects.get().name == 'Fixture item'
+        assert Item.objects.get().name == "Fixture item"
 
     def test_fixtures_again(self):
         """Ensure fixtures are only loaded once."""
@@ -20,13 +20,13 @@ class TestSetup(TestCase):
     def setUp(self):
         """setUp should be called after starting a transaction"""
         assert Item.objects.count() == 0
-        Item.objects.create(name='Some item')
-        Item.objects.create(name='Some item again')
+        Item.objects.create(name="Some item")
+        Item.objects.create(name="Some item again")
 
     def test_count(self):
         self.assertEqual(Item.objects.count(), 2)
         assert Item.objects.count() == 2
-        Item.objects.create(name='Foo')
+        Item.objects.create(name="Foo")
         self.assertEqual(Item.objects.count(), 3)
 
     def test_count_again(self):
@@ -38,15 +38,15 @@ class TestSetup(TestCase):
 
 
 class TestFixturesWithSetup(TestCase):
-    fixtures = ['items']
+    fixtures = ["items"]
 
     def setUp(self):
         assert Item.objects.count() == 1
-        Item.objects.create(name='Some item')
+        Item.objects.create(name="Some item")
 
     def test_count(self):
         assert Item.objects.count() == 2
-        Item.objects.create(name='Some item again')
+        Item.objects.create(name="Some item again")
 
     def test_count_again(self):
         self.test_count()
@@ -61,7 +61,8 @@ def test_sole_test(django_testdir):
     are collected, without the django_db marker.
     """
 
-    django_testdir.create_test_module('''
+    django_testdir.create_test_module(
+        """
         import os
 
         from django.test import TestCase
@@ -78,19 +79,20 @@ def test_sole_test(django_testdir):
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
-    ''')
+    """
+    )
 
-    result = django_testdir.runpytest_subprocess('-v')
-    result.stdout.fnmatch_lines([
-        "*TestFoo*test_foo PASSED*",
-    ])
+    result = django_testdir.runpytest_subprocess("-v")
+    result.stdout.fnmatch_lines(["*TestFoo*test_foo PASSED*"])
     assert result.ret == 0
 
 
 class TestUnittestMethods:
     "Test that setup/teardown methods of unittests are being called."
+
     def test_django(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
 
             class TestFoo(TestCase):
@@ -110,20 +112,24 @@ class TestUnittestMethods:
 
                 def test_pass(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v', '-s')
-        result.stdout.fnmatch_lines([
-            "CALLED: setUpClass",
-            "CALLED: setUp",
-            "CALLED: tearDown",
-            "PASSED*",
-            "CALLED: tearDownClass",
-        ])
+        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result.stdout.fnmatch_lines(
+            [
+                "CALLED: setUpClass",
+                "CALLED: setUp",
+                "CALLED: tearDown",
+                "PASSED*",
+                "CALLED: tearDownClass",
+            ]
+        )
         assert result.ret == 0
 
     def test_setUpClass_not_being_a_classmethod(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
 
             class TestFoo(TestCase):
@@ -132,17 +138,21 @@ class TestUnittestMethods:
 
                 def test_pass(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v', '-s')
-        result.stdout.fnmatch_lines([
-            "* ERROR at setup of TestFoo.test_pass *",
-            "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
-        ])
+        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result.stdout.fnmatch_lines(
+            [
+                "* ERROR at setup of TestFoo.test_pass *",
+                "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
+            ]
+        )
         assert result.ret == 1
 
     def test_setUpClass_multiple_subclasses(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
 
 
@@ -163,20 +173,24 @@ class TestUnittestMethods:
             class TestBar2(TestFoo):
                 def test_bar21(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v')
-        result.stdout.fnmatch_lines([
-            "*TestFoo::test_shared PASSED*",
-            "*TestBar::test_bar1 PASSED*",
-            "*TestBar::test_shared PASSED*",
-            "*TestBar2::test_bar21 PASSED*",
-            "*TestBar2::test_shared PASSED*",
-        ])
+        result = django_testdir.runpytest_subprocess("-v")
+        result.stdout.fnmatch_lines(
+            [
+                "*TestFoo::test_shared PASSED*",
+                "*TestBar::test_bar1 PASSED*",
+                "*TestBar::test_shared PASSED*",
+                "*TestBar2::test_bar21 PASSED*",
+                "*TestBar2::test_shared PASSED*",
+            ]
+        )
         assert result.ret == 0
 
     def test_setUpClass_mixin(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
 
             class TheMixin(object):
@@ -193,17 +207,18 @@ class TestUnittestMethods:
             class TestBar(TheMixin, TestCase):
                 def test_bar(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v')
-        result.stdout.fnmatch_lines([
-            "*TestFoo::test_foo PASSED*",
-            "*TestBar::test_bar PASSED*",
-        ])
+        result = django_testdir.runpytest_subprocess("-v")
+        result.stdout.fnmatch_lines(
+            ["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"]
+        )
         assert result.ret == 0
 
     def test_setUpClass_skip(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
             import pytest
 
@@ -227,20 +242,24 @@ class TestUnittestMethods:
             class TestBar2(TestFoo):
                 def test_bar21(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v')
-        result.stdout.fnmatch_lines([
-            "*TestFoo::test_shared SKIPPED*",
-            "*TestBar::test_bar1 PASSED*",
-            "*TestBar::test_shared PASSED*",
-            "*TestBar2::test_bar21 PASSED*",
-            "*TestBar2::test_shared PASSED*",
-        ])
+        result = django_testdir.runpytest_subprocess("-v")
+        result.stdout.fnmatch_lines(
+            [
+                "*TestFoo::test_shared SKIPPED*",
+                "*TestBar::test_bar1 PASSED*",
+                "*TestBar::test_shared PASSED*",
+                "*TestBar2::test_bar21 PASSED*",
+                "*TestBar2::test_shared PASSED*",
+            ]
+        )
         assert result.ret == 0
 
     def test_multi_inheritance_setUpClass(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import TestCase
             from .app.models import Item
 
@@ -298,14 +317,16 @@ class TestUnittestMethods:
 
                 def test_c(self):
                     assert self.state == self.expected_state
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-vvvv', '-s')
-        assert result.parseoutcomes()['passed'] == 6
+        result = django_testdir.runpytest_subprocess("-vvvv", "-s")
+        assert result.parseoutcomes()["passed"] == 6
         assert result.ret == 0
 
     def test_unittest(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from unittest import TestCase
 
             class TestFoo(TestCase):
@@ -325,20 +346,24 @@ class TestUnittestMethods:
 
                 def test_pass(self):
                     pass
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-v', '-s')
-        result.stdout.fnmatch_lines([
-            "CALLED: setUpClass",
-            "CALLED: setUp",
-            "CALLED: tearDown",
-            "PASSED*",
-            "CALLED: tearDownClass",
-        ])
+        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result.stdout.fnmatch_lines(
+            [
+                "CALLED: setUpClass",
+                "CALLED: setUp",
+                "CALLED: tearDown",
+                "PASSED*",
+                "CALLED: tearDownClass",
+            ]
+        )
         assert result.ret == 0
 
     def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir):
-        django_testdir.create_test_module('''
+        django_testdir.create_test_module(
+            """
             from django.test import testcases
 
             class CMSTestCase(testcases.TestCase):
@@ -355,19 +380,18 @@ class TestUnittestMethods:
 
                 def test_noop(self):
                     print('test_noop')
-        ''')
+        """
+        )
 
-        result = django_testdir.runpytest_subprocess('-q', '-s')
-        result.stdout.fnmatch_lines([
-            "*FooBarTestCase.setUpClass*",
-            "*test_noop*",
-            "1 passed*",
-        ])
+        result = django_testdir.runpytest_subprocess("-q", "-s")
+        result.stdout.fnmatch_lines(
+            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
+        )
         assert result.ret == 0
 
 
 class TestCaseWithDbFixture(TestCase):
-    pytestmark = pytest.mark.usefixtures('db')
+    pytestmark = pytest.mark.usefixtures("db")
 
     def test_simple(self):
         # We only want to check setup/teardown does not conflict
@@ -375,7 +399,7 @@ class TestCaseWithDbFixture(TestCase):
 
 
 class TestCaseWithTrDbFixture(TestCase):
-    pytestmark = pytest.mark.usefixtures('transactional_db')
+    pytestmark = pytest.mark.usefixtures("transactional_db")
 
     def test_simple(self):
         # We only want to check setup/teardown does not conflict
@@ -391,7 +415,8 @@ def test_pdb_enabled(django_testdir):
     https://github.com/pytest-dev/pytest-django/issues/405
     """
 
-    django_testdir.create_test_module('''
+    django_testdir.create_test_module(
+        '''
         import os
 
         from django.test import TestCase
@@ -419,7 +444,8 @@ def test_pdb_enabled(django_testdir):
                 """tearDown should be called before rolling back the database"""
                 assert Item.objects.count() == 3
 
-    ''')
+    '''
+    )
 
-    result = django_testdir.runpytest_subprocess('-v', '--pdb')
+    result = django_testdir.runpytest_subprocess("-v", "--pdb")
     assert result.ret == 0

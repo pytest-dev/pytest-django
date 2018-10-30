@@ -13,47 +13,47 @@ try:
 except ImportError:
     import pathlib2 as pathlib
 
-pytest_plugins = 'pytester'
+pytest_plugins = "pytester"
 
 REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 
 def pytest_configure(config):
     config.addinivalue_line(
-        'markers',
-        'django_project: options for the django_testdir fixture')
+        "markers", "django_project: options for the django_testdir fixture"
+    )
 
 
-def _marker_apifun(extra_settings='',
-                   create_manage_py=False,
-                   project_root=None):
+def _marker_apifun(extra_settings="", create_manage_py=False, project_root=None):
     return {
-        'extra_settings': extra_settings,
-        'create_manage_py': create_manage_py,
-        'project_root': project_root,
+        "extra_settings": extra_settings,
+        "create_manage_py": create_manage_py,
+        "project_root": project_root,
     }
 
 
 @pytest.fixture
 def testdir(testdir, monkeypatch):
-    monkeypatch.delenv('PYTEST_ADDOPTS', raising=False)
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
     return testdir
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def django_testdir(request, testdir, monkeypatch):
-    marker = request.node.get_closest_marker('django_project')
+    marker = request.node.get_closest_marker("django_project")
 
     options = _marker_apifun(**(marker.kwargs if marker else {}))
 
-    if hasattr(request.node.cls, 'db_settings'):
+    if hasattr(request.node.cls, "db_settings"):
         db_settings = request.node.cls.db_settings
     else:
         db_settings = copy.deepcopy(settings.DATABASES)
-        db_settings['default']['NAME'] = DB_NAME
-        db_settings['default']['TEST']['NAME'] = TEST_DB_NAME
+        db_settings["default"]["NAME"] = DB_NAME
+        db_settings["default"]["TEST"]["NAME"] = TEST_DB_NAME
 
-    test_settings = dedent('''
+    test_settings = (
+        dedent(
+            """
         import django
 
         # Pypy compatibility
@@ -94,33 +94,36 @@ def django_testdir(request, testdir, monkeypatch):
         ]
 
         %(extra_settings)s
-    ''') % {
-        'db_settings': repr(db_settings),
-        'extra_settings': dedent(options['extra_settings'])}
+    """
+        )
+        % {
+            "db_settings": repr(db_settings),
+            "extra_settings": dedent(options["extra_settings"]),
+        }
+    )
 
-    if options['project_root']:
-        project_root = testdir.mkdir(options['project_root'])
+    if options["project_root"]:
+        project_root = testdir.mkdir(options["project_root"])
     else:
         project_root = testdir.tmpdir
 
-    tpkg_path = project_root.mkdir('tpkg')
+    tpkg_path = project_root.mkdir("tpkg")
 
-    if options['create_manage_py']:
-        project_root.ensure('manage.py')
+    if options["create_manage_py"]:
+        project_root.ensure("manage.py")
 
-    tpkg_path.ensure('__init__.py')
+    tpkg_path.ensure("__init__.py")
 
-    app_source = REPOSITORY_ROOT / '../pytest_django_test/app'
-    test_app_path = tpkg_path.join('app')
+    app_source = REPOSITORY_ROOT / "../pytest_django_test/app"
+    test_app_path = tpkg_path.join("app")
 
     # Copy the test app to make it available in the new test run
-    shutil.copytree(six.text_type(app_source),
-                    six.text_type(test_app_path))
+    shutil.copytree(six.text_type(app_source), six.text_type(test_app_path))
     tpkg_path.join("the_settings.py").write(test_settings)
 
-    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'tpkg.the_settings')
+    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
 
-    def create_test_module(test_code, filename='test_the_test.py'):
+    def create_test_module(test_code, filename="test_the_test.py"):
         r = tpkg_path.join(filename)
         r.write(dedent(test_code), ensure=True)
         return r
@@ -134,11 +137,13 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.create_app_file = create_app_file
     testdir.project_root = project_root
 
-    testdir.makeini("""
+    testdir.makeini(
+        """
         [pytest]
         addopts = --strict
         console_output_style=classic
-    """)
+    """
+    )
 
     return testdir
 
@@ -146,12 +151,15 @@ def django_testdir(request, testdir, monkeypatch):
 @pytest.fixture
 def django_testdir_initial(django_testdir):
     """A django_testdir fixture which provides initial_data."""
-    django_testdir.project_root.join('tpkg/app/migrations').remove()
-    django_testdir.makefile('.json', initial_data="""
+    django_testdir.project_root.join("tpkg/app/migrations").remove()
+    django_testdir.makefile(
+        ".json",
+        initial_data="""
         [{
             "pk": 1,
             "model": "app.item",
             "fields": { "name": "mark_initial_data" }
-        }]""")
+        }]""",
+    )
 
     return django_testdir

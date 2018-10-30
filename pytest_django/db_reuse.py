@@ -11,15 +11,15 @@ def test_database_exists_from_previous_run(connection):
 
     # When using a real SQLite backend (via TEST_NAME), check if the file
     # exists, because it gets created automatically.
-    if connection.settings_dict['ENGINE'] == 'django.db.backends.sqlite3':
+    if connection.settings_dict["ENGINE"] == "django.db.backends.sqlite3":
         if not os.path.exists(test_db_name):
             return False
 
-    orig_db_name = connection.settings_dict['NAME']
-    connection.settings_dict['NAME'] = test_db_name
+    orig_db_name = connection.settings_dict["NAME"]
+    connection.settings_dict["NAME"] = test_db_name
 
     # With SQLite memory databases the db never exists.
-    if connection.settings_dict['NAME'] == ':memory:':
+    if connection.settings_dict["NAME"] == ":memory:":
         return False
 
     try:
@@ -29,7 +29,7 @@ def test_database_exists_from_previous_run(connection):
         return False
     finally:
         connection.close()
-        connection.settings_dict['NAME'] = orig_db_name
+        connection.settings_dict["NAME"] = orig_db_name
 
 
 def _monkeypatch(obj, method_name, new_method):
@@ -43,8 +43,9 @@ def _monkeypatch(obj, method_name, new_method):
     setattr(obj, method_name, wrapped_method)
 
 
-def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
-                              keepdb=False, serialize=False):
+def create_test_db_with_reuse(
+    self, verbosity=1, autoclobber=False, keepdb=False, serialize=False
+):
     """
     This method is a monkey patched version of create_test_db that
     will not actually create a new database, but just reuse the
@@ -53,14 +54,16 @@ def create_test_db_with_reuse(self, verbosity=1, autoclobber=False,
     This is only used with Django < 1.8.
     """
     test_database_name = self._get_test_db_name()
-    self.connection.settings_dict['NAME'] = test_database_name
+    self.connection.settings_dict["NAME"] = test_database_name
 
     if verbosity >= 1:
-        test_db_repr = ''
+        test_db_repr = ""
         if verbosity >= 2:
             test_db_repr = " ('%s')" % test_database_name
-        print("Re-using existing test database for alias '%s'%s..." % (
-            self.connection.alias, test_db_repr))
+        print(
+            "Re-using existing test database for alias '%s'%s..."
+            % (self.connection.alias, test_db_repr)
+        )
 
     return test_database_name
 
@@ -70,5 +73,6 @@ def monkey_patch_creation_for_db_reuse():
 
     for connection in connections.all():
         if test_database_exists_from_previous_run(connection):
-            _monkeypatch(connection.creation, 'create_test_db',
-                         create_test_db_with_reuse)
+            _monkeypatch(
+                connection.creation, "create_test_db", create_test_db_with_reuse
+            )
