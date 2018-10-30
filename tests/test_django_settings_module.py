@@ -406,6 +406,41 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
     assert r.ret == 0
 
 
+def test_no_ds_but_django_conf_imported(testdir, monkeypatch):
+    """pytest-django should not bail out, if "django.conf" has been imported
+    somewhere, e.g. via hypothesis (#599)."""
+
+    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+
+    testdir.makepyfile("""
+        import os
+        import sys
+
+        # line copied from hypothesis/extras/django.py
+        from django.conf import settings as django_settings
+
+        # Don't let pytest poke into this object, generating a
+        # django.core.exceptions.ImproperlyConfigured
+        del django_settings
+
+        from pytest_django.lazy_django import django_settings_is_configured
+
+        def test_django_settings_is_configured():
+            assert django_settings_is_configured() is False
+
+        def test_django_conf_is_imported():
+            assert 'django.conf' in sys.modules
+
+        def test_env():
+            assert 'DJANGO_SETTINGS_MODULE' not in os.environ
+
+        def test_cfg(pytestconfig):
+            assert pytestconfig.option.ds is None
+    """)
+    r = testdir.runpytest_subprocess('-s')
+    assert r.ret == 0
+
+
 def test_no_django_settings_but_django_imported(testdir, monkeypatch):
     """Make sure we do not crash when Django happens to be imported, but
     settings is not properly configured"""
