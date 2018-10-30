@@ -218,10 +218,13 @@ def pytest_load_initial_conftests(early_config, parser, args):
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
-    if (options.itv or
-            _get_boolean_value(os.environ.get(INVALID_TEMPLATE_VARS_ENV),
-                               INVALID_TEMPLATE_VARS_ENV) or
-            early_config.getini(INVALID_TEMPLATE_VARS_ENV)):
+    if (
+        options.itv
+        or _get_boolean_value(
+            os.environ.get(INVALID_TEMPLATE_VARS_ENV), INVALID_TEMPLATE_VARS_ENV
+        )
+        or early_config.getini(INVALID_TEMPLATE_VARS_ENV)
+    ):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = 'true'
 
     # Configure DJANGO_SETTINGS_MODULE
@@ -245,9 +248,11 @@ def pytest_load_initial_conftests(early_config, parser, args):
         early_config._dsm_report_header = None
 
     # Configure DJANGO_CONFIGURATION
-    dc = (options.dc or
-          os.environ.get(CONFIGURATION_ENV) or
-          early_config.getini(CONFIGURATION_ENV))
+    dc = (
+        options.dc
+        or os.environ.get(CONFIGURATION_ENV)
+        or early_config.getini(CONFIGURATION_ENV)
+    )
 
     if ds:
         os.environ[SETTINGS_MODULE_ENV] = ds
@@ -298,10 +303,12 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
         f = method.__func__
     except AttributeError:
         pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
-    if PY2 and not (inspect.ismethod(method) and
-                    inspect.isclass(method.__self__) and
-                    issubclass(cls, method.__self__)):
-        pytest.fail('%s.%s should be a classmethod' % (cls, method_name))
+    if PY2 and not (
+        inspect.ismethod(method)
+        and inspect.isclass(method.__self__)
+        and issubclass(cls, method.__self__)
+    ):
+        pytest.fail("%s.%s should be a classmethod" % (cls, method_name))
     return f is not super_method.__func__
 
 
@@ -430,8 +437,8 @@ def _django_setup_unittest(request, django_db_blocker):
         def _cleaning_debug(self):
             testMethod = getattr(self, self._testMethodName)
             skipped = (
-                getattr(self.__class__, "__unittest_skip__", False) or
-                getattr(testMethod, "__unittest_skip__", False))
+                getattr(self.__class__, "__unittest_skip__", False)
+                or getattr(testMethod, "__unittest_skip__", False))
 
             if not skipped:
                 self._pre_setup()
@@ -584,8 +591,8 @@ def _fail_for_invalid_template_variable(request):
             else:
                 return msg
 
-    if (os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true' and
-            django_settings_is_configured()):
+    if (os.environ.get(INVALID_TEMPLATE_VARS_ENV, 'false') == 'true'
+            and django_settings_is_configured()):
         from django.conf import settings as dj_settings
 
         if dj_settings.TEMPLATES:

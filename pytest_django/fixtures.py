@@ -335,8 +335,9 @@ def live_server(request):
 
     import django
 
-    addr = (request.config.getvalue('liveserver') or
-            os.getenv('DJANGO_LIVE_TEST_SERVER_ADDRESS'))
+    addr = request.config.getvalue("liveserver") or os.getenv(
+        "DJANGO_LIVE_TEST_SERVER_ADDRESS"
+    )
 
     if addr and ':' in addr:
         if django.VERSION >= (1, 11):
