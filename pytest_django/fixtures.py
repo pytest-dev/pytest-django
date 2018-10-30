@@ -407,7 +407,7 @@ def _live_server_helper(request):
 
 
 @contextmanager
-def _assert_num_queries(config, num_expected, exact=True, connection=None):
+def _assert_num_queries(config, num, exact=True, connection=None):
     from django.test.utils import CaptureQueriesContext
 
     if connection is None:
@@ -418,12 +418,12 @@ def _assert_num_queries(config, num_expected, exact=True, connection=None):
         yield context
         num_performed = len(context)
         if exact:
-            failed = num_expected != num_performed
+            failed = num != num_performed
         else:
-            failed = num_performed > num_expected
+            failed = num_performed > num
         if failed:
             msg = "Expected to perform {} queries {}{}".format(
-                num_expected,
+                num,
                 "" if exact else "or less ",
                 "but {} done".format(
                     num_performed == 1 and "1 was" or "%d were" % (num_performed,)
