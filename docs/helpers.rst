@@ -278,22 +278,23 @@ Example
         assert settings.USE_TZ
 
 
+.. fixture:: django_assert_num_queries
+
 ``django_assert_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. fixture:: django_assert_num_queries
+.. py:function:: django_assert_num_queries(connection=None, info=None)
+
+  :param connection: optional non-default DB connection
+  :param str info: optional info message to display on failure
 
 This fixture allows to check for an expected number of DB queries.
 
-It wraps `django.test.utils.CaptureQueriesContext`.  A non-default DB
-connection can be passed in using the `connection` keyword argument, and it
-will yield the wrapped CaptureQueriesContext instance.
+It wraps `django.test.utils.CaptureQueriesContext` and yields the wrapped
+CaptureQueriesContext instance.
 
 
-Example
-"""""""
-
-::
+Example usage::
 
     def test_queries(django_assert_num_queries):
         with django_assert_num_queries(3) as captured:
@@ -304,20 +305,21 @@ Example
         assert 'foo' in captured.captured_queries[0]['sql']
 
 
+.. fixture:: django_assert_max_num_queries
+
 ``django_assert_max_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. fixture:: django_assert_max_num_queries
+.. py:function:: django_assert_num_queries(connection=None, info=None)
+
+  :param connection: optional non-default DB connection
+  :param str info: optional info message to display on failure
 
 This fixture allows to check for an expected maximum number of DB queries.
 
 It is a specialized version of :fixture:`django_assert_num_queries`.
 
-
-Example
-"""""""
-
-::
+Example usage::
 
     def test_max_queries(django_assert_max_num_queries):
         with django_assert_max_num_queries(3):

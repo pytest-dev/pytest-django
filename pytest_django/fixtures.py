@@ -407,7 +407,7 @@ def _live_server_helper(request):
 
 
 @contextmanager
-def _assert_num_queries(config, num, exact=True, connection=None):
+def _assert_num_queries(config, num, exact=True, connection=None, info=None):
     from django.test.utils import CaptureQueriesContext
 
     if connection is None:
@@ -429,6 +429,8 @@ def _assert_num_queries(config, num, exact=True, connection=None):
                     num_performed == 1 and "1 was" or "%d were" % (num_performed,)
                 ),
             )
+            if info:
+                msg += "\n{}".format(info)
             if verbose:
                 sqls = (q["sql"] for q in context.captured_queries)
                 msg += "\n\nQueries:\n========\n\n%s" % "\n\n".join(sqls)
