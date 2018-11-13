@@ -1,6 +1,35 @@
 Changelog
 =========
 
+3.4.4 (2018-11-13)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Refine the django.conf module check to see if the settings really are
+  configured (#668).
+* Avoid crash after OSError during Django path detection (#664).
+
+Features
+^^^^^^^^
+
+* Add parameter info to fixture assert_num_queries to display additional message on failure (#663).
+
+Docs
+^^^^
+
+* Improve doc for django_assert_num_queries/django_assert_max_num_queries.
+* Add warning about sqlite specific snippet + fix typos (#666).
+
+Misc
+^^^^
+
+* MANIFEST.in: include tests for downstream distros (#653).
+* Ensure that the LICENSE file is included in wheels (#665).
+* Run black on source.
+
+
 3.4.3 (2018-09-16)
 ------------------
 
