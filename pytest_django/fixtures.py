@@ -3,16 +3,14 @@
 from __future__ import with_statement
 
 import os
+import warnings
+from contextlib import contextmanager
 from functools import partial
 
 import pytest
 
-from contextlib import contextmanager
-
 from . import live_server_helper
-
 from .django_compat import is_django_unittest
-
 from .lazy_django import skip_if_no_django
 
 __all__ = [
@@ -362,8 +360,7 @@ def live_server(request):
         if django.VERSION >= (1, 11):
             ports = addr.split(":")[1]
             if "-" in ports or "," in ports:
-                request.config.warn(
-                    "D001",
+                warnings.warn(
                     "Specifying multiple live server ports is not supported "
                     "in Django 1.11. This will be an error in a future "
                     "pytest-django release.",
