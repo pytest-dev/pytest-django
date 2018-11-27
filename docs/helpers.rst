@@ -326,7 +326,7 @@ It is a specialized version of :fixture:`django_assert_num_queries`.
 Example usage::
 
     def test_max_queries(django_assert_max_num_queries):
-        with django_assert_max_num_queries(3):
+        with django_assert_max_num_queries(2):
             Item.objects.create('foo')
             Item.objects.create('bar')
 
