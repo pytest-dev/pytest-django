@@ -469,6 +469,7 @@ class TestLiveServer:
         django_testdir.runpytest_subprocess("--liveserver=localhost:%s" % port)
 
 
+@pytest.mark.parametrize('username_field', ('email', 'identifier'))
 @pytest.mark.django_project(
     extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
@@ -482,7 +483,7 @@ class TestLiveServer:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_custom_user_model(django_testdir):
+def test_custom_user_model(django_testdir, username_field):
     django_testdir.create_app_file(
         """
         from django.contrib.auth.models import AbstractUser
@@ -491,8 +492,8 @@ def test_custom_user_model(django_testdir):
         class MyCustomUser(AbstractUser):
             identifier = models.CharField(unique=True, max_length=100)
 
-            USERNAME_FIELD = 'identifier'
-        """,
+            USERNAME_FIELD = '%s'
+        """ % (username_field),
         "models.py",
     )
     django_testdir.create_app_file(
