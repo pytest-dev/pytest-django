@@ -215,6 +215,50 @@ class TestSqliteWithXdist:
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
 
+class TestSqliteWithMultipleDbsAndXdist:
+
+    db_settings = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "/tmp/should-not-be-used",
+        },
+        "db2": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "db_name",
+            "TEST": {"NAME": "test_custom_db_name"},
+        }
+    }
+
+    def test_sqlite_database_renamed(self, django_testdir):
+        pytest.importorskip("xdist")
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_a():
+                (conn_db2, conn_default) = sorted(
+                    connections.all(),
+                    key=lambda conn: conn.alias,
+                )
+
+                assert conn_default.vendor == 'sqlite'
+                db_name = conn_default.creation._get_test_db_name()
+                assert 'file:memorydb' in db_name
+
+                assert conn_db2.vendor == 'sqlite'
+                db_name = conn_db2.creation._get_test_db_name()
+                assert 'test_custom_db_name_gw' in db_name
+        """
+        )
+
+        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*PASSED*test_a*"])
+
+
 @pytest.mark.skipif(
     get_django_version() >= (1, 9),
     reason=(
