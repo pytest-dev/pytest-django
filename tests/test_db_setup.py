@@ -288,7 +288,135 @@ class TestSqliteWithMultipleDbsAndXdist:
 
                 assert conn_db2.vendor == 'sqlite'
                 db_name = conn_db2.creation._get_test_db_name()
-                assert 'test_custom_db_name_gw' in db_name
+                assert db_name.startswith('test_custom_db_name_gw')
+        """
+        )
+
+        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*PASSED*test_a*"])
+
+
+class TestSqliteWithTox:
+
+    db_settings = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "db_name",
+            "TEST": {"NAME": "test_custom_db_name"},
+        }
+    }
+
+    def test_db_with_tox_suffix(self, django_testdir, monkeypatch):
+        "A test to check that Tox DB suffix works when running in parallel."
+        monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_inner():
+
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                db_name = conn.creation._get_test_db_name()
+                assert db_name == 'test_custom_db_name_py37-django22'
+        """
+        )
+
+        result = django_testdir.runpytest_subprocess("--tb=short", "-vv")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
+
+    def test_db_with_empty_tox_suffix(self, django_testdir, monkeypatch):
+        "A test to check that Tox DB suffix is not used when suffix would be empty."
+        monkeypatch.setenv("TOX_PARALLEL_ENV", "")
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_inner():
+
+                (conn,) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                db_name = conn.creation._get_test_db_name()
+                assert db_name == 'test_custom_db_name'
+        """
+        )
+
+        result = django_testdir.runpytest_subprocess("--tb=short", "-vv")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
+
+
+class TestSqliteWithToxAndXdist:
+
+    db_settings = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": "db_name",
+            "TEST": {"NAME": "test_custom_db_name"},
+        }
+    }
+
+    def test_db_with_tox_suffix(self, django_testdir, monkeypatch):
+        "A test to check that both Tox and xdist suffixes work together."
+        pytest.importorskip("xdist")
+        monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_inner():
+
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                db_name = conn.creation._get_test_db_name()
+                assert db_name.startswith('test_custom_db_name_py37-django22_gw')
+        """
+        )
+
+        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*PASSED*test_inner*"])
+
+
+class TestSqliteInMemoryWithXdist:
+
+    db_settings = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+            "TEST": {"NAME": ":memory:"},
+        }
+    }
+
+    def test_sqlite_in_memory_used(self, django_testdir):
+        pytest.importorskip("xdist")
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from django.db import connections
+
+            @pytest.mark.django_db
+            def test_a():
+                (conn, ) = connections.all()
+
+                assert conn.vendor == 'sqlite'
+                db_name = conn.creation._get_test_db_name()
+                assert 'file:memorydb' in db_name or db_name == ':memory:'
         """
         )
 

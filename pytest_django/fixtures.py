@@ -33,35 +33,35 @@ __all__ = [
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_xdist_suffix(request):
+def django_db_modify_db_settings_tox_suffix(request):
     skip_if_no_django()
 
-    from django.conf import settings
-
-    for db_settings in settings.DATABASES.values():
-
-        try:
-            test_name = db_settings["TEST"]["NAME"]
-        except KeyError:
-            test_name = None
-
-        if not test_name:
-            if db_settings["ENGINE"] == "django.db.backends.sqlite3":
-                continue
-
-            test_name = "test_{}".format(db_settings["NAME"])
-
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
-        xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
-        if test_name != ":memory:" and xdist_suffix is not None:
-            test_name = "{}_{}".format(test_name, xdist_suffix)
-
-        db_settings.setdefault("TEST", {})
-        db_settings["TEST"]["NAME"] = test_name
+    tox_environment = os.getenv("TOX_PARALLEL_ENV")
+    if tox_environment:
+        # Put a suffix like _py27-django21 on tox workers
+        _set_suffix_to_test_databases(suffix=tox_environment)
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings(django_db_modify_db_settings_xdist_suffix):
+def django_db_modify_db_settings_xdist_suffix(request):
+    skip_if_no_django()
+
+    xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
+    if xdist_suffix:
+        # Put a suffix like _gw0, _gw1 etc on xdist processes
+        _set_suffix_to_test_databases(suffix=xdist_suffix)
+
+
+@pytest.fixture(scope="session")
+def django_db_modify_db_settings_parallel_suffix(
+    django_db_modify_db_settings_tox_suffix,
+    django_db_modify_db_settings_xdist_suffix,
+):
+    skip_if_no_django()
+
+
+@pytest.fixture(scope="session")
+def django_db_modify_db_settings(django_db_modify_db_settings_parallel_suffix):
     skip_if_no_django()
 
 
@@ -167,6 +167,24 @@ def _disable_native_migrations():
             return super(MigrateSilentCommand, self).handle(*args, **kwargs)
 
     migrate.Command = MigrateSilentCommand
+
+
+def _set_suffix_to_test_databases(suffix):
+    from django.conf import settings
+
+    for db_settings in settings.DATABASES.values():
+        test_name = db_settings.get("TEST", {}).get("NAME")
+
+        if not test_name:
+            if db_settings["ENGINE"] == "django.db.backends.sqlite3":
+                continue
+            test_name = "test_{}".format(db_settings["NAME"])
+
+        if test_name == ":memory:":
+            continue
+
+        db_settings.setdefault("TEST", {})
+        db_settings["TEST"]["NAME"] = "{}_{}".format(test_name, suffix)
 
 
 # ############### User visible fixtures ################
