@@ -178,6 +178,8 @@ Example
 Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
 ``django_db`` mark).
 
+.. fixture:: admin_user
+
 ``admin_user`` - an admin user (superuser)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

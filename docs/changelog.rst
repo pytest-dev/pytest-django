@@ -1,6 +1,21 @@
 Changelog
 =========
 
+3.4.5 (2019-01-07)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Use ``request.config`` instead of ``pytest.config`` (#677)
+* :fixture:`admin_user`: handle "email" username_field (#676)
+
+Misc
+^^^^
+
+* Minor doc fixes (#674)
+* tests: fix for pytest 4 (#675)
+
 3.4.4 (2018-11-13)
 ------------------
 
