@@ -259,16 +259,16 @@ def admin_user(db, django_user_model, django_username_field):
         user = manager.get(**{username_field: username})
     except UserModel.DoesNotExist:
         import inspect
+
         fields = {
-                        p.name: p.default if p.default is not inspect._empty else None 
-                        for p in inspect.signature(manager).parameters.values() if p.name not in ("self", "args", "kwargs")
-                    }
+            p.name: p.default if p.default is not inspect._empty else None
+            for p in inspect.signature(manager.create_superuser).parameters.values()
+            if p.name not in ("self", "args", "kwargs")
+        }
         fields[username_field] = username
         fields["email"] = "admin@example.com"
         fields["password"] = "password"
-        user = manager.create_superuser(
-            **fields
-        )
+        user = manager.create_superuser(**fields)
     return user
 
 
@@ -370,7 +370,7 @@ def live_server(request):
                 warnings.warn(
                     "Specifying multiple live server ports is not supported "
                     "in Django 1.11. This will be an error in a future "
-                    "pytest-django release.",
+                    "pytest-django release."
                 )
 
     if not addr:
