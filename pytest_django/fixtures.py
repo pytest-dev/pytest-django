@@ -252,16 +252,22 @@ def admin_user(db, django_user_model, django_username_field):
     """
     UserModel = django_user_model
     username_field = django_username_field
+    manager = UserModel._default_manager
     username = "admin@example.com" if username_field == "email" else "admin"
 
     try:
-        user = UserModel._default_manager.get(**{username_field: username})
+        user = manager.get(**{username_field: username})
     except UserModel.DoesNotExist:
-        extra_fields = {}
-        if username_field not in ("username", "email"):
-            extra_fields[username_field] = "admin"
-        user = UserModel._default_manager.create_superuser(
-            username, "admin@example.com", "password", **extra_fields
+        import inspect
+        fields = {
+                        p.name: p.default if p.default is not inspect._empty else None 
+                        for p in inspect.signature(manager).parameters.values() if p.name not in ("self", "args", "kwargs")
+                    }
+        fields[username_field] = username
+        fields["email"] = "admin@example.com"
+        fields["password"] = "password"
+        user = manager.create_superuser(
+            **fields
         )
     return user
 
