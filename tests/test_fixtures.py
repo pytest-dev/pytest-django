@@ -581,9 +581,9 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-    """,
+        """,  # noqa: E501
         "migrations/0002_custom_user_model.py",
-    )  # noqa
+    )
 
     result = django_testdir.runpytest_subprocess("-s")
     result.stdout.fnmatch_lines(["*1 passed*"])
