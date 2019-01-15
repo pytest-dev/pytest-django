@@ -160,7 +160,8 @@ def test_django_assert_num_queries_db_connection(django_assert_num_queries):
 
 @pytest.mark.django_db
 def test_django_assert_num_queries_output_info(django_testdir):
-    django_testdir.create_test_module("""
+    django_testdir.create_test_module(
+        """
         from django.contrib.contenttypes.models import ContentType
         import pytest
 
@@ -173,14 +174,17 @@ def test_django_assert_num_queries_output_info(django_testdir):
                 list(ContentType.objects.all())
                 ContentType.objects.count()
                 ContentType.objects.first()  # additional wrong query
-    """)
-    result = django_testdir.runpytest_subprocess('--tb=short', '-v')
-    result.stdout.fnmatch_lines([
-        '*Expected to perform 2 queries but 3 were done*',
-        '*Expected: 1 for select all, 1 for count*',
-        '*Queries:*',
-        '*========*',
-    ])
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result.stdout.fnmatch_lines(
+        [
+            "*Expected to perform 2 queries but 3 were done*",
+            "*Expected: 1 for select all, 1 for count*",
+            "*Queries:*",
+            "*========*",
+        ]
+    )
     assert result.ret == 1
 
 
@@ -469,7 +473,7 @@ class TestLiveServer:
         django_testdir.runpytest_subprocess("--liveserver=localhost:%s" % port)
 
 
-@pytest.mark.parametrize('username_field', ('email', 'identifier'))
+@pytest.mark.parametrize("username_field", ("email", "identifier"))
 @pytest.mark.django_project(
     extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
@@ -493,7 +497,8 @@ def test_custom_user_model(django_testdir, username_field):
             identifier = models.CharField(unique=True, max_length=100)
 
             USERNAME_FIELD = '%s'
-        """ % (username_field),
+        """
+        % (username_field),
         "models.py",
     )
     django_testdir.create_app_file(

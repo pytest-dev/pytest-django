@@ -7,6 +7,7 @@ except ImportError:
 try:
     from django.conf.urls import patterns
 except ImportError:
+
     def patterns(prefix, *urls):
-        assert prefix == ''
+        assert prefix == ""
         return urls

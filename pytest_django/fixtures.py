@@ -364,7 +364,7 @@ def live_server(request):
                 warnings.warn(
                     "Specifying multiple live server ports is not supported "
                     "in Django 1.11. This will be an error in a future "
-                    "pytest-django release.",
+                    "pytest-django release."
                 )
 
     if not addr:
