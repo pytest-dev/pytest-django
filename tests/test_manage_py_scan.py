@@ -25,6 +25,44 @@ def test_django_project_found(django_testdir):
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
+def test_django_project_found_with_k(django_testdir, monkeypatch):
+    """Test that cwd is checked as fallback with non-args via '-k foo'."""
+    testfile = django_testdir.create_test_module(
+        """
+    def test_foobar():
+        assert True
+    """,
+        "sub/test_in_sub.py",
+    )
+
+    monkeypatch.chdir(testfile.dirname)
+    result = django_testdir.runpytest_subprocess("-k", "test_foobar")
+    assert result.ret == 0
+
+    outcomes = result.parseoutcomes()
+    assert outcomes["passed"] == 1
+
+
+@pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
+def test_django_project_found_with_k_and_cwd(django_testdir, monkeypatch):
+    """Cover cwd not used as fallback if present already in args."""
+    testfile = django_testdir.create_test_module(
+        """
+    def test_foobar():
+        assert True
+    """,
+        "sub/test_in_sub.py",
+    )
+
+    monkeypatch.chdir(testfile.dirname)
+    result = django_testdir.runpytest_subprocess(testfile.dirname, "-k", "test_foobar")
+    assert result.ret == 0
+
+    outcomes = result.parseoutcomes()
+    assert outcomes["passed"] == 1
+
+
+@pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
 def test_django_project_found_absolute(django_testdir, monkeypatch):
     """This only tests that "." is added as an absolute path (#637)."""
     django_testdir.create_test_module(
