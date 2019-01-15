@@ -182,8 +182,11 @@ def _add_django_project_to_path(args):
         args = map(str, args)
         args = [arg_to_path(x) for x in args if not x.startswith("-")]
 
+        cwd = pathlib.Path.cwd()
         if not args:
-            args = [pathlib.Path.cwd()]
+            args.append(cwd)
+        elif cwd not in args:
+            args.append(cwd)
 
         for arg in args:
             if is_django_project(arg):
