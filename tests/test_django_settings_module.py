@@ -410,9 +410,10 @@ def test_no_ds_but_django_conf_imported(testdir, monkeypatch):
     """pytest-django should not bail out, if "django.conf" has been imported
     somewhere, e.g. via hypothesis (#599)."""
 
-    monkeypatch.delenv('DJANGO_SETTINGS_MODULE')
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
         import os
         import sys
 
@@ -436,8 +437,9 @@ def test_no_ds_but_django_conf_imported(testdir, monkeypatch):
 
         def test_cfg(pytestconfig):
             assert pytestconfig.option.ds is None
-    """)
-    r = testdir.runpytest_subprocess('-s')
+    """
+    )
+    r = testdir.runpytest_subprocess("-s")
     assert r.ret == 0
 
 
