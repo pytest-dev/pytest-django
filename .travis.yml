@@ -80,7 +80,7 @@ stages:
     if: tag IS present
 
 install:
-  - pip install tox==3.3.0
+  - pip install tox==3.7.0
 
 script:
   - tox
