@@ -7,10 +7,14 @@ jobs:
     - stage: baseline
       python: 3.6
       env: TOXENV=py36-dj20-postgres-coverage
+      services:
+        - postgresql
     - python: 3.6
       env: TOXENV=py36-dj111-sqlite-coverage
     - python: 2.7
       env: TOXENV=py27-dj111-mysql_innodb-coverage
+      services:
+        - mysql
     - python: 3.6
       env: TOXENV=checkqa,docs
 
@@ -25,14 +29,20 @@ jobs:
 
     - python: 3.5
       env: TOXENV=py35-dj110-postgres-coverage
+      services:
+        - postgresql
 
     - python: 3.4
       env: TOXENV=py34-dj19-sqlite_file-coverage
 
     - python: 2.7
       env: TOXENV=py27-dj111-mysql_myisam-coverage
+      services:
+        - mysql
     - python: 2.7
       env: TOXENV=py27-dj18-postgres-coverage
+      services:
+        - postgresql
 
     # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
@@ -43,6 +53,8 @@ jobs:
     - stage: test_release
       python: 3.6
       env: TOXENV=py36-dj20-postgres
+      services:
+        - postgresql
 
     - stage: release
       script: skip
