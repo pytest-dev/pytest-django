@@ -1,6 +1,20 @@
 Changelog
 =========
 
+3.4.6 (2019-02-01)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* django_find_project: add cwd as fallback always (#690)
+
+Misc
+^^^^
+
+* Enable tests for Django 2.2 and add classifier (#693)
+* Disallow pytest 4.2.0 in ``install_requires`` (#697)
+
 3.4.5 (2019-01-07)
 ------------------
 
