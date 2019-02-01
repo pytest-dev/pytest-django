@@ -520,9 +520,10 @@ def _django_setup_unittest(request, django_db_blocker):
             def teardown():
                 _restore_class_methods(cls)
                 cls.tearDownClass()
-                django_db_blocker.restore()
 
             request.addfinalizer(teardown)
+
+        request.addfinalizer(django_db_blocker.restore)
 
 
 @pytest.fixture(scope="function", autouse=True)
