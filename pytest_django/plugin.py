@@ -50,7 +50,8 @@ INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
 PY2 = sys.version_info[0] == 2
 
-_call_unittest_setup = parse_version(pytest.__version__) < parse_version("4.2")
+# pytest 4.2 handles unittest setup/teardown itself via wrapping fixtures.
+_handle_unittest_methods = parse_version(pytest.__version__) < parse_version("4.2")
 
 
 # ############### pytest hooks ################
@@ -419,8 +420,9 @@ def _restore_class_methods(cls):
 
 
 def pytest_runtest_setup(item):
-    if django_settings_is_configured() and is_django_unittest(item):
-        _disable_class_methods(item.cls)
+    if _handle_unittest_methods:
+        if django_settings_is_configured() and is_django_unittest(item):
+            _disable_class_methods(item.cls)
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -510,18 +512,17 @@ def _django_setup_unittest(request, django_db_blocker):
 
         cls.debug = _cleaning_debug
 
-        if _call_unittest_setup:
+        if _handle_unittest_methods:
             _restore_class_methods(cls)
             cls.setUpClass()
             _disable_class_methods(cls)
 
-        def teardown():
-            _restore_class_methods(cls)
-            if _call_unittest_setup:
+            def teardown():
+                _restore_class_methods(cls)
                 cls.tearDownClass()
-            django_db_blocker.restore()
+                django_db_blocker.restore()
 
-        request.addfinalizer(teardown)
+            request.addfinalizer(teardown)
 
 
 @pytest.fixture(scope="function", autouse=True)
