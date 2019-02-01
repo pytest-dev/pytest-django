@@ -269,7 +269,6 @@ class TestUnittestMethods:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
-            from .app.models import Item
 
             # Using a mixin is a regression test, see #280 for more details:
             # https://github.com/pytest-dev/pytest-django/issues/280
