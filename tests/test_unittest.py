@@ -1,5 +1,6 @@
 import pytest
 from django.test import TestCase
+from pkg_resources import parse_version
 
 from pytest_django_test.app.models import Item
 
@@ -142,12 +143,19 @@ class TestUnittestMethods:
         )
 
         result = django_testdir.runpytest_subprocess("-v", "-s")
-        result.stdout.fnmatch_lines(
-            [
-                "* ERROR at setup of TestFoo.test_pass *",
+        expected_lines = [
+            "* ERROR at setup of TestFoo.test_pass *",
+        ]
+        if parse_version(pytest.__version__) < parse_version("4.2"):
+            expected_lines += [
                 "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
             ]
-        )
+        else:
+            expected_lines += [
+                "E * TypeError: *",
+            ]
+
+        result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 
     def test_setUpClass_multiple_subclasses(self, django_testdir):
@@ -261,7 +269,6 @@ class TestUnittestMethods:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
-            from .app.models import Item
 
             # Using a mixin is a regression test, see #280 for more details:
             # https://github.com/pytest-dev/pytest-django/issues/280
