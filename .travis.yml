@@ -6,7 +6,7 @@ jobs:
   include:
     - stage: baseline
       python: 3.6
-      env: TOXENV=py36-dj20-postgres-coverage
+      env: TOXENV=py36-dj20-postgres-xdist-coverage
       services:
         - postgresql
     - python: 3.6
