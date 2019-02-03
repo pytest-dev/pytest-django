@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.4.7 (2019-02-03)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fix disabling/handling of unittest methods with pytest 4.2+ (#700)
+
 3.4.6 (2019-02-01)
 ------------------
 
