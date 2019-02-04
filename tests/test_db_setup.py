@@ -115,6 +115,7 @@ class TestSqlite:
 
 
 def test_xdist_with_reuse(django_testdir):
+    pytest.importorskip("xdist")
     skip_if_sqlite_in_memory()
 
     drop_database("gw0")
@@ -192,6 +193,7 @@ class TestSqliteWithXdist:
     }
 
     def test_sqlite_in_memory_used(self, django_testdir):
+        pytest.importorskip("xdist")
 
         django_testdir.create_test_module(
             """

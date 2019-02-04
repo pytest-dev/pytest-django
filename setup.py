@@ -42,7 +42,6 @@ setup(
         'testing': [
             'Django',
             'django-configurations>=2.0',
-            'pytest-xdist>=1.15',
             'six',
         ],
     },
