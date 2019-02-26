@@ -52,7 +52,7 @@ jobs:
     - python: pypy2.7-6.0
       env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3.5-6.0
-      env: TOXENV=pypy3-dj110-sqlite
+      env: TOXENV=pypy3-dj110-postgres
 
     - stage: test_release
       python: 3.6
@@ -102,4 +102,4 @@ after_success:
       codecov_flags=${codecov_flags//-/,}
       bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout -F "$codecov_flags"
     fi
-    set +x
+    set +ex

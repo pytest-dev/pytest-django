@@ -47,7 +47,7 @@ def run_cmd(*args):
 
 def run_mysql(*args):
     user = _settings.get("USER", None)
-    if user:
+    if user:  # pragma: no branch
         args = ("-u", user) + tuple(args)
     args = ("mysql",) + tuple(args)
     return run_cmd(*args)
@@ -61,110 +61,99 @@ def skip_if_sqlite_in_memory():
         pytest.skip("Do not test db reuse since database does not support it")
 
 
-def drop_database(name=TEST_DB_NAME, suffix=None):
-    assert bool(name) ^ bool(suffix), "name and suffix cannot be used together"
+def drop_database(name=TEST_DB_NAME):
+    db_engine = get_db_engine()
 
-    if suffix:
-        name = "%s_%s" % (name, suffix)
-
-    if get_db_engine() == "postgresql_psycopg2":
+    if db_engine == "postgresql_psycopg2":
         r = run_cmd("psql", "postgres", "-c", "DROP DATABASE %s" % name)
         assert "DROP DATABASE" in force_text(
             r.std_out
         ) or "does not exist" in force_text(r.std_err)
         return
 
-    if get_db_engine() == "mysql":
+    if db_engine == "mysql":
         r = run_mysql("-e", "DROP DATABASE %s" % name)
         assert "database doesn't exist" in force_text(r.std_err) or r.status_code == 0
         return
 
-    if get_db_engine() == "sqlite3":
-        if name == ":memory:":
-            raise AssertionError("sqlite in-memory database cannot be dropped!")
-        if os.path.exists(name):
-            os.unlink(name)
-        return
+    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
 
-    raise AssertionError("%s cannot be tested properly!" % get_db_engine())
+    if name == ":memory:":
+        raise AssertionError("sqlite in-memory database cannot be dropped!")
+    if os.path.exists(name):
+        os.unlink(name)
 
 
 def db_exists(db_suffix=None):
     name = TEST_DB_NAME
+    db_engine = get_db_engine()
 
     if db_suffix:
         name = "%s_%s" % (name, db_suffix)
 
-    if get_db_engine() == "postgresql_psycopg2":
+    if db_engine == "postgresql_psycopg2":
         r = run_cmd("psql", name, "-c", "SELECT 1")
         return r.status_code == 0
 
-    if get_db_engine() == "mysql":
+    if db_engine == "mysql":
         r = run_mysql(name, "-e", "SELECT 1")
         return r.status_code == 0
 
-    if get_db_engine() == "sqlite3":
-        if TEST_DB_NAME == ":memory:":
-            raise AssertionError(
-                "sqlite in-memory database cannot be checked for existence!"
-            )
-        return os.path.exists(name)
-
-    raise AssertionError("%s cannot be tested properly!" % get_db_engine())
+    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert TEST_DB_NAME != ":memory:", (
+        "sqlite in-memory database cannot be checked for existence!")
+    return os.path.exists(name)
 
 
 def mark_database():
-    if get_db_engine() == "postgresql_psycopg2":
+    db_engine = get_db_engine()
+
+    if db_engine == "postgresql_psycopg2":
         r = run_cmd("psql", TEST_DB_NAME, "-c", "CREATE TABLE mark_table();")
         assert r.status_code == 0
         return
 
-    if get_db_engine() == "mysql":
+    if db_engine == "mysql":
         r = run_mysql(TEST_DB_NAME, "-e", "CREATE TABLE mark_table(kaka int);")
         assert r.status_code == 0
         return
 
-    if get_db_engine() == "sqlite3":
-        if TEST_DB_NAME == ":memory:":
-            raise AssertionError("sqlite in-memory database cannot be marked!")
+    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert TEST_DB_NAME != ":memory:", (
+        "sqlite in-memory database cannot be marked!")
 
-        conn = sqlite3.connect(TEST_DB_NAME)
-        try:
-            with conn:
-                conn.execute("CREATE TABLE mark_table(kaka int);")
-        finally:  # Close the DB even if an error is raised
-            conn.close()
-        return
-
-    raise AssertionError("%s cannot be tested properly!" % get_db_engine())
+    conn = sqlite3.connect(TEST_DB_NAME)
+    try:
+        with conn:
+            conn.execute("CREATE TABLE mark_table(kaka int);")
+    finally:  # Close the DB even if an error is raised
+        conn.close()
 
 
 def mark_exists():
-    if get_db_engine() == "postgresql_psycopg2":
+    db_engine = get_db_engine()
+
+    if db_engine == "postgresql_psycopg2":
         r = run_cmd("psql", TEST_DB_NAME, "-c", "SELECT 1 FROM mark_table")
 
         # When something pops out on std_out, we are good
         return bool(r.std_out)
 
-    if get_db_engine() == "mysql":
+    if db_engine == "mysql":
         r = run_mysql(TEST_DB_NAME, "-e", "SELECT 1 FROM mark_table")
 
         return r.status_code == 0
 
-    if get_db_engine() == "sqlite3":
-        if TEST_DB_NAME == ":memory:":
-            raise AssertionError(
-                "sqlite in-memory database cannot be checked for mark!"
-            )
+    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert TEST_DB_NAME != ":memory:", (
+        "sqlite in-memory database cannot be checked for mark!")
 
-        conn = sqlite3.connect(TEST_DB_NAME)
-        try:
-            with conn:
-                conn.execute("SELECT 1 FROM mark_table")
-                return True
-        except sqlite3.OperationalError:
-            return False
-        finally:  # Close the DB even if an error is raised
-            conn.close()
-
-    raise AssertionError("%s cannot be tested properly!" % get_db_engine())
+    conn = sqlite3.connect(TEST_DB_NAME)
+    try:
+        with conn:
+            conn.execute("SELECT 1 FROM mark_table")
+            return True
+    except sqlite3.OperationalError:
+        return False
+    finally:  # Close the DB even if an error is raised
+        conn.close()
