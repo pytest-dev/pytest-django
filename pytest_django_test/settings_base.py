@@ -16,12 +16,7 @@ SECRET_KEY = "foobar"
 
 # Used to construct unique test database names to allow detox to run multiple
 # versions at the same time
-uid = os.getenv("UID", "")
-
-if uid:
-    db_suffix = "_%s" % uid
-else:
-    db_suffix = ""
+db_suffix = "_%s" % os.getuid()
 
 MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",

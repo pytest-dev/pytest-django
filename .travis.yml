@@ -102,4 +102,4 @@ after_success:
       codecov_flags=${codecov_flags//-/,}
       bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout -F "$codecov_flags"
     fi
-    set +x
+    set +ex
