@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.4.8 (2019-02-26)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fix DB renaming fixture for Multi-DB environment with SQLite (#679)
+
 3.4.7 (2019-02-03)
 ------------------
 
