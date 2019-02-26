@@ -52,7 +52,7 @@ jobs:
     - python: pypy2.7-6.0
       env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3.5-6.0
-      env: TOXENV=pypy3-dj110-postgres
+      env: TOXENV=pypy3-dj110-sqlite
 
     - stage: test_release
       python: 3.6
