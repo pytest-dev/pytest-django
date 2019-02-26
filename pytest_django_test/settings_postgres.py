@@ -2,7 +2,7 @@ from pytest_django_test.settings_base import *  # noqa
 
 # PyPy compatibility
 try:
-    from psycopg2ct import compat
+    from psycopg2cffi import compat
 
     compat.register()
 except ImportError:

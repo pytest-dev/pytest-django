@@ -58,7 +58,7 @@ def django_testdir(request, testdir, monkeypatch):
 
         # Pypy compatibility
         try:
-            from psycopg2ct import compat
+            from psycopg2cffi import compat
         except ImportError:
             pass
         else:
