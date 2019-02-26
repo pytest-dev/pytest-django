@@ -77,10 +77,8 @@ def drop_database(name=TEST_DB_NAME):
         return
 
     assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
-
-    if name == ":memory:":
-        raise AssertionError("sqlite in-memory database cannot be dropped!")
-    if os.path.exists(name):
+    assert name != ":memory:", "sqlite in-memory database cannot be dropped!"
+    if os.path.exists(name):  # pragma: no branch
         os.unlink(name)
 
 
