@@ -8,6 +8,9 @@ import sys
 import pytest
 
 
+_django_settings_is_configured = None
+
+
 def skip_if_no_django():
     """Raises a skip exception when no Django settings are available"""
     if not django_settings_is_configured():
@@ -21,12 +24,17 @@ def django_settings_is_configured():
     configured flag in the Django settings object if django.conf has already
     been imported.
     """
-    ret = bool(os.environ.get("DJANGO_SETTINGS_MODULE"))
+    global _django_settings_is_configured
 
-    if not ret and "django.conf" in sys.modules:
-        return sys.modules["django.conf"].settings.configured
+    if _django_settings_is_configured is None:
+        ret = bool(os.environ.get("DJANGO_SETTINGS_MODULE"))
 
-    return ret
+        if not ret and "django.conf" in sys.modules:
+            ret = sys.modules["django.conf"].settings.configured
+
+        _django_settings_is_configured = ret
+
+    return _django_settings_is_configured
 
 
 def get_django_version():
