@@ -17,7 +17,10 @@ def _get_actual_assertions_names():
     from unittest import TestCase as DefaultTestCase
 
     obj = DjangoTestCase('run')
-    is_assert = lambda func: func.startswith('assert') and '_' not in func
+
+    def is_assert(func):
+        return func.startswith('assert') and '_' not in func
+
     base_methods = [name for name, member in
                     inspect.getmembers(DefaultTestCase)
                     if is_assert(name)]
