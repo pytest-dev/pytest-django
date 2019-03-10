@@ -3,6 +3,18 @@
 Django helpers
 ==============
 
+Assertions
+----------
+
+All of Django's ``TestCase`` _assertions are available by adding the following
+at the top of your test file.
+
+::
+
+    from pytest_django.asserts import *
+
+.. _assertions: https://docs.djangoproject.com/en/dev/topics/testing/tools/#assertions
+
 Markers
 -------
 
