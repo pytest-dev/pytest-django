@@ -426,24 +426,23 @@ def pytest_runtest_setup(item):
 
 
 def pytest_collection_modifyitems(session, config, items):
-    def get_marker_transaction(test):
-        marker = test.get_closest_marker('django_db')
-        if marker:
-            return validate_django_db(marker)[0]
-        return None
-
-    def has_fixture(test, fixture):
-        return fixture in getattr(test, 'funcargnames', [])
-
     def get_order_number(test):
-        if get_marker_transaction(test) is True:
-            return 1
-        if has_fixture(test, "transactional_db"):
+        marker_db = test.get_closest_marker('django_db')
+        if marker_db:
+            transaction = validate_django_db(marker_db)[0]
+
+            if transaction is True:
+                return 1
+        else:
+            transaction = None
+
+        fixtures = getattr(test, 'funcargnames', [])
+        if "transactional_db" in fixtures:
             return 1
 
-        if get_marker_transaction(test) is False:
+        if transaction is False:
             return 0
-        if has_fixture(test, "db"):
+        if "db" in fixtures:
             return 0
 
         return 2
