@@ -577,10 +577,12 @@ def mailoutbox(django_mail_patch_dns, _dj_autoclear_mailbox,
 
 
 @pytest.fixture(scope="function")
-def django_mail_patch_dns(monkeypatch, django_mail_dnsname):
-    from django.core import mail
+def django_mail_patch_dns(monkeypatch, django_mail_dnsname,
+                          _django_settings_is_configured):
+    if _django_settings_is_configured:
+        from django.core import mail
 
-    monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
+        monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
 
 
 @pytest.fixture(scope="function")
