@@ -452,12 +452,14 @@ def test_no_django_settings_but_django_imported(testdir, monkeypatch):
     assert r.ret == 0
 
 
-def test_django_settings_is_configured_cached(testdir, monkeypatch):
+def test_django_settings_is_configured_first(testdir, monkeypatch):
     """
-    ``django_settings_is_configured`` should return the initial value always.
+    The value from ``django_settings_is_configured`` should be used internally
+    always.
 
     This avoids having the _dj_autoclear_mailbox autouse fixture trigger
-    "AttributeError: module 'django.core.mail' has no attribute 'outbox'".
+    "AttributeError: module 'django.core.mail' has no attribute 'outbox'",
+    because Django / the test environment was not setup initially.
     """
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
