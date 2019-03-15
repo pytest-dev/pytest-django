@@ -450,3 +450,33 @@ def test_no_django_settings_but_django_imported(testdir, monkeypatch):
     testdir.makeconftest("import django")
     r = testdir.runpytest_subprocess("--help")
     assert r.ret == 0
+
+
+def test_django_settings_is_configured_cached(testdir, monkeypatch):
+    """
+    ``django_settings_is_configured`` should return the initial value always.
+
+    This avoids having the _dj_autoclear_mailbox autouse fixture trigger
+    "AttributeError: module 'django.core.mail' has no attribute 'outbox'".
+    """
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+
+    p = testdir.makepyfile(
+        """
+        from pytest_django.lazy_django import django_settings_is_configured
+
+        def test_1(_django_settings_is_configured):
+            import os
+
+            assert not _django_settings_is_configured
+            assert not django_settings_is_configured()
+
+            os.environ["DJANGO_SETTINGS_MODULE"] = "ignored_dsm"
+
+        def test_2(_django_settings_is_configured):
+            assert not _django_settings_is_configured
+            assert django_settings_is_configured()
+        """)
+    result = testdir.runpytest_subprocess(p, "-s")
+    result.stdout.fnmatch_lines(["*2 passed in*"])
+    assert result.ret == 0

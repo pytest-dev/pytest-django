@@ -451,8 +451,13 @@ def pytest_collection_modifyitems(session, config, items):
     items[:] = sorted(items, key=get_order_number)
 
 
+@pytest.fixture(scope="session")
+def _django_settings_is_configured():
+    return django_settings_is_configured()
+
+
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request):
+def django_test_environment(_django_settings_is_configured):
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -463,18 +468,22 @@ def django_test_environment(request):
         without duplicating a lot more of Django's test support code
         we need to follow this model.
     """
-    if django_settings_is_configured():
+    if _django_settings_is_configured:
         _setup_django()
         from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
         dj_settings.DEBUG = False
         setup_test_environment()
-        request.addfinalizer(teardown_test_environment)
+
+    yield
+
+    if _django_settings_is_configured:
+        teardown_test_environment()
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker():
+def django_db_blocker(_django_settings_is_configured):
     """Wrapper around Django's database access.
 
     This object can be used to re-enable database access.  This fixture is used
@@ -487,10 +496,8 @@ def django_db_blocker():
     This is an advanced feature that is meant to be used to implement database
     fixtures.
     """
-    if not django_settings_is_configured():
-        return None
-
-    return _blocking_manager
+    if _django_settings_is_configured:
+        return _blocking_manager
 
 
 @pytest.fixture(autouse=True)
@@ -512,9 +519,9 @@ def _django_db_marker(request):
 
 
 @pytest.fixture(autouse=True, scope="class")
-def _django_setup_unittest(request, django_db_blocker):
+def _django_setup_unittest(request, django_db_blocker, _django_settings_is_configured):
     """Setup a django unittest, internal to pytest-django."""
-    if not django_settings_is_configured() or not is_django_unittest(request):
+    if not _django_settings_is_configured or not is_django_unittest(request):
         yield
         return
 
@@ -553,23 +560,20 @@ def _django_setup_unittest(request, django_db_blocker):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def _dj_autoclear_mailbox():
-    if not django_settings_is_configured():
-        return
+def _dj_autoclear_mailbox(_django_settings_is_configured):
+    if _django_settings_is_configured:
+        from django.core import mail
 
-    from django.core import mail
-
-    del mail.outbox[:]
+        del mail.outbox[:]
 
 
 @pytest.fixture(scope="function")
-def mailoutbox(monkeypatch, django_mail_patch_dns, _dj_autoclear_mailbox):
-    if not django_settings_is_configured():
-        return
+def mailoutbox(monkeypatch, django_mail_patch_dns, _dj_autoclear_mailbox,
+               _django_settings_is_configured):
+    if _django_settings_is_configured:
+        from django.core import mail
 
-    from django.core import mail
-
-    return mail.outbox
+        return mail.outbox
 
 
 @pytest.fixture(scope="function")
@@ -615,7 +619,7 @@ def _django_set_urlconf(request):
 
 
 @pytest.fixture(autouse=True, scope="session")
-def _fail_for_invalid_template_variable(request):
+def _fail_for_invalid_template_variable(_django_settings_is_configured):
     """Fixture that fails for invalid variables in templates.
 
     This fixture will fail each test that uses django template rendering
@@ -687,7 +691,7 @@ def _fail_for_invalid_template_variable(request):
 
     if (
         os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
-        and django_settings_is_configured()
+        and _django_settings_is_configured
     ):
         from django.conf import settings as dj_settings
 
@@ -700,12 +704,12 @@ def _fail_for_invalid_template_variable(request):
 
 
 @pytest.fixture(autouse=True)
-def _template_string_if_invalid_marker(request):
+def _template_string_if_invalid_marker(request, _django_settings_is_configured):
     """Apply the @pytest.mark.ignore_template_errors marker,
      internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true":
-        if marker and django_settings_is_configured():
+        if marker and _django_settings_is_configured:
             from django.conf import settings as dj_settings
 
             if dj_settings.TEMPLATES:
@@ -715,12 +719,11 @@ def _template_string_if_invalid_marker(request):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _django_clear_site_cache():
+def _django_clear_site_cache(_django_settings_is_configured):
     """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
     unexpected behavior with cached site objects.
     """
-
-    if django_settings_is_configured():
+    if _django_settings_is_configured:
         from django.conf import settings as dj_settings
 
         if "django.contrib.sites" in dj_settings.INSTALLED_APPS:
