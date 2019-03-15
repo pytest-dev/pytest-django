@@ -15,17 +15,17 @@ from .lazy_django import skip_if_no_django
 
 __all__ = [
     "django_db_setup",
-    "db",
-    "transactional_db",
+    "django_db",
+    "django_transactional_db",
     "django_db_reset_sequences",
-    "admin_user",
+    "django_admin_user",
     "django_user_model",
     "django_username_field",
-    "client",
-    "admin_client",
-    "rf",
-    "settings",
-    "live_server",
+    "django_client",
+    "django_admin_client",
+    "django_rf",
+    "django_settings",
+    "django_live_server",
     "_live_server_helper",
     "django_assert_num_queries",
     "django_assert_max_num_queries",
@@ -157,7 +157,7 @@ def _disable_native_migrations():
 
 
 @pytest.fixture(scope="function")
-def db(request, django_db_setup, django_db_blocker):
+def django_db(request, django_db_setup, django_db_blocker):
     """Require a django test database.
 
     This database will be setup with the default fixtures and will have
@@ -183,7 +183,7 @@ def db(request, django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(scope="function")
-def transactional_db(request, django_db_setup, django_db_blocker):
+def django_transactional_db(request, django_db_setup, django_db_blocker):
     """Require a django test database with transaction support.
 
     This will re-initialise the django database for each test and is
@@ -220,7 +220,7 @@ def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
 
 
 @pytest.fixture()
-def client():
+def django_client():
     """A Django test client instance."""
     skip_if_no_django()
 
@@ -244,7 +244,7 @@ def django_username_field(django_user_model):
 
 
 @pytest.fixture()
-def admin_user(db, django_user_model, django_username_field):
+def django_admin_user(db, django_user_model, django_username_field):
     """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
@@ -267,7 +267,7 @@ def admin_user(db, django_user_model, django_username_field):
 
 
 @pytest.fixture()
-def admin_client(db, admin_user):
+def django_admin_client(db, admin_user):
     """A Django test client logged in as an admin user."""
     from django.test.client import Client
 
@@ -277,7 +277,7 @@ def admin_client(db, admin_user):
 
 
 @pytest.fixture()
-def rf():
+def django_rf():
     """RequestFactory instance"""
     skip_if_no_django()
 
@@ -320,7 +320,7 @@ class SettingsWrapper(object):
 
 
 @pytest.yield_fixture()
-def settings():
+def django_settings():
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
@@ -330,7 +330,7 @@ def settings():
 
 
 @pytest.fixture(scope="session")
-def live_server(request):
+def django_live_server(request):
     """Run a live Django server in the background during tests
 
     The address the server is started from is taken from the

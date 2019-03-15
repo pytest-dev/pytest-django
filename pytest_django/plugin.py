@@ -24,17 +24,18 @@ from .fixtures import django_db_createdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
-from .fixtures import admin_client  # noqa
-from .fixtures import admin_user  # noqa
-from .fixtures import client  # noqa
-from .fixtures import db  # noqa
+from .fixtures import django_admin_client  # noqa
+from .fixtures import django_admin_user  # noqa
+from .fixtures import django_client  # noqa
+from .fixtures import django_db  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
-from .fixtures import live_server  # noqa
+from .fixtures import django_live_server  # noqa
 from .fixtures import django_db_reset_sequences  # noqa
-from .fixtures import rf  # noqa
-from .fixtures import settings  # noqa
-from .fixtures import transactional_db  # noqa
+from .fixtures import django_rf  # noqa
+from .fixtures import django_settings
+from .fixtures import django_transactional_db  # noqa
+
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
@@ -42,6 +43,17 @@ try:
     import pathlib
 except ImportError:
     import pathlib2 as pathlib
+
+
+# For backward compatibility.
+admin_client = django_admin_client
+admin_user = django_admin_user
+client = django_client
+db = django_db
+live_server = django_live_server
+rf = django_rf
+settings = django_settings
+transactional_db = django_transactional_db
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
