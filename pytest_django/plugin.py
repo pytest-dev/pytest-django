@@ -245,14 +245,14 @@ def pytest_load_initial_conftests(early_config, parser, args):
     early_config.addinivalue_line(
         "markers",
         "django_db(transaction=False): Mark the test as using "
-        "the django test database.  The *transaction* argument marks will "
+        "the Django test database.  The *transaction* argument marks will "
         "allow you to use real transactions in the test like Django's "
         "TransactionTestCase.",
     )
     early_config.addinivalue_line(
         "markers",
         "urls(modstr): Use a different URLconf for this test, similar to "
-        "the `urls` attribute of Django `TestCase` objects.  *modstr* is "
+        "the `urls` attribute of Django's `TestCase` objects.  *modstr* is "
         "a string specifying the module of a URL config, e.g. "
         '"my_app.test_urls".',
     )
@@ -423,6 +423,30 @@ def pytest_runtest_setup(item):
     if _handle_unittest_methods:
         if django_settings_is_configured() and is_django_unittest(item):
             _disable_class_methods(item.cls)
+
+
+def pytest_collection_modifyitems(session, config, items):
+    def get_order_number(test):
+        marker_db = test.get_closest_marker('django_db')
+        if marker_db:
+            transaction = validate_django_db(marker_db)[0]
+            if transaction is True:
+                return 1
+        else:
+            transaction = None
+
+        fixtures = getattr(test, 'funcargnames', [])
+        if "transactional_db" in fixtures:
+            return 1
+
+        if transaction is False:
+            return 0
+        if "db" in fixtures:
+            return 0
+
+        return 2
+
+    items[:] = sorted(items, key=get_order_number)
 
 
 @pytest.fixture(autouse=True, scope="session")
