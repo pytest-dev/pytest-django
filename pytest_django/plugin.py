@@ -430,7 +430,6 @@ def pytest_collection_modifyitems(session, config, items):
         marker_db = test.get_closest_marker('django_db')
         if marker_db:
             transaction = validate_django_db(marker_db)[0]
-
             if transaction is True:
                 return 1
         else:
