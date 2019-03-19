@@ -33,8 +33,9 @@ from .fixtures import django_username_field  # noqa
 from .fixtures import django_live_server  # noqa
 from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import django_rf  # noqa
-from .fixtures import django_settings
+from .fixtures import django_settings  # noqa
 from .fixtures import django_transactional_db  # noqa
+import warnings
 
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
@@ -46,14 +47,27 @@ except ImportError:
 
 
 # For backward compatibility.
-admin_client = django_admin_client
-admin_user = django_admin_user
-client = django_client
-db = django_db
-live_server = django_live_server
-rf = django_rf
-settings = django_settings
-transactional_db = django_transactional_db
+class PytestDjangoPrefixDeprecationWarning(DeprecationWarning):
+    pass
+
+
+def wrap_deprecated_fixture(oldname, newname):
+    @pytest.fixture(name=oldname)
+    def inner(request):
+        msg = "Please use fixture %s instead of %s." % (newname, oldname)
+        warnings.warn(PytestDjangoPrefixDeprecationWarning(msg))
+        return request.getfixturevalue(newname)
+    return inner
+
+
+admin_client = wrap_deprecated_fixture("admin_client", "django_admin_client")
+admin_user = wrap_deprecated_fixture("admin_user", "django_admin_user")
+client = wrap_deprecated_fixture("client", "django_client")
+db = wrap_deprecated_fixture("db", "django_db")
+live_server = wrap_deprecated_fixture("live_server", "django_live_server")
+rf = wrap_deprecated_fixture("rf", "django_rf")
+settings = wrap_deprecated_fixture("settings", "django_settings")
+transactional_db = wrap_deprecated_fixture("transactional_db", "django_transactional_db")
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
