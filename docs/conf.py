@@ -50,7 +50,7 @@ intersphinx_mapping = {
 
 def setup(app):
     # Allow linking to pytest's confvals.
-    app.add_description_unit(
+    app.add_object_type(
         "confval",
         "pytest-confval",
         objname="configuration value",
