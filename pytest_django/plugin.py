@@ -718,8 +718,9 @@ def _django_clear_site_cache():
     """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
     unexpected behavior with cached site objects.
     """
+    from django.apps import apps
 
-    if django_settings_is_configured():
+    if django_settings_is_configured() and apps.models_ready:
         from django.conf import settings as dj_settings
 
         if "django.contrib.sites" in dj_settings.INSTALLED_APPS:
