@@ -143,7 +143,7 @@ default database construction mostly follows Django's own test runner. You can
 however influence all parts of the database setup process to make it fit in
 projects with special requirements.
 
-This section assumes some familiary with the Django test runner, Django
+This section assumes some familiarity with the Django test runner, Django
 database creation and pytest fixtures.
 
 Fixtures
