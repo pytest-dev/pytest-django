@@ -78,6 +78,12 @@ class TestDatabaseFixtures:
 
         assert not connection.in_atomic_block
 
+    def test_transactions_enabled_multi_db(self, transactional_db, django_multi_db):
+        if not connections_support_transactions():
+            pytest.skip("transactions required for this test")
+
+        assert not connection.in_atomic_block
+
     def test_transactions_enabled_via_reset_seq(self, django_db_reset_sequences):
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
@@ -139,6 +145,22 @@ class TestDatabaseFixtures:
     def test_fin(self, fin):
         # Check finalizer has db access (teardown will fail if not)
         pass
+
+    def test_multi_db_access(self, all_dbs, django_multi_db):
+        Item.objects.using('replica').create(name="spam")
+
+    def test_multi_db_clean(self, all_dbs, django_multi_db):
+        # Relies on the order: test_multi_db_access created an object
+        assert Item.objects.using('replica').count() == 0
+
+    def test_no_multi_db_access(self, all_dbs):
+        # Even without marker we can write to replica
+        # but items won't be cleaned, see `test_no_multi_db_no_clean`
+        Item.objects.using('replica').create(name="spam")
+
+    def test_no_multi_db_no_clean(self, all_dbs):
+        # Relies on the order: test_no_multi_db_access created objects
+        assert Item.objects.using('replica').count() > 0
 
 
 class TestDatabaseFixturesAllOrder:
@@ -205,6 +227,13 @@ class TestDatabaseMarker:
 
         assert not connection.in_atomic_block
 
+    @pytest.mark.django_db(transaction=True, multi_db=True)
+    def test_transactions_enabled_multi_db(self):
+        if not connections_support_transactions():
+            pytest.skip("transactions required for this test")
+
+        assert not connection.in_atomic_block
+
     @pytest.mark.django_db
     def test_reset_sequences_disabled(self, request):
         marker = request.node.get_closest_marker("django_db")
@@ -214,6 +243,35 @@ class TestDatabaseMarker:
     def test_reset_sequences_enabled(self, request):
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
+
+    @pytest.mark.django_db(multi_db=True)
+    def test_access_multi_db(self):
+        Item.objects.using('replica').create(name="spam")
+
+    @pytest.mark.django_db(multi_db=True)
+    def test_clean_multi_db(self):
+        # Relies on the order: test_access_multi_db created an object.
+        assert Item.objects.using('replica').count() == 0
+
+    @pytest.mark.django_db(transaction=True, multi_db=True)
+    def test_transaction_access_multi_db(self):
+        Item.objects.using('replica').create(name="spam")
+
+    @pytest.mark.django_db(transaction=True, multi_db=True)
+    def test_transaction_clean_multi_db(self):
+        # Relies on the order: test_transaction_access_multi_db created an object.
+        assert Item.objects.using('replica').count() == 0
+
+    @pytest.mark.django_db
+    def test_no_multi_db_access(self):
+        # Even without marker we can write to replica
+        # but items won't be cleaned, see `test_no_multi_db_no_clean`
+        Item.objects.using('replica').create(name="spam")
+
+    @pytest.mark.django_db
+    def test_no_multi_db_clean(self):
+        # Relies on the order: test_no_multi_db_access created objects
+        assert Item.objects.using('replica').count() > 0
 
 
 def test_unittest_interaction(django_testdir):

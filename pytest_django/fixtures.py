@@ -18,6 +18,7 @@ __all__ = [
     "db",
     "transactional_db",
     "django_db_reset_sequences",
+    "django_multi_db",
     "admin_user",
     "django_user_model",
     "django_username_field",
@@ -141,6 +142,13 @@ def _django_db_fixture_helper(
     else:
         from django.test import TestCase as django_case
 
+    # We check if the multi_db marker has been used
+    marker = request.node.get_closest_marker('django_db')
+    multi_db = marker.kwargs.get('multi_db', False) if marker else False
+    # We check if django_multi_db fixture has been used
+    multi_db = multi_db or "django_multi_db" in request.fixturenames
+    django_case.multi_db = multi_db
+
     test_case = django_case(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
@@ -217,6 +225,19 @@ def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
     _django_db_fixture_helper(
         request, django_db_blocker, transactional=True, reset_sequences=True
     )
+
+
+@pytest.fixture(scope="function")
+def django_multi_db(request, django_db_setup, django_db_blocker):
+    """Require a django test database
+
+    This behaves like the ``db`` fixture, with the addition of marking
+    the test as multi_db for django test case purposes. Using this fixture
+    is equivalent to marking your TestCase class as ``multi_db = True``.
+
+    You can use this fixture in tandem with other fixtures.
+    """
+    request.getfixturevalue("db")
 
 
 @pytest.fixture()

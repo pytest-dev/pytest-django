@@ -16,7 +16,7 @@ on what marks are and for notes on using_ them.
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. :py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False]):
+.. :py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False, multi_db=False]):
 
 This is used to mark a test function as requiring the database. It
 will ensure the database is set up correctly for the test. Each test
@@ -26,8 +26,8 @@ of the test. This behavior is the same as Django's standard
 
 In order for a test to have access to the database it must either
 be marked using the ``django_db`` mark or request one of the ``db``,
-``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
-test will fail when trying to access the database.
+``transactional_db``, ``django_db_reset_sequences`` or ``multi_db`` fixtures.
+Otherwise the test will fail when trying to access the database.
 
 :type transaction: bool
 :param transaction:
@@ -46,6 +46,13 @@ test will fail when trying to access the database.
  ``False``.  Must be used together with ``transaction=True`` to have an
  effect.  Please be aware that not all databases support this feature.
  For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
+
+
+:type multi_db: bool
+:param multi_db:
+ The ``multi_db`` argument will allow to test using multiple databases.
+ This behaves the same way the ``multi_db`` parameter of `django.test.TestCase`_
+ does.
 
 .. note::
 
@@ -241,6 +248,16 @@ This fixture provides the same transactional database access as
 sequences (if your database supports it). This is only required for
 fixtures which need database access themselves. A test function should
 normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``reset_sequences=True``.
+
+``django_multi_db``
+~~~~~~~~~~~~~~~~~~~
+
+.. fixture:: django_multi_db
+
+This fixtures lets you test against multiple databases. When this fixture
+is used, the test behaves as a django TestCase class marked with ``multi_db=True``
+does. A test function should normally use the ``pytest.mark.django_db`` mark
+with ``multi_db=True``.
 
 ``live_server``
 ~~~~~~~~~~~~~~~

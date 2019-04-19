@@ -35,6 +35,7 @@ from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .fixtures import django_multi_db  # noqa
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
@@ -495,12 +496,14 @@ def django_db_blocker():
 def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
-    This will dynamically request the ``db``, ``transactional_db`` or
-    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
+    This will dynamically request the ``db``, ``transactional_db``,
+    ``django_db_reset_sequences`` or ``multi_db`` fixtures as
+    required by the django_db marker.
     """
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences = validate_django_db(marker)
+        transaction, reset_sequences, multi_db = validate_django_db(marker)
+        # multi_db is handled in `_django_db_fixture_helper`
         if reset_sequences:
             request.getfixturevalue("django_db_reset_sequences")
         elif transaction:
@@ -804,8 +807,8 @@ def validate_django_db(marker):
     A sequence reset is only allowed when combined with a transaction.
     """
 
-    def apifun(transaction=False, reset_sequences=False):
-        return transaction, reset_sequences
+    def apifun(transaction=False, reset_sequences=False, multi_db=False):
+        return transaction, reset_sequences, multi_db
 
     return apifun(*marker.args, **marker.kwargs)
 
