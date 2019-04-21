@@ -4,7 +4,6 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 
-import contextlib
 import inspect
 from functools import reduce
 import os
@@ -158,16 +157,7 @@ PROJECT_SCAN_DISABLED = (
     "projects since it is disabled in the configuration "
     '("django_find_project = false")'
 )
-
-
-@contextlib.contextmanager
-def _handle_import_error(extra_message):
-    try:
-        yield
-    except ImportError as e:
-        django_msg = (e.args[0] + "\n\n") if e.args else ""
-        msg = django_msg + extra_message
-        raise ImportError(msg)
+_django_project_scan_outcome = PROJECT_SCAN_DISABLED
 
 
 def _add_django_project_to_path(args):
@@ -262,77 +252,12 @@ def pytest_load_initial_conftests(early_config, parser, args):
         "variables (if --fail-on-template-vars is used).",
     )
 
-    options = parser.parse_known_args(args)
-
-    if options.version or options.help:
-        return
-
     django_find_project = _get_boolean_value(
         early_config.getini("django_find_project"), "django_find_project"
     )
-
     if django_find_project:
+        global _django_project_scan_outcome
         _django_project_scan_outcome = _add_django_project_to_path(args)
-    else:
-        _django_project_scan_outcome = PROJECT_SCAN_DISABLED
-
-    if (
-        options.itv
-        or _get_boolean_value(
-            os.environ.get(INVALID_TEMPLATE_VARS_ENV), INVALID_TEMPLATE_VARS_ENV
-        )
-        or early_config.getini(INVALID_TEMPLATE_VARS_ENV)
-    ):
-        os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
-
-    # Configure DJANGO_SETTINGS_MODULE
-    if options.ds:
-        ds_source = "command line option"
-        ds = options.ds
-    elif SETTINGS_MODULE_ENV in os.environ:
-        ds = os.environ[SETTINGS_MODULE_ENV]
-        ds_source = "environment variable"
-    elif early_config.getini(SETTINGS_MODULE_ENV):
-        ds = early_config.getini(SETTINGS_MODULE_ENV)
-        ds_source = "ini file"
-    else:
-        ds = None
-        ds_source = None
-
-    if ds:
-        early_config._dsm_report_header = "Django settings: %s (from %s)" % (
-            ds,
-            ds_source,
-        )
-    else:
-        early_config._dsm_report_header = None
-
-    # Configure DJANGO_CONFIGURATION
-    dc = (
-        options.dc
-        or os.environ.get(CONFIGURATION_ENV)
-        or early_config.getini(CONFIGURATION_ENV)
-    )
-
-    if ds:
-        os.environ[SETTINGS_MODULE_ENV] = ds
-
-        if dc:
-            os.environ[CONFIGURATION_ENV] = dc
-
-            # Install the django-configurations importer
-            import configurations.importer
-
-            configurations.importer.install()
-
-        # Forcefully load Django settings, throws ImportError or
-        # ImproperlyConfigured if settings cannot be loaded.
-        from django.conf import settings as dj_settings
-
-        with _handle_import_error(_django_project_scan_outcome):
-            dj_settings.DATABASES
-
-    _setup_django()
 
 
 def pytest_report_header(config):
@@ -340,10 +265,72 @@ def pytest_report_header(config):
         return [config._dsm_report_header]
 
 
-@pytest.mark.trylast
-def pytest_configure():
-    # Allow Django settings to be configured in a user pytest_configure call,
-    # but make sure we call django.setup()
+@pytest.mark.tryfirst
+def pytest_configure(config):
+    if config.option.version or config.option.help:
+        return
+
+    # Allow Django settings to be configured in a user's pytest_configure, or
+    # conftest, but make sure we call django.setup().
+
+    if (
+        config.option.itv
+        or _get_boolean_value(
+            os.environ.get(INVALID_TEMPLATE_VARS_ENV), INVALID_TEMPLATE_VARS_ENV
+        )
+        or config.getini(INVALID_TEMPLATE_VARS_ENV)
+    ):
+        os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
+
+    # Configure DJANGO_SETTINGS_MODULE
+    if config.option.ds:
+        ds_source = "command line option"
+        ds = config.option.ds
+    elif SETTINGS_MODULE_ENV in os.environ:
+        ds = os.environ[SETTINGS_MODULE_ENV]
+        ds_source = "environment variable"
+    elif config.getini(SETTINGS_MODULE_ENV):
+        ds = config.getini(SETTINGS_MODULE_ENV)
+        ds_source = "ini file"
+    else:
+        ds = None
+        ds_source = None
+
+    if ds:
+        config._dsm_report_header = "Django settings: %s (from %s)" % (
+            ds,
+            ds_source,
+        )
+    else:
+        config._dsm_report_header = None
+        return
+
+    os.environ[SETTINGS_MODULE_ENV] = ds
+
+    # Configure DJANGO_CONFIGURATION
+    dc = (
+        config.option.dc
+        or os.environ.get(CONFIGURATION_ENV)
+        or config.getini(CONFIGURATION_ENV)
+    )
+    if dc:
+        os.environ[CONFIGURATION_ENV] = dc
+
+        # Install the django-configurations importer
+        import configurations.importer
+
+        configurations.importer.install()
+
+    # Forcefully load Django settings.
+    # Throws ImportError or ImproperlyConfigured if settings cannot be loaded.
+    from django.conf import settings as dj_settings
+
+    try:
+        dj_settings.DATABASES
+    except ImportError as e:
+        django_msg = (e.args[0] + "\n\n") if e.args else ""
+        msg = django_msg + _django_project_scan_outcome
+
     _setup_django()
 
 
