@@ -6,8 +6,6 @@ import pytest
 import six
 from django.conf import settings
 
-from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
-
 try:
     import pathlib
 except ImportError:
@@ -40,6 +38,8 @@ def testdir(testdir, monkeypatch):
 
 @pytest.fixture(scope="function")
 def django_testdir(request, testdir, monkeypatch):
+    from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
+
     marker = request.node.get_closest_marker("django_project")
 
     options = _marker_apifun(**(marker.kwargs if marker else {}))
