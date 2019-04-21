@@ -335,6 +335,18 @@ def pytest_configure(config):
         django_msg = (e.args[0] + "\n\n") if e.args else ""
         msg = django_msg + _django_project_scan_outcome
 
+        # Use UsageError here.
+        # - the traceback is not interesting, and raising the ImportError would
+        #   make pytest prefix it with INTERNALERROR even.
+        # - pytest.exit writes to both stdout and stderr?!
+        #
+        # The useful information from the header (_dsm_report_header) is not
+        # there in any case..
+        from _pytest.main import UsageError
+        raise UsageError(
+            "pytest-django could not setup Django due to ImportError: " + msg
+        )
+
     _setup_django()
 
 
