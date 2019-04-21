@@ -265,7 +265,7 @@ def pytest_report_header(config):
         return [config._dsm_report_header]
 
 
-@pytest.mark.tryfirst
+@pytest.mark.trylast
 def pytest_configure(config):
     if config.option.version or config.option.help:
         return
@@ -296,14 +296,18 @@ def pytest_configure(config):
         ds = None
         ds_source = None
 
-    if ds:
-        config._dsm_report_header = "Django settings: %s (from %s)" % (
-            ds,
-            ds_source,
-        )
-    else:
+    if not ds:
         config._dsm_report_header = None
+
+        # Setup Django if settings are configured manually.
+        _setup_django()
+
         return
+
+    config._dsm_report_header = "Django settings: %s (from %s)" % (
+        ds,
+        ds_source,
+    )
 
     os.environ[SETTINGS_MODULE_ENV] = ds
 
