@@ -274,8 +274,7 @@ class Test_database_blocking:
         result = django_testdir.runpytest_subprocess("-v")
         result.stderr.fnmatch_lines(
             [
-                '*Failed: Database access not allowed, use the "django_db" mark, '
-                'or the "db" or "transactional_db" fixtures to enable it.*'
+                "E   django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.",
             ]
         )
 
