@@ -50,10 +50,13 @@ def non_zero_sequences_counter(db):
 class TestDatabaseFixtures:
     """Tests for the different database fixtures."""
 
-    @pytest.fixture(params=["db", "transactional_db", "django_db_reset_sequences"])
+    @pytest.fixture(params=["db", "transactional_db", "django_db_reset_sequences",
+                            "django_db_serialized_rollback"])
     def all_dbs(self, request):
         if request.param == "django_db_reset_sequences":
             return request.getfixturevalue("django_db_reset_sequences")
+        elif request.param == "django_db_serialized_rollback":
+            return request.getfixturevalue("django_db_serialized_rollback")
         elif request.param == "transactional_db":
             return request.getfixturevalue("transactional_db")
         elif request.param == "db":
@@ -214,6 +217,16 @@ class TestDatabaseMarker:
     def test_reset_sequences_enabled(self, request):
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
+
+    @pytest.mark.django_db
+    def test_serialized_rollback_disabled(self, request):
+        marker = request.node.get_closest_marker("django_db")
+        assert not marker.kwargs
+
+    @pytest.mark.django_db(serialized_rollback=True)
+    def test_serialized_rollback_enabled(self, request):
+        marker = request.node.get_closest_marker("django_db")
+        assert marker.kwargs["serialized_rollback"]
 
 
 def test_unittest_interaction(django_testdir):

@@ -18,6 +18,7 @@ __all__ = [
     "db",
     "transactional_db",
     "django_db_reset_sequences",
+    "django_db_serialized_rollback",
     "admin_user",
     "django_user_model",
     "django_username_field",
@@ -124,7 +125,8 @@ def django_db_setup(
 
 
 def _django_db_fixture_helper(
-    request, django_db_blocker, transactional=False, reset_sequences=False
+    request, django_db_blocker, transactional=False, reset_sequences=False,
+    serialized_rollback=False
 ):
     if is_django_unittest(request):
         return
@@ -149,6 +151,7 @@ def _django_db_fixture_helper(
         from django.test import TestCase as django_case
 
     test_case = django_case(methodName="__init__")
+    test_case.serialized_rollback = serialized_rollback
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
@@ -207,13 +210,16 @@ def db(request, django_db_setup, django_db_blocker):
     """
     if "django_db_reset_sequences" in request.fixturenames:
         request.getfixturevalue("django_db_reset_sequences")
+    if "django_db_serialized_rollback" in request.fixturenames:
+        request.getfixturevalue("django_db_serialized_rollback")
     if (
         "transactional_db" in request.fixturenames
         or "live_server" in request.fixturenames
     ):
         request.getfixturevalue("transactional_db")
     else:
-        _django_db_fixture_helper(request, django_db_blocker, transactional=False)
+        _django_db_fixture_helper(request, django_db_blocker, transactional=False,
+                                  serialized_rollback=False)
 
 
 @pytest.fixture(scope="function")
@@ -232,6 +238,8 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     """
     if "django_db_reset_sequences" in request.fixturenames:
         request.getfixturevalue("django_db_reset_sequences")
+    if "django_db_serialized_rollback" in request.fixturenames:
+        request.getfixturevalue("django_db_serialized_rollback")
     _django_db_fixture_helper(request, django_db_blocker, transactional=True)
 
 
@@ -250,6 +258,20 @@ def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
     """
     _django_db_fixture_helper(
         request, django_db_blocker, transactional=True, reset_sequences=True
+    )
+
+
+@pytest.fixture(scope="function")
+def django_db_serialized_rollback(request, django_db_setup, django_db_blocker):
+    """Enable serialized rollback after transaction test cases
+
+    This fixture only has an effect when the ``transactional_db``
+    fixture is active, which happen as a side-effect of requesting
+    ``live_server``.
+
+    """
+    _django_db_fixture_helper(
+        request, django_db_blocker, transactional=True, serialized_rollback=True
     )
 
 

@@ -34,6 +34,7 @@ from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
 from .fixtures import django_db_reset_sequences  # noqa
+from .fixtures import django_db_serialized_rollback  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
@@ -497,14 +498,17 @@ def django_db_blocker():
 def _django_db_marker(request):
     """Implement the django_db marker, internal to pytest-django.
 
-    This will dynamically request the ``db``, ``transactional_db`` or
-    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
+    This will dynamically request the ``db``, ``transactional_db``,
+    ``django_db_reset_sequences`` or ``django_db_serialized_rollback``
+     fixtures as required by the django_db marker.
     """
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences = validate_django_db(marker)
+        transaction, reset_sequences, serialized_rollback = validate_django_db(marker)
         if reset_sequences:
             request.getfixturevalue("django_db_reset_sequences")
+        elif serialized_rollback:
+            request.getfixturevalue("django_db_serialized_rollback")
         elif transaction:
             request.getfixturevalue("transactional_db")
         else:
@@ -805,15 +809,16 @@ _blocking_manager = _DatabaseBlocker()
 def validate_django_db(marker):
     """Validate the django_db marker.
 
-    It checks the signature and creates the ``transaction`` and
-    ``reset_sequences`` attributes on the marker which will have the
-    correct values.
+    It checks the signature and creates the ``transaction``,
+    ``reset_sequences`` and ``serialized_rollback`` attributes on
+    the marker which will have the correct values.
 
     A sequence reset is only allowed when combined with a transaction.
+    A serialized rollback is only allowed when combined with a transaction.
     """
 
-    def apifun(transaction=False, reset_sequences=False):
-        return transaction, reset_sequences
+    def apifun(transaction=False, reset_sequences=False, serialized_rollback=False):
+        return transaction, reset_sequences, serialized_rollback
 
     return apifun(*marker.args, **marker.kwargs)
 
