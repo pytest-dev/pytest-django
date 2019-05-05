@@ -98,8 +98,6 @@ after_success:
   - |
     set -ex
     if [[ "${TOXENV%-coverage}" != "$TOXENV" ]]; then
-      codecov_flags=${TOXENV%-coverage}
-      codecov_flags=${codecov_flags//-/,}
-      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout -F "$codecov_flags"
+      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout
     fi
     set +ex
