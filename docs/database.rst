@@ -250,11 +250,12 @@ django_db_blocker
 
 .. warning::
     It does not manage transactions and changes made to the database will not
-    be automatically restored. Using the ``pytest.mark.django_db`` marker
-    or :fixture:`db` fixture, which wraps database changes in a transaction and
-    restores the state is generally the thing you want in tests. This marker
-    can be used when you are trying to influence the way the database is
-    configured.
+    be automatically restored.
+    Using the ``pytest.mark.django_db`` marker (or the corresponding
+    :fixture:`django_db` fixture) is usually what you want to use in test -
+    they will wrap database changes in a transaction and restore the state.
+    This marker can be used when you are trying to influence the way the
+    database is configured.
 
 Database access is by default not allowed. ``django_db_blocker`` is the object
 which can allow specific code paths to have access to the database. This
