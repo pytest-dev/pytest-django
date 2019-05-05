@@ -110,7 +110,14 @@ def django_db_setup(
 
     def teardown_database():
         with django_db_blocker.unblock():
-            teardown_databases(db_cfg, verbosity=request.config.option.verbose)
+            try:
+                teardown_databases(db_cfg, verbosity=request.config.option.verbose)
+            except Exception as exc:
+                request.node.warn(
+                    pytest.PytestWarning(
+                        "Error when trying to teardown test databases: %r" % exc
+                    )
+                )
 
     if not django_db_keepdb:
         request.addfinalizer(teardown_database)
