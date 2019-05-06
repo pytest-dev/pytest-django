@@ -345,7 +345,7 @@ class TestNativeMigrations(object):
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()
-        result.stdout.fnmatch_lines(["*test_inner_migrations*PASSED*"])
+        result.stdout.fnmatch_lines(["*= 1 passed in *"])
 
     def test_migrations_run(self, django_testdir):
         testdir = django_testdir
