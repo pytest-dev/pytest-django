@@ -155,9 +155,16 @@ def _django_db_fixture_helper(
 
 def _disable_native_migrations():
     from django.conf import settings
+    from django.core.management.commands.migrate import Command
+
     from .migrations import DisableMigrations
 
     settings.MIGRATION_MODULES = DisableMigrations()
+
+    def migrate_noop(self, *args, **kwargs):
+        pass
+
+    Command.handle = migrate_noop
 
 
 # ############### User visible fixtures ################
