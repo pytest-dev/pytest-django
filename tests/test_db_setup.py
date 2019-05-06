@@ -340,9 +340,10 @@ class TestNativeMigrations(object):
         )
 
         result = django_testdir.runpytest_subprocess(
-            "--nomigrations", "--tb=short", "-v"
+            "--nomigrations", "--tb=short", "-vv",
         )
         assert result.ret == 0
+        assert "Operations to perform:" not in result.stdout.str()
         result.stdout.fnmatch_lines(["*test_inner_migrations*PASSED*"])
 
     def test_migrations_run(self, django_testdir):
