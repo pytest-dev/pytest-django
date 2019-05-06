@@ -327,7 +327,8 @@ class TestNativeMigrations(object):
 
             @pytest.mark.django_db
             def test_inner_migrations():
-                pass
+                from .app.models import Item
+                Item.objects.create()
         """
         )
 
@@ -340,11 +341,11 @@ class TestNativeMigrations(object):
         )
 
         result = django_testdir.runpytest_subprocess(
-            "--nomigrations", "--tb=short", "-vv",
+            "--nomigrations", "--tb=short", "-vv", "-s",
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()
-        result.stdout.fnmatch_lines(["*test_inner_migrations*PASSED*"])
+        result.stdout.fnmatch_lines(["*= 1 passed in *"])
 
     def test_migrations_run(self, django_testdir):
         testdir = django_testdir
@@ -354,7 +355,8 @@ class TestNativeMigrations(object):
 
             @pytest.mark.django_db
             def test_inner_migrations():
-                pass
+                from .app.models import Item
+                Item.objects.create()
             """
         )
 
