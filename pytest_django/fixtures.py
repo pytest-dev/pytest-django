@@ -155,16 +155,18 @@ def _django_db_fixture_helper(
 
 def _disable_native_migrations():
     from django.conf import settings
-    from django.core.management.commands.migrate import Command
+    from django.core.management.commands import migrate
 
     from .migrations import DisableMigrations
 
     settings.MIGRATION_MODULES = DisableMigrations()
 
-    def migrate_noop(self, *args, **kwargs):
-        pass
+    class MigrateSilentCommand(migrate.Command):
+        def handle(self, *args, **kwargs):
+            kwargs["verbosity"] = 0
+            return super(MigrateSilentCommand, self).handle(*args, **kwargs)
 
-    Command.handle = migrate_noop
+    migrate.Command = MigrateSilentCommand
 
 
 # ############### User visible fixtures ################
