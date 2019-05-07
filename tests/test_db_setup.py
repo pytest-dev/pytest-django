@@ -294,7 +294,7 @@ class TestSqliteWithMultipleDbsAndXdist:
 @pytest.mark.skipif(
     get_django_version() >= (1, 9),
     reason=(
-        "Django 1.9 requires migration and has no concept " "of initial data fixtures"
+        "Django 1.9 requires migration and has no concept of initial data fixtures"
     ),
 )
 def test_initial_data(django_testdir_initial):
