@@ -112,7 +112,7 @@ def pytest_addoption(parser):
         action="store",
         dest="djangodebugmode",
         default="None",
-        help="Configure the DEBUG setting. Defaults to False"
+        help="Configure the DEBUG setting. Defaults to None."
     )
     parser.addini(
         CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
@@ -471,14 +471,13 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from distutils.version import StrictVersion
         import django
         from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        if request.config.getvalue('djangodebugmode') != 'None':
-            django_debug_mode = bool(strtobool(request.config.getvalue('djangodebugmode')))
-            if StrictVersion(django.get_version()) >= StrictVersion('1.11'):
+        if request.config.getvalue("djangodebugmode") != "None":
+            django_debug_mode = bool(strtobool(request.config.getvalue("djangodebugmode")))
+            if django.VERSION >= (1, 11):
                 setup_test_environment(debug=django_debug_mode)
             else:
                 dj_settings.DEBUG = django_debug_mode
