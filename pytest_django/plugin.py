@@ -110,9 +110,9 @@ def pytest_addoption(parser):
     group._addoption(
         "--django-debug-mode",
         action="store",
-        dest="djangodebugmode",
+        dest="django_debug_mode",
         default="None",
-        help="Configure the DEBUG setting. Defaults to None."
+        help="Configure Django's DEBUG setting."
     )
     parser.addini(
         CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
@@ -471,20 +471,21 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        import django
-        from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        if request.config.getvalue("djangodebugmode") != "None":
-            django_debug_mode = bool(strtobool(request.config.getvalue("djangodebugmode")))
+        setup_test_environment_kwargs = {}
+
+        django_debug_mode = request.config.getvalue("django_debug_mode")
+        if django_debug_mode != "None":
+            import django
+            debug = bool(strtobool(django_debug_mode))
             if django.VERSION >= (1, 11):
-                setup_test_environment(debug=django_debug_mode)
+                setup_test_environment_kwargs["debug"] = debug
             else:
-                dj_settings.DEBUG = django_debug_mode
-                setup_test_environment()
-        else:
-            # default setup
-            setup_test_environment()
+                from django.conf import settings as dj_settings
+                dj_settings.DEBUG = debug
+
+        setup_test_environment(**setup_test_environment_kwargs)
         request.addfinalizer(teardown_test_environment)
 
 

@@ -108,13 +108,12 @@ This plugin can then be used e.g. via ``-p`` in :pytest-confval:`addopts`.
 ``DEBUG`` setting during the test run
 -------------------------------------
 
-By default, django test runner behavior is to force DEBUG setting to False. So does the ``pytest-django``.
-But sometimes, especially for functional tests, you might want to avoid this, to debug why certain page does not work.
+Django's test runner forces ``DEBUG`` to be ``False`` by default, and so
+does ``pytest-django``.
+This can be controlled using the ``--django-debug-mode`` command line option::
 
-Command Line Option::
+    $ pytest --django-debug-mode True|False|None
 
-    $ py.test --django-debug-mode True|False|None
-
-``None`` ensure there is no override of the test settings DEBUG value
-``True`` override DEBUG to True
-``False`` override DEBUG to False
+``None`` do not override the default
+``True`` override ``DEBUG`` to be ``True``
+``False`` override ``DEBUG`` to be ``False``
