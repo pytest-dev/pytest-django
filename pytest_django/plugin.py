@@ -512,43 +512,45 @@ def _django_db_marker(request):
 @pytest.fixture(autouse=True, scope="class")
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
-    if django_settings_is_configured() and is_django_unittest(request):
-        request.getfixturevalue("django_test_environment")
-        request.getfixturevalue("django_db_setup")
+    if not django_settings_is_configured() or not is_django_unittest(request):
+        return
 
-        django_db_blocker.unblock()
+    request.getfixturevalue("django_test_environment")
+    request.getfixturevalue("django_db_setup")
 
-        cls = request.node.cls
+    django_db_blocker.unblock()
 
-        # implement missing (as of 1.10) debug() method for django's TestCase
-        # see pytest-dev/pytest-django#406
-        def _cleaning_debug(self):
-            testMethod = getattr(self, self._testMethodName)
-            skipped = getattr(self.__class__, "__unittest_skip__", False) or getattr(
-                testMethod, "__unittest_skip__", False
-            )
+    cls = request.node.cls
 
-            if not skipped:
-                self._pre_setup()
-            super(cls, self).debug()
-            if not skipped:
-                self._post_teardown()
+    # implement missing (as of 1.10) debug() method for django's TestCase
+    # see pytest-dev/pytest-django#406
+    def _cleaning_debug(self):
+        testMethod = getattr(self, self._testMethodName)
+        skipped = getattr(self.__class__, "__unittest_skip__", False) or getattr(
+            testMethod, "__unittest_skip__", False
+        )
 
-        cls.debug = _cleaning_debug
+        if not skipped:
+            self._pre_setup()
+        super(cls, self).debug()
+        if not skipped:
+            self._post_teardown()
 
-        if _handle_unittest_methods:
+    cls.debug = _cleaning_debug
+
+    if _handle_unittest_methods:
+        _restore_class_methods(cls)
+        cls.setUpClass()
+        _disable_class_methods(cls)
+
+        def teardown():
             _restore_class_methods(cls)
-            cls.setUpClass()
-            _disable_class_methods(cls)
+            cls.tearDownClass()
+            django_db_blocker.restore()
 
-            def teardown():
-                _restore_class_methods(cls)
-                cls.tearDownClass()
-                django_db_blocker.restore()
-
-            request.addfinalizer(teardown)
-        else:
-            request.addfinalizer(django_db_blocker.restore)
+        request.addfinalizer(teardown)
+    else:
+        request.addfinalizer(django_db_blocker.restore)
 
 
 @pytest.fixture(scope="function", autouse=True)
