@@ -515,7 +515,6 @@ def _django_setup_unittest(request, django_db_blocker):
     if not django_settings_is_configured() or not is_django_unittest(request):
         return
 
-    request.getfixturevalue("django_test_environment")
     request.getfixturevalue("django_db_setup")
 
     django_db_blocker.unblock()
