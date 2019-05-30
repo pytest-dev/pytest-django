@@ -10,11 +10,11 @@ jobs:
       services:
         - postgresql
     - python: 3.6
-      env: TOXENV=py36-dj111-sqlite-coverage
-    - python: 2.7
-      env: TOXENV=py27-dj111-mysql_innodb-coverage
+      env: TOXENV=py36-dj111-mysql_innodb-coverage
       services:
         - mysql
+    - python: 2.7
+      env: TOXENV=py27-dj111-sqlite-xdist-coverage
     - python: 3.6
       env: TOXENV=checkqa,docs
 
