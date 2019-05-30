@@ -278,7 +278,10 @@ class TestSqliteWithMultipleDbsAndXdist:
 
                 assert conn_default.vendor == 'sqlite'
                 db_name = conn_default.creation._get_test_db_name()
-                if conn_default.features.can_share_in_memory_db:
+
+                # can_share_in_memory_db was removed in Django 2.1, and
+                # used in _get_test_db_name before.
+                if getattr(conn_default.features, "can_share_in_memory_db", True):
                     assert 'file:memorydb' in db_name
                 else:
                     assert db_name == ":memory:"
