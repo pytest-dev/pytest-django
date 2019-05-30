@@ -278,7 +278,10 @@ class TestSqliteWithMultipleDbsAndXdist:
 
                 assert conn_default.vendor == 'sqlite'
                 db_name = conn_default.creation._get_test_db_name()
-                assert 'file:memorydb' in db_name
+                if conn_default.features.can_share_in_memory_db:
+                    assert 'file:memorydb' in db_name
+                else:
+                    assert db_name == ":memory:"
 
                 assert conn_db2.vendor == 'sqlite'
                 db_name = conn_db2.creation._get_test_db_name()
