@@ -513,11 +513,10 @@ def _django_db_marker(request):
 def _django_setup_unittest(request, django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
+        yield
         return
 
     request.getfixturevalue("django_db_setup")
-
-    django_db_blocker.unblock()
 
     cls = request.node.cls
 
@@ -537,19 +536,18 @@ def _django_setup_unittest(request, django_db_blocker):
 
     cls.debug = _cleaning_debug
 
-    if _handle_unittest_methods:
-        _restore_class_methods(cls)
-        cls.setUpClass()
-        _disable_class_methods(cls)
+    with django_db_blocker.unblock():
+        if _handle_unittest_methods:
+            _restore_class_methods(cls)
+            cls.setUpClass()
+            _disable_class_methods(cls)
 
-        def teardown():
+            yield
+
             _restore_class_methods(cls)
             cls.tearDownClass()
-            django_db_blocker.restore()
-
-        request.addfinalizer(teardown)
-    else:
-        request.addfinalizer(django_db_blocker.restore)
+        else:
+            yield
 
 
 @pytest.fixture(scope="function", autouse=True)
