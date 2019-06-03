@@ -1,6 +1,32 @@
 Changelog
 =========
 
+3.5.0 (2019-06-03)
+------------------
+
+Features
+^^^^^^^^
+
+* Run tests in the same order as Django (#223)
+
+* Use verbosity=0 with disabled migrations (#729, #730)
+
+Bugfixes
+^^^^^^^^
+
+* django_db_setup: warn instead of crash with teardown errors (#726)
+
+Misc
+^^^^
+* tests: fix test_sqlite_database_renamed (#739, #741)
+
+* tests/conftest.py: move import of db_helpers (#737)
+
+* Cleanup/improve coverage, mainly with tests (#706)
+
+* Slightly revisit unittest handling (#740)
+
+
 3.4.8 (2019-02-26)
 ------------------
 
