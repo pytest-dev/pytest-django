@@ -40,7 +40,7 @@ def test_dc_env(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 
@@ -68,7 +68,7 @@ def test_dc_ini(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 
@@ -96,5 +96,5 @@ def test_dc_option(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess("--ds=tpkg.settings_opt", "--dc=MySettings")
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0

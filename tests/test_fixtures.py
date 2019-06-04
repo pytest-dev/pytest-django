@@ -602,7 +602,7 @@ class Migration(migrations.Migration):
     )
 
     result = django_testdir.runpytest_subprocess("-s")
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 

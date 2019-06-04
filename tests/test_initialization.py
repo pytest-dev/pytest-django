@@ -54,7 +54,7 @@ def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch):
             "conftest",
             "pytest_configure: conftest",
             "pytest_configure: plugin",
-            "*1 passed*",
+            "* 1 passed in*",
         ]
     )
     assert result.ret == 0

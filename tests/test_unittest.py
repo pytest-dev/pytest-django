@@ -392,7 +392,7 @@ class TestUnittestMethods:
 
         result = django_testdir.runpytest_subprocess("-q", "-s")
         result.stdout.fnmatch_lines(
-            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
+            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed in*"]
         )
         assert result.ret == 0
 
