@@ -145,16 +145,8 @@ class TestUnittestMethods:
         result = django_testdir.runpytest_subprocess("-v", "-s")
         expected_lines = [
             "* ERROR at setup of TestFoo.test_pass *",
+            "E * TypeError: *",
         ]
-        if _pytest_version_info < (4, 2):
-            expected_lines += [
-                "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
-            ]
-        else:
-            expected_lines += [
-                "E * TypeError: *",
-            ]
-
         result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 

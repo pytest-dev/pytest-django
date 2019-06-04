@@ -9,7 +9,6 @@ import inspect
 from functools import reduce
 import os
 import sys
-import types
 
 import pytest
 
@@ -51,9 +50,7 @@ INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
 PY2 = sys.version_info[0] == 2
 
-# pytest 4.2 handles unittest setup/teardown itself via wrapping fixtures.
 _pytest_version_info = tuple(int(x) for x in pytest.__version__.split(".", 2)[:2])
-_handle_unittest_methods = _pytest_version_info < (4, 2)
 
 _report_header = []
 
@@ -364,57 +361,6 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
     return f is not super_method.__func__
 
 
-_disabled_classmethods = {}
-
-
-def _disable_class_methods(cls):
-    if cls in _disabled_classmethods:
-        return
-
-    _disabled_classmethods[cls] = (
-        # Get the classmethod object (not the resulting bound method),
-        # otherwise inheritance will be broken when restoring.
-        cls.__dict__.get("setUpClass"),
-        _classmethod_is_defined_at_leaf(cls, "setUpClass"),
-        cls.__dict__.get("tearDownClass"),
-        _classmethod_is_defined_at_leaf(cls, "tearDownClass"),
-    )
-
-    cls.setUpClass = types.MethodType(lambda cls: None, cls)
-    cls.tearDownClass = types.MethodType(lambda cls: None, cls)
-
-
-def _restore_class_methods(cls):
-    (
-        setUpClass,
-        restore_setUpClass,
-        tearDownClass,
-        restore_tearDownClass,
-    ) = _disabled_classmethods.pop(cls)
-
-    try:
-        del cls.setUpClass
-    except AttributeError:
-        raise
-
-    try:
-        del cls.tearDownClass
-    except AttributeError:
-        pass
-
-    if restore_setUpClass:
-        cls.setUpClass = setUpClass
-
-    if restore_tearDownClass:
-        cls.tearDownClass = tearDownClass
-
-
-def pytest_runtest_setup(item):
-    if _handle_unittest_methods:
-        if django_settings_is_configured() and is_django_unittest(item):
-            _disable_class_methods(item.cls)
-
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items):
     def get_order_number(test):
@@ -524,20 +470,8 @@ def _django_setup_unittest(request, django_db_blocker):
 
     request.getfixturevalue("django_db_setup")
 
-    cls = request.node.cls
-
     with django_db_blocker.unblock():
-        if _handle_unittest_methods:
-            _restore_class_methods(cls)
-            cls.setUpClass()
-            _disable_class_methods(cls)
-
-            yield
-
-            _restore_class_methods(cls)
-            cls.tearDownClass()
-        else:
-            yield
+        yield
 
     if mp_debug:
         mp_debug.undo()
