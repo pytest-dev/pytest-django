@@ -334,33 +334,6 @@ def pytest_configure():
     _setup_django()
 
 
-def _classmethod_is_defined_at_leaf(cls, method_name):
-    super_method = None
-
-    for base_cls in cls.__mro__[1:]:  # pragma: no branch
-        super_method = base_cls.__dict__.get(method_name)
-        if super_method is not None:
-            break
-
-    assert super_method is not None, (
-        "%s could not be found in base classes" % method_name
-    )
-
-    method = getattr(cls, method_name)
-
-    try:
-        f = method.__func__
-    except AttributeError:
-        pytest.fail("%s.%s should be a classmethod" % (cls, method_name))
-    if PY2 and not (
-        inspect.ismethod(method)
-        and inspect.isclass(method.__self__)
-        and issubclass(cls, method.__self__)
-    ):
-        pytest.fail("%s.%s should be a classmethod" % (cls, method_name))
-    return f is not super_method.__func__
-
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items):
     def get_order_number(test):
