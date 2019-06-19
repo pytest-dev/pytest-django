@@ -1,28 +1,30 @@
 """
-Dynamically load all Django assertion cases and expose them for importing
+Dynamically load all Django assertion cases and expose them for importing.
 """
 from django.test import (
     TestCase, SimpleTestCase,
     LiveServerTestCase, TransactionTestCase
 )
 
+test_case = TestCase('run')
+
 
 def _wrapper(name):
     def assertion_func(*args, **kwargs):
-        getattr(TestCase('run'), name)(*args, **kwargs)
+        getattr(test_case, name)(*args, **kwargs)
 
     return assertion_func
 
 
 __all__ = []
-asserts = set()
-asserts.update(
-    set(attr for attr in TestCase.__dict__ if attr.startswith('assert')),
-    set(attr for attr in SimpleTestCase.__dict__ if attr.startswith('assert')),
-    set(attr for attr in LiveServerTestCase.__dict__ if attr.startswith('assert')),
-    set(attr for attr in TransactionTestCase.__dict__ if attr.startswith('assert')),
+assertions_names = set()
+assertions_names.update(
+    set(attr for attr in vars(TestCase) if attr.startswith('assert')),
+    set(attr for attr in vars(SimpleTestCase) if attr.startswith('assert')),
+    set(attr for attr in vars(LiveServerTestCase) if attr.startswith('assert')),
+    set(attr for attr in vars(TransactionTestCase) if attr.startswith('assert')),
 )
 
-for assert_func in asserts:
-    locals()[assert_func] = _wrapper(assert_func)
+for assert_func in assertions_names:
+    globals()[assert_func] = _wrapper(assert_func)
     __all__.append(assert_func)

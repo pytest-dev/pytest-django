@@ -6,7 +6,7 @@ Django helpers
 Assertions
 ----------
 
-All of Django's ``TestCase`` _assertions are available by adding the following
+All of Django's ``TestCase`` assertions_ are available by adding the following
 at the top of your test file.
 
 ::

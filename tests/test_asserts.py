@@ -1,5 +1,5 @@
 """
-Tests the dynamic loading of all Django assertion cases
+Tests the dynamic loading of all Django assertion cases.
 """
 import inspect
 
@@ -11,7 +11,7 @@ from pytest_django.asserts import __all__ as asserts_all
 
 def _get_actual_assertions_names():
     """
-    Returns list with names of all assertion helpers in Django
+    Returns list with names of all assertion helpers in Django.
     """
     from django.test import TestCase as DjangoTestCase
     from unittest import TestCase as DefaultTestCase
