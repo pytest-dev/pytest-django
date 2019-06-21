@@ -10,7 +10,7 @@ from functools import partial
 import pytest
 
 from . import live_server_helper
-from .django_compat import is_django_unittest, get_all_user_model_fields
+from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
 __all__ = [
@@ -274,7 +274,7 @@ def admin_user(db, django_user_model, django_username_field):
     try:
         user = UserModel._default_manager.get(**attributes)
     except UserModel.DoesNotExist:
-        all_user_model_fields = get_all_user_model_fields(UserModel)
+        all_user_model_fields = [x.name for x in UserModel._meta.get_fields()]
 
         if 'username' in all_user_model_fields:
             # django.contrib.auth.UserManager expects a username field to be

@@ -12,14 +12,3 @@ def is_django_unittest(request_or_item):
         return False
 
     return issubclass(cls, SimpleTestCase)
-
-
-def get_all_user_model_fields(UserModel):
-    """
-    Returns all user model fields and respects removal of Model._meta.get_all_field_names()
-    https://docs.djangoproject.com/en/1.9/ref/models/meta/#migrating-from-the-old-api
-    """
-    try:
-        return UserModel._meta.get_all_field_names()
-    except AttributeError:
-        return [x.name for x in UserModel._meta.get_fields()]
