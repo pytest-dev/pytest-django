@@ -13,9 +13,10 @@ def is_django_unittest(request_or_item):
 
     return issubclass(cls, SimpleTestCase)
 
+
 def get_all_user_model_fields(UserModel):
     """
-    Returns all usermodel fields and takes removal of Model._meta.get_all_field_names() into account
+    Returns all user model fields and respects removal of Model._meta.get_all_field_names()
     https://docs.djangoproject.com/en/1.9/ref/models/meta/#migrating-from-the-old-api
     """
     try:

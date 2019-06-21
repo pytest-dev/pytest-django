@@ -474,6 +474,7 @@ class TestLiveServer:
 
 
 @pytest.mark.parametrize("username_field", ("email", "identifier"))
+@pytest.mark.parametrize("original_username_field_present", (True, False))
 @pytest.mark.django_project(
     extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
@@ -487,20 +488,72 @@ class TestLiveServer:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_custom_user_model(django_testdir, username_field):
-    django_testdir.create_app_file(
-        """
-        from django.contrib.auth.models import AbstractUser
-        from django.db import models
+def test_custom_user_model(django_testdir, username_field, original_username_field_present):
+    if original_username_field_present:
+        django_testdir.create_app_file(
+            """
+            from django.contrib.auth.models import AbstractUser
+            from django.db import models
 
-        class MyCustomUser(AbstractUser):
-            identifier = models.CharField(unique=True, max_length=100)
+            class MyCustomUser(AbstractUser):
+                identifier = models.CharField(unique=True, max_length=100)
 
-            USERNAME_FIELD = '%s'
-        """
-        % (username_field),
-        "models.py",
-    )
+                USERNAME_FIELD = '%s'
+            """
+            % (username_field),
+            "models.py",
+        )
+    else:
+        django_testdir.create_app_file(
+            """
+            from django.contrib.auth.models import BaseUserManager
+
+            class MyCustomUserManager(BaseUserManager):
+                def _create_user(self, email, password, **extra_fields):
+                    if not email:
+                        raise ValueError('The given email must be set')
+                    email = self.normalize_email(email)
+                    user = self.model(email=email, **extra_fields)
+                    user.set_password(password)
+                    user.save(using=self._db)
+                    return user
+
+                def create_user(self, email, password=None, **extra_fields):
+                    extra_fields.setdefault('is_staff', False)
+                    extra_fields.setdefault('is_superuser', False)
+                    return self._create_user(email, password, **extra_fields)
+
+                def create_superuser(self, email, password, **extra_fields):
+                    extra_fields.setdefault('is_staff', True)
+                    extra_fields.setdefault('is_superuser', True)
+
+                    if extra_fields.get('is_staff') is not True:
+                        raise ValueError('Superuser must have is_staff=True.')
+                    if extra_fields.get('is_superuser') is not True:
+                        raise ValueError('Superuser must have is_superuser=True.')
+
+                    return self._create_user(email, password, **extra_fields)
+            """,
+            "managers.py"
+        )
+        django_testdir.create_app_file(
+            """
+            from django.contrib.auth.models import AbstractUser
+            from django.db import models
+
+            from .managers import MyCustomUserManager
+
+            class MyCustomUser(AbstractUser):
+                identifier = models.CharField(unique=True, max_length=100)
+
+                USERNAME_FIELD = '%s'
+                REQUIRED_FIELDS = []
+                username = None
+                objects = MyCustomUserManager()
+            """
+            % (username_field),
+            "models.py",
+        )
     django_testdir.create_app_file(
         """
         from django.conf.urls import url
@@ -539,6 +592,10 @@ def test_custom_user_model(django_testdir, username_field):
     )
 
     django_testdir.create_app_file("", "migrations/__init__.py")
+    username_db_field = ""
+    if original_username_field_present:
+        username_db_field = "('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),"  # noqa: E501
+
     django_testdir.create_app_file(
         """
 # -*- coding: utf-8 -*-
@@ -564,7 +621,7 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(null=True, verbose_name='last login', blank=True)),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),
+                %s
                 ('first_name', models.CharField(max_length=30, verbose_name='first name', blank=True)),
                 ('last_name', models.CharField(max_length=30, verbose_name='last name', blank=True)),
                 ('email', models.EmailField(max_length=254, verbose_name='email address', blank=True)),
@@ -583,7 +640,8 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-        """,  # noqa: E501
+        """  # noqa: E501
+        % (username_db_field),
         "migrations/0002_custom_user_model.py",
     )
 
