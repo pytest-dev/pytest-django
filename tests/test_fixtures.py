@@ -548,8 +548,12 @@ def test_custom_user_model(django_testdir, username_field, original_username_fie
 
                 USERNAME_FIELD = '%s'
                 REQUIRED_FIELDS = []
-                username = None
                 objects = MyCustomUserManager()
+
+            username_field = MyCustomUser._meta.get_field('username')
+            local_fields = MyCustomUser._meta.local_fields
+            local_fields.remove(username_field)
+            MyCustomUser._meta.fields = local_fields
             """
             % (username_field),
             "models.py",
