@@ -129,7 +129,7 @@ def _django_db_fixture_helper(
     if is_django_unittest(request):
         return
 
-    if not transactional and "live_server" in request.funcargnames:
+    if not transactional and "live_server" in request.fixturenames:
         # Do nothing, we get called with transactional=True, too.
         return
 
@@ -187,11 +187,11 @@ def db(request, django_db_setup, django_db_blocker):
     over each other in the following order (the last one wins): ``db``,
     ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if "django_db_reset_sequences" in request.funcargnames:
+    if "django_db_reset_sequences" in request.fixturenames:
         request.getfixturevalue("django_db_reset_sequences")
     if (
-        "transactional_db" in request.funcargnames
-        or "live_server" in request.funcargnames
+        "transactional_db" in request.fixturenames
+        or "live_server" in request.fixturenames
     ):
         request.getfixturevalue("transactional_db")
     else:
@@ -212,7 +212,7 @@ def transactional_db(request, django_db_setup, django_db_blocker):
     over each other in the following order (the last one wins): ``db``,
     ``transactional_db``, ``django_db_reset_sequences``.
     """
-    if "django_db_reset_sequences" in request.funcargnames:
+    if "django_db_reset_sequences" in request.fixturenames:
         request.getfixturevalue("django_db_reset_sequences")
     _django_db_fixture_helper(request, django_db_blocker, transactional=True)
 
@@ -410,7 +410,7 @@ def _live_server_helper(request):
 
     It will also override settings only for the duration of the test.
     """
-    if "live_server" not in request.funcargnames:
+    if "live_server" not in request.fixturenames:
         return
 
     request.getfixturevalue("transactional_db")
