@@ -435,7 +435,7 @@ def pytest_collection_modifyitems(session, config, items):
         else:
             transaction = None
 
-        fixtures = getattr(test, 'funcargnames', [])
+        fixtures = getattr(test, 'fixturenames', [])
         if "transactional_db" in fixtures:
             return 1
 
