@@ -9,6 +9,7 @@ _build
 .env
 /.coverage.*
 /.coverage
+/coverage.xml
 /htmlcov/
 .cache
 .pytest_cache/
