@@ -21,7 +21,7 @@ setup(
     use_scm_version={
         'write_to': 'pytest_django/_version.py',
         'version_scheme': 'post-release',
-        'write_to_template': '__version__ = "{version}"',
+        'write_to_template': '__version__ = "{version}"\n',
     },
     description='A Django plugin for pytest.',
     author='Andreas Pelme',
