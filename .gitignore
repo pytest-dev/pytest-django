@@ -16,6 +16,3 @@ _build
 .Python
 .eggs
 *.egg
-
-# Do not track since it's auto-generated.
-pytest_django/_version.py

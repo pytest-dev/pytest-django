@@ -18,12 +18,8 @@ def read(fname):
 
 setup(
     name='pytest-django',
-    use_scm_version={
-        'write_to': 'pytest_django/_version.py',
-        'version_scheme': 'post-release',
-        'write_to_template': '__version__ = "{version}"\n',
-    },
     description='A Django plugin for pytest.',
+    versioning='post',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
     maintainer="Andreas Pelme",
@@ -33,7 +29,7 @@ setup(
     packages=['pytest_django'],
     long_description=read('README.rst'),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
-    setup_requires=['setuptools_scm>=1.11.1'],
+    setup_requires=['setupmeta'],
     install_requires=[
         'pytest>=3.6',
         'pathlib2;python_version<"3.4"',
