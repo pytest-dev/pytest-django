@@ -19,7 +19,7 @@ Talks, articles and blog posts
 
  * Blog post: `Django Projects to Django Apps: Converting the Unit Tests, by
    John Costa
-   <http://www.johnmcostaiii.net/2013/django-projects-to-django-apps-converting-the-unit-tests/>`_.
+   <https://www.johnmcostaiii.net/post/2013-04-21-django-projects-to-django-apps-converting-the-unit-tests/>`_.
 
 For general information and tutorials on pytest, see the `pytest tutorial page <https://pytest.org/en/latest/getting-started.html>`_.
 
