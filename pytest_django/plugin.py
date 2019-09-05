@@ -10,6 +10,7 @@ from functools import reduce
 import os
 import sys
 import types
+from io import StringIO
 
 import pytest
 from pkg_resources import parse_version
@@ -37,6 +38,8 @@ from .fixtures import django_db_reset_sequences  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .fixtures import django_i18n_setup  # noqa
+from .fixtures import django_i18n_fixture_helper
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
@@ -109,6 +112,21 @@ def pytest_addoption(parser):
         dest="nomigrations",
         default=False,
         help="Enable Django migrations on test setup",
+    )
+    group.addoption(
+        "--reuse-i18n",
+        action="store_true",
+        dest="reuse_i18n",
+        default=False,
+        help="Re-use compiled i18n files if they already exist",
+    )
+    group.addoption(
+        "--locale",
+        action="append",
+        dest="locale",
+        default=[],
+        help="Locale(s) to process (e.g. de_AT). Default is to process all. "
+        "Can be used multiple times.",
     )
     parser.addini(
         CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
@@ -265,6 +283,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
         "ignore_template_errors(): ignore errors from invalid template "
         "variables (if --fail-on-template-vars is used).",
     )
+    early_config.addinivalue_line("markers", "django_i18n: mark test to run with i18n files")
 
     options = parser.parse_known_args(args)
 
@@ -497,6 +516,18 @@ def _django_db_marker(request):
             request.getfixturevalue("transactional_db")
         else:
             request.getfixturevalue("db")
+
+
+@pytest.fixture(autouse=True)
+def _django_i18n_marker(request):
+
+    marker = request.node.get_closest_marker("django_i18n")
+
+    if marker:
+        locale = validate_django_i18n(marker)
+
+        if not request.config.getvalue("reuse_i18n"):
+            django_i18n_fixture_helper(locale)
 
 
 @pytest.fixture(autouse=True, scope="class")
@@ -810,5 +841,18 @@ def validate_urls(marker):
 
     def apifun(urls):
         return urls
+
+    return apifun(*marker.args, **marker.kwargs)
+
+
+def validate_django_i18n(marker):
+    """Validate the django_i18n marker.
+
+    It checks the signature and creates the `django_i18n` attribute on the
+    marker which will have the correct value.
+    """
+
+    def apifun(locale):
+        return locale
 
     return apifun(*marker.args, **marker.kwargs)

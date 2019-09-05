@@ -6,6 +6,7 @@ import os
 import warnings
 from contextlib import contextmanager
 from functools import partial
+from io import StringIO
 
 import pytest
 
@@ -151,6 +152,24 @@ def _django_db_fixture_helper(
     test_case = django_case(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
+
+
+@pytest.fixture(scope="session")
+def django_locale(request):
+    return request.config.getvalue("locale")
+
+
+def django_i18n_fixture_helper(locale):
+    from django.core.management import call_command
+
+    call_command("compilemessages", locale=django_locale, stderr=StringIO())
+
+
+@pytest.fixture(scope="session")
+def django_i18n_setup(request, django_locale):
+
+    if not request.config.getvalue("reuse_i18n"):
+        django_i18n_fixture_helper(django_locale)
 
 
 def _disable_native_migrations():
