@@ -6,7 +6,10 @@ jobs:
   include:
     - stage: baseline
       python: 3.6
-      env: TOXENV=py36-dj20-postgres-xdist-coverage
+      env:
+        - TOXENV=py36-dj20-postgres-xdist-coverage
+        # Test in verbose mode.
+        - PYTEST_ADDOPTS=-vv
       services:
         - postgresql
     - python: 3.6
