@@ -7,12 +7,12 @@ fixtures are tested in test_database.
 from __future__ import with_statement
 
 import socket
+from contextlib import contextmanager
 
 import pytest
-
-from django.db import connection, transaction
 from django.conf import settings as real_settings
 from django.core import mail
+from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_text
@@ -20,6 +20,18 @@ from django.utils.encoding import force_text
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 from pytest_django_test.compat import HTTPError, urlopen
+
+
+@contextmanager
+def nonverbose_config(config):
+    """Ensure that pytest's config.option.verbose is <= 0."""
+    if config.option.verbose <= 0:
+        yield
+    else:
+        saved = config.option.verbose
+        config.option.verbose = 0
+        yield
+        config.option.verbose = saved
 
 
 def test_client(client):
@@ -53,56 +65,58 @@ def test_rf(rf):
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_db(django_assert_num_queries):
-    with django_assert_num_queries(3):
-        Item.objects.create(name="foo")
-        Item.objects.create(name="bar")
-        Item.objects.create(name="baz")
-
-    with pytest.raises(pytest.fail.Exception) as excinfo:
-        with django_assert_num_queries(2) as captured:
-            Item.objects.create(name="quux")
-    assert excinfo.value.args == (
-        "Expected to perform 2 queries but 1 was done "
-        "(add -v option to show queries)",
-    )
-    assert len(captured.captured_queries) == 1
-
-
-@pytest.mark.django_db
-def test_django_assert_max_num_queries_db(django_assert_max_num_queries):
-    with django_assert_max_num_queries(2):
-        Item.objects.create(name="1-foo")
-        Item.objects.create(name="2-bar")
-
-    with pytest.raises(pytest.fail.Exception) as excinfo:
-        with django_assert_max_num_queries(2) as captured:
-            Item.objects.create(name="1-foo")
-            Item.objects.create(name="2-bar")
-            Item.objects.create(name="3-quux")
-
-    assert excinfo.value.args == (
-        "Expected to perform 2 queries or less but 3 were done "
-        "(add -v option to show queries)",
-    )
-    assert len(captured.captured_queries) == 3
-    assert "1-foo" in captured.captured_queries[0]["sql"]
-
-
-@pytest.mark.django_db(transaction=True)
-def test_django_assert_num_queries_transactional_db(
-    transactional_db, django_assert_num_queries
-):
-    with transaction.atomic():
-
+def test_django_assert_num_queries_db(request, django_assert_num_queries):
+    with nonverbose_config(request.config):
         with django_assert_num_queries(3):
             Item.objects.create(name="foo")
             Item.objects.create(name="bar")
             Item.objects.create(name="baz")
 
-        with pytest.raises(pytest.fail.Exception):
-            with django_assert_num_queries(2):
+        with pytest.raises(pytest.fail.Exception) as excinfo:
+            with django_assert_num_queries(2) as captured:
                 Item.objects.create(name="quux")
+        assert excinfo.value.args == (
+            "Expected to perform 2 queries but 1 was done "
+            "(add -v option to show queries)",
+        )
+        assert len(captured.captured_queries) == 1
+
+
+@pytest.mark.django_db
+def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries):
+    with nonverbose_config(request.config):
+        with django_assert_max_num_queries(2):
+            Item.objects.create(name="1-foo")
+            Item.objects.create(name="2-bar")
+
+        with pytest.raises(pytest.fail.Exception) as excinfo:
+            with django_assert_max_num_queries(2) as captured:
+                Item.objects.create(name="1-foo")
+                Item.objects.create(name="2-bar")
+                Item.objects.create(name="3-quux")
+
+        assert excinfo.value.args == (
+            "Expected to perform 2 queries or less but 3 were done "
+            "(add -v option to show queries)",
+        )
+        assert len(captured.captured_queries) == 3
+        assert "1-foo" in captured.captured_queries[0]["sql"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_django_assert_num_queries_transactional_db(
+    request, transactional_db, django_assert_num_queries
+):
+    with nonverbose_config(request.config):
+        with transaction.atomic():
+            with django_assert_num_queries(3):
+                Item.objects.create(name="foo")
+                Item.objects.create(name="bar")
+                Item.objects.create(name="baz")
+
+            with pytest.raises(pytest.fail.Exception):
+                with django_assert_num_queries(2):
+                    Item.objects.create(name="quux")
 
 
 def test_django_assert_num_queries_output(django_testdir):
