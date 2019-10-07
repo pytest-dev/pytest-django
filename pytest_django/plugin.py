@@ -6,6 +6,7 @@ test database and provides some useful text fixtures.
 
 import contextlib
 import inspect
+import site
 from functools import reduce
 import os
 import sys
@@ -141,6 +142,16 @@ def pytest_addoption(parser):
         type="bool",
         default=False,
     )
+    parser.addini(
+        "python_paths_early", type="linelist",
+        help="newline-separated directories to add to PYTHONPATH via sys.path.insert(0, path),"
+             "after resolving user prefix and relative paths (from ini file directory)",
+        default=[])
+    parser.addini(
+        "site_dirs_early", type="linelist",
+        help="newline-separated directories to add to PYTHONPATH via site.addsitedir(path),"
+             "after resolving user prefix and relative paths (from ini file directory)",
+        default=[])
 
 
 PROJECT_FOUND = (
@@ -270,6 +281,30 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
     if options.version or options.help:
         return
+
+    def _normalize_path(path):
+        """
+        Expand user and resolve relative paths using rootdir
+        """
+        path = str(path)
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            path = os.path.join(str(early_config.rootdir), path)
+        return os.path.normpath(path)
+
+    python_paths_early = tuple(_normalize_path(path)
+                               for path in early_config.getini("python_paths_early"))
+    if python_paths_early:
+        for path in reversed(python_paths_early):
+            sys.path.insert(0, path)
+        _report_header.append("early extra python paths: %s" % str(python_paths_early))
+
+    site_dirs_early = tuple(_normalize_path(path)
+                            for path in early_config.getini("site_dirs_early"))
+    if site_dirs_early:
+        for path in site_dirs_early:
+            site.addsitedir(path)
+        _report_header.append("early extra site dirs: %s" % str(site_dirs_early))
 
     django_find_project = _get_boolean_value(
         early_config.getini("django_find_project"), "django_find_project"

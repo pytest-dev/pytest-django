@@ -1,4 +1,80 @@
+import os
 from textwrap import dedent
+
+
+def test_python_path_ini_settings(testdir):
+
+    src_dir = testdir.mkdir("src")
+    settings_file = src_dir.join("mycustomsettings.py")
+    with open(str(settings_file), "w") as f:
+        f.write("SECRET_KEY='28769GJSVBZJZVSNBZVZVBZNZB'")
+
+    sitedir = testdir.mkdir("sitedir")
+    pth_file = sitedir.join("stuffs.pth")
+    with open(str(pth_file), "w") as f:
+        f.write("../src")
+
+    testdir.makepyfile(test_stuffs="def test_some_stuffs(): pass")  # Dummy test
+
+    result = testdir.runpytest_subprocess("--ds=mycustomsettings")
+    result.stderr.fnmatch_lines(
+        [
+            "ImportError: No module named *mycustomsettings*"
+        ]
+    )
+    assert result.ret == 1
+
+    testdir.makeini(
+        """
+       [pytest]
+       python_paths_early = src/
+                            ~/myhomesubdir/
+                            /tmp/path/to/somewhere
+        """)
+
+    expected_python_paths = (os.path.normpath(os.path.join(str(testdir), "src/")),
+                             os.path.normpath(os.path.join(str(testdir), "myhomesubdir/")),
+                             os.path.normpath("/tmp/path/to/somewhere"))
+    expected_python_paths_fnmatch = "*early extra python paths: %s*" % str(expected_python_paths)
+
+    result = testdir.runpytest_subprocess("--ds=mycustomsettings")
+    result.stdout.fnmatch_lines(
+        [
+            expected_python_paths_fnmatch,
+        ]
+    )
+    assert result.ret == 0  # Dummy test ran
+
+    testdir.makeini("")  # Erase ini file
+
+    result = testdir.runpytest_subprocess("--ds=mycustomsettings")
+    result.stderr.fnmatch_lines(
+        [
+            "ImportError: No module named *mycustomsettings*"
+        ]
+    )
+    assert result.ret == 1
+
+    testdir.makeini(
+        """
+       [pytest]
+       site_dirs_early = sitedir/
+                       ~/myhomesubdir2/
+                       /tmp2/path2/to2/somewhere2
+        """)
+
+    expected_site_dirs = (os.path.normpath(os.path.join(str(testdir), "sitedir/")),
+                          os.path.normpath(os.path.join(str(testdir), "myhomesubdir2/")),
+                          os.path.normpath("/tmp2/path2/to2/somewhere2"))
+    expected_site_dirs_fnmatch = "*early extra site dirs: %s*" % str(expected_site_dirs)
+
+    result = testdir.runpytest_subprocess("--ds=mycustomsettings")
+    result.stdout.fnmatch_lines(
+        [
+            expected_site_dirs_fnmatch,
+        ]
+    )
+    assert result.ret == 0  # Dummy test ran
 
 
 def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch):
