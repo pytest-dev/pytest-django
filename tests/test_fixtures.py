@@ -539,12 +539,12 @@ def test_custom_user_model(django_testdir, username_field):
     )
     django_testdir.makepyfile(
         """
-        from django.utils.encoding import force_text
+        from django.utils.encoding import force_str
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
             resp = admin_client.get('/admin-required/')
-            assert force_text(resp.content) == 'You are an admin'
+            assert force_str(resp.content) == 'You are an admin'
         """
     )
 
