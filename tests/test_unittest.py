@@ -456,3 +456,34 @@ def test_pdb_enabled(django_testdir):
 
     result = django_testdir.runpytest_subprocess("-v", "--pdb")
     assert result.ret == 0
+
+
+def test_debug_restored(django_testdir):
+    django_testdir.create_test_module(
+        """
+        from django.test import TestCase
+
+        pre_setup_count = 0
+
+
+        class TestClass1(TestCase):
+
+            def test_method(self):
+                pass
+
+
+        class TestClass2(TestClass1):
+
+            def _pre_setup(self):
+                global pre_setup_count
+                pre_setup_count += 1
+                super(TestClass2, self)._pre_setup()
+
+            def test_method(self):
+                assert pre_setup_count == 1
+    """
+    )
+
+    result = django_testdir.runpytest_subprocess("--pdb")
+    result.stdout.fnmatch_lines(["*= 2 passed in *"])
+    assert result.ret == 0
