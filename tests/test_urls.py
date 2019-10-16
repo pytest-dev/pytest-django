@@ -23,12 +23,11 @@ def test_urls_cache_is_cleared(testdir):
     testdir.makepyfile(
         myurls="""
         from django.conf.urls import url
-        from pytest_django_test.compat import patterns
 
         def fake_view(request):
             pass
 
-        urlpatterns = patterns('', url(r'first/$', fake_view, name='first'))
+        urlpatterns = [url(r'first/$', fake_view, name='first')]
     """
     )
 
@@ -60,24 +59,22 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
     testdir.makepyfile(
         myurls="""
         from django.conf.urls import url
-        from pytest_django_test.compat import patterns
 
         def fake_view(request):
             pass
 
-        urlpatterns = patterns('', url(r'first/$', fake_view, name='first'))
+        urlpatterns = [url(r'first/$', fake_view, name='first')]
     """
     )
 
     testdir.makepyfile(
         myurls2="""
         from django.conf.urls import url
-        from pytest_django_test.compat import patterns
 
         def fake_view(request):
             pass
 
-        urlpatterns = patterns('', url(r'second/$', fake_view, name='second'))
+        urlpatterns = [url(r'second/$', fake_view, name='second')]
     """
     )
 

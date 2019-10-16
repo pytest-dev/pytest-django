@@ -518,13 +518,9 @@ def test_custom_user_model(django_testdir, username_field):
     django_testdir.create_app_file(
         """
         from django.conf.urls import url
-        from pytest_django_test.compat import patterns
         from tpkg.app import views
 
-        urlpatterns = patterns(
-            '',
-            url(r'admin-required/', views.admin_required_view),
-        )
+        urlpatterns = [url(r'admin-required/', views.admin_required_view)]
         """,
         "urls.py",
     )
@@ -543,12 +539,12 @@ def test_custom_user_model(django_testdir, username_field):
     )
     django_testdir.makepyfile(
         """
-        from django.utils.encoding import force_text
+        from django.utils.encoding import force_str
         from tpkg.app.models import MyCustomUser
 
         def test_custom_user_model(admin_client):
             resp = admin_client.get('/admin-required/')
-            assert force_text(resp.content) == 'You are an admin'
+            assert force_str(resp.content) == 'You are an admin'
         """
     )
 
@@ -578,7 +574,7 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(null=True, verbose_name='last login', blank=True)),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator('^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),
+                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator(r'^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),
                 ('first_name', models.CharField(max_length=30, verbose_name='first name', blank=True)),
                 ('last_name', models.CharField(max_length=30, verbose_name='last name', blank=True)),
                 ('email', models.EmailField(max_length=254, verbose_name='email address', blank=True)),
@@ -602,7 +598,7 @@ class Migration(migrations.Migration):
     )
 
     result = django_testdir.runpytest_subprocess("-s")
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 

@@ -138,7 +138,7 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     testdir.makepyfile(settings_after_conftest="SECRET_KEY='secret'")
     # testdir.makeconftest("import sys; print(sys.path)")
     result = testdir.runpytest_subprocess("-v")
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 
@@ -226,7 +226,7 @@ def test_django_settings_configure(testdir, monkeypatch):
     """
     )
     result = testdir.runpython(p)
-    result.stdout.fnmatch_lines(["*4 passed*"])
+    result.stdout.fnmatch_lines(["* 4 passed in*"])
 
 
 def test_settings_in_hook(testdir, monkeypatch):
@@ -275,7 +275,7 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["*1 passed*"])
+    result.stdout.fnmatch_lines(["* 1 passed in*"])
     assert result.ret == 0
 
 
