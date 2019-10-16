@@ -522,8 +522,9 @@ def _django_setup_unittest(request, django_db_blocker):
 
     cls = request.node.cls
 
-    # implement missing (as of 1.10) debug() method for django's TestCase
-    # see pytest-dev/pytest-django#406
+    # Implement missing (as of 2.2) debug() wrapper/method for Django's TestCase.
+    # See pytest-dev/pytest-django#406.
+    # Pending PR for Django: https://github.com/django/django/pull/7436.
     def _cleaning_debug(self):
         testMethod = getattr(self, self._testMethodName)
         skipped = getattr(self.__class__, "__unittest_skip__", False) or getattr(
@@ -536,6 +537,7 @@ def _django_setup_unittest(request, django_db_blocker):
         if not skipped:
             self._post_teardown()
 
+    orig_debug = cls.debug
     cls.debug = _cleaning_debug
 
     with django_db_blocker.unblock():
@@ -550,6 +552,8 @@ def _django_setup_unittest(request, django_db_blocker):
             cls.tearDownClass()
         else:
             yield
+
+    cls.debug = orig_debug
 
 
 @pytest.fixture(scope="function", autouse=True)
