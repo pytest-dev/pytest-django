@@ -1,6 +1,25 @@
 Changelog
 =========
 
+3.6.0 (2019-10-17)
+------------------
+
+Features
+^^^^^^^^
+
+* Rename test databases when running parallel Tox (#678, #680)
+
+Bugfixes
+^^^^^^^^
+
+* Django unittests: restore "debug" function (#769, #771)
+
+Misc
+^^^^
+
+* Improve/harden internal tests / infrastructure.
+
+
 3.5.1 (2019-06-29)
 ------------------
 
