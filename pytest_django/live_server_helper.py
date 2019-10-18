@@ -1,6 +1,7 @@
-import sys
+import six
 
 
+@six.python_2_unicode_compatible
 class LiveServer(object):
     """The liveserver fixture
 
@@ -70,21 +71,11 @@ class LiveServer(object):
     def url(self):
         return "http://%s:%s" % (self.thread.host, self.thread.port)
 
-    if sys.version_info < (3, 0):
+    def __str__(self):
+        return self.url
 
-        def __unicode__(self):
-            return self.url
-
-        def __add__(self, other):
-            return unicode(self) + other  # noqa: pyflakes on python3
-
-    else:
-
-        def __str__(self):
-            return self.url
-
-        def __add__(self, other):
-            return str(self) + other
+    def __add__(self, other):
+        return "%s%s" % (self, other)
 
     def __repr__(self):
         return "<LiveServer listening at %s>" % self.url
