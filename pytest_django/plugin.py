@@ -522,23 +522,25 @@ def _django_setup_unittest(request, django_db_blocker):
 
     cls = request.node.cls
 
-    # Implement missing (as of 2.2) debug() wrapper/method for Django's TestCase.
+    # Implement missing debug() wrapper/method for Django's TestCase (< 3.1.0).
     # See pytest-dev/pytest-django#406.
-    # Pending PR for Django: https://github.com/django/django/pull/7436.
-    def _cleaning_debug(self):
-        testMethod = getattr(self, self._testMethodName)
-        skipped = getattr(self.__class__, "__unittest_skip__", False) or getattr(
-            testMethod, "__unittest_skip__", False
-        )
+    import django
+    monkeypatch_debug = django.VERSION < (3, 1)
+    if monkeypatch_debug:
+        def _cleaning_debug(self):
+            testMethod = getattr(self, self._testMethodName)
+            skipped = getattr(self.__class__, "__unittest_skip__", False) or getattr(
+                testMethod, "__unittest_skip__", False
+            )
 
-        if not skipped:
-            self._pre_setup()
-        super(cls, self).debug()
-        if not skipped:
-            self._post_teardown()
+            if not skipped:
+                self._pre_setup()
+            super(cls, self).debug()
+            if not skipped:
+                self._post_teardown()
 
-    orig_debug = cls.debug
-    cls.debug = _cleaning_debug
+        orig_debug = cls.debug
+        cls.debug = _cleaning_debug
 
     with django_db_blocker.unblock():
         if _handle_unittest_methods:
@@ -553,7 +555,8 @@ def _django_setup_unittest(request, django_db_blocker):
         else:
             yield
 
-    cls.debug = orig_debug
+    if monkeypatch_debug:
+        cls.debug = orig_debug
 
 
 @pytest.fixture(scope="function", autouse=True)
