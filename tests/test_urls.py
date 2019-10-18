@@ -1,6 +1,6 @@
 import pytest
 from django.conf import settings
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 
 @pytest.mark.urls("pytest_django_test.urls_overridden")
@@ -16,7 +16,7 @@ def test_urls():
 @pytest.mark.urls("pytest_django_test.urls_overridden")
 def test_urls_client(client):
     response = client.get("/overridden_url/")
-    assert force_text(response.content) == "Overridden urlconf works!"
+    assert force_str(response.content) == "Overridden urlconf works!"
 
 
 def test_urls_cache_is_cleared(testdir):

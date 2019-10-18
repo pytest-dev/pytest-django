@@ -15,7 +15,7 @@ from django.core import mail
 from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
@@ -42,13 +42,13 @@ def test_client(client):
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
-    assert force_text(resp.content) == "You are an admin"
+    assert force_str(resp.content) == "You are an admin"
 
 
 def test_admin_client_no_db_marker(admin_client):
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
-    assert force_text(resp.content) == "You are an admin"
+    assert force_str(resp.content) == "You are an admin"
 
 
 @pytest.mark.django_db
@@ -328,10 +328,10 @@ class TestLiveServer:
         TestLiveServer._test_settings_before_run = True
 
     def test_url(self, live_server):
-        assert live_server.url == force_text(live_server)
+        assert live_server.url == force_str(live_server)
 
     def test_change_settings(self, live_server, settings):
-        assert live_server.url == force_text(live_server)
+        assert live_server.url == force_str(live_server)
 
     def test_settings_restored(self):
         """Ensure that settings are restored after test_settings_before."""
@@ -356,20 +356,20 @@ class TestLiveServer:
 
     def test_db_changes_visibility(self, live_server):
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 0"
+        assert force_str(response_data) == "Item count: 0"
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 1"
+        assert force_str(response_data) == "Item count: 1"
 
     def test_fixture_db(self, db, live_server):
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 1"
+        assert force_str(response_data) == "Item count: 1"
 
     def test_fixture_transactional_db(self, transactional_db, live_server):
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 1"
+        assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
     def item(self):
@@ -386,7 +386,7 @@ class TestLiveServer:
 
     def test_item_db(self, item_db, live_server):
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 1"
+        assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
     def item_transactional_db(self, transactional_db):
@@ -394,7 +394,7 @@ class TestLiveServer:
 
     def test_item_transactional_db(self, item_transactional_db, live_server):
         response_data = urlopen(live_server + "/item_count/").read()
-        assert force_text(response_data) == "Item count: 1"
+        assert force_str(response_data) == "Item count: 1"
 
     @pytest.mark.django_project(
         extra_settings="""
@@ -418,7 +418,7 @@ class TestLiveServer:
         django_testdir.create_test_module(
             """
             import pytest
-            from django.utils.encoding import force_text
+            from django.utils.encoding import force_str
 
             try:
                 from urllib2 import urlopen, HTTPError
@@ -431,7 +431,7 @@ class TestLiveServer:
                             in settings.INSTALLED_APPS)
                     response_data = urlopen(
                         live_server + '/static/a_file.txt').read()
-                    assert force_text(response_data) == 'bla\\n'
+                    assert force_str(response_data) == 'bla\\n'
             """
         )
         result = django_testdir.runpytest_subprocess("--tb=short", "-v")
