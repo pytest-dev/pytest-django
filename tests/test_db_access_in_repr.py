@@ -16,10 +16,12 @@ def test_db_access_with_repr_in_report(django_testdir):
     """
     )
 
-    result = django_testdir.runpytest_subprocess("--tb=short")
+    result = django_testdir.runpytest_subprocess("--tb=auto")
     result.stdout.fnmatch_lines([
         "tpkg/test_the_test.py FF",
         "E   *DoesNotExist: Item matching query does not exist.",
+        "tpkg/test_the_test.py:8: ",
+        "self = <QuerySet []>, args = (), kwargs = {'name': 'This one is not there'}",
         "E   *DoesNotExist: Item matching query does not exist.",
         "* 2 failed in *",
     ])
