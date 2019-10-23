@@ -46,9 +46,13 @@ class TestNativeMigrations(object):
         result = django_testdir.runpytest_subprocess(
             "-vv", "-s",
         )
-        assert result.ret == 0
-        assert "Operations to perform:" not in result.stdout.str()
-        result.stdout.fnmatch_lines(["*= 1 passed in *"])
+        assert result.ret == 1
+        assert "Operations to perform:" in result.stdout.str()
+        result.stdout.fnmatch_lines([
+            "Running migrations:",
+            "E           __fake__.Item.DoesNotExist: Item matching query does not exist.",
+            "*= 1 error in *",
+        ])
 
     def test_migrations_run(self, django_testdir):
         testdir = django_testdir
