@@ -427,6 +427,16 @@ def pytest_runtest_setup(item):
             _disable_class_methods(item.cls)
 
 
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item):
+    if _blocking_manager._cm_exit_error:
+        with _blocking_manager.unblock():
+            yield
+        _blocking_manager._cm_exit_error = None
+    else:
+        yield
+
+
 def pytest_collection_modifyitems(session, config, items):
     def get_order_number(test):
         marker_db = test.get_closest_marker('django_db')
@@ -747,6 +757,8 @@ class _DatabaseBlockerContextManager(object):
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            self._db_blocker._cm_exit_error = (exc_type, exc_value, traceback)
         self._db_blocker.restore()
 
 
@@ -759,6 +771,14 @@ class _DatabaseBlocker(object):
     def __init__(self):
         self._history = []
         self._real_ensure_connection = None
+        self._cm_exit_error = None
+
+    @property
+    def _is_blocked(self):
+        if self._real_ensure_connection is None:
+            # Skip loading Django if not used.
+            return False
+        return self._dj_db_wrapper.ensure_connection == self._blocking_wrapper
 
     @property
     def _dj_db_wrapper(self):
