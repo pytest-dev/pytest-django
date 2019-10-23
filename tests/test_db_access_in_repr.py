@@ -19,8 +19,8 @@ def test_db_access_with_repr_in_report(django_testdir):
     result = django_testdir.runpytest_subprocess("--tb=short")
     result.stdout.fnmatch_lines([
         "tpkg/test_the_test.py FF",
-        "E   tpkg.app.models.Item.DoesNotExist: Item matching query does not exist.",
-        "E   tpkg.app.models.Item.DoesNotExist: Item matching query does not exist.",
+        "E   *DoesNotExist: Item matching query does not exist.",
+        "E   *DoesNotExist: Item matching query does not exist.",
         "* 2 failed in *",
     ])
     assert "INTERNALERROR" not in str(result.stdout) + str(result.stderr)
