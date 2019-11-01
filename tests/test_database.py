@@ -16,17 +16,17 @@ def db_supports_reset_sequences():
 
 
 def test_noaccess():
-    with pytest.raises(pytest.fail.Exception):
+    with pytest.raises(RuntimeError):
         Item.objects.create(name="spam")
-    with pytest.raises(pytest.fail.Exception):
+    with pytest.raises(RuntimeError):
         Item.objects.count()
 
 
 @pytest.fixture
 def noaccess():
-    with pytest.raises(pytest.fail.Exception):
+    with pytest.raises(RuntimeError):
         Item.objects.create(name="spam")
-    with pytest.raises(pytest.fail.Exception):
+    with pytest.raises(RuntimeError):
         Item.objects.count()
 
 
@@ -254,7 +254,7 @@ def test_unittest_interaction(django_testdir):
             "*test_db_access_2 FAILED*",
             "*test_db_access_3 FAILED*",
             "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-            '*Failed: Database access not allowed, use the "django_db" mark, '
+            '*RuntimeError: Database access not allowed, use the "django_db" mark, '
             'or the "db" or "transactional_db" fixtures to enable it.',
         ]
     )
@@ -274,7 +274,7 @@ class Test_database_blocking:
         result = django_testdir.runpytest_subprocess("-v")
         result.stderr.fnmatch_lines(
             [
-                '*Failed: Database access not allowed, use the "django_db" mark, '
+                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
                 'or the "db" or "transactional_db" fixtures to enable it.*'
             ]
         )
@@ -290,7 +290,7 @@ class Test_database_blocking:
         result = django_testdir.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
-                '*Failed: Database access not allowed, use the "django_db" mark, '
+                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
                 'or the "db" or "transactional_db" fixtures to enable it.'
             ]
         )
