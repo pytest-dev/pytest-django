@@ -777,7 +777,7 @@ class _DatabaseBlocker(object):
     def _blocking_wrapper(*args, **kwargs):
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
-        pytest.fail(
+        raise RuntimeError(
             "Database access not allowed, "
             'use the "django_db" mark, or the '
             '"db" or "transactional_db" fixtures to enable it.'

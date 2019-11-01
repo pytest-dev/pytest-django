@@ -219,7 +219,7 @@ def test_database_name():
 
 
 def test_database_noaccess():
-    with pytest.raises(pytest.fail.Exception):
+    with pytest.raises(RuntimeError):
         Item.objects.count()
 
 
