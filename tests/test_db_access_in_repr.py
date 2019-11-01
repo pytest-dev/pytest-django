@@ -1,5 +1,3 @@
-
-
 def test_db_access_with_repr_in_report(django_testdir):
     django_testdir.create_test_module(
         """
