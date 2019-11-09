@@ -1,6 +1,20 @@
 Changelog
 =========
 
+3.7.0 (2019-11-09)
+------------------
+
+Bugfixes
+^^^^^^^^
+
+* Monkeypatch pytest to not use ``TestCase.debug`` with unittests, instead
+  of patching it into Django (#782).
+
+* Work around pytest crashing due to ``pytest.fail`` being used from within the
+  DB blocker, and pytest trying to display an object representation involving
+  DB access (#781).  pytest-django uses a ``RuntimeError`` now instead.
+
+
 3.6.0 (2019-10-17)
 ------------------
 
