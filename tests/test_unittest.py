@@ -458,7 +458,7 @@ def test_pdb_enabled(django_testdir):
     assert result.ret == 0
 
 
-def test_debug_restored(django_testdir):
+def test_debug_not_used(django_testdir):
     django_testdir.create_test_module(
         """
         from django.test import TestCase
@@ -468,22 +468,14 @@ def test_debug_restored(django_testdir):
 
         class TestClass1(TestCase):
 
+            def debug(self):
+                assert 0, "should not be called"
+
             def test_method(self):
                 pass
-
-
-        class TestClass2(TestClass1):
-
-            def _pre_setup(self):
-                global pre_setup_count
-                pre_setup_count += 1
-                super(TestClass2, self)._pre_setup()
-
-            def test_method(self):
-                assert pre_setup_count == 1
     """
     )
 
     result = django_testdir.runpytest_subprocess("--pdb")
-    result.stdout.fnmatch_lines(["*= 2 passed in *"])
+    result.stdout.fnmatch_lines(["*= 1 passed in *"])
     assert result.ret == 0
