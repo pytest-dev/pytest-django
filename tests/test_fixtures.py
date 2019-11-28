@@ -716,3 +716,18 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir):
 def test_template_source(template_factory):
     template_obj = template_factory("foo")
     assert template_obj.source == "foo"
+
+
+def test_context_dicts(context_factory):
+    context_obj = context_factory(dict_={"foo": "bar", "bar": "baz"})
+    assert context_obj.dicts == [
+        {
+            "False": False,
+            "True": True,
+            "None": None,
+        },
+        {
+            "foo": "bar",
+            "bar": "baz",
+        }
+    ]

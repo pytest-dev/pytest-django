@@ -30,6 +30,7 @@ __all__ = [
     "django_assert_num_queries",
     "django_assert_max_num_queries",
     "template_factory",
+    "context_factory",
 ]
 
 
@@ -490,5 +491,18 @@ def template_factory():
 
     def factory(content):
         return Template(content)
+    
+    return factory
+
+
+@pytest.fixture(scope="function")
+def context_factory():
+    """A factory fixture (returning a function) to create a Context instance to
+    provide to `render` method of a `Template` instance.
+    """
+    from django.template import Context
+
+    def factory(dict_=None, autoescape=True, use_l10n=None, use_tz=None):
+        return Context(dict_, autoescape, use_l10n, use_tz)
     
     return factory
