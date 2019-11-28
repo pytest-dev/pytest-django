@@ -29,6 +29,7 @@ __all__ = [
     "_live_server_helper",
     "django_assert_num_queries",
     "django_assert_max_num_queries",
+    "template_factory",
 ]
 
 
@@ -479,3 +480,15 @@ def django_assert_num_queries(pytestconfig):
 @pytest.fixture(scope="function")
 def django_assert_max_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig, exact=False)
+
+
+@pytest.fixture(scope="function")
+def template_factory():
+    """A factory fixture (returning a function) to create a Template instance.
+    """
+    from django.template import Template
+
+    def factory(content):
+        return Template(content)
+    
+    return factory

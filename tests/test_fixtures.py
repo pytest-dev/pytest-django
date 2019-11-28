@@ -711,3 +711,8 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir):
         ["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"]
     )
     assert result.ret == 0
+
+
+def test_template_source(template_factory):
+    template_obj = template_factory("foo")
+    assert template_obj.source == "foo"
