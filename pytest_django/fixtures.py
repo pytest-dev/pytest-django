@@ -491,7 +491,7 @@ def template_factory():
 
     def factory(content):
         return Template(content)
-    
+
     return factory
 
 
@@ -504,5 +504,5 @@ def context_factory():
 
     def factory(dict_=None, autoescape=True, use_l10n=None, use_tz=None):
         return Context(dict_, autoescape, use_l10n, use_tz)
-    
+
     return factory
