@@ -713,9 +713,10 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir):
     assert result.ret == 0
 
 
-def test_template_source(template_factory):
+def test_template_isinstance(template_factory):
+    from django.template import Template
     template_obj = template_factory("foo")
-    assert template_obj.source == "foo"
+    assert isinstance(template_obj, Template)
 
 
 def test_context_dicts(context_factory):
