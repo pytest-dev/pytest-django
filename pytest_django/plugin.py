@@ -55,6 +55,8 @@ PY2 = sys.version_info[0] == 2
 # pytest 4.2 handles unittest setup/teardown itself via wrapping fixtures.
 _handle_unittest_methods = parse_version(pytest.__version__) < parse_version("4.2")
 
+_report_header = []
+
 
 # ############### pytest hooks ################
 
@@ -287,39 +289,25 @@ def pytest_load_initial_conftests(early_config, parser, args):
     ):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
 
-    # Configure DJANGO_SETTINGS_MODULE
-    if options.ds:
-        ds_source = "command line option"
-        ds = options.ds
-    elif SETTINGS_MODULE_ENV in os.environ:
-        ds = os.environ[SETTINGS_MODULE_ENV]
-        ds_source = "environment variable"
-    elif early_config.getini(SETTINGS_MODULE_ENV):
-        ds = early_config.getini(SETTINGS_MODULE_ENV)
-        ds_source = "ini file"
-    else:
-        ds = None
-        ds_source = None
+    def _get_option_with_source(option, envname):
+        if option:
+            return option, "option"
+        if envname in os.environ:
+            return os.environ[envname], "env"
+        cfgval = early_config.getini(envname)
+        if cfgval:
+            return cfgval, "ini"
+        return None, None
+
+    ds, ds_source = _get_option_with_source(options.ds, SETTINGS_MODULE_ENV)
+    dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
     if ds:
-        early_config._dsm_report_header = "Django settings: %s (from %s)" % (
-            ds,
-            ds_source,
-        )
-    else:
-        early_config._dsm_report_header = None
-
-    # Configure DJANGO_CONFIGURATION
-    dc = (
-        options.dc
-        or os.environ.get(CONFIGURATION_ENV)
-        or early_config.getini(CONFIGURATION_ENV)
-    )
-
-    if ds:
+        _report_header.append("settings: %s (from %s)" % (ds, ds_source))
         os.environ[SETTINGS_MODULE_ENV] = ds
 
         if dc:
+            _report_header.append("configuration: %s (from %s)" % (dc, dc_source))
             os.environ[CONFIGURATION_ENV] = dc
 
             # Install the django-configurations importer
@@ -338,8 +326,8 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
 
 def pytest_report_header(config):
-    if config._dsm_report_header:
-        return [config._dsm_report_header]
+    if _report_header:
+        return ["django: " + ", ".join(_report_header)]
 
 
 @pytest.mark.trylast
