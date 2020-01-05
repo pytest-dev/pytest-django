@@ -19,13 +19,15 @@ class LiveServer(object):
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
-            if (
-                conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3"
-                and conn.settings_dict["NAME"] == ":memory:"
-            ):
-                # Explicitly enable thread-shareability for this connection
-                conn.allow_thread_sharing = True
-                connections_override[conn.alias] = conn
+            if conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3":
+                test_dbname = conn.settings_dict['TEST']['NAME'] or ':memory:'
+                if test_dbname == ":memory:":
+                    # Explicitly enable thread-shareability for this connection
+                    if django.VERSION >= (2, 2):
+                        conn.inc_thread_sharing()
+                    else:
+                        conn.allow_thread_sharing = True
+                    connections_override[conn.alias] = conn
 
         liveserver_kwargs = {"connections_override": connections_override}
         from django.conf import settings
