@@ -23,6 +23,7 @@ class LiveServer(object):
                 conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3"
                 and conn.settings_dict["NAME"] == ":memory:"
             ):
+                assert 0
                 # Explicitly enable thread-shareability for this connection
                 conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
