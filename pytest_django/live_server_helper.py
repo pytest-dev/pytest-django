@@ -1,3 +1,4 @@
+import django
 import six
 
 
@@ -10,11 +11,11 @@ class LiveServer(object):
     """
 
     def __init__(self, addr):
-        import django
         from django.db import connections
         from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
 
+        self.orig_conns = {}
         connections_override = {}
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
@@ -22,12 +23,14 @@ class LiveServer(object):
             if conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3":
                 test_dbname = conn.settings_dict['TEST']['NAME'] or ':memory:'
                 if test_dbname == ":memory:":
+                    connections_override[conn.alias] = conn
                     # Explicitly enable thread-shareability for this connection
                     if django.VERSION >= (2, 2):
                         conn.inc_thread_sharing()
+                        self.orig_conns[conn] = True
                     else:
+                        self.orig_conns[conn] = conn.allow_thread_sharing
                         conn.allow_thread_sharing = True
-                    connections_override[conn.alias] = conn
 
         liveserver_kwargs = {"connections_override": connections_override}
         from django.conf import settings
@@ -68,6 +71,14 @@ class LiveServer(object):
         """Stop the server"""
         self.thread.terminate()
         self.thread.join()
+
+        if django.VERSION >= (2, 2):
+            for conn in self.orig_conns:
+                conn.inc_thread_sharing()
+        else:
+            for conn, val in self.orig_conns.items():
+                conn.allow_thread_sharing = val
+        self.orig_conns = {}
 
     @property
     def url(self):
