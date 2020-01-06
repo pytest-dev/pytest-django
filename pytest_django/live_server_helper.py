@@ -31,7 +31,7 @@ class LiveServer(object):
 
     @property
     def url(self):
-        return "http://%s:%s" % (self._dj_testcase.host, self._dj_testcase.server_thread.port)
+        return self._dj_testcase.live_server_url
 
     def __str__(self):
         return self.url
