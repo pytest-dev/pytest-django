@@ -11,13 +11,9 @@ class LiveServer(object):
     """
 
     def __init__(self, addr):
-        from django.db import connections
-        from django.test.testcases import LiveServerThread
         from django.test.testcases import LiveServerTestCase
-        from django.test.utils import modify_settings
 
         self._dj_testcase = LiveServerTestCase("__init__")
-
         self._dj_testcase.setUpClass()
 
     def stop(self):
