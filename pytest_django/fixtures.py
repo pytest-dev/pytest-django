@@ -9,7 +9,6 @@ from functools import partial
 
 import pytest
 
-from . import live_server_helper
 from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
@@ -385,6 +384,7 @@ def live_server(request):
     """
     skip_if_no_django()
 
+    from . import live_server_helper
     import django
 
     addr = request.config.getvalue("liveserver") or os.getenv(
