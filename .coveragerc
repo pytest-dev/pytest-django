@@ -1,8 +1,19 @@
 [run]
+include =
+  pytest_django/*
+  pytest_django_test/*
+  tests/*
+  */lib/python*/site-packages/pytest_django/*
+  */pypy*/site-packages/pytest_django/*
+  *\Lib\site-packages\pytest_django\*
 parallel = 1
-source = ${PYTESTDJANGO_COVERAGE_SRC}.
 branch = 1
 
+[paths]
+source = pytest_django/
+  */lib/python*/site-packages/pytest_django/
+  */pypy*/site-packages/pytest_django/
+  *\Lib\site-packages\pytest_django\
+
 [report]
-include = pytest_django/*,pytest_django_test/*,tests/*
 skip_covered = 1
