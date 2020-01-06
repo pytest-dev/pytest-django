@@ -435,6 +435,11 @@ def _live_server_helper(request):
 
     live_server = request.getfixturevalue("live_server")
 
+    modified_settings = live_server._dj_testcase._live_server_modified_settings
+    if not hasattr(modified_settings, "wrapped"):
+        modified_settings.enable()
+    request.addfinalizer(modified_settings.disable)
+
 
 @contextmanager
 def _assert_num_queries(config, num, exact=True, connection=None, info=None):

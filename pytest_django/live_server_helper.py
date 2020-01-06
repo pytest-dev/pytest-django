@@ -1,4 +1,3 @@
-import django
 import six
 
 
@@ -12,11 +11,21 @@ class LiveServer(object):
 
     def __init__(self, addr):
         from django.test.testcases import LiveServerTestCase
+        from django.conf import settings
 
-        self._dj_testcase = LiveServerTestCase("__init__")
+        if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
+            from django.contrib.staticfiles.handlers import StaticFilesHandler
+        else:
+            from django.test.testcases import _StaticFilesHandler as StaticFilesHandler
+
+        class CustomLiveServerTestCase(LiveServerTestCase):
+            static_handler = StaticFilesHandler
+
+        self._dj_testcase = CustomLiveServerTestCase("__init__")
         self._dj_testcase.setUpClass()
 
     def stop(self):
+        self._dj_testcase._live_server_modified_settings.enable()
         self._dj_testcase.tearDownClass()
 
     @property
