@@ -417,13 +417,12 @@ class TestLiveServer:
         """
         django_testdir.create_test_module(
             """
-            import pytest
             from django.utils.encoding import force_str
 
             try:
-                from urllib2 import urlopen, HTTPError
+                from urllib2 import urlopen
             except ImportError:
-                from urllib.request import urlopen, HTTPError
+                from urllib.request import urlopen
 
             class TestLiveServer:
                 def test_a(self, live_server, settings):
