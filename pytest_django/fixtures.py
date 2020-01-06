@@ -434,8 +434,6 @@ def _live_server_helper(request):
     request.getfixturevalue("transactional_db")
 
     live_server = request.getfixturevalue("live_server")
-    live_server._live_server_modified_settings.enable()
-    request.addfinalizer(live_server._live_server_modified_settings.disable)
 
 
 @contextmanager
