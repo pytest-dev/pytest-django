@@ -22,7 +22,8 @@ class LiveServer(object):
             # the server thread.
             if conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3":
                 test_dbname = conn.settings_dict['TEST']['NAME'] or ':memory:'
-                if test_dbname == ":memory:":
+
+                if test_dbname == ':memory:' or 'mode=memory' in test_dbname:
                     connections_override[conn.alias] = conn
                     # Explicitly enable thread-shareability for this connection
                     if django.VERSION >= (2, 2):
