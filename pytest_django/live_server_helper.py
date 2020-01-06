@@ -25,7 +25,8 @@ class LiveServer(object):
         self._dj_testcase.setUpClass()
 
     def stop(self):
-        self._dj_testcase._live_server_modified_settings.enable()
+        if not hasattr(self._dj_testcase._live_server_modified_settings, "wrapped"):
+            self._dj_testcase._live_server_modified_settings.enable()
         self._dj_testcase.tearDownClass()
 
     @property
