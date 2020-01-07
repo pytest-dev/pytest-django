@@ -94,7 +94,7 @@ stages:
     if: tag IS present
 
 install:
-  - pip install tox==3.7.0
+  - pip install tox==3.9.0
 
 script:
   - tox
