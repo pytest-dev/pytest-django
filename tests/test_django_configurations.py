@@ -40,11 +40,14 @@ def test_dc_env(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines([
+        'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
+        "* 1 passed in*",
+    ])
     assert result.ret == 0
 
 
-def test_dc_ini(testdir, monkeypatch):
+def test_dc_env_overrides_ini(testdir, monkeypatch):
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "MySettings")
 
@@ -68,7 +71,40 @@ def test_dc_ini(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines([
+        'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
+        "* 1 passed in*",
+    ])
+    assert result.ret == 0
+
+
+def test_dc_ini(testdir, monkeypatch):
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+
+    testdir.makeini(
+        """
+       [pytest]
+       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+       DJANGO_CONFIGURATION = MySettings
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    settings = pkg.join("settings_ini.py")
+    settings.write(BARE_SETTINGS)
+    testdir.makepyfile(
+        """
+        import os
+
+        def test_ds():
+            assert os.environ['DJANGO_SETTINGS_MODULE'] == 'tpkg.settings_ini'
+            assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
+    """
+    )
+    result = testdir.runpytest_subprocess()
+    result.stdout.fnmatch_lines([
+        'django: settings: tpkg.settings_ini (from ini), configuration: MySettings (from ini)',
+        "* 1 passed in*",
+    ])
     assert result.ret == 0
 
 
@@ -96,5 +132,9 @@ def test_dc_option(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess("--ds=tpkg.settings_opt", "--dc=MySettings")
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines([
+        'django: settings: tpkg.settings_opt (from option),'
+        ' configuration: MySettings (from option)',
+        "* 1 passed in*",
+    ])
     assert result.ret == 0
