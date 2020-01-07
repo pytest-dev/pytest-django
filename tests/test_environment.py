@@ -95,10 +95,7 @@ def test_invalid_template_variable(django_testdir):
     )
     result = django_testdir.runpytest_subprocess("-s", "--fail-on-template-vars")
 
-    if get_django_version() >= (1, 9):
-        origin = "'*/tpkg/app/templates/invalid_template_base.html'"
-    else:
-        origin = "'invalid_template.html'"
+    origin = "'*/tpkg/app/templates/invalid_template_base.html'"
     result.stdout.fnmatch_lines_random(
         [
             "tpkg/test_the_test.py F.*",

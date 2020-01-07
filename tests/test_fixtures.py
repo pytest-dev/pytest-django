@@ -335,7 +335,6 @@ class TestLiveServer:
 
     def test_settings_restored(self):
         """Ensure that settings are restored after test_settings_before."""
-        import django
         from django.conf import settings
 
         assert TestLiveServer._test_settings_before_run is True
@@ -343,10 +342,7 @@ class TestLiveServer:
             "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
-        if django.VERSION >= (1, 11):
-            assert settings.ALLOWED_HOSTS == ["testserver"]
-        else:
-            assert settings.ALLOWED_HOSTS == ["*"]
+        assert settings.ALLOWED_HOSTS == ["testserver"]
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():
@@ -445,9 +441,6 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + "/static/a_file.txt").read()
 
-    @pytest.mark.skipif(
-        get_django_version() < (1, 11), reason="Django >= 1.11 required"
-    )
     def test_specified_port_range_error_message_django_111(self, django_testdir):
         django_testdir.create_test_module(
             """

@@ -81,9 +81,6 @@ def django_testdir(request, testdir, monkeypatch):
             'django.contrib.messages.middleware.MessageMiddleware',
         ]
 
-        if django.VERSION < (1, 10):
-            MIDDLEWARE_CLASSES = MIDDLEWARE
-
         TEMPLATES = [
             {
                 'BACKEND': 'django.template.backends.django.DjangoTemplates',

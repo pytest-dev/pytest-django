@@ -1,6 +1,5 @@
 import pytest
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.db_helpers import (
     db_exists,
     drop_database,
@@ -151,7 +150,6 @@ class TestSqlite:
             """
             import pytest
             from django.db import connections
-            from django import VERSION
 
             @pytest.mark.django_db
             def test_a():
@@ -451,32 +449,6 @@ class TestSqliteInMemoryWithXdist:
         result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
-
-
-@pytest.mark.skipif(
-    get_django_version() >= (1, 9),
-    reason=(
-        "Django 1.9 requires migration and has no concept of initial data fixtures"
-    ),
-)
-def test_initial_data(django_testdir_initial):
-    """Test that initial data gets loaded."""
-    django_testdir_initial.create_test_module(
-        """
-        import pytest
-
-        from .app.models import Item
-
-        @pytest.mark.django_db
-        def test_inner():
-            assert [x.name for x in Item.objects.all()] \
-                == ["mark_initial_data"]
-    """
-    )
-
-    result = django_testdir_initial.runpytest_subprocess("--tb=short", "-v")
-    assert result.ret == 0
-    result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
 
 
 class TestNativeMigrations(object):
