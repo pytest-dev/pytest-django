@@ -10,7 +10,6 @@ class LiveServer(object):
     """
 
     def __init__(self, addr):
-        import django
         from django.db import connections
         from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
@@ -39,17 +38,13 @@ class LiveServer(object):
 
             liveserver_kwargs["static_handler"] = _StaticFilesHandler
 
-        if django.VERSION < (1, 11):
-            host, possible_ports = parse_addr(addr)
-            self.thread = LiveServerThread(host, possible_ports, **liveserver_kwargs)
+        try:
+            host, port = addr.split(":")
+        except ValueError:
+            host = addr
         else:
-            try:
-                host, port = addr.split(":")
-            except ValueError:
-                host = addr
-            else:
-                liveserver_kwargs["port"] = int(port)
-            self.thread = LiveServerThread(host, **liveserver_kwargs)
+            liveserver_kwargs["port"] = int(port)
+        self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
             ALLOWED_HOSTS={"append": host}
