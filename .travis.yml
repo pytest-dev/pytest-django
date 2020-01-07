@@ -39,27 +39,23 @@ jobs:
 
     # Explicitly test (older) pytest 5.3.
     - python: 3.5
-      env: TOXENV=py35-dj110-postgres-pytest53-coverage
+      env: TOXENV=py35-dj111-postgres-pytest53-coverage
       services:
         - postgresql
 
     - python: 3.4
-      env: TOXENV=py34-dj19-sqlite_file-coverage
+      env: TOXENV=py34-dj111-sqlite_file-coverage
 
     - python: 2.7
       env: TOXENV=py27-dj111-mysql_myisam-coverage
       services:
         - mysql
-    - python: 2.7
-      env: TOXENV=py27-dj18-postgres-coverage
-      services:
-        - postgresql
 
     # pypy/pypy3: not included with coverage reports (much slower then).
     - python: pypy
       env: TOXENV=pypy-dj111-sqlite_file
     - python: pypy3
-      env: TOXENV=pypy3-dj110-sqlite
+      env: TOXENV=pypy3-dj111-sqlite
 
     - stage: test_release
       python: 3.6
