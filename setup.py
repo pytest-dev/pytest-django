@@ -69,5 +69,8 @@ setup(
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Software Development :: Testing',
                  ],
+    project_urls={
+        'Source': 'https://github.com/pytest-dev/pytest-django',
+    },
     # the following makes a plugin available to pytest
     entry_points={'pytest11': ['django = pytest_django.plugin']})
