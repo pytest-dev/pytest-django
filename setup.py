@@ -19,7 +19,7 @@ def read(fname):
 setup(
     name='pytest-django',
     description='A Django plugin for pytest.',
-    versioning='post',
+    versioning='devcommit',
     author='Andreas Pelme',
     author_email='andreas@pelme.se',
     maintainer="Andreas Pelme",
