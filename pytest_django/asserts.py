@@ -11,7 +11,7 @@ test_case = TestCase('run')
 
 def _wrapper(name):
     def assertion_func(*args, **kwargs):
-        getattr(test_case, name)(*args, **kwargs)
+        return getattr(test_case, name)(*args, **kwargs)
 
     return assertion_func
 

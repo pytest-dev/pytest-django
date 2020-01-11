@@ -38,12 +38,17 @@ def test_django_asserts_available():
         assert hasattr(pytest_django.asserts, name)
 
 
+@pytest.mark.django_db
 def test_sanity():
     from django.http import HttpResponse
-    from pytest_django.asserts import assertContains
+    from pytest_django.asserts import assertContains, assertNumQueries
 
     response = HttpResponse('My response')
 
     assertContains(response, 'My response')
     with pytest.raises(AssertionError):
         assertContains(response, 'Not my response')
+
+    assertNumQueries(0, lambda: 1 + 1)
+    with assertNumQueries(0):
+        pass
