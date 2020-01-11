@@ -52,3 +52,5 @@ def test_sanity():
     assertNumQueries(0, lambda: 1 + 1)
     with assertNumQueries(0):
         pass
+
+    assert assertContains.__doc__

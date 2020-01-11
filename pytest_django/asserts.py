@@ -1,6 +1,7 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
+from functools import wraps
 from django.test import (
     TestCase, SimpleTestCase,
     LiveServerTestCase, TransactionTestCase
@@ -10,8 +11,11 @@ test_case = TestCase('run')
 
 
 def _wrapper(name):
+    func = getattr(test_case, name)
+
+    @wraps(func)
     def assertion_func(*args, **kwargs):
-        return getattr(test_case, name)(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return assertion_func
 
