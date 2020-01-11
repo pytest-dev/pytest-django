@@ -91,7 +91,7 @@ def django_db_setup(
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
-    from .compat import setup_databases, teardown_databases
+    from django.test.utils import setup_databases, teardown_databases
 
     setup_databases_args = {}
 
