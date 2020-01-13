@@ -3,6 +3,16 @@
 Django helpers
 ==============
 
+Assertions
+----------
+
+All of Django's :py:class:`~django:django.test.TestCase`
+:ref:`django:assertions` are available in ``pytest_django.asserts``, e.g.
+
+::
+
+    from pytest_django.asserts import assertTemplateUsed
+
 Markers
 -------
 
