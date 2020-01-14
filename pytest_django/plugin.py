@@ -325,7 +325,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
     _setup_django()
 
 
-def pytest_report_header(config):
+def pytest_report_header():
     if _report_header:
         return ["django: " + ", ".join(_report_header)]
 
@@ -415,7 +415,7 @@ def pytest_runtest_setup(item):
             _disable_class_methods(item.cls)
 
 
-def pytest_collection_modifyitems(session, config, items):
+def pytest_collection_modifyitems(items):
     def get_order_number(test):
         marker_db = test.get_closest_marker('django_db')
         if marker_db:
@@ -553,7 +553,7 @@ def _dj_autoclear_mailbox():
 
 
 @pytest.fixture(scope="function")
-def mailoutbox(monkeypatch, django_mail_patch_dns, _dj_autoclear_mailbox):
+def mailoutbox(django_mail_patch_dns, _dj_autoclear_mailbox):
     if not django_settings_is_configured():
         return
 
@@ -570,7 +570,7 @@ def django_mail_patch_dns(monkeypatch, django_mail_dnsname):
 
 
 @pytest.fixture(scope="function")
-def django_mail_dnsname(monkeypatch):
+def django_mail_dnsname():
     return "fake-tests.example.com"
 
 
@@ -605,7 +605,7 @@ def _django_set_urlconf(request):
 
 
 @pytest.fixture(autouse=True, scope="session")
-def _fail_for_invalid_template_variable(request):
+def _fail_for_invalid_template_variable():
     """Fixture that fails for invalid variables in templates.
 
     This fixture will fail each test that uses django template rendering

@@ -33,7 +33,7 @@ __all__ = [
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_tox_suffix(request):
+def django_db_modify_db_settings_tox_suffix():
     skip_if_no_django()
 
     tox_environment = os.getenv("TOX_PARALLEL_ENV")
