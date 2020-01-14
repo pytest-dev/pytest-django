@@ -590,13 +590,9 @@ def _django_set_urlconf(request):
     marker = request.node.get_closest_marker("urls")
     if marker:
         skip_if_no_django()
-        import django.conf
 
-        try:
-            from django.urls import clear_url_caches, set_urlconf
-        except ImportError:
-            # Removed in Django 2.0
-            from django.core.urlresolvers import clear_url_caches, set_urlconf
+        import django.conf
+        from django.urls import clear_url_caches, set_urlconf
 
         urls = validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
