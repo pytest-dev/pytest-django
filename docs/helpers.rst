@@ -104,8 +104,7 @@ test will fail when trying to access the database.
   Ignore errors when using the ``--fail-on-template-vars`` option, i.e.
   do not cause tests to fail if your templates contain invalid variables.
 
-  This marker sets the ``string_if_invalid`` template option, or
-  the older ``settings.TEMPLATE_STRING_IF_INVALID=None`` (Django up to 1.10).
+  This marker sets the ``string_if_invalid`` template option.
   See :ref:`django:invalid-template-variables`.
 
   Example usage::
