@@ -1,6 +1,17 @@
 Changelog
 =========
 
+3.8.0 (2020-01-14)
+------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Make Django's assertion helpers available in pytest_django.asserts (#709).
+
+* Report django-configurations setting (#791)
+
+
 3.7.0 (2019-11-09)
 ------------------
 
