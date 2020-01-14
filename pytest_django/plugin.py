@@ -652,6 +652,8 @@ def _fail_for_invalid_template_variable():
                     if origin is not None:
                         return origin
 
+            assert 0, "dead?"
+
             from django.template import Template
 
             # finding the ``render`` needle in the stack
