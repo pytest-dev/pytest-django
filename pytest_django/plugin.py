@@ -639,8 +639,7 @@ def _fail_for_invalid_template_variable():
         def _get_origin():
             stack = inspect.stack()
 
-            # Try to use topmost `self.origin` first (Django 1.9+, and with
-            # TEMPLATE_DEBUG)..
+            # Find topmost `self.origin`.
             for f in stack[2:]:
                 func = f[3]
                 if func == "render":
@@ -652,32 +651,10 @@ def _fail_for_invalid_template_variable():
                     if origin is not None:
                         return origin
 
-            assert 0, "dead?"
-
-            from django.template import Template
-
-            # finding the ``render`` needle in the stack
-            frame = reduce(
-                lambda x, y: y[3] == "render" and "base.py" in y[1] and y or x, stack
-            )
-            # assert 0, stack
-            frame = frame[0]
-            # finding only the frame locals in all frame members
-            f_locals = reduce(
-                lambda x, y: y[0] == "f_locals" and y or x, inspect.getmembers(frame)
-            )[1]
-            # ``django.template.base.Template``
-            template = f_locals["self"]
-            if isinstance(template, Template):
-                return template.name
-
         def __mod__(self, var):
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
             origin = self._get_origin()
-            if origin:
-                msg = "Undefined template variable '%s' in '%s'" % (var, origin)
-            else:
-                msg = "Undefined template variable '%s'" % var
+            msg = "Undefined template variable '%s' in '%s'" % (var, origin)
             if self.fail:
                 pytest.fail(msg)
             else:
