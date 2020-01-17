@@ -617,6 +617,7 @@ class Test_django_db_blocker:
             with pytest.raises(RuntimeError):
                 Item.objects.exists()
 
+    @pytest.mark.django_db
     def test_unblock_manually(self, django_db_blocker):
         try:
             django_db_blocker.unblock()
@@ -624,6 +625,7 @@ class Test_django_db_blocker:
         finally:
             django_db_blocker.restore()
 
+    @pytest.mark.django_db
     def test_unblock_with_block(self, django_db_blocker):
         with django_db_blocker.unblock():
             Item.objects.exists()
