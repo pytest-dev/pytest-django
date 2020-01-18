@@ -1,4 +1,4 @@
-from pytest_django_test.settings_base import *  # noqa
+from .settings_base import *  # noqa: F401 F403
 
 # PyPy compatibility
 try:
@@ -12,7 +12,7 @@ except ImportError:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "pytest_django" + db_suffix,  # noqa
+        "NAME": "pytest_django_should_never_get_accessed",
         "HOST": "localhost",
         "USER": "",
     }
