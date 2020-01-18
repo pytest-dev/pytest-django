@@ -5,7 +5,7 @@ def test_db_access_with_repr_in_report(django_testdir):
 
         from .app.models import Item
 
-        def test_via_db_blocker(django_db_setup, django_db_blocker):
+        def test_via_db_blocker(django_db_blocker):
             with django_db_blocker.unblock():
                 Item.objects.get(name='This one is not there')
 

@@ -84,7 +84,7 @@ def django_db_createdb(request):
 def django_db_setup(
     request,
     django_test_environment,
-    django_db_blocker,
+    _django_db_blocker,
     django_db_use_migrations,
     django_db_keepdb,
     django_db_createdb,
@@ -101,15 +101,16 @@ def django_db_setup(
     if django_db_keepdb and not django_db_createdb:
         setup_databases_args["keepdb"] = True
 
-    with django_db_blocker.unblock():
+    with _django_db_blocker.unblock():
         db_cfg = setup_databases(
             verbosity=request.config.option.verbose,
             interactive=False,
             **setup_databases_args
         )
 
-    def teardown_database():
-        with django_db_blocker.unblock():
+    yield
+    if not django_db_keepdb:
+        with _django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
             except Exception as exc:
@@ -118,9 +119,6 @@ def django_db_setup(
                         "Error when trying to teardown test databases: %r" % exc
                     )
                 )
-
-    if not django_db_keepdb:
-        request.addfinalizer(teardown_database)
 
 
 def _django_db_fixture_helper(
@@ -191,7 +189,7 @@ def _set_suffix_to_test_databases(suffix):
 
 
 @pytest.fixture(scope="function")
-def db(request, django_db_setup, django_db_blocker):
+def db(request, django_db_blocker):
     """Require a django test database.
 
     This database will be setup with the default fixtures and will have
@@ -429,13 +427,15 @@ def _live_server_helper(request):
     It will also override settings only for the duration of the test.
     """
     if "live_server" not in request.fixturenames:
+        yield
         return
 
     request.getfixturevalue("transactional_db")
 
     live_server = request.getfixturevalue("live_server")
     live_server._live_server_modified_settings.enable()
-    request.addfinalizer(live_server._live_server_modified_settings.disable)
+    yield
+    live_server._live_server_modified_settings.disable()
 
 
 @contextmanager
