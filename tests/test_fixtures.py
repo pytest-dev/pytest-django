@@ -601,32 +601,44 @@ class Migration(migrations.Migration):
     assert result.ret == 0
 
 
-class Test_django_db_blocker:
-    @pytest.mark.django_db
-    def test_block_manually(self, django_db_blocker):
-        try:
-            django_db_blocker.block()
-            with pytest.raises(RuntimeError):
-                Item.objects.exists()
-        finally:
-            django_db_blocker.restore()
+def test_django_db_blocker(testdir):
+    p1 = testdir.makepyfile("""
+        import django.db.utils
+        import pytest
 
-    @pytest.mark.django_db
-    def test_block_with_block(self, django_db_blocker):
-        with django_db_blocker.block():
-            with pytest.raises(RuntimeError):
-                Item.objects.exists()
+        from pytest_django_test.app.models import Item
 
-    def test_unblock_manually(self, django_db_blocker):
-        try:
-            django_db_blocker.unblock()
-            Item.objects.exists()
-        finally:
-            django_db_blocker.restore()
 
-    def test_unblock_with_block(self, django_db_blocker):
-        with django_db_blocker.unblock():
-            Item.objects.exists()
+        @pytest.mark.django_db
+        def test_block_manually(django_db_blocker):
+            try:
+                django_db_blocker.block()
+                with pytest.raises(RuntimeError):
+                    Item.objects.exists()
+            finally:
+                django_db_blocker.restore()
+
+        @pytest.mark.django_db
+        def test_block_with_block(django_db_blocker):
+            with django_db_blocker.block():
+                with pytest.raises(RuntimeError):
+                    Item.objects.exists()
+
+        def test_unblock_manually(django_db_blocker):
+            try:
+                django_db_blocker.unblock()
+                with pytest.raises(django.db.utils.OperationalError):
+                    Item.objects.exists()
+            finally:
+                django_db_blocker.restore()
+
+        def test_unblock_with_block(django_db_blocker):
+            with django_db_blocker.unblock():
+                with pytest.raises(django.db.utils.OperationalError):
+                    Item.objects.exists()
+    """)
+    result = testdir.runpytest_subprocess("-vv", "-rA", "--tb=short", str(p1))
+    assert result.ret == 0
 
 
 def test_mail(mailoutbox):
