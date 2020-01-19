@@ -482,7 +482,7 @@ def _django_db_blocker():
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker(django_db_setup, _django_db_blocker):
+def django_db_blocker(django_db_setup, _django_db_blocker):  # noqa: F811
     """Wrapper around _django_db_blocker to serve as convenience reference.
 
     The ``_django_db_blocker`` fixture must be available for the ``django_db_setup``
