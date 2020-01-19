@@ -1,6 +1,10 @@
 language: python
 dist: xenial
 
+env:
+  global:
+    - TRAVIS_TOXARGS="--force-dep=pytest!=5.3.3"
+
 jobs:
   fast_finish: true
   include:
@@ -97,7 +101,7 @@ install:
   - pip install tox==3.9.0
 
 script:
-  - tox
+  - tox $TRAVIS_TOXARGS
 
 after_success:
   - |
