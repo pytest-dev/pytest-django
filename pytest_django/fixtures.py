@@ -182,7 +182,10 @@ def _set_suffix_to_test_databases(suffix):
             continue
 
         db_settings.setdefault("TEST", {})
-        db_settings["TEST"]["NAME"] = "{}_{}".format(test_name, suffix)
+        test_db_name = test_name
+        if not test_name.endswith("_{}".format(suffix)):
+            test_db_name = "{}_{}".format(test_name, suffix)
+        db_settings["TEST"]["NAME"] = test_db_name
 
 
 # ############### User visible fixtures ################
