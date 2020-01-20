@@ -1,5 +1,6 @@
 language: python
 dist: xenial
+cache: false
 
 jobs:
   fast_finish: true
@@ -97,7 +98,7 @@ install:
   - pip install tox==3.9.0
 
 script:
-  - tox
+  - tox --force-dep "pytest@git+https://github.com/blueyed/pytest@fixture-stack#egg=pytest"
 
 after_success:
   - |

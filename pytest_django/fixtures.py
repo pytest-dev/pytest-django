@@ -36,28 +36,34 @@ __all__ = [
 def django_db_modify_db_settings_tox_suffix():
     skip_if_no_django()
 
-    tox_environment = os.getenv("TOX_PARALLEL_ENV")
-    if tox_environment:
-        # Put a suffix like _py27-django21 on tox workers
-        _set_suffix_to_test_databases(suffix=tox_environment)
+    return os.getenv("TOX_PARALLEL_ENV")
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
-    xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
-    if xdist_suffix:
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
-        _set_suffix_to_test_databases(suffix=xdist_suffix)
+    return getattr(request.config, "slaveinput", {}).get("slaveid")
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_parallel_suffix(
     django_db_modify_db_settings_tox_suffix,
-    django_db_modify_db_settings_xdist_suffix,
+    django_db_modify_db_settings_xdist_suffix
 ):
     skip_if_no_django()
+    xdist_worker = django_db_modify_db_settings_xdist_suffix
+    tox_environment = django_db_modify_db_settings_tox_suffix
+    suffix_parts = []
+    if tox_environment:
+        # Put a suffix like _py27-django21 on tox workers
+        suffix_parts.append(tox_environment)
+    if xdist_worker:
+        # Put a suffix like _gw0, _gw1 etc on xdist processes
+        suffix_parts.append(xdist_worker)
+    suffix = "_".join(suffix_parts)
+    if suffix:
+        _set_suffix_to_test_databases(suffix=suffix)
 
 
 @pytest.fixture(scope="session")
@@ -182,10 +188,7 @@ def _set_suffix_to_test_databases(suffix):
             continue
 
         db_settings.setdefault("TEST", {})
-        test_db_name = test_name
-        if not test_name.endswith("_{}".format(suffix)):
-            test_db_name = "{}_{}".format(test_name, suffix)
-        db_settings["TEST"]["NAME"] = test_db_name
+        db_settings["TEST"]["NAME"] = "{}_{}".format(test_name, suffix)
 
 
 # ############### User visible fixtures ################

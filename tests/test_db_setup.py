@@ -159,32 +159,34 @@ def test_xdist_with_reuse(django_testdir):
 
         from .app.models import Item
 
-        def _check(settings):
+        def _check(settings, worker_id):
             # Make sure that the database name looks correct
             db_name = settings.DATABASES['default']['NAME']
-            assert db_name.endswith('_gw0') or db_name.endswith('_gw1')
-
+            assert db_name == (
+                'test_pytest_django_should_never_get_accessed_inner_inner_{}'
+                .format(worker_id)
+            )
             assert Item.objects.count() == 0
             Item.objects.create(name='foo')
             assert Item.objects.count() == 1
 
 
         @pytest.mark.django_db
-        def test_a(settings):
-            _check(settings)
+        def test_a(settings, worker_id):
+            _check(settings, worker_id)
 
 
         @pytest.mark.django_db
-        def test_b(settings):
-            _check(settings)
+        def test_b(settings, worker_id):
+            _check(settings, worker_id)
 
         @pytest.mark.django_db
-        def test_c(settings):
-            _check(settings)
+        def test_c(settings, worker_id):
+            _check(settings, worker_id)
 
         @pytest.mark.django_db
-        def test_d(settings):
-            _check(settings)
+        def test_d(settings, worker_id):
+            _check(settings, worker_id)
     """
     )
 
@@ -270,7 +272,7 @@ class TestSqliteWithMultipleDbsAndXdist:
             from django.db import connections
 
             @pytest.mark.django_db
-            def test_a():
+            def test_a(worker_id):
                 (conn_db2, conn_default) = sorted(
                     connections.all(),
                     key=lambda conn: conn.alias,
@@ -288,7 +290,7 @@ class TestSqliteWithMultipleDbsAndXdist:
 
                 assert conn_db2.vendor == 'sqlite'
                 db_name = conn_db2.creation._get_test_db_name()
-                assert db_name.startswith('test_custom_db_name_gw')
+                assert db_name == 'test_custom_db_name_{}'.format(worker_id)
         """
         )
 
@@ -377,13 +379,15 @@ class TestSqliteWithToxAndXdist:
             from django.db import connections
 
             @pytest.mark.django_db
-            def test_inner():
+            def test_inner(worker_id):
 
                 (conn, ) = connections.all()
 
                 assert conn.vendor == 'sqlite'
                 db_name = conn.creation._get_test_db_name()
-                assert db_name.startswith('test_custom_db_name_py37-django22_gw')
+                assert db_name == 'test_custom_db_name_py37-django22_{}'.format(
+                    worker_id,
+                )
         """
         )
 
