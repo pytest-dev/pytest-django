@@ -4,7 +4,7 @@ dist: xenial
 jobs:
   fast_finish: true
   include:
-    - stage: baseline
+    - stage: test
       python: 3.6
       env:
         - TOXENV=py36-dj20-postgres-xdist-coverage
