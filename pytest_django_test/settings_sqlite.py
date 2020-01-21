@@ -1,4 +1,4 @@
-from .settings_base import *  # noqa
+from .settings_base import *  # noqa: F401 F403
 
 DATABASES = {
     "default": {
