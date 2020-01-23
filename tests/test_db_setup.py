@@ -216,6 +216,10 @@ def test_xdist_with_reuse(django_testdir):
     result.stdout.fnmatch_lines(["*PASSED*test_c*"])
     result.stdout.fnmatch_lines(["*PASSED*test_d*"])
 
+    # Cleanup.
+    drop_database("gw0")
+    drop_database("gw1")
+
 
 class TestSqliteWithXdist:
 
