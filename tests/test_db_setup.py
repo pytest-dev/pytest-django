@@ -152,6 +152,8 @@ def test_xdist_with_reuse(django_testdir):
 
     drop_database("gw0")
     drop_database("gw1")
+    assert not db_exists("gw0")
+    assert not db_exists("gw1")
 
     django_testdir.create_test_module(
         """

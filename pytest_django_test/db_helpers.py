@@ -61,7 +61,15 @@ def skip_if_sqlite_in_memory():
         pytest.skip("Do not test db reuse since database does not support it")
 
 
-def drop_database(name=TEST_DB_NAME):
+def _get_db_name(db_suffix=None):
+    name = TEST_DB_NAME
+    if db_suffix:
+        name = "%s_%s" % (name, db_suffix)
+    return name
+
+
+def drop_database(db_suffix=None):
+    name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
     if db_engine == "postgresql_psycopg2":
@@ -83,11 +91,8 @@ def drop_database(name=TEST_DB_NAME):
 
 
 def db_exists(db_suffix=None):
-    name = TEST_DB_NAME
+    name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
-
-    if db_suffix:
-        name = "%s_%s" % (name, db_suffix)
 
     if db_engine == "postgresql_psycopg2":
         r = run_cmd("psql", name, "-c", "SELECT 1")
