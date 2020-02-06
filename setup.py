@@ -71,6 +71,7 @@ setup(
                  ],
     project_urls={
         'Source': 'https://github.com/pytest-dev/pytest-django',
+        'Changelog': 'https://pytest-django.readthedocs.io/en/latest/changelog.html',
     },
     # the following makes a plugin available to pytest
     entry_points={'pytest11': ['django = pytest_django.plugin']})
