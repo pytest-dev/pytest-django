@@ -1,10 +1,8 @@
 Changelog
 =========
 
-.. _v3-8-0:
-
-3.8.0 (2020-01-14)
-------------------
+v3.8.0 (2020-01-14)
+--------------------
 
 Improvements
 ^^^^^^^^^^^^
@@ -14,8 +12,8 @@ Improvements
 * Report django-configurations setting (#791)
 
 
-3.7.0 (2019-11-09)
-------------------
+v3.7.0 (2019-11-09)
+-------------------
 
 Bugfixes
 ^^^^^^^^
@@ -28,8 +26,8 @@ Bugfixes
   DB access (#781).  pytest-django uses a ``RuntimeError`` now instead.
 
 
-3.6.0 (2019-10-17)
-------------------
+v3.6.0 (2019-10-17)
+-------------------
 
 Features
 ^^^^^^^^
@@ -47,16 +45,16 @@ Misc
 * Improve/harden internal tests / infrastructure.
 
 
-3.5.1 (2019-06-29)
-------------------
+v3.5.1 (2019-06-29)
+-------------------
 
 Bugfixes
 ^^^^^^^^
 
 * Fix compatibility with pytest 5.x (#751)
 
-3.5.0 (2019-06-03)
-------------------
+v3.5.0 (2019-06-03)
+-------------------
 
 Features
 ^^^^^^^^
@@ -81,24 +79,24 @@ Misc
 * Slightly revisit unittest handling (#740)
 
 
-3.4.8 (2019-02-26)
-------------------
+v3.4.8 (2019-02-26)
+-------------------
 
 Bugfixes
 ^^^^^^^^
 
 * Fix DB renaming fixture for Multi-DB environment with SQLite (#679)
 
-3.4.7 (2019-02-03)
-------------------
+v3.4.7 (2019-02-03)
+-------------------
 
 Bugfixes
 ^^^^^^^^
 
 * Fix disabling/handling of unittest methods with pytest 4.2+ (#700)
 
-3.4.6 (2019-02-01)
-------------------
+v3.4.6 (2019-02-01)
+-------------------
 
 Bugfixes
 ^^^^^^^^
@@ -111,8 +109,8 @@ Misc
 * Enable tests for Django 2.2 and add classifier (#693)
 * Disallow pytest 4.2.0 in ``install_requires`` (#697)
 
-3.4.5 (2019-01-07)
-------------------
+v3.4.5 (2019-01-07)
+-------------------
 
 Bugfixes
 ^^^^^^^^
@@ -126,8 +124,8 @@ Misc
 * Minor doc fixes (#674)
 * tests: fix for pytest 4 (#675)
 
-3.4.4 (2018-11-13)
-------------------
+v3.4.4 (2018-11-13)
+-------------------
 
 Bugfixes
 ^^^^^^^^
@@ -155,16 +153,16 @@ Misc
 * Run black on source.
 
 
-3.4.3 (2018-09-16)
-------------------
+v3.4.3 (2018-09-16)
+-------------------
 
 Bugfixes
 ^^^^^^^^
 
 * Fix OSError with arguments containing ``::`` on Windows (#641).
 
-3.4.2 (2018-08-20)
-------------------
+v3.4.2 (2018-08-20)
+-------------------
 
 Bugfixes
 ^^^^^^^^
@@ -173,8 +171,8 @@ Bugfixes
 * Fixed code for inserting the project to sys.path with pathlib to use an
   absolute path, regression in 3.4.0 (#637, #638).
 
-3.4.0 (2018-08-16)
-------------------
+v3.4.0 (2018-08-16)
+-------------------
 
 Features
 ^^^^^^^^
@@ -195,8 +193,8 @@ Compatibility
 
 * Removed py dependency, use pathlib instead (#631).
 
-3.3.3 (2018-07-26)
-------------------
+v3.3.3 (2018-07-26)
+-------------------
 
 Bug fixes
 ^^^^^^^^^
@@ -211,8 +209,8 @@ Docs
 * Use sphinx_rtf_theme (#621).
 * Minor fixes.
 
-3.3.2 (2018-06-21)
-------------------
+v3.3.2 (2018-06-21)
+-------------------
 
 Bug fixes
 ^^^^^^^^^
@@ -225,8 +223,8 @@ Compatibility
 
 * Support Django 2.1 (no changes necessary) (#614).
 
-3.3.0 (2018-06-15)
-------------------
+v3.3.0 (2018-06-15)
+-------------------
 
 Features
 ^^^^^^^^
@@ -249,13 +247,13 @@ Compatibility
 
 * The required `pytest` version changed from >=2.9 to >=3.6.
 
-3.2.1
------
+v3.2.1
+------
 
 * Fixed automatic deployment to PyPI.
 
-3.2.0
------
+v3.2.0
+------
 
 Features
 ^^^^^^^^
@@ -279,8 +277,8 @@ Compatibility
 * Support for Django 2.0 has been added.
 * Support for Django before 1.8 has been dropped.
 
-3.1.2
------
+v3.1.2
+------
 
 Bug fixes
 ^^^^^^^^^
@@ -290,8 +288,8 @@ Bug fixes
   mentioned in the 3.1.0 release are no longer present. Related issue:
   `pytest-django issue <https://github.com/pytest-dev/pytest-django/issues/433>`__
 
-3.1.1
------
+v3.1.1
+------
 
 Bug fixes
 ^^^^^^^^^
@@ -302,8 +300,8 @@ Bug fixes
   `pytest issue <https://github.com/pytest-dev/pytest/issues/1977>`__,
   `Django issue <https://code.djangoproject.com/ticket/27391>`__
 
-3.1.0
------
+v3.1.0
+------
 
 Features
 ^^^^^^^^
@@ -330,8 +328,8 @@ Compatibility
         mail.outbox = []
 
 
-3.0.0
------
+v3.0.0
+------
 
 Bug fixes
 ^^^^^^^^^
@@ -381,8 +379,8 @@ Compatibility
   update your code. See :ref:`advanced-database-configuration` for more
   information on the new fixtures and example use cases.
 
-2.9.1
------
+v2.9.1
+------
 
 Bug fixes
 ^^^^^^^^^
@@ -392,10 +390,10 @@ Bug fixes
   <https://github.com/pytest-dev/pytest-django/issues/280>`__.
 
 
-2.9.0
------
+v2.9.0
+------
 
-2.9.0 focus on compatibility with Django 1.9 and master as well as pytest 2.8.1
+v2.9.0 focus on compatibility with Django 1.9 and master as well as pytest 2.8.1
 and Python 3.5
 
 Features
@@ -434,8 +432,8 @@ Compatibility
 * Drop support for Django 1.3. While pytest-django supports a wide range of
   Django versions, extended for Django 1.3 was dropped in february 2013.
 
-2.8.0
------
+v2.8.0
+------
 
 Features
 ^^^^^^^^
@@ -454,8 +452,8 @@ Bug fixes
   `setUpClass`/`setUpTestData`. Django 1.8 is now a fully supported version.
   Django master as of 2014-01-18 (the Django 1.9 branch) is also supported.
 
-2.7.0
------
+v2.7.0
+------
 
 Features
 ^^^^^^^^
@@ -498,16 +496,16 @@ Bugfixes
 * ``DJANGO_LIVE_TEST_SERVER_ADDRESS`` environment variable is read instead
   of ``DJANGO_TEST_LIVE_SERVER_ADDRESS``. (#140)
 
-2.6.2
------
+v2.6.2
+------
 
 * Fixed a bug that caused doctests to runs. Thanks to @jjmurre for the patch
 
 * Fixed issue #88 - make sure to use SQLite in memory database when running
   with pytest-xdist.
 
-2.6.1
------
+v2.6.1
+------
 This is a bugfix/support release with no new features:
 
 * Added support for Django 1.7 beta and Django master as of 2014-04-16.
@@ -517,22 +515,22 @@ This is a bugfix/support release with no new features:
 * Support for MySQL with MyISAM tables. Thanks to Zach Kanzler and Julen Ruiz
   Aizpuru for fixing this. This fixes issue #8 #64.
 
-2.6.0
------
+v2.6.0
+------
 * Experimental support for Django 1.7 / Django master as of 2014-01-19.
 
   pytest-django is now automatically tested against the latest git version of
   Django. The support is experimental since Django 1.7 is not yet released, but
   the goal is to always be up to date with the latest Django master
 
-2.5.1
------
+v2.5.1
+------
 Invalid release accidentally pushed to PyPI (identical to 2.6.1). Should not be
 used - use 2.6.1 or newer to avoid confusion.
 
 
-2.5.0
------
+v2.5.0
+------
 * Python 2.5 compatibility dropped. py.test 2.5 dropped support for Python 2.5,
   therefore it will be hard to properly support in pytest-django. The same
   strategy as for pytest itself is used: No code will be changed to prevent
@@ -542,44 +540,44 @@ used - use 2.6.1 or newer to avoid confusion.
   pytest-xdist as normal (pass -n to py.test). One database will be created for
   each subprocess so that tests run independent from each other.
 
-2.4.0
------
+v2.4.0
+------
 * Support for py.test 2.4 pytest_load_initial_conftests. This makes it possible
   to import Django models in project conftest.py files, since pytest-django
   will be initialized before the conftest.py is loaded.
 
-2.3.1
------
+v2.3.1
+------
 * Support for Django 1.5 custom user models, thanks to Leonardo Santagada.
 
 
-2.3.0
------
+v2.3.0
+------
 
 * Support for configuring settings via django-configurations. Big thanks to
   Donald Stufft for this feature!
 
-2.2.1
------
+v2.2.1
+------
 
 * Fixed an issue with the settings fixture when used in combination with
   django-appconf. It now uses pytest's monkeypatch internally and should
   be more robust.
 
-2.2.0
------
+v2.2.0
+------
 
 * Python 3 support. pytest-django now supports Python 3.2 and 3.3 in addition
   to 2.5-2.7. Big thanks to Rafal Stozek for making this happen!
 
-2.1.0
------
+v2.1.0
+------
 
 * Django 1.5 support. pytest-django is now tested against 1.5 for Python
   2.6-2.7. This is the first step towards Python 3 support.
 
-2.0.1
------
+v2.0.1
+------
 
 * Fixed #24/#25: Make it possible to configure Django via
   ``django.conf.settings.configure()``.
@@ -588,8 +586,8 @@ used - use 2.6.1 or newer to avoid confusion.
   does not change this setting in the default test runner, so pytest-django
   should not do it either.
 
-2.0.0
------
+v2.0.0
+------
 
 This release is *backward incompatible*. The biggest change is the need
 to add the ``pytest.mark.django_db`` to tests which require database
@@ -637,39 +635,39 @@ way for easier additions of new and exciting features in the future!
 * Deprecate the ``transaction_test_case`` decorator, this is now
   integrated with the ``django_db`` mark.
 
-1.4
----
+v1.4
+----
 * Removed undocumented pytest.load_fixture: If you need this feature, just use
   ``django.management.call_command('loaddata', 'foo.json')`` instead.
 * Fixed issue with RequestFactory in Django 1.3.
 
 * Fixed issue with RequestFactory in Django 1.3.
 
-1.3
----
+v1.3
+----
 * Added ``--reuse-db`` and ``--create-db`` to allow database re-use. Many
   thanks to `django-nose <https://github.com/jbalogh/django-nose>`__ for
   code and inspiration for this feature.
 
-1.2.2
------
+v1.2.2
+------
 * Fixed Django 1.3 compatibility.
 
-1.2.1
------
+v1.2.1
+------
 * Disable database access and raise errors when using --no-db and accessing
   the database by accident.
 
-1.2
----
+v1.2
+----
 * Added the ``--no-db`` command line option.
 
-1.1.1
------
+v1.1.1
+------
 * Flush tables after each test run with transaction_test_case instead of before.
 
-1.1
----
+v1.1
+----
 
 * The initial release of this fork from `Ben Firshman original project
   <http://github.com/bfirsh/pytest_django>`__
