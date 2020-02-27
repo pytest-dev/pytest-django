@@ -415,6 +415,7 @@ def pytest_runtest_setup(item):
             _disable_class_methods(item.cls)
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items):
     def get_order_number(test):
         marker_db = test.get_closest_marker('django_db')
