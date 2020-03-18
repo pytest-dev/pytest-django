@@ -1,7 +1,7 @@
 import pytest
 from django.test import TestCase
-from pkg_resources import parse_version
 
+from pytest_django.plugin import _pytest_version_info
 from pytest_django_test.app.models import Item
 
 
@@ -146,7 +146,7 @@ class TestUnittestMethods:
         expected_lines = [
             "* ERROR at setup of TestFoo.test_pass *",
         ]
-        if parse_version(pytest.__version__) < parse_version("4.2"):
+        if _pytest_version_info < (4, 2):
             expected_lines += [
                 "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
             ]

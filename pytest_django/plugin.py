@@ -12,7 +12,6 @@ import sys
 import types
 
 import pytest
-from pkg_resources import parse_version
 
 from .django_compat import is_django_unittest  # noqa
 from .fixtures import django_assert_num_queries  # noqa
@@ -53,7 +52,8 @@ INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 PY2 = sys.version_info[0] == 2
 
 # pytest 4.2 handles unittest setup/teardown itself via wrapping fixtures.
-_handle_unittest_methods = parse_version(pytest.__version__) < parse_version("4.2")
+_pytest_version_info = tuple(int(x) for x in pytest.__version__.split(".", 2)[:2])
+_handle_unittest_methods = _pytest_version_info < (4, 2)
 
 _report_header = []
 
