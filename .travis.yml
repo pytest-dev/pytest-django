@@ -37,8 +37,9 @@ jobs:
     - python: 3.6
       env: TOXENV=py36-djmaster-sqlite-coverage
 
+    # Explicitly test (older) pytest 5.3.
     - python: 3.5
-      env: TOXENV=py35-dj110-postgres-coverage
+      env: TOXENV=py35-dj110-postgres-pytest53-coverage
       services:
         - postgresql
 
