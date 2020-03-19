@@ -417,7 +417,20 @@ def pytest_runtest_setup(item):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items):
+    # If Django is not configured we don't need to bother
+    if not django_settings_is_configured():
+        return
+
+    from django.test import TestCase, TransactionTestCase
+
     def get_order_number(test):
+        if hasattr(test, "cls") and test.cls:
+            # Beware, TestCase is a subclass of TransactionTestCase
+            if issubclass(test.cls, TestCase):
+                return 0
+            if issubclass(test.cls, TransactionTestCase):
+                return 1
+
         marker_db = test.get_closest_marker('django_db')
         if marker_db:
             transaction = validate_django_db(marker_db)[0]
