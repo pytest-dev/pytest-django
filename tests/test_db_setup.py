@@ -33,7 +33,9 @@ def test_db_order(django_testdir):
     """Test order in which tests are being executed."""
 
     django_testdir.create_test_module('''
+        from unittest import TestCase
         import pytest
+        from django.test import SimpleTestCase, TestCase as DjangoTestCase, TransactionTestCase
 
         from .app.models import Item
 
@@ -50,14 +52,34 @@ def test_db_order(django_testdir):
         @pytest.mark.django_db
         def test_run_first_decorator():
             pass
+
+        class MyTestCase(TestCase):
+            def test_run_last_test_case(self):
+                pass
+
+        class MySimpleTestCase(SimpleTestCase):
+            def test_run_last_simple_test_case(self):
+                pass
+
+        class MyDjangoTestCase(DjangoTestCase):
+            def test_run_first_django_test_case(self):
+                pass
+
+        class MyTransactionTestCase(TransactionTestCase):
+            def test_run_second_transaction_test_case(self):
+                pass
     ''')
     result = django_testdir.runpytest_subprocess('-v', '-s')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
         "*test_run_first_decorator*",
+        "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",
+        "*test_run_second_transaction_test_case*",
+        "*test_run_last_test_case*",
+        "*test_run_last_simple_test_case*",
     ])
 
 
