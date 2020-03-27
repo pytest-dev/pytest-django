@@ -128,6 +128,12 @@ def pytest_addoption(parser):
         type="bool",
         default=True,
     )
+    parser.addini(
+        "django_debug_sql",
+        "Enable logging of SQL statements, displayed with failed tests.",
+        type="bool",
+        default=False,
+    )
     group._addoption(
         "--fail-on-template-vars",
         action="store_true",

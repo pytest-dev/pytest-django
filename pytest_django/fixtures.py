@@ -2,6 +2,7 @@
 
 from __future__ import with_statement
 
+import logging
 import os
 import warnings
 from contextlib import contextmanager
@@ -80,6 +81,27 @@ def django_db_createdb(request):
     return request.config.getvalue("create_db")
 
 
+def _setup_sql_debug_logging():
+    # Simulate what Django's DebugSQLTextTestResult does.
+    logger = logging.getLogger('django.db.backends')
+    oldlevel = logger.level
+    logger.setLevel(logging.DEBUG)
+    return oldlevel
+
+
+def _restore_sql_debug_logging(request, oldlevel):
+    logger = logging.getLogger('django.db.backends')
+    if logger.level != logging.DEBUG:
+        request.node.warn(pytest.PytestWarning(
+            "Debug logging level of django.db.backends was changed (to {}). "
+            "SQL queries might be missing.  "
+            "This might be caused by calling django.setup() too late/unnecessarily.".format(
+                logger.level
+            )
+        ))
+    logger.setLevel(oldlevel)
+
+
 @pytest.fixture(scope="session")
 def django_db_setup(
     request,
@@ -95,6 +117,11 @@ def django_db_setup(
 
     setup_databases_args = {}
 
+    debug_sql = request.config.getini("django_debug_sql")
+    if debug_sql:
+        setup_databases_args["debug_sql"] = True
+        old_loglevel = _setup_sql_debug_logging()
+
     if not django_db_use_migrations:
         _disable_native_migrations()
 
@@ -108,7 +135,9 @@ def django_db_setup(
             **setup_databases_args
         )
 
-    def teardown_database():
+    yield
+
+    if not django_db_keepdb:
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
@@ -119,8 +148,8 @@ def django_db_setup(
                     )
                 )
 
-    if not django_db_keepdb:
-        request.addfinalizer(teardown_database)
+    if debug_sql:
+        _restore_sql_debug_logging(request, old_loglevel)
 
 
 def _django_db_fixture_helper(
