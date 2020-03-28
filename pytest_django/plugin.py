@@ -63,7 +63,7 @@ _report_header = []
 
 def pytest_addoption(parser):
     group = parser.getgroup("django")
-    group._addoption(
+    group.addoption(
         "--reuse-db",
         action="store_true",
         dest="reuse_db",
@@ -71,7 +71,7 @@ def pytest_addoption(parser):
         help="Re-use the testing database if it already exists, "
         "and do not remove it when the test finishes.",
     )
-    group._addoption(
+    group.addoption(
         "--create-db",
         action="store_true",
         dest="create_db",
@@ -79,7 +79,7 @@ def pytest_addoption(parser):
         help="Re-create the database, even if it exists. This "
         "option can be used to override --reuse-db.",
     )
-    group._addoption(
+    group.addoption(
         "--ds",
         action="store",
         type=str,
@@ -87,7 +87,7 @@ def pytest_addoption(parser):
         default=None,
         help="Set DJANGO_SETTINGS_MODULE.",
     )
-    group._addoption(
+    group.addoption(
         "--dc",
         action="store",
         type=str,
@@ -95,7 +95,7 @@ def pytest_addoption(parser):
         default=None,
         help="Set DJANGO_CONFIGURATION.",
     )
-    group._addoption(
+    group.addoption(
         "--nomigrations",
         "--no-migrations",
         action="store_true",
@@ -103,7 +103,7 @@ def pytest_addoption(parser):
         default=False,
         help="Disable Django migrations on test setup",
     )
-    group._addoption(
+    group.addoption(
         "--migrations",
         action="store_false",
         dest="nomigrations",
@@ -113,7 +113,7 @@ def pytest_addoption(parser):
     parser.addini(
         CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
     )
-    group._addoption(
+    group.addoption(
         "--liveserver",
         default=None,
         help="Address and port for the live_server fixture.",
@@ -128,7 +128,7 @@ def pytest_addoption(parser):
         type="bool",
         default=True,
     )
-    group._addoption(
+    group.addoption(
         "--fail-on-template-vars",
         action="store_true",
         dest="itv",
