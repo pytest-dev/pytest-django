@@ -401,7 +401,7 @@ Use the same database for all xdist processes
 """""""""""""""""""""""""""""""""""""""""""""
 
 By default, each xdist process gets its own database to run tests on. This is
-needed to have transactional tests that does not interfere with eachother.
+needed to have transactional tests that does not interfere with each other.
 
 If you instead want your tests to use the same database, override the
 :fixture:`django_db_modify_db_settings` to not do anything. Put this in
