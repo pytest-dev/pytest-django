@@ -1,4 +1,5 @@
 import pytest
+import sys
 from django.test import TestCase
 
 from pytest_django.plugin import _pytest_version_info
@@ -497,6 +498,7 @@ def test_debug_not_used(django_testdir):
     assert result.ret == 0
 
 
+@pytest.mark.skipif(sys.version_info < (3,), reason="py27: no print function")
 def test_teardown_behavior(django_testdir):
     django_testdir.create_test_module(
         """
