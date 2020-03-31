@@ -520,20 +520,16 @@ def _django_setup_unittest(request, django_db_blocker):
         yield
         return
 
-    from _pytest.unittest import TestCaseFunction
+    # Fix/patch pytest.
+    # Before pytest 5.4: https://github.com/pytest-dev/pytest/issues/5991
+    # After pytest 5.4: https://github.com/pytest-dev/pytest-django/issues/824
+    from _pytest.monkeypatch import MonkeyPatch
 
-    if "debug" in TestCaseFunction.runtest.__code__.co_names:
-        # Fix pytest (https://github.com/pytest-dev/pytest/issues/5991), only
-        # if "self._testcase.debug()" is being used (forward compatible).
-        from _pytest.monkeypatch import MonkeyPatch
+    def non_debugging_runtest(self):
+        self._testcase(result=self)
 
-        def non_debugging_runtest(self):
-            self._testcase(result=self)
-
-        mp_debug = MonkeyPatch()
-        mp_debug.setattr("_pytest.unittest.TestCaseFunction.runtest", non_debugging_runtest)
-    else:
-        mp_debug = None
+    mp_debug = MonkeyPatch()
+    mp_debug.setattr("_pytest.unittest.TestCaseFunction.runtest", non_debugging_runtest)
 
     request.getfixturevalue("django_db_setup")
 

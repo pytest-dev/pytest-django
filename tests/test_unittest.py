@@ -58,10 +58,11 @@ class TestFixturesWithSetup(TestCase):
 
 def test_sole_test(django_testdir):
     """
-    Make sure the database are configured when only Django TestCase classes
+    Make sure the database is configured when only Django TestCase classes
     are collected, without the django_db marker.
-    """
 
+    Also ensures that the DB is available after a failure (#824).
+    """
     django_testdir.create_test_module(
         """
         import os
@@ -80,12 +81,27 @@ def test_sole_test(django_testdir):
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
+
+                assert 0, "trigger_error"
+
+        class TestBar(TestCase):
+            def test_bar(self):
+                assert Item.objects.count() == 0
     """
     )
 
     result = django_testdir.runpytest_subprocess("-v")
-    result.stdout.fnmatch_lines(["*TestFoo*test_foo PASSED*"])
-    assert result.ret == 0
+    result.stdout.fnmatch_lines(
+        [
+            "*::test_foo FAILED",
+            "*::test_bar PASSED",
+            '>       assert 0, "trigger_error"',
+            "E       AssertionError: trigger_error",
+            "E       assert 0",
+            "*= 1 failed, 1 passed in *",
+        ]
+    )
+    assert result.ret == 1
 
 
 class TestUnittestMethods:
