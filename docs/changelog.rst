@@ -1,6 +1,37 @@
 Changelog
 =========
 
+v3.9.0 (2020-03-31)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Improve test ordering with Django test classes (#830)
+
+* Remove import of pkg_resources for parsing pytest version (performance) (#826)
+
+Bugfixes
+^^^^^^^^
+
+* Work around unittest issue with pytest 5.4.{0,1} (#825)
+
+* Don't break --failed-first when re-ordering tests (#819, #820)
+
+* pytest_addoption: use `group.addoption` (#833)
+
+Misc
+^^^^
+
+* Remove Django version from --nomigrations heading (#822)
+
+* docs: changelog: prefix headers with v for permalink anchors
+
+* changelog: add custom/fixed anchor for last version
+
+* setup.py: add Changelog to project_urls
+
+
 v3.8.0 (2020-01-14)
 --------------------
 
