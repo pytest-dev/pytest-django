@@ -516,10 +516,16 @@ def test_custom_user_model(django_testdir, username_field):
     )
     django_testdir.create_app_file(
         """
-        from django.conf.urls import url
         from tpkg.app import views
 
-        urlpatterns = [url(r'admin-required/', views.admin_required_view)]
+        try:
+            from django.urls import path
+        except ImportError:
+            from django.conf.urls import url
+
+            urlpatterns = [url(r'admin-required/', views.admin_required_view)]
+        else:
+            urlpatterns = [path('admin-required/', views.admin_required_view)]
         """,
         "urls.py",
     )
