@@ -116,7 +116,7 @@ def test_django_project_found_invalid_settings_version(django_testdir, monkeypat
     """Invalid DSM should not cause an error with --help or --version."""
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
 
-    result = django_testdir.runpytest_subprocess("django_project_root", "--version")
+    result = django_testdir.runpytest_subprocess("django_project_root", "--version", "--version")
     assert result.ret == 0
     result.stderr.fnmatch_lines(["*This is pytest version*"])
 
