@@ -240,7 +240,7 @@ def _get_boolean_value(x, name, default=None):
     except KeyError:
         raise ValueError(
             "{} is not a valid value for {}. "
-            "It must be one of {}." % (x, name, ", ".join(possible_values.keys()))
+            "It must be one of {}.".format(x, name, ", ".join(possible_values.keys()))
         )
 
 
