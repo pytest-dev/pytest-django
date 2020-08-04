@@ -36,28 +36,34 @@ __all__ = [
 def django_db_modify_db_settings_tox_suffix():
     skip_if_no_django()
 
-    tox_environment = os.getenv("TOX_PARALLEL_ENV")
-    if tox_environment:
-        # Put a suffix like _py27-django21 on tox workers
-        _set_suffix_to_test_databases(suffix=tox_environment)
+    return os.getenv("TOX_PARALLEL_ENV")
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
-    xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
-    if xdist_suffix:
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
-        _set_suffix_to_test_databases(suffix=xdist_suffix)
+    return getattr(request.config, "slaveinput", {}).get("slaveid")
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_parallel_suffix(
     django_db_modify_db_settings_tox_suffix,
-    django_db_modify_db_settings_xdist_suffix,
+    django_db_modify_db_settings_xdist_suffix
 ):
     skip_if_no_django()
+    xdist_worker = django_db_modify_db_settings_xdist_suffix
+    tox_environment = django_db_modify_db_settings_tox_suffix
+    suffix_parts = []
+    if tox_environment:
+        # Put a suffix like _py27-django21 on tox workers
+        suffix_parts.append(tox_environment)
+    if xdist_worker:
+        # Put a suffix like _gw0, _gw1 etc on xdist processes
+        suffix_parts.append(xdist_worker)
+    suffix = "_".join(suffix_parts)
+    if suffix:
+        _set_suffix_to_test_databases(suffix=suffix)
 
 
 @pytest.fixture(scope="session")
@@ -84,7 +90,7 @@ def django_db_createdb(request):
 def django_db_setup(
     request,
     django_test_environment,
-    django_db_blocker,
+    _django_db_blocker,
     django_db_use_migrations,
     django_db_keepdb,
     django_db_createdb,
@@ -101,15 +107,16 @@ def django_db_setup(
     if django_db_keepdb and not django_db_createdb:
         setup_databases_args["keepdb"] = True
 
-    with django_db_blocker.unblock():
+    with _django_db_blocker.unblock():
         db_cfg = setup_databases(
             verbosity=request.config.option.verbose,
             interactive=False,
             **setup_databases_args
         )
 
-    def teardown_database():
-        with django_db_blocker.unblock():
+    yield
+    if not django_db_keepdb:
+        with _django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
             except Exception as exc:
@@ -118,9 +125,6 @@ def django_db_setup(
                         "Error when trying to teardown test databases: %r" % exc
                     )
                 )
-
-    if not django_db_keepdb:
-        request.addfinalizer(teardown_database)
 
 
 def _django_db_fixture_helper(
@@ -191,7 +195,7 @@ def _set_suffix_to_test_databases(suffix):
 
 
 @pytest.fixture(scope="function")
-def db(request, django_db_setup, django_db_blocker):
+def db(request, django_db_blocker):
     """Require a django test database.
 
     This database will be setup with the default fixtures and will have
@@ -429,13 +433,15 @@ def _live_server_helper(request):
     It will also override settings only for the duration of the test.
     """
     if "live_server" not in request.fixturenames:
+        yield
         return
 
     request.getfixturevalue("transactional_db")
 
     live_server = request.getfixturevalue("live_server")
     live_server._live_server_modified_settings.enable()
-    request.addfinalizer(live_server._live_server_modified_settings.disable)
+    yield
+    live_server._live_server_modified_settings.disable()
 
 
 @contextmanager

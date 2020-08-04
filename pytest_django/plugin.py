@@ -476,7 +476,7 @@ def django_test_environment(request):
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker():
+def _django_db_blocker():
     """Wrapper around Django's database access.
 
     This object can be used to re-enable database access.  This fixture is used
@@ -493,6 +493,28 @@ def django_db_blocker():
         return None
 
     return _blocking_manager
+
+
+@pytest.fixture(scope="session")
+def django_db_blocker(django_db_setup, _django_db_blocker):  # noqa: F811
+    """Wrapper around _django_db_blocker to serve as convenience reference.
+
+    The ``_django_db_blocker`` fixture must be available for the ``django_db_setup``
+    fixture, so ``django_db_setup`` must request the ``_django_db_blocker`` fixture. But
+    in order for ``_django_db_blocker`` to be used, ``django_db_setup`` must also have
+    been executed, suggesting that ``_django_db_blocker`` should request
+    ``django_db_setup``, especially since it is possible for ``_django_db_blocker`` to
+    be needed when ``django_db_setup`` wouldn't normally have been run (e.g. if a test
+    isn't marked with ``pytest.mark.django_db``).
+
+    This would normally cause a catch-22, but to circumvent this, the
+    `_django_db_blocker`` fixture is used behind the scenes, while ``django_db_blocker``
+    serves as the fixture used by everything that would normally need the blocker (aside
+    from ``django_db_setup``). This fixture helps coordinate between both
+    ``django_db_setup`` and ``_django_db_blocker``, so that whenever
+    ``django_db_blocker`` gets used, it ensures ``django_db_setup`` is run first.
+    """
+    return _django_db_blocker
 
 
 @pytest.fixture(autouse=True)
@@ -514,7 +536,7 @@ def _django_db_marker(request):
 
 
 @pytest.fixture(autouse=True, scope="class")
-def _django_setup_unittest(request, django_db_blocker):
+def _django_setup_unittest(request, _django_db_blocker):
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
         yield
@@ -535,7 +557,7 @@ def _django_setup_unittest(request, django_db_blocker):
 
     cls = request.node.cls
 
-    with django_db_blocker.unblock():
+    with _django_db_blocker.unblock():
         if _handle_unittest_methods:
             _restore_class_methods(cls)
             cls.setUpClass()
@@ -746,7 +768,7 @@ class _DatabaseBlockerContextManager(object):
 class _DatabaseBlocker(object):
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
-    This is the object returned by django_db_blocker.
+    This is the object returned by _django_db_blocker and django_db_blocker.
     """
 
     def __init__(self):
