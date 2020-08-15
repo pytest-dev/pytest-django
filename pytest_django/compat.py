@@ -13,3 +13,12 @@ except ImportError:
         _DiscoverRunner(verbosity=verbosity, interactive=False).teardown_databases(
             db_cfg
         )
+
+
+# Import NullTimeKeeper from Django > 3.1 for setup_databases call -
+# fix for https://github.com/pytest-dev/pytest-django/issues/858
+try:
+    from django.test.utils import NullTimeKeeper
+    setup_databases_args = {"time_keeper": NullTimeKeeper()}
+except ImportError:
+    setup_databases_args = {}
