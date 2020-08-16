@@ -46,7 +46,7 @@ def django_db_modify_db_settings_tox_suffix():
 def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
-    xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
+    xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     if xdist_suffix:
         # Put a suffix like _gw0, _gw1 etc on xdist processes
         _set_suffix_to_test_databases(suffix=xdist_suffix)
