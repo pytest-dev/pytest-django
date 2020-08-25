@@ -1,6 +1,25 @@
 Changelog
 =========
 
+v3.10.0 (2020-08-25)
+--------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Officialy support Django 3.1
+
+* Preliminary supoprt for upcoming Django 3.2
+
+* Support for pytest-xdist 2.0
+
+
+Misc
+^^^^
+
+* Fix running pytest-django's own tests against pytest 6.0 (#855)
+
+
 v3.9.0 (2020-03-31)
 -------------------
 
