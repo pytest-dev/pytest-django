@@ -36,6 +36,15 @@ def test_client(client):
     assert isinstance(client, Client)
 
 
+@pytest.mark.skipif(
+    get_django_version() < (3, 1), reason="Django >= 3.1 required"
+)
+def test_async_client(async_client):
+    from django.test.client import AsyncClient
+
+    assert isinstance(async_client, AsyncClient)
+
+
 @pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)

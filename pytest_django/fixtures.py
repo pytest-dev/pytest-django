@@ -20,6 +20,7 @@ __all__ = [
     "django_user_model",
     "django_username_field",
     "client",
+    "async_client",
     "admin_client",
     "rf",
     "settings",
@@ -259,6 +260,16 @@ def client():
     from django.test.client import Client
 
     return Client()
+
+
+@pytest.fixture()
+def async_client():
+    """A Django test async client instance."""
+    skip_if_no_django()
+
+    from django.test.client import AsyncClient
+
+    return AsyncClient()
 
 
 @pytest.fixture()

@@ -28,6 +28,7 @@ from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import _live_server_helper  # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
+from .fixtures import async_client  # noqa
 from .fixtures import client  # noqa
 from .fixtures import db  # noqa
 from .fixtures import django_user_model  # noqa
