@@ -3,7 +3,6 @@ import shutil
 from textwrap import dedent
 
 import pytest
-import six
 from django.conf import settings
 
 try:
@@ -58,7 +57,7 @@ def django_testdir(request, testdir, monkeypatch):
 
         # Pypy compatibility
         try:
-            from psycopg2ct import compat
+            from psycopg2cffi import compat
         except ImportError:
             pass
         else:
@@ -80,9 +79,6 @@ def django_testdir(request, testdir, monkeypatch):
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.messages.middleware.MessageMiddleware',
         ]
-
-        if django.VERSION < (1, 10):
-            MIDDLEWARE_CLASSES = MIDDLEWARE
 
         TEMPLATES = [
             {
@@ -118,7 +114,7 @@ def django_testdir(request, testdir, monkeypatch):
     test_app_path = tpkg_path.join("app")
 
     # Copy the test app to make it available in the new test run
-    shutil.copytree(six.text_type(app_source), six.text_type(test_app_path))
+    shutil.copytree(str(app_source), str(test_app_path))
     tpkg_path.join("the_settings.py").write(test_settings)
 
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")

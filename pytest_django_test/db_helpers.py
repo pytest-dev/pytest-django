@@ -31,7 +31,7 @@ def get_db_engine():
     return _settings["ENGINE"].split(".")[-1]
 
 
-class CmdResult(object):
+class CmdResult:
     def __init__(self, status_code, std_out, std_err):
         self.status_code = status_code
         self.std_out = std_out
@@ -64,7 +64,7 @@ def skip_if_sqlite_in_memory():
 def _get_db_name(db_suffix=None):
     name = TEST_DB_NAME
     if db_suffix:
-        name = "%s_%s" % (name, db_suffix)
+        name = "{}_{}".format(name, db_suffix)
     return name
 
 
@@ -72,7 +72,7 @@ def drop_database(db_suffix=None):
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
-    if db_engine == "postgresql_psycopg2":
+    if db_engine == "postgresql":
         r = run_cmd("psql", "postgres", "-c", "DROP DATABASE %s" % name)
         assert "DROP DATABASE" in force_str(
             r.std_out
@@ -94,7 +94,7 @@ def db_exists(db_suffix=None):
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
-    if db_engine == "postgresql_psycopg2":
+    if db_engine == "postgresql":
         r = run_cmd("psql", name, "-c", "SELECT 1")
         return r.status_code == 0
 
@@ -111,7 +111,7 @@ def db_exists(db_suffix=None):
 def mark_database():
     db_engine = get_db_engine()
 
-    if db_engine == "postgresql_psycopg2":
+    if db_engine == "postgresql":
         r = run_cmd("psql", TEST_DB_NAME, "-c", "CREATE TABLE mark_table();")
         assert r.status_code == 0
         return
@@ -136,7 +136,7 @@ def mark_database():
 def mark_exists():
     db_engine = get_db_engine()
 
-    if db_engine == "postgresql_psycopg2":
+    if db_engine == "postgresql":
         r = run_cmd("psql", TEST_DB_NAME, "-c", "SELECT 1 FROM mark_table")
 
         # When something pops out on std_out, we are good

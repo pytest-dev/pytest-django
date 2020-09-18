@@ -1,5 +1,3 @@
-from __future__ import with_statement
-
 import pytest
 from django.db import connection
 from django.test.testcases import connections_support_transactions

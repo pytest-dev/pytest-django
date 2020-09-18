@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .app import views
 
 urlpatterns = [
-    url(r"^item_count/$", views.item_count),
-    url(r"^admin-required/$", views.admin_required_view),
+    path("item_count/", views.item_count),
+    path("admin-required/", views.admin_required_view),
 ]

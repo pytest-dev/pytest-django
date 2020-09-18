@@ -3,7 +3,6 @@
 If these tests fail you probably forgot to run "python setup.py develop".
 """
 
-import django
 import pytest
 
 
@@ -308,10 +307,6 @@ def test_debug_false(testdir, monkeypatch):
     assert r.ret == 0
 
 
-@pytest.mark.skipif(
-    not hasattr(django, "setup"),
-    reason="This Django version does not support app loading",
-)
 @pytest.mark.django_project(
     extra_settings="""
     INSTALLED_APPS = [
@@ -329,10 +324,7 @@ def test_django_setup_sequence(django_testdir):
             name = 'tpkg.app'
 
             def ready(self):
-                try:
-                    populating = apps.loading
-                except AttributeError:  # Django < 2.0
-                    populating = apps._lock.locked()
+                populating = apps.loading
                 print('READY(): populating=%r' % populating)
         """,
         "apps.py",
@@ -342,10 +334,7 @@ def test_django_setup_sequence(django_testdir):
         """
         from django.apps import apps
 
-        try:
-            populating = apps.loading
-        except AttributeError:  # Django < 2.0
-            populating = apps._lock.locked()
+        populating = apps.loading
 
         print('IMPORT: populating=%r,ready=%r' % (populating, apps.ready))
         SOME_THING = 1234
@@ -360,10 +349,7 @@ def test_django_setup_sequence(django_testdir):
         from tpkg.app.models import SOME_THING
 
         def test_anything():
-            try:
-                populating = apps.loading
-            except AttributeError:  # Django < 2.0
-                populating = apps._lock.locked()
+            populating = apps.loading
 
             print('TEST: populating=%r,ready=%r' % (populating, apps.ready))
         """
@@ -372,10 +358,7 @@ def test_django_setup_sequence(django_testdir):
     result = django_testdir.runpytest_subprocess("-s", "--tb=line")
     result.stdout.fnmatch_lines(["*IMPORT: populating=True,ready=False*"])
     result.stdout.fnmatch_lines(["*READY(): populating=True*"])
-    if django.VERSION < (2, 0):
-        result.stdout.fnmatch_lines(["*TEST: populating=False,ready=True*"])
-    else:
-        result.stdout.fnmatch_lines(["*TEST: populating=True,ready=True*"])
+    result.stdout.fnmatch_lines(["*TEST: populating=True,ready=True*"])
     assert result.ret == 0
 
 

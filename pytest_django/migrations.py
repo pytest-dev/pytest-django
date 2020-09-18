@@ -2,7 +2,7 @@
 from pytest_django.lazy_django import get_django_version
 
 
-class DisableMigrations(object):
+class DisableMigrations:
     def __init__(self):
         self._django_version = get_django_version()
 
@@ -10,7 +10,4 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        if self._django_version >= (1, 9):
-            return None
-        else:
-            return "notmigrations"
+        return None
