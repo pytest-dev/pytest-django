@@ -408,6 +408,30 @@ class TestSettings:
             ]
         )
 
+    def test_transactional_db_order(self, django_testdir):
+        django_testdir.create_test_module(
+            """
+            import pytest
+
+            from django.conf import settings as django_settings
+            from django.db.models.signals import post_migrate
+
+            @pytest.fixture
+            def check_settings_in_post_migrate(settings, transactional_db):
+                def receiver(sender, **kwargs):
+                    assert not hasattr(django_settings, 'TRANSIENT_SETTING')
+
+                post_migrate.connect(receiver, weak=False)
+
+            def test_set_non_existent(settings, check_settings_in_post_migrate):
+                settings.TRANSIENT_SETTING = 1
+         """
+        )
+
+        result = django_testdir.runpytest_subprocess("-v")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*test_set_non_existent PASSED*"])
+
 
 class TestLiveServer:
     def test_settings_before(self) -> None:
