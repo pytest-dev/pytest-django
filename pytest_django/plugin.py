@@ -8,6 +8,7 @@ import contextlib
 import inspect
 from functools import reduce
 import os
+import pathlib
 import sys
 import types
 
@@ -39,21 +40,10 @@ from .fixtures import transactional_db  # noqa
 
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
-
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
 CONFIGURATION_ENV = "DJANGO_CONFIGURATION"
 INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
-
-PY2 = sys.version_info[0] == 2
-
-# pytest 4.2 handles unittest setup/teardown itself via wrapping fixtures.
-_pytest_version_info = tuple(int(x) for x in pytest.__version__.split(".", 2)[:2])
-_handle_unittest_methods = _pytest_version_info < (4, 2)
 
 _report_header = []
 
@@ -303,11 +293,11 @@ def pytest_load_initial_conftests(early_config, parser, args):
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
     if ds:
-        _report_header.append("settings: %s (from %s)" % (ds, ds_source))
+        _report_header.append("settings: {} (from {})".format(ds, ds_source))
         os.environ[SETTINGS_MODULE_ENV] = ds
 
         if dc:
-            _report_header.append("configuration: %s (from %s)" % (dc, dc_source))
+            _report_header.append("configuration: {} (from {})".format(dc, dc_source))
             os.environ[CONFIGURATION_ENV] = dc
 
             # Install the django-configurations importer
@@ -330,7 +320,7 @@ def pytest_report_header():
         return ["django: " + ", ".join(_report_header)]
 
 
-@pytest.mark.trylast
+@pytest.hookimpl(trylast=True)
 def pytest_configure():
     # Allow Django settings to be configured in a user pytest_configure call,
     # but make sure we call django.setup()
@@ -354,13 +344,7 @@ def _classmethod_is_defined_at_leaf(cls, method_name):
     try:
         f = method.__func__
     except AttributeError:
-        pytest.fail("%s.%s should be a classmethod" % (cls, method_name))
-    if PY2 and not (
-        inspect.ismethod(method)
-        and inspect.isclass(method.__self__)
-        and issubclass(cls, method.__self__)
-    ):
-        pytest.fail("%s.%s should be a classmethod" % (cls, method_name))
+        pytest.fail("{}.{} should be a classmethod".format(cls, method_name))
     return f is not super_method.__func__
 
 
@@ -407,12 +391,6 @@ def _restore_class_methods(cls):
 
     if restore_tearDownClass:
         cls.tearDownClass = tearDownClass
-
-
-def pytest_runtest_setup(item):
-    if _handle_unittest_methods:
-        if django_settings_is_configured() and is_django_unittest(item):
-            _disable_class_methods(item.cls)
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -523,33 +501,21 @@ def _django_setup_unittest(request, django_db_blocker):
     # Fix/patch pytest.
     # Before pytest 5.4: https://github.com/pytest-dev/pytest/issues/5991
     # After pytest 5.4: https://github.com/pytest-dev/pytest-django/issues/824
-    from _pytest.monkeypatch import MonkeyPatch
+    from _pytest.unittest import TestCaseFunction
+    original_runtest = TestCaseFunction.runtest
 
     def non_debugging_runtest(self):
         self._testcase(result=self)
 
-    mp_debug = MonkeyPatch()
-    mp_debug.setattr("_pytest.unittest.TestCaseFunction.runtest", non_debugging_runtest)
+    try:
+        TestCaseFunction.runtest = non_debugging_runtest
 
-    request.getfixturevalue("django_db_setup")
+        request.getfixturevalue("django_db_setup")
 
-    cls = request.node.cls
-
-    with django_db_blocker.unblock():
-        if _handle_unittest_methods:
-            _restore_class_methods(cls)
-            cls.setUpClass()
-            _disable_class_methods(cls)
-
+        with django_db_blocker.unblock():
             yield
-
-            _restore_class_methods(cls)
-            cls.tearDownClass()
-        else:
-            yield
-
-    if mp_debug:
-        mp_debug.undo()
+    finally:
+        TestCaseFunction.runtest = original_runtest
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -591,12 +557,7 @@ def _django_set_urlconf(request):
     if marker:
         skip_if_no_django()
         import django.conf
-
-        try:
-            from django.urls import clear_url_caches, set_urlconf
-        except ImportError:
-            # Removed in Django 2.0
-            from django.core.urlresolvers import clear_url_caches, set_urlconf
+        from django.urls import clear_url_caches, set_urlconf
 
         urls = validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
@@ -629,7 +590,7 @@ def _fail_for_invalid_template_variable():
     ``pytest.mark.ignore_template_errors``
     """
 
-    class InvalidVarException(object):
+    class InvalidVarException:
         """Custom handler for invalid strings in templates."""
 
         def __init__(self):
@@ -677,7 +638,7 @@ def _fail_for_invalid_template_variable():
             """Handle TEMPLATE_STRING_IF_INVALID % var."""
             origin = self._get_origin()
             if origin:
-                msg = "Undefined template variable '%s' in '%s'" % (var, origin)
+                msg = "Undefined template variable '{}' in '{}'".format(var, origin)
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:
@@ -732,7 +693,7 @@ def _django_clear_site_cache():
 # ############### Helper Functions ################
 
 
-class _DatabaseBlockerContextManager(object):
+class _DatabaseBlockerContextManager:
     def __init__(self, db_blocker):
         self._db_blocker = db_blocker
 
@@ -743,7 +704,7 @@ class _DatabaseBlockerContextManager(object):
         self._db_blocker.restore()
 
 
-class _DatabaseBlocker(object):
+class _DatabaseBlocker:
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
     This is the object returned by django_db_blocker.

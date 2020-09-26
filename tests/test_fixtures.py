@@ -4,10 +4,10 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
-from __future__ import with_statement
 
 import socket
 from contextlib import contextmanager
+from urllib.request import urlopen, HTTPError
 
 import pytest
 from django.conf import settings as real_settings
@@ -17,9 +17,7 @@ from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import HTTPError, urlopen
 
 
 @contextmanager
@@ -322,7 +320,7 @@ class TestLiveServer:
         from django.conf import settings
 
         assert (
-            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
         TestLiveServer._test_settings_before_run = True
@@ -335,18 +333,14 @@ class TestLiveServer:
 
     def test_settings_restored(self):
         """Ensure that settings are restored after test_settings_before."""
-        import django
         from django.conf import settings
 
         assert TestLiveServer._test_settings_before_run is True
         assert (
-            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
-        if django.VERSION >= (1, 11):
-            assert settings.ALLOWED_HOSTS == ["testserver"]
-        else:
-            assert settings.ALLOWED_HOSTS == ["*"]
+        assert settings.ALLOWED_HOSTS == ["testserver"]
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():
@@ -417,12 +411,9 @@ class TestLiveServer:
         """
         django_testdir.create_test_module(
             """
-            from django.utils.encoding import force_str
+            from urllib.request import urlopen
 
-            try:
-                from urllib2 import urlopen
-            except ImportError:
-                from urllib.request import urlopen
+            from django.utils.encoding import force_str
 
             class TestLiveServer:
                 def test_a(self, live_server, settings):
@@ -445,28 +436,6 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + "/static/a_file.txt").read()
 
-    @pytest.mark.skipif(
-        get_django_version() < (1, 11), reason="Django >= 1.11 required"
-    )
-    def test_specified_port_range_error_message_django_111(self, django_testdir):
-        django_testdir.create_test_module(
-            """
-        def test_with_live_server(live_server):
-            pass
-        """
-        )
-
-        result = django_testdir.runpytest_subprocess("--liveserver=localhost:1234-2345")
-        result.stdout.fnmatch_lines(
-            [
-                "*Specifying multiple live server ports is not supported in Django 1.11. This "
-                "will be an error in a future pytest-django release.*"
-            ]
-        )
-
-    @pytest.mark.skipif(
-        get_django_version() < (1, 11, 2), reason="Django >= 1.11.2 required"
-    )
     def test_specified_port_django_111(self, django_testdir):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -516,16 +485,11 @@ def test_custom_user_model(django_testdir, username_field):
     )
     django_testdir.create_app_file(
         """
+        from django.urls import path
+
         from tpkg.app import views
 
-        try:
-            from django.urls import path
-        except ImportError:
-            from django.conf.urls import url
-
-            urlpatterns = [url(r'admin-required/', views.admin_required_view)]
-        else:
-            urlpatterns = [path('admin-required/', views.admin_required_view)]
+        urlpatterns = [path('admin-required/', views.admin_required_view)]
         """,
         "urls.py",
     )
@@ -556,9 +520,6 @@ def test_custom_user_model(django_testdir, username_field):
     django_testdir.create_app_file("", "migrations/__init__.py")
     django_testdir.create_app_file(
         """
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import django.utils.timezone
 import django.core.validators

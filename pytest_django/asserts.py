@@ -23,10 +23,10 @@ def _wrapper(name):
 __all__ = []
 assertions_names = set()
 assertions_names.update(
-    set(attr for attr in vars(TestCase) if attr.startswith('assert')),
-    set(attr for attr in vars(SimpleTestCase) if attr.startswith('assert')),
-    set(attr for attr in vars(LiveServerTestCase) if attr.startswith('assert')),
-    set(attr for attr in vars(TransactionTestCase) if attr.startswith('assert')),
+    {attr for attr in vars(TestCase) if attr.startswith('assert')},
+    {attr for attr in vars(SimpleTestCase) if attr.startswith('assert')},
+    {attr for attr in vars(LiveServerTestCase) if attr.startswith('assert')},
+    {attr for attr in vars(TransactionTestCase) if attr.startswith('assert')},
 )
 
 for assert_func in assertions_names:

@@ -1,5 +1,3 @@
-from __future__ import with_statement
-
 import os
 
 import pytest
@@ -8,7 +6,6 @@ from django.contrib.sites import models as site_models
 from django.core import mail
 from django.db import connection
 from django.test import TestCase
-from pytest_django.lazy_django import get_django_version
 
 from pytest_django_test.app.models import Item
 
@@ -57,11 +54,11 @@ class TestDirectAccessWorksForDjangoTestCase(TestCase):
 def test_invalid_template_variable(django_testdir):
     django_testdir.create_app_file(
         """
-        from django.conf.urls import url
+        from django.urls import path
 
         from tpkg.app import views
 
-        urlpatterns = [url(r'invalid_template/', views.invalid_template)]
+        urlpatterns = [path('invalid_template/', views.invalid_template)]
         """,
         "urls.py",
     )
@@ -95,10 +92,7 @@ def test_invalid_template_variable(django_testdir):
     )
     result = django_testdir.runpytest_subprocess("-s", "--fail-on-template-vars")
 
-    if get_django_version() >= (1, 9):
-        origin = "'*/tpkg/app/templates/invalid_template_base.html'"
-    else:
-        origin = "'invalid_template.html'"
+    origin = "'*/tpkg/app/templates/invalid_template_base.html'"
     result.stdout.fnmatch_lines_random(
         [
             "tpkg/test_the_test.py F.*",
@@ -163,11 +157,11 @@ def test_invalid_template_with_default_if_none(django_testdir):
 def test_invalid_template_variable_opt_in(django_testdir):
     django_testdir.create_app_file(
         """
-        from django.conf.urls import url
+        from django.urls import path
 
         from tpkg.app import views
 
-        urlpatterns = [url(r'invalid_template/', views.invalid_template)]
+        urlpatterns = [path('invalid_template', views.invalid_template)]
         """,
         "urls.py",
     )
@@ -255,14 +249,9 @@ class TestrunnerVerbosity:
         """Verbose output with '-v'."""
         result = testdir.runpytest_subprocess("-s", "-v")
         result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py:*", "*PASSED*"])
-        if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines(
-                ["*Destroying test database for alias 'default'*"]
-            )
-        else:
-            result.stdout.fnmatch_lines(
-                ["*Destroying test database for alias 'default'...*"]
-            )
+        result.stderr.fnmatch_lines(
+            ["*Destroying test database for alias 'default'*"]
+        )
 
     def test_more_verbose_with_vv(self, testdir):
         """More verbose output with '-v -v'."""
@@ -275,37 +264,22 @@ class TestrunnerVerbosity:
                 "*PASSED*",
             ]
         )
-        if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines(
-                [
-                    "*Creating test database for alias*",
-                    "*Destroying test database for alias 'default'*",
-                ]
-            )
-        else:
-            result.stdout.fnmatch_lines(
-                [
-                    "*Creating test database for alias*",
-                    "*Destroying test database for alias 'default'*",
-                ]
-            )
+        result.stderr.fnmatch_lines(
+            [
+                "*Creating test database for alias*",
+                "*Destroying test database for alias 'default'*",
+            ]
+        )
 
     def test_more_verbose_with_vv_and_reusedb(self, testdir):
         """More verbose output with '-v -v', and --create-db."""
         result = testdir.runpytest_subprocess("-s", "-v", "-v", "--create-db")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py:*", "*PASSED*"])
-        if get_django_version() >= (2, 2):
-            result.stderr.fnmatch_lines(["*Creating test database for alias*"])
-            assert (
-                "*Destroying test database for alias 'default' ('*')...*"
-                not in result.stderr.str()
-            )
-        else:
-            result.stdout.fnmatch_lines(["*Creating test database for alias*"])
-            assert (
-                "*Destroying test database for alias 'default' ('*')...*"
-                not in result.stdout.str()
-            )
+        result.stderr.fnmatch_lines(["*Creating test database for alias*"])
+        assert (
+            "*Destroying test database for alias 'default' ('*')...*"
+            not in result.stderr.str()
+        )
 
 
 @pytest.mark.django_db

@@ -1,9 +1,7 @@
 """All pytest-django fixtures"""
 
-from __future__ import with_statement
 
 import os
-import warnings
 from contextlib import contextmanager
 from functools import partial
 
@@ -91,7 +89,7 @@ def django_db_setup(
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
-    from .compat import setup_databases, teardown_databases
+    from django.test.utils import setup_databases, teardown_databases
 
     setup_databases_args = {}
 
@@ -164,7 +162,7 @@ def _disable_native_migrations():
     class MigrateSilentCommand(migrate.Command):
         def handle(self, *args, **kwargs):
             kwargs["verbosity"] = 0
-            return super(MigrateSilentCommand, self).handle(*args, **kwargs)
+            return super().handle(*args, **kwargs)
 
     migrate.Command = MigrateSilentCommand
 
@@ -320,7 +318,7 @@ def rf():
     return RequestFactory()
 
 
-class SettingsWrapper(object):
+class SettingsWrapper:
     _to_restore = []
 
     def __delattr__(self, attr):
@@ -370,8 +368,8 @@ def live_server(request):
     The address the server is started from is taken from the
     --liveserver command line option or if this is not provided from
     the DJANGO_LIVE_TEST_SERVER_ADDRESS environment variable.  If
-    neither is provided ``localhost:8081,8100-8200`` is used.  See the
-    Django documentation for its full syntax.
+    neither is provided ``localhost`` is used.  See the Django
+    documentation for its full syntax.
 
     NOTE: If the live server needs database access to handle a request
           your test will have to request database access.  Furthermore
@@ -385,27 +383,9 @@ def live_server(request):
     """
     skip_if_no_django()
 
-    import django
-
     addr = request.config.getvalue("liveserver") or os.getenv(
         "DJANGO_LIVE_TEST_SERVER_ADDRESS"
-    )
-
-    if addr and ":" in addr:
-        if django.VERSION >= (1, 11):
-            ports = addr.split(":")[1]
-            if "-" in ports or "," in ports:
-                warnings.warn(
-                    "Specifying multiple live server ports is not supported "
-                    "in Django 1.11. This will be an error in a future "
-                    "pytest-django release."
-                )
-
-    if not addr:
-        if django.VERSION < (1, 11):
-            addr = "localhost:8081,8100-8200"
-        else:
-            addr = "localhost"
+    ) or "localhost"
 
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
@@ -458,14 +438,14 @@ def _assert_num_queries(config, num, exact=True, connection=None, info=None):
                 num,
                 "" if exact else "or less ",
                 "but {} done".format(
-                    num_performed == 1 and "1 was" or "%d were" % (num_performed,)
+                    num_performed == 1 and "1 was" or "{} were".format(num_performed)
                 ),
             )
             if info:
                 msg += "\n{}".format(info)
             if verbose:
                 sqls = (q["sql"] for q in context.captured_queries)
-                msg += "\n\nQueries:\n========\n\n%s" % "\n\n".join(sqls)
+                msg += "\n\nQueries:\n========\n\n" + "\n\n".join(sqls)
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)

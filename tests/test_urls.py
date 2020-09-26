@@ -1,14 +1,11 @@
 import pytest
 from django.conf import settings
+from django.urls import is_valid_path
 from django.utils.encoding import force_str
 
 
 @pytest.mark.urls("pytest_django_test.urls_overridden")
 def test_urls():
-    try:
-        from django.urls import is_valid_path
-    except ImportError:
-        from django.core.urlresolvers import is_valid_path
     assert settings.ROOT_URLCONF == "pytest_django_test.urls_overridden"
     assert is_valid_path("/overridden_url/")
 
@@ -22,21 +19,18 @@ def test_urls_client(client):
 def test_urls_cache_is_cleared(testdir):
     testdir.makepyfile(
         myurls="""
-        from django.conf.urls import url
+        from django.urls import path
 
         def fake_view(request):
             pass
 
-        urlpatterns = [url(r'first/$', fake_view, name='first')]
+        urlpatterns = [path('first', fake_view, name='first')]
     """
     )
 
     testdir.makepyfile(
         """
-        try:
-            from django.urls import reverse, NoReverseMatch
-        except ImportError:  # Django < 2.0
-            from django.core.urlresolvers import reverse, NoReverseMatch
+        from django.urls import reverse, NoReverseMatch
         import pytest
 
         @pytest.mark.urls('myurls')
@@ -58,32 +52,29 @@ def test_urls_cache_is_cleared(testdir):
 def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir):
     testdir.makepyfile(
         myurls="""
-        from django.conf.urls import url
+        from django.urls import path
 
         def fake_view(request):
             pass
 
-        urlpatterns = [url(r'first/$', fake_view, name='first')]
+        urlpatterns = [path('first', fake_view, name='first')]
     """
     )
 
     testdir.makepyfile(
         myurls2="""
-        from django.conf.urls import url
+        from django.urls import path
 
         def fake_view(request):
             pass
 
-        urlpatterns = [url(r'second/$', fake_view, name='second')]
+        urlpatterns = [path('second', fake_view, name='second')]
     """
     )
 
     testdir.makepyfile(
         """
-        try:
-            from django.urls import reverse, NoReverseMatch
-        except ImportError:  # Django < 2.0
-            from django.core.urlresolvers import reverse, NoReverseMatch
+        from django.urls import reverse, NoReverseMatch
         import pytest
 
         @pytest.mark.urls('myurls')
