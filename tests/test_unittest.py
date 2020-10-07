@@ -97,7 +97,7 @@ def test_sole_test(django_testdir):
             '>       assert 0, "trigger_error"',
             "E       AssertionError: trigger_error",
             "E       assert 0",
-            "*= 1 failed, 1 passed in *",
+            "*= 1 failed, 1 passed*",
         ]
     )
     assert result.ret == 1
@@ -399,7 +399,7 @@ class TestUnittestMethods:
 
         result = django_testdir.runpytest_subprocess("-q", "-s")
         result.stdout.fnmatch_lines(
-            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed in*"]
+            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
         )
         assert result.ret == 0
 
@@ -484,5 +484,5 @@ def test_debug_not_used(django_testdir):
     )
 
     result = django_testdir.runpytest_subprocess("--pdb")
-    result.stdout.fnmatch_lines(["*= 1 passed in *"])
+    result.stdout.fnmatch_lines(["*= 1 passed*"])
     assert result.ret == 0
