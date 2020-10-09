@@ -287,7 +287,11 @@ def admin_user(db, django_user_model, django_username_field):
     username = "admin@example.com" if username_field == "email" else "admin"
 
     try:
-        user = UserModel._default_manager.get(**{username_field: username})
+        # The default behavior of `get_by_natural_key()` is to look up by `username_field`.
+        # However the user model is free to override it with any sort of custom behavior.
+        # The Django authentication backend already assumes the lookup is by username,
+        # so we can assume so as well.
+        user = UserModel._default_manager.get_by_natural_key(username)
     except UserModel.DoesNotExist:
         extra_fields = {}
         if username_field not in ("username", "email"):
