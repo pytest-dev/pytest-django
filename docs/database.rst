@@ -333,7 +333,7 @@ Put this into ``conftest.py``::
         conn.close()
 
 
-    @pytest.yield_fixture(scope='session')
+    @pytest.fixture(scope='session')
     def django_db_setup():
         from django.conf import settings
 
