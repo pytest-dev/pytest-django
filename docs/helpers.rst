@@ -231,7 +231,10 @@ is configured to be in the containing Django project.
 This fixture will ensure the Django database is set up.  Only
 required for fixtures that want to use the database themselves.  A
 test function should normally use the ``pytest.mark.django_db``
-mark to signal it needs the database.
+mark to signal it needs the database. This fixture does
+not return a database connection object. When you need a Django 
+database connection or cursor, import it from Django using
+``from django.db import connection``.
 
 ``transactional_db``
 ~~~~~~~~~~~~~~~~~~~~
