@@ -53,24 +53,24 @@ jobs:
       services:
         - postgresql
 
-    - stage: test_release
-      python: 3.8
-      env: TOXENV=py38-dj31-postgres
-      services:
-        - postgresql
+#     - stage: test_release
+#       python: 3.8
+#       env: TOXENV=py38-dj31-postgres
+#       services:
+#         - postgresql
 
-    - stage: release
-      script: skip
-      install: skip
-      after_success: true
-      deploy:
-        provider: pypi
-        user: blueyed
-        password:
-          secure: "FY7qbX/N0XRcH8hVk00SsQWvNIkuxKvY7Br4ghRnHvleHG3YulJ7WbJnik+9eoBGeMfJeNyzBfVjpeo1ZIq9IZBiyTdNfG/sZFsC5LOoG/CPxPH3nD9JktI2HoBMnlSbGg/MMHjY+wXuOY647U/3qNedcnQmGztYt6QWi5DRxu8="
-        on:
-          tags: true
-        distributions: "sdist bdist_wheel"
+#     - stage: release
+#       script: skip
+#       install: skip
+#       after_success: true
+#       deploy:
+#         provider: pypi
+#         user: blueyed
+#         password:
+#           secure: "FY7qbX/N0XRcH8hVk00SsQWvNIkuxKvY7Br4ghRnHvleHG3YulJ7WbJnik+9eoBGeMfJeNyzBfVjpeo1ZIq9IZBiyTdNfG/sZFsC5LOoG/CPxPH3nD9JktI2HoBMnlSbGg/MMHjY+wXuOY647U/3qNedcnQmGztYt6QWi5DRxu8="
+#         on:
+#           tags: true
+#         distributions: "sdist bdist_wheel"
 
   # NOTE: does not show up in "allowed failures" section, but is allowed to
   # fail (for the "test" stage).
@@ -82,10 +82,10 @@ stages:
     if: tag IS NOT present
   - name: test
     if: tag IS NOT present
-  - name: test_release
-    if: tag IS present
-  - name: release
-    if: tag IS present
+  # - name: test_release
+  #   if: tag IS present
+  # - name: release
+  #   if: tag IS present
 
 install:
   - pip install tox==3.20.0
@@ -93,10 +93,10 @@ install:
 script:
   - tox
 
-after_success:
-  - |
-    set -ex
-    if [[ "${TOXENV%-coverage}" != "$TOXENV" ]]; then
-      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout
-    fi
-    set +ex
+# after_success:
+#   - |
+#     set -ex
+#     if [[ "${TOXENV%-coverage}" != "$TOXENV" ]]; then
+#       bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout
+#     fi
+#     set +ex

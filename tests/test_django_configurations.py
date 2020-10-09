@@ -42,7 +42,7 @@ def test_dc_env(testdir, monkeypatch):
     result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
-        "* 1 passed in*",
+        "* 1 passed*",
     ])
     assert result.ret == 0
 
@@ -73,7 +73,7 @@ def test_dc_env_overrides_ini(testdir, monkeypatch):
     result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
-        "* 1 passed in*",
+        "* 1 passed*",
     ])
     assert result.ret == 0
 
@@ -103,7 +103,7 @@ def test_dc_ini(testdir, monkeypatch):
     result = testdir.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_ini (from ini), configuration: MySettings (from ini)',
-        "* 1 passed in*",
+        "* 1 passed*",
     ])
     assert result.ret == 0
 
@@ -135,6 +135,6 @@ def test_dc_option(testdir, monkeypatch):
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_opt (from option),'
         ' configuration: MySettings (from option)',
-        "* 1 passed in*",
+        "* 1 passed*",
     ])
     assert result.ret == 0

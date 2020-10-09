@@ -21,7 +21,7 @@ def test_db_access_with_repr_in_report(django_testdir):
         "tpkg/test_the_test.py:8: ",
         'self = *RuntimeError*Database access not allowed*',
         "E   *DoesNotExist: Item matching query does not exist.",
-        "* 2 failed in *",
+        "* 2 failed*",
     ])
     assert "INTERNALERROR" not in str(result.stdout) + str(result.stderr)
     assert result.ret == 1
