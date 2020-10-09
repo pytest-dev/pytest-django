@@ -6,9 +6,9 @@
     :alt: Supported Python versions
     :target: https://pypi.python.org/pypi/pytest-django
 
-.. image:: https://travis-ci.org/pytest-dev/pytest-django.svg?branch=master
+.. image:: https://github.com/pytest-dev/pytest-django/workflows/main/badge.svg
     :alt: Build Status
-    :target: https://travis-ci.org/pytest-dev/pytest-django
+    :target: https://github.com/pytest-dev/pytest-django/actions
 
 .. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
     :alt: Coverage

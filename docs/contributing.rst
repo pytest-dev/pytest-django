@@ -178,10 +178,10 @@ Your coverage report is now ready in the ``htmlcov`` directory.
 Continuous integration
 ----------------------
 
-`Travis`_ is used to automatically run all tests against all supported versions
+`GitHub Actions`_ is used to automatically run all tests against all supported versions
 of Python, Django and different database backends.
 
-The `pytest-django Travis`_ page shows the latest test run. Travis will
+The `pytest-django Actions`_ page shows the latest test run. The CI will
 automatically pick up pull requests, test them and report the result directly
 in the pull request.
 
@@ -237,6 +237,6 @@ double cookie points. Seriously. You rock.
 .. _git : http://git-scm.com/
 .. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
-.. _Travis: https://travis-ci.org/
-.. _pytest-django Travis: https://travis-ci.org/pytest-dev/pytest-django
+.. _GitHub Actions: https://github.com/features/actions
+.. _pytest-django Actions: https://github.com/pytest-dev/pytest-django/actions
 .. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html
