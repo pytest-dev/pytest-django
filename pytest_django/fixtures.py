@@ -287,7 +287,7 @@ def admin_user(db, django_user_model, django_username_field):
     username = "admin@example.com" if username_field == "email" else "admin"
 
     try:
-        user = UserModel._default_manager.get(**{username_field: username})
+        user = UserModel._default_manager.get_by_natural_key(username)
     except UserModel.DoesNotExist:
         extra_fields = {}
         if username_field not in ("username", "email"):
