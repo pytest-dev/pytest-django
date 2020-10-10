@@ -79,8 +79,8 @@ directly in ``pytest-django`` please get in touch, we are interested
 in eventually supporting this but unsure about simply following
 Django's approach.
 
-See `https://github.com/pytest-dev/pytest-django/pull/431` for an idea /
-discussion to approach this.
+See `pull request 431 <https://github.com/pytest-dev/pytest-django/pull/431>`_
+for an idea/discussion to approach this.
 
 ``--reuse-db`` - reuse the testing database between test runs
 --------------------------------------------------------------

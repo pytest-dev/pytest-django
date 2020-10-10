@@ -13,9 +13,9 @@ Talks, articles and blog posts
 
  * Talk from DjangoCon Europe 2014: `pytest: helps you write better Django apps, by Andreas Pelme <https://www.youtube.com/watch?v=aaArYVh6XSM>`_
 
- * Talk from EuroPython 2013: `Testing Django application with pytest, by Andreas Pelme <http://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
+ * Talk from EuroPython 2013: `Testing Django application with pytest, by Andreas Pelme <https://www.youtube.com/watch?v=aUf8Fkb7TaY>`_
 
- * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <http://pydanny.com/pytest-no-boilerplate-testing.html>`_
+ * Three part blog post tutorial (part 3 mentions Django integration): `pytest: no-boilerplate testing, by Daniel Greenfeld <https://daniel.feldroy.com/pytest-no-boilerplate-testing.html>`_
 
  * Blog post: `Django Projects to Django Apps: Converting the Unit Tests, by
    John Costa
@@ -28,7 +28,7 @@ Step 1: Installation
 --------------------
 
 pytest-django can be obtained directly from `PyPI
-<http://pypi.python.org/pypi/pytest-django>`_, and can be installed with
+<https://pypi.python.org/pypi/pytest-django>`_, and can be installed with
 ``pip``:
 
 .. code-block:: bash

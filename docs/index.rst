@@ -46,14 +46,14 @@ Running the test suite with pytest offers some features that are not present in 
 
 See the `pytest documentation`_ for more information on pytest.
 
-.. _pytest documentation: http://docs.pytest.org/
+.. _pytest documentation: https://docs.pytest.org/
 
 Bugs? Feature Suggestions?
 ==========================
 
 Report issues and feature requests at the `GitHub issue tracker`_.
 
-.. _GitHub issue tracker: http://github.com/pytest-dev/pytest-django/issues
+.. _GitHub issue tracker: https://github.com/pytest-dev/pytest-django/issues
 
 Table of Contents
 =================

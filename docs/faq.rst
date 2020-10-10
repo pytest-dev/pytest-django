@@ -54,7 +54,7 @@ When debugging test collection problems, the ``--collectonly`` flag and
 ``-rs`` (report skipped tests) can be helpful.
 
 .. _related pytest docs:
-    http://docs.pytest.org/en/stable/example/pythoncollection.html#changing-naming-conventions
+    https://docs.pytest.org/en/stable/example/pythoncollection.html#changing-naming-conventions
 
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
@@ -144,6 +144,6 @@ pytest-django.
 
 Direct help can be found in the #pylib IRC channel on irc.freenode.org.
 
-.. _pytest tag: http://stackoverflow.com/search?q=pytest
+.. _pytest tag: https://stackoverflow.com/search?q=pytest
 .. _open an issue on the GitHub project:
     https://github.com/pytest-dev/pytest-django/issues/
