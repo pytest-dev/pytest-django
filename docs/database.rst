@@ -12,8 +12,8 @@ what code uses the database and catches any mistakes.
 Enabling database access in tests
 ---------------------------------
 
-You can use `pytest marks <https://pytest.org/en/latest/mark.html>`_ to
-tell ``pytest-django`` your test needs database access::
+You can use :ref:`pytest marks <pytest:mark>` to tell ``pytest-django`` your
+test needs database access::
 
    import pytest
 
@@ -24,10 +24,8 @@ tell ``pytest-django`` your test needs database access::
 
 It is also possible to mark all tests in a class or module at once.
 This demonstrates all the ways of marking, even though they overlap.
-Just one of these marks would have been sufficient.  See the `pytest
-documentation
-<https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules>`_
-for detail::
+Just one of these marks would have been sufficient.  See the :ref:`pytest
+documentation <pytest:scoped-marking>` for detail::
 
    import pytest
 
@@ -45,20 +43,18 @@ By default ``pytest-django`` will set up the Django databases the
 first time a test needs them.  Once setup the database is cached for
 used for all subsequent tests and rolls back transactions to isolate
 tests from each other.  This is the same way the standard Django
-`TestCase
-<https://docs.djangoproject.com/en/1.9/topics/testing/tools/#testcase>`_
-uses the database.  However ``pytest-django`` also caters for
-transaction test cases and allows you to keep the test databases
-configured across different test runs.
+:class:`~django.test.TestCase` uses the database.  However
+``pytest-django`` also caters for transaction test cases and allows
+you to keep the test databases configured across different test runs.
 
 
 Testing transactions
 --------------------
 
-Django itself has the ``TransactionTestCase`` which allows you to test
-transactions and will flush the database between tests to isolate
-them.  The downside of this is that these tests are much slower to
-set up due to the required flushing of the database.
+Django itself has the :class:`~django.test.TransactionTestCase` which
+allows you to test transactions and will flush the database between
+tests to isolate them.  The downside of this is that these tests are
+much slower to set up due to the required flushing of the database.
 ``pytest-django`` also supports this style of tests, which you can
 select using an argument to the ``django_db`` mark::
 
@@ -184,8 +180,9 @@ django_db_modify_db_settings
 
 .. fixture:: django_db_modify_db_settings
 
-This fixture allows modifying `django.conf.settings.DATABASES` just before the
-databases are configured.
+This fixture allows modifying
+`django.conf.settings.DATABASES <https://docs.djangoproject.com/en/stable/ref/settings/#databases>`_
+just before the databases are configured.
 
 If you need to customize the location of your test database, this is the
 fixture you want to override.
