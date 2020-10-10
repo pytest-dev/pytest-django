@@ -24,35 +24,35 @@ Markers
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. :py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False]):
+.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False])
 
-This is used to mark a test function as requiring the database. It
-will ensure the database is set up correctly for the test. Each test
-will run in its own transaction which will be rolled back at the end
-of the test. This behavior is the same as Django's standard
-:class:`~django.test.TestCase` class.
+  This is used to mark a test function as requiring the database. It
+  will ensure the database is set up correctly for the test. Each test
+  will run in its own transaction which will be rolled back at the end
+  of the test. This behavior is the same as Django's standard
+  :class:`~django.test.TestCase` class.
 
-In order for a test to have access to the database it must either
-be marked using the ``django_db`` mark or request one of the ``db``,
-``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
-test will fail when trying to access the database.
+  In order for a test to have access to the database it must either
+  be marked using the ``django_db`` mark or request one of the ``db``,
+  ``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
+  test will fail when trying to access the database.
 
-:type transaction: bool
-:param transaction:
- The ``transaction`` argument will allow the test to use real transactions.
- With ``transaction=False`` (the default when not specified), transaction
- operations are noops during the test. This is the same behavior that
- :class:`django.test.TestCase` uses. When ``transaction=True``, the behavior
- will be the same as :class:`django.test.TransactionTestCase`.
+  :type transaction: bool
+  :param transaction:
+    The ``transaction`` argument will allow the test to use real transactions.
+    With ``transaction=False`` (the default when not specified), transaction
+    operations are noops during the test. This is the same behavior that
+    :class:`django.test.TestCase` uses. When ``transaction=True``, the behavior
+    will be the same as :class:`django.test.TransactionTestCase`.
 
 
-:type reset_sequences: bool
-:param reset_sequences:
- The ``reset_sequences`` argument will ask to reset auto increment sequence
- values (e.g. primary keys) before running the test.  Defaults to
- ``False``.  Must be used together with ``transaction=True`` to have an
- effect.  Please be aware that not all databases support this feature.
- For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
+  :type reset_sequences: bool
+  :param reset_sequences:
+    The ``reset_sequences`` argument will ask to reset auto increment sequence
+    values (e.g. primary keys) before running the test.  Defaults to
+    ``False``.  Must be used together with ``transaction=True`` to have an
+    effect.  Please be aware that not all databases support this feature.
+    For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
 
 .. note::
 
