@@ -123,8 +123,8 @@ More information on fixtures is available in the `pytest documentation
 <https://pytest.org/en/latest/fixture.html>`_.
 
 
-``rf`` - ``RequestFactory``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_rf`` - ``RequestFactory``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a `django.test.RequestFactory`_
 
@@ -137,13 +137,13 @@ Example
 
     from myapp.views import my_view
 
-    def test_details(rf):
-        request = rf.get('/customer/details')
+    def test_details(django_rf):
+        request = django_rf.get('/customer/details')
         response = my_view(request)
         assert response.status_code == 200
 
-``client`` - ``django.test.Client``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_client`` - ``django.test.Client``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a `django.test.Client`_
 
@@ -154,8 +154,8 @@ Example
 
 ::
 
-    def test_with_client(client):
-        response = client.get('/')
+    def test_with_client(django_client):
+        response = django_client.get('/')
         assert response.content == 'Foobar'
 
 To use `client` as an authenticated standard user, call its `force_login()` or
@@ -163,7 +163,7 @@ To use `client` as an authenticated standard user, call its `force_login()` or
 
 ::
 
-    def test_with_authenticated_client(client, django_user_model):
+    def test_with_authenticated_client(django_client, django_user_model):
         username = "user1"
         password = "bar"
         user = django_user_model.objects.create_user(username=username, password=password)
@@ -171,12 +171,12 @@ To use `client` as an authenticated standard user, call its `force_login()` or
         client.force_login(user)
         # Or this:
         client.login(username=username, password=password)
-        response = client.get('/private')
+        response = django_client.get('/private')
         assert response.content == 'Protected Area'
 
 
-``admin_client`` - ``django.test.Client`` logged in as admin
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_admin_client`` - ``django.test.Client`` logged in as admin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a `django.test.Client`_, logged in as an admin user.
 
@@ -185,23 +185,23 @@ Example
 
 ::
 
-    def test_an_admin_view(admin_client):
-        response = admin_client.get('/admin/')
+    def test_an_admin_view(django_admin_client):
+        response = adjango_dmin_client.get('/admin/')
         assert response.status_code == 200
 
-Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
-``django_db`` mark).
+Using the `django_admin_client` fixture will cause the test to automatically be
+marked for database use (no need to specify the ``django_db`` mark).
 
 .. fixture:: admin_user
 
-``admin_user`` - an admin user (superuser)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``django_admin_user`` - an admin user (superuser)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An instance of a superuser, with username "admin" and password "password" (in
 case there is no "admin" user yet).
 
-Using the `admin_user` fixture will cause the test to automatically be marked for database use (no need to specify the
-``django_db`` mark).
+Using the `django_admin_user` fixture will cause the test to automatically be
+marked for database use (no need to specify the ``django_db`` mark).
 
 
 ``django_user_model``
@@ -227,10 +227,10 @@ This fixture extracts the field name used for the username on the user model, i.
 ``settings.USERNAME_FIELD``. Use this fixture to make pluggable apps testable regardless what the username field
 is configured to be in the containing Django project.
 
-``db``
-~~~~~~~
+``django_db``
+~~~~~~~~~~~~~
 
-.. fixture:: db
+.. fixture:: django_db
 
 This fixture will ensure the Django database is set up.  Only
 required for fixtures that want to use the database themselves.  A
@@ -240,8 +240,8 @@ not return a database connection object. When you need a Django
 database connection or cursor, import it from Django using
 ``from django.db import connection``.
 
-``transactional_db``
-~~~~~~~~~~~~~~~~~~~~
+``django_transactional_db``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
@@ -259,13 +259,13 @@ sequences (if your database supports it). This is only required for
 fixtures which need database access themselves. A test function should
 normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``reset_sequences=True``.
 
-``live_server``
-~~~~~~~~~~~~~~~
+``django_live_server``
+~~~~~~~~~~~~~~~~~~~~~~
 
 This fixture runs a live Django server in a background thread.  The
-server's URL can be retrieved using the ``live_server.url`` attribute
-or by requesting it's string value: ``unicode(live_server)``.  You can
-also directly concatenate a string to form a URL: ``live_server +
+server's URL can be retrieved using the ``django_live_server.url`` attribute
+or by requesting it's string value: ``unicode(django_live_server)``.  You can
+also directly concatenate a string to form a URL: ``django_live_server +
 '/foo``.
 
 .. note:: Combining database access fixtures.
@@ -277,11 +277,11 @@ also directly concatenate a string to form a URL: ``live_server +
   * ``transactional_db``
   * ``django_db_reset_sequences``
 
-  In addition, using ``live_server`` will also trigger transactional
+  In addition, using ``django_live_server`` will also trigger transactional
   database access, if not specified.
 
-``settings``
-~~~~~~~~~~~~
+``django_settings``
+~~~~~~~~~~~~~~~~~~~
 
 This fixture will provide a handle on the Django settings module, and
 automatically revert any changes made to the settings (modifications, additions
@@ -292,9 +292,9 @@ Example
 
 ::
 
-    def test_with_specific_settings(settings):
-        settings.USE_TZ = True
-        assert settings.USE_TZ
+    def test_with_specific_settings(django_settings):
+        django_settings.USE_TZ = True
+        assert django_settings.USE_TZ
 
 
 .. fixture:: django_assert_num_queries
@@ -350,8 +350,8 @@ Example usage::
             Item.objects.create('bar')
 
 
-``mailoutbox``
-~~~~~~~~~~~~~~
+``django_mailoutbox``
+~~~~~~~~~~~~~~~~~~~~~
 
 A clean email outbox to which Django-generated emails are sent.
 
@@ -362,10 +362,10 @@ Example
 
     from django.core import mail
 
-    def test_mail(mailoutbox):
+    def test_mail(django_mailoutbox):
         mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
-        assert len(mailoutbox) == 1
-        m = mailoutbox[0]
+        assert len(django_mailoutbox) == 1
+        m = django_mailoutbox[0]
         assert m.subject == 'subject'
         assert m.body == 'body'
         assert m.from_email == 'from@example.com'
@@ -396,5 +396,6 @@ Clearing of mail.outbox
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 ``mail.outbox`` will be cleared for each pytest, to give each new test an empty
-mailbox to work with. However, it's more "pytestic" to use the ``mailoutbox`` fixture described above
-than to access ``mail.outbox``.
+mailbox to work with.
+However, it's more "pytestic" to use the ``django_mailoutbox`` fixture
+described above than to access ``mail.outbox``.
