@@ -355,7 +355,7 @@ class SettingsWrapper:
         del self._to_restore[:]
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def settings():
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()

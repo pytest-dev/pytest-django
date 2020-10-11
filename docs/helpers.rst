@@ -16,46 +16,43 @@ All of Django's :py:class:`~django:django.test.TestCase`
 Markers
 -------
 
-``pytest-django`` registers and uses markers.  See the pytest documentation_
-on what marks are and for notes on using_ them.
-
-.. _documentation: https://pytest.org/en/latest/mark.html
-.. _using: https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules
+``pytest-django`` registers and uses markers.  See the pytest
+:ref:`documentation <pytest:mark>` on what marks are and for notes on
+:ref:`using <pytest:scoped-marking>` them.
 
 
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. :py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False]):
+.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False])
 
-This is used to mark a test function as requiring the database. It
-will ensure the database is set up correctly for the test. Each test
-will run in its own transaction which will be rolled back at the end
-of the test. This behavior is the same as Django's standard
-`django.test.TestCase`_ class.
+  This is used to mark a test function as requiring the database. It
+  will ensure the database is set up correctly for the test. Each test
+  will run in its own transaction which will be rolled back at the end
+  of the test. This behavior is the same as Django's standard
+  :class:`~django.test.TestCase` class.
 
-In order for a test to have access to the database it must either
-be marked using the ``django_db`` mark or request one of the ``db``,
-``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
-test will fail when trying to access the database.
+  In order for a test to have access to the database it must either
+  be marked using the ``django_db`` mark or request one of the ``db``,
+  ``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
+  test will fail when trying to access the database.
 
-:type transaction: bool
-:param transaction:
- The ``transaction`` argument will allow the test to use real transactions.
- With ``transaction=False`` (the default when not specified), transaction
- operations are noops during the test. This is the same behavior that
- `django.test.TestCase`_
- uses. When ``transaction=True``, the behavior will be the same as
- `django.test.TransactionTestCase`_
+  :type transaction: bool
+  :param transaction:
+    The ``transaction`` argument will allow the test to use real transactions.
+    With ``transaction=False`` (the default when not specified), transaction
+    operations are noops during the test. This is the same behavior that
+    :class:`django.test.TestCase` uses. When ``transaction=True``, the behavior
+    will be the same as :class:`django.test.TransactionTestCase`.
 
 
-:type reset_sequences: bool
-:param reset_sequences:
- The ``reset_sequences`` argument will ask to reset auto increment sequence
- values (e.g. primary keys) before running the test.  Defaults to
- ``False``.  Must be used together with ``transaction=True`` to have an
- effect.  Please be aware that not all databases support this feature.
- For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
+  :type reset_sequences: bool
+  :param reset_sequences:
+    The ``reset_sequences`` argument will ask to reset auto increment sequence
+    values (e.g. primary keys) before running the test.  Defaults to
+    ``False``.  Must be used together with ``transaction=True`` to have an
+    effect.  Please be aware that not all databases support this feature.
+    For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
 
 .. note::
 
@@ -68,13 +65,10 @@ test will fail when trying to access the database.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
- Test classes that subclass `django.test.TestCase`_ will have access to
+ Test classes that subclass :class:`django.test.TestCase` will have access to
  the database always to make them compatible with existing Django tests.
- Test classes that subclass Python's ``unittest.TestCase`` need to have the
- marker applied in order to access the database.
-
-.. _django.test.TestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#testcase
-.. _django.test.TransactionTestCase: https://docs.djangoproject.com/en/dev/topics/testing/overview/#transactiontestcase
+ Test classes that subclass Python's :class:`unittest.TestCase` need to have
+ the marker applied in order to access the database.
 
 
 ``pytest.mark.urls`` - override the urlconf
@@ -119,16 +113,14 @@ Fixtures
 --------
 
 pytest-django provides some pytest fixtures to provide dependencies for tests.
-More information on fixtures is available in the `pytest documentation
-<https://pytest.org/en/latest/fixture.html>`_.
+More information on fixtures is available in the :ref:`pytest documentation
+<pytest:fixtures>`.
 
 
 ``rf`` - ``RequestFactory``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.RequestFactory`_
-
-.. _django.test.RequestFactory: https://docs.djangoproject.com/en/dev/topics/testing/advanced/#django.test.RequestFactory
+An instance of a :class:`django.test.RequestFactory`.
 
 Example
 """""""
@@ -145,9 +137,7 @@ Example
 ``client`` - ``django.test.Client``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.Client`_
-
-.. _django.test.Client: https://docs.djangoproject.com/en/dev/topics/testing/tools/#the-test-client
+An instance of a :class:`django.test.Client`.
 
 Example
 """""""
@@ -158,8 +148,9 @@ Example
         response = client.get('/')
         assert response.content == 'Foobar'
 
-To use `client` as an authenticated standard user, call its `force_login()` or
-`login()` method before accessing a URL:
+To use `client` as an authenticated standard user, call its
+:meth:`force_login() <django.test.Client.force_login>` or
+:meth:`login() <django.test.Client.login()>` method before accessing a URL:
 
 ::
 
@@ -178,7 +169,7 @@ To use `client` as an authenticated standard user, call its `force_login()` or
 ``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.Client`_, logged in as an admin user.
+An instance of a :class:`django.test.Client`, logged in as an admin user.
 
 Example
 """""""
@@ -208,7 +199,8 @@ Using the `admin_user` fixture will cause the test to automatically be marked fo
 ~~~~~~~~~~~~~~~~~~~~~
 
 A shortcut to the User model configured for use by the current Django project (aka the model referenced by
-`settings.AUTH_USER_MODEL`). Use this fixture to make pluggable apps testable regardless what User model is configured
+`settings.AUTH_USER_MODEL <https://docs.djangoproject.com/en/stable/ref/settings/#auth-user-model>`_).
+Use this fixture to make pluggable apps testable regardless what User model is configured
 in the containing Django project.
 
 Example
@@ -223,8 +215,9 @@ Example
 ``django_username_field``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This fixture extracts the field name used for the username on the user model, i.e. resolves to the current
-``settings.USERNAME_FIELD``. Use this fixture to make pluggable apps testable regardless what the username field
+This fixture extracts the field name used for the username on the user model, i.e.
+resolves to the user model's :attr:`~django.contrib.auth.models.CustomUser.USERNAME_FIELD`.
+Use this fixture to make pluggable apps testable regardless what the username field
 is configured to be in the containing Django project.
 
 ``db``
@@ -264,7 +257,7 @@ normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``
 
 This fixture runs a live Django server in a background thread.  The
 server's URL can be retrieved using the ``live_server.url`` attribute
-or by requesting it's string value: ``unicode(live_server)``.  You can
+or by requesting it's string value: ``str(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo``.
 
@@ -313,8 +306,8 @@ This fixture allows to check for an expected number of DB queries.
 If the assertion failed, the executed queries can be shown by using
 the verbose command line option.
 
-It wraps `django.test.utils.CaptureQueriesContext` and yields the wrapped
-CaptureQueriesContext instance.
+It wraps ``django.test.utils.CaptureQueriesContext`` and yields the wrapped
+``CaptureQueriesContext`` instance.
 
 Example usage::
 

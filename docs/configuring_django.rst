@@ -9,7 +9,7 @@ the tests.
 The environment variable ``DJANGO_SETTINGS_MODULE``
 ---------------------------------------------------
 
-Running the tests with DJANGO_SETTINGS_MODULE defined will find the
+Running the tests with ``DJANGO_SETTINGS_MODULE`` defined will find the
 Django settings the same way Django does by default.
 
 Example::

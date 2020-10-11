@@ -20,7 +20,7 @@ the command line::
     pytest test_something.py a_directory
 
 See the `pytest documentation on Usage and invocations
-<https://pytest.org/en/latest/usage.html>`_ for more help on available parameters.
+<https://pytest.org/en/stable/usage.html>`_ for more help on available parameters.
 
 Additional command line options
 -------------------------------
@@ -51,6 +51,6 @@ is set to "foo", the test database with xdist will be "test_foo_gw0",
 "test_foo_gw1" etc.
 
 See the full documentation on `pytest-xdist
-<https://pytest.org/en/latest/xdist.html>`_ for more information. Among other
-features, pytest-xdist can distribute/coordinate test execution on remote
-machines.
+<https://github.com/pytest-dev/pytest-xdist/blob/master/README.rst>`_ for more
+information. Among other features, pytest-xdist can distribute/coordinate test
+execution on remote machines.

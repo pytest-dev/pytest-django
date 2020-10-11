@@ -16,9 +16,10 @@ for more information.
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
-Create a `pytest fixture <https://pytest.org/en/latest/fixture.html>`_ that is
-automatically run before each test case. To run all tests with the english
-locale, put the following code in your project's `conftest.py`_ file:
+Create a :ref:`pytest fixture <pytest:fixtures>` that is
+automatically run before each test case. To run all tests with the English
+locale, put the following code in your project's
+:ref:`conftest.py <pytest:plugins>` file:
 
 .. code-block:: python
 
@@ -27,8 +28,6 @@ locale, put the following code in your project's `conftest.py`_ file:
     @pytest.fixture(autouse=True)
     def set_default_language():
         activate('en')
-
-.. _conftest.py: http://docs.pytest.org/en/latest/plugins.html
 
 .. _faq-tests-not-being-picked-up:
 
@@ -55,7 +54,7 @@ When debugging test collection problems, the ``--collectonly`` flag and
 ``-rs`` (report skipped tests) can be helpful.
 
 .. _related pytest docs:
-    http://docs.pytest.org/en/latest/example/pythoncollection.html#changing-naming-conventions
+    https://docs.pytest.org/en/stable/example/pythoncollection.html#changing-naming-conventions
 
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
@@ -145,6 +144,6 @@ pytest-django.
 
 Direct help can be found in the #pylib IRC channel on irc.freenode.org.
 
-.. _pytest tag: http://stackoverflow.com/search?q=pytest
+.. _pytest tag: https://stackoverflow.com/search?q=pytest
 .. _open an issue on the GitHub project:
     https://github.com/pytest-dev/pytest-django/issues/

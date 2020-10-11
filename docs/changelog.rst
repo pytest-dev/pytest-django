@@ -656,7 +656,7 @@ bugs.
 The tests for pytest-django itself has been greatly improved, paving the
 way for easier additions of new and exciting features in the future!
 
-* Semantic version numbers will now be used for releases, see http://semver.org/.
+* Semantic version numbers will now be used for releases, see https://semver.org/.
 
 * Do not allow database access in tests by default.  Introduce
   ``pytest.mark.django_db`` to enable database access.
@@ -720,7 +720,7 @@ v1.1
 ----
 
 * The initial release of this fork from `Ben Firshman original project
-  <http://github.com/bfirsh/pytest_django>`__
+  <https://github.com/bfirsh/pytest_django>`__
 * Added documentation
 * Uploaded to PyPI for easy installation
 * Added the ``transaction_test_case`` decorator for tests that needs real transactions

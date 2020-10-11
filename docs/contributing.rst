@@ -227,16 +227,16 @@ double cookie points. Seriously. You rock.
 
 .. _fork: https://github.com/pytest-dev/pytest-django
 .. _issue tracker: https://github.com/pytest-dev/pytest-django/issues
-.. _Sphinx: http://sphinx.pocoo.org/
-.. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _GitHub : http://www.github.com
-.. _GitHub help : http://help.github.com
-.. _freenode : http://freenode.net/
+.. _Sphinx: https://www.sphinx-doc.org/
+.. _PEP8: https://www.python.org/dev/peps/pep-0008/
+.. _GitHub : https://www.github.com
+.. _GitHub help : https://help.github.com
+.. _freenode : https://freenode.net/
 .. _@andreaspelme : https://twitter.com/andreaspelme
-.. _pull request : http://help.github.com/send-pull-requests/
-.. _git : http://git-scm.com/
-.. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _pull request : https://help.github.com/send-pull-requests/
+.. _git : https://git-scm.com/
+.. _restructuredText: https://docutils.sourceforge.io/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
 .. _GitHub Actions: https://github.com/features/actions
 .. _pytest-django Actions: https://github.com/pytest-dev/pytest-django/actions
-.. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html
+.. _`subprocess section of coverage documentation`: https://coverage.readthedocs.io/en/latest/subprocess.html
