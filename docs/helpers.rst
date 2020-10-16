@@ -56,12 +56,12 @@ Markers
 
 .. note::
 
-  If you want access to the Django database *inside a fixture*
-  this marker will not help even if the function requesting your
-  fixture has this marker applied.  To access the database in a
-  fixture, the fixture itself will have to request the ``db``,
-  ``transactional_db`` or ``django_db_reset_sequences`` fixture.  See below
-  for a description of them.
+  If you want access to the Django database inside a *fixture*, this marker may
+  or may not help even if the function requesting your fixture has this marker
+  applied, depending on pytest's fixture execution order. To access the
+  database in a fixture, it is recommended that the fixture explicitly request
+  one of the ``db``, ``transactional_db`` or ``django_db_reset_sequences``
+  fixtures. See below for a description of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
