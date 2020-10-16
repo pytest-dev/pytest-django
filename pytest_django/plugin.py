@@ -653,11 +653,7 @@ def _fail_for_invalid_template_variable():
         from django.conf import settings as dj_settings
 
         if dj_settings.TEMPLATES:
-            dj_settings.TEMPLATES[0]["OPTIONS"][
-                "string_if_invalid"
-            ] = InvalidVarException()
-        else:
-            dj_settings.TEMPLATE_STRING_IF_INVALID = InvalidVarException()
+            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = InvalidVarException()
 
 
 @pytest.fixture(autouse=True)
