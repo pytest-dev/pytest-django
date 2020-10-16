@@ -597,7 +597,6 @@ def _fail_for_invalid_template_variable():
             self.fail = True
 
         def __contains__(self, key):
-            """There is a test for '%s' in TEMPLATE_STRING_IF_INVALID."""
             return key == "%s"
 
         @staticmethod
@@ -635,7 +634,6 @@ def _fail_for_invalid_template_variable():
                 return template.name
 
         def __mod__(self, var):
-            """Handle TEMPLATE_STRING_IF_INVALID % var."""
             origin = self._get_origin()
             if origin:
                 msg = "Undefined template variable '{}' in '{}'".format(var, origin)
@@ -667,8 +665,6 @@ def _template_string_if_invalid_marker(request):
 
             if dj_settings.TEMPLATES:
                 dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"].fail = False
-            else:
-                dj_settings.TEMPLATE_STRING_IF_INVALID.fail = False
 
 
 @pytest.fixture(autouse=True, scope="function")
