@@ -53,8 +53,8 @@ jobs:
           python: 3.8
           allow_failure: false
 
-        - name: py38-dj31-postgres-xdist-coverage
-          python: 3.8
+        - name: py39-dj31-postgres-xdist-coverage
+          python: 3.9
           allow_failure: false
 
         - name: py37-dj30-mysql_innodb-coverage
@@ -77,8 +77,8 @@ jobs:
           python: 3.8
           allow_failure: false
 
-        - name: py38-djmaster-sqlite-coverage
-          python: 3.8
+        - name: py39-djmaster-sqlite-coverage
+          python: 3.9
           allow_failure: true
 
         # Explicitly test (older) pytest 5.4.
