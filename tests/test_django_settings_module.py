@@ -278,7 +278,7 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_debug_false(testdir, monkeypatch):
+def test_debug_false_by_default(testdir, monkeypatch):
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeconftest(
         """
@@ -301,6 +301,78 @@ def test_debug_false(testdir, monkeypatch):
         def test_debug_is_false():
             assert settings.DEBUG is False
     """
+    )
+
+    r = testdir.runpytest_subprocess()
+    assert r.ret == 0
+
+
+@pytest.mark.parametrize('django_debug_mode', (False, True))
+def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode):
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       django_debug_mode = {}
+    """.format(django_debug_mode)
+    )
+    testdir.makeconftest(
+        """
+        from django.conf import settings
+
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DEBUG=%s,
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """ % (not django_debug_mode)
+    )
+
+    testdir.makepyfile(
+        """
+        from django.conf import settings
+        def test_debug_is_false():
+            assert settings.DEBUG is {}
+    """.format(django_debug_mode)
+    )
+
+    r = testdir.runpytest_subprocess()
+    assert r.ret == 0
+
+
+@pytest.mark.parametrize('settings_debug', (False, True))
+def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug):
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       django_debug_mode = keep
+    """
+    )
+    testdir.makeconftest(
+        """
+        from django.conf import settings
+
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DEBUG=%s,
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """ % settings_debug
+    )
+
+    testdir.makepyfile(
+        """
+        from django.conf import settings
+        def test_debug_is_false():
+            assert settings.DEBUG is {}
+    """.format(settings_debug)
     )
 
     r = testdir.runpytest_subprocess()

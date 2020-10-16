@@ -29,6 +29,25 @@ Additional command line options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fail tests that render templates which make use of invalid template variables.
 
+Additional pytest.ini settings
+------------------------------
+
+``django_debug_mode`` - change how DEBUG is set
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default tests run with the
+`DEBUG <https://docs.djangoproject.com/en/stable/ref/settings/#debug>`_
+setting set to ``False``. This is to ensure that the observed output of your
+code matches what will be seen in a production setting.
+
+If you want ``DEBUG`` to be set::
+
+    [pytest]
+    django_debug_mode = true
+
+You can also use ``django_debug_mode = keep`` to disable the overriding and use
+whatever is already set in the Django settings.
+
 Running tests in parallel with pytest-xdist
 -------------------------------------------
 pytest-django supports running tests on multiple processes to speed up test
