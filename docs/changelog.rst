@@ -1,6 +1,54 @@
 Changelog
 =========
 
+v4.0.0 (2020-10-16)
+-------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+This release contains no breaking changes, except dropping compatibility
+with some older/unsupported versions.
+
+* Drop support for Python versions before 3.5 (#868).
+
+  Previously 2.7 and 3.4 were supported. Running ``pip install pytest-django``
+  on Python 2.7 or 3.4 would continue to install the compatible 3.x series.
+
+* Drop support for Django versions before 2.2 (#868).
+
+  Previously Django>=1.8 was supported.
+
+* Drop support for pytest versions before 5.4 (#868).
+
+  Previously pytest>=3.6 was supported.
+
+Improvements
+^^^^^^^^^^^^
+
+* Officialy support Python 3.9.
+
+* Add ``pytest_django.__version__`` (#880).
+
+* Minor documentation improvements (#882).
+
+Bugfixes
+^^^^^^^^
+
+* Make the ``admin_user`` and ``admin_client`` fixtures compatible with custom
+  user models which don't have a ``username`` field (#457).
+
+* Change the ``admin_user`` fixture to use ``get_by_natural_key()`` to get the
+  user instead of directly using ``USERNAME_FIELD``, in case it is overridden,
+  and to match Django (#879).
+
+Misc
+^^^^
+
+* Fix pytest-django's own tests failing due to some deprecation warnings
+  (#875).
+
+
 v3.10.0 (2020-08-25)
 --------------------
 
