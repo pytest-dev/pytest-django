@@ -293,13 +293,12 @@ def admin_user(db, django_user_model, django_username_field):
         # so we can assume so as well.
         user = UserModel._default_manager.get_by_natural_key(username)
     except UserModel.DoesNotExist:
-        user = UserModel._default_manager.create_superuser(
-            **{
-                "email": "admin@example.com",
-                "password": "password",
-                username_field: username,
-            }
-        )
+        user_data = {}
+        if "email" in UserModel.REQUIRED_FIELDS:
+            user_data["email"] = "admin@example.com"
+        user_data["password"] = "password"
+        user_data[username_field] = username
+        user = UserModel._default_manager.create_superuser(**user_data)
     return user
 
 
