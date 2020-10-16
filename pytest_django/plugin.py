@@ -445,11 +445,9 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        dj_settings.DEBUG = False
-        setup_test_environment()
+        setup_test_environment(debug=False)
         request.addfinalizer(teardown_test_environment)
 
 
