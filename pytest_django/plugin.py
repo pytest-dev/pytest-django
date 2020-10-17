@@ -10,7 +10,6 @@ from functools import reduce
 import os
 import pathlib
 import sys
-import types
 
 import pytest
 
@@ -331,72 +330,6 @@ def pytest_configure():
     # Allow Django settings to be configured in a user pytest_configure call,
     # but make sure we call django.setup()
     _setup_django()
-
-
-def _classmethod_is_defined_at_leaf(cls, method_name):
-    super_method = None
-
-    for base_cls in cls.__mro__[1:]:  # pragma: no branch
-        super_method = base_cls.__dict__.get(method_name)
-        if super_method is not None:
-            break
-
-    assert super_method is not None, (
-        "%s could not be found in base classes" % method_name
-    )
-
-    method = getattr(cls, method_name)
-
-    try:
-        f = method.__func__
-    except AttributeError:
-        pytest.fail("{}.{} should be a classmethod".format(cls, method_name))
-    return f is not super_method.__func__
-
-
-_disabled_classmethods = {}
-
-
-def _disable_class_methods(cls):
-    if cls in _disabled_classmethods:
-        return
-
-    _disabled_classmethods[cls] = (
-        # Get the classmethod object (not the resulting bound method),
-        # otherwise inheritance will be broken when restoring.
-        cls.__dict__.get("setUpClass"),
-        _classmethod_is_defined_at_leaf(cls, "setUpClass"),
-        cls.__dict__.get("tearDownClass"),
-        _classmethod_is_defined_at_leaf(cls, "tearDownClass"),
-    )
-
-    cls.setUpClass = types.MethodType(lambda cls: None, cls)
-    cls.tearDownClass = types.MethodType(lambda cls: None, cls)
-
-
-def _restore_class_methods(cls):
-    (
-        setUpClass,
-        restore_setUpClass,
-        tearDownClass,
-        restore_tearDownClass,
-    ) = _disabled_classmethods.pop(cls)
-
-    try:
-        del cls.setUpClass
-    except AttributeError:
-        raise
-
-    try:
-        del cls.tearDownClass
-    except AttributeError:
-        pass
-
-    if restore_setUpClass:
-        cls.setUpClass = setUpClass
-
-    if restore_tearDownClass:
-        cls.tearDownClass = tearDownClass
 
 
 @pytest.hookimpl(tryfirst=True)
