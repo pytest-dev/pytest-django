@@ -168,6 +168,8 @@ To use `client` as an authenticated standard user, call its
         response = client.get('/private')
         assert response.content == 'Protected Area'
 
+.. fixture:: async_client
+
 ``async_client`` - ``django.test.AsyncClient``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -185,6 +187,7 @@ Example
         response = await async_client.get('/')
         assert response.content == 'Foobar'
 
+.. fixture:: admin_client
 
 ``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
