@@ -135,6 +135,26 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
+.. fixture:: async_rf
+
+``async_rf`` - ``AsyncRequestFactory``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance of a :class:`django.test.AsyncRequestFactory`.
+
+Example
+"""""""
+
+::
+
+    from myapp.views import my_view
+
+    @pytest.mark.asyncio
+    async def test_details(async_rf):
+        request = await async_rf.get('/customer/details')
+        response = my_view(request)
+        assert response.status_code == 200
+
 .. fixture:: client
 
 ``client`` - ``django.test.Client``

@@ -23,6 +23,7 @@ __all__ = [
     "async_client",
     "admin_client",
     "rf",
+    "async_rf",
     "settings",
     "live_server",
     "_live_server_helper",
@@ -331,6 +332,16 @@ def rf():
     from django.test.client import RequestFactory
 
     return RequestFactory()
+
+
+@pytest.fixture()
+def async_rf():
+    """AsyncRequestFactory instance"""
+    skip_if_no_django()
+
+    from django.test.client import AsyncRequestFactory
+
+    return AsyncRequestFactory()
 
 
 class SettingsWrapper:

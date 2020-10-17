@@ -13,7 +13,7 @@ import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
-from django.test.client import Client, RequestFactory
+from django.test.client import Client, AsyncRequestFactory, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
@@ -81,6 +81,10 @@ def test_admin_user_no_db_marker(admin_user, django_user_model):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+
+
+def test_async_rf(async_rf):
+    assert isinstance(async_rf, AsyncRequestFactory)
 
 
 @pytest.mark.django_db
