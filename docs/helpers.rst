@@ -32,10 +32,10 @@ Markers
   of the test. This behavior is the same as Django's standard
   :class:`~django.test.TestCase` class.
 
-  In order for a test to have access to the database it must either
-  be marked using the ``django_db`` mark or request one of the ``db``,
-  ``transactional_db`` or ``django_db_reset_sequences`` fixtures.  Otherwise the
-  test will fail when trying to access the database.
+  In order for a test to have access to the database it must either be marked
+  using the :func:`~pytest.mark.django_db` mark or request one of the :fixture:`db`,
+  :fixture:`transactional_db` or :fixture:`django_db_reset_sequences` fixtures.
+  Otherwise the test will fail when trying to access the database.
 
   :type transaction: bool
   :param transaction:
@@ -60,8 +60,9 @@ Markers
   or may not help even if the function requesting your fixture has this marker
   applied, depending on pytest's fixture execution order. To access the
   database in a fixture, it is recommended that the fixture explicitly request
-  one of the ``db``, ``transactional_db`` or ``django_db_reset_sequences``
-  fixtures. See below for a description of them.
+  one of the :fixture:`db`, :fixture:`transactional_db` or
+  :fixture:`django_db_reset_sequences` fixtures. See below for a description of
+  them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
@@ -115,6 +116,7 @@ pytest-django provides some pytest fixtures to provide dependencies for tests.
 More information on fixtures is available in the :ref:`pytest documentation
 <pytest:fixtures>`.
 
+.. fixture:: rf
 
 ``rf`` - ``RequestFactory``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,6 +134,8 @@ Example
         request = rf.get('/customer/details')
         response = my_view(request)
         assert response.status_code == 200
+
+.. fixture:: client
 
 ``client`` - ``django.test.Client``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -164,6 +168,7 @@ To use `client` as an authenticated standard user, call its
         response = client.get('/private')
         assert response.content == 'Protected Area'
 
+.. fixture:: admin_client
 
 ``admin_client`` - ``django.test.Client`` logged in as admin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,8 +184,8 @@ Example
         response = admin_client.get('/admin/')
         assert response.status_code == 200
 
-Using the `admin_client` fixture will cause the test to automatically be marked for database use (no need to specify the
-``django_db`` mark).
+Using the `admin_client` fixture will cause the test to automatically be marked
+for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
 
 .. fixture:: admin_user
 
@@ -190,9 +195,10 @@ Using the `admin_client` fixture will cause the test to automatically be marked 
 An instance of a superuser, with username "admin" and password "password" (in
 case there is no "admin" user yet).
 
-Using the `admin_user` fixture will cause the test to automatically be marked for database use (no need to specify the
-``django_db`` mark).
+Using the `admin_user` fixture will cause the test to automatically be marked
+for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
 
+.. fixture:: django_user_model
 
 ``django_user_model``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -210,6 +216,7 @@ Example
     def test_new_user(django_user_model):
         django_user_model.objects.create(username="someone", password="something")
 
+.. fixture:: django_username_field
 
 ``django_username_field``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -219,18 +226,20 @@ resolves to the user model's :attr:`~django.contrib.auth.models.CustomUser.USERN
 Use this fixture to make pluggable apps testable regardless what the username field
 is configured to be in the containing Django project.
 
+.. fixture:: db
+
 ``db``
 ~~~~~~~
 
-.. fixture:: db
-
 This fixture will ensure the Django database is set up.  Only
 required for fixtures that want to use the database themselves.  A
-test function should normally use the ``pytest.mark.django_db``
+test function should normally use the :func:`pytest.mark.django_db`
 mark to signal it needs the database. This fixture does
 not return a database connection object. When you need a Django 
 database connection or cursor, import it from Django using
 ``from django.db import connection``.
+
+.. fixture:: transactional_db
 
 ``transactional_db``
 ~~~~~~~~~~~~~~~~~~~~
@@ -238,18 +247,22 @@ database connection or cursor, import it from Django using
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function should normally use the
-``pytest.mark.django_db``  mark with ``transaction=True``.
+func:`pytest.mark.django_db`  mark with ``transaction=True`` to signal
+it needs the database.
+
+.. fixture:: django_db_reset_sequences
 
 ``django_db_reset_sequences``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. fixture:: django_db_reset_sequences
-
 This fixture provides the same transactional database access as
-``transactional_db``, with additional support for reset of auto increment
-sequences (if your database supports it). This is only required for
-fixtures which need database access themselves. A test function should
-normally use the ``pytest.mark.django_db`` mark with ``transaction=True`` and ``reset_sequences=True``.
+:fixture:`transactional_db`, with additional support for reset of auto
+increment sequences (if your database supports it). This is only required for
+fixtures which need database access themselves. A test function should normally
+use the :func:`pytest.mark.django_db` mark with ``transaction=True`` and
+``reset_sequences=True``.
+
+.. fixture:: live_server
 
 ``live_server``
 ~~~~~~~~~~~~~~~
@@ -271,6 +284,8 @@ also directly concatenate a string to form a URL: ``live_server +
 
   In addition, using ``live_server`` will also trigger transactional
   database access, if not specified.
+
+.. fixture:: settings
 
 ``settings``
 ~~~~~~~~~~~~
@@ -341,6 +356,7 @@ Example usage::
             Item.objects.create('foo')
             Item.objects.create('bar')
 
+.. fixture:: mailoutbox
 
 ``mailoutbox``
 ~~~~~~~~~~~~~~
