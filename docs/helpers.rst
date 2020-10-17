@@ -138,9 +138,11 @@ Example
 .. fixture:: async_rf
 
 ``async_rf`` - ``AsyncRequestFactory``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a :class:`django.test.AsyncRequestFactory`.
+An instance of a `django.test.AsyncRequestFactory`
+
+.. _django.test.AsyncRequestFactory: https://docs.djangoproject.com/en/3.1/topics/testing/advanced/#asyncrequestfactory
 
 Example
 """""""
@@ -193,7 +195,7 @@ To use `client` as an authenticated standard user, call its
 ``async_client`` - ``django.test.AsyncClient``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.AsyncClient`_
+An instance of a `django.test.AsyncClient`
 
 .. _django.test.AsyncClient: https://docs.djangoproject.com/en/stable/topics/testing/tools/#the-test-client
 

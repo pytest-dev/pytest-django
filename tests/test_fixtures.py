@@ -13,7 +13,7 @@ import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
-from django.test.client import Client, AsyncRequestFactory, RequestFactory
+from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
@@ -37,9 +37,7 @@ def test_client(client):
     assert isinstance(client, Client)
 
 
-@pytest.mark.skipif(
-    get_django_version() < (3, 1), reason="Django >= 3.1 required"
-)
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
 def test_async_client(async_client):
     from django.test.client import AsyncClient
 
@@ -83,7 +81,10 @@ def test_rf(rf):
     assert isinstance(rf, RequestFactory)
 
 
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
 def test_async_rf(async_rf):
+    from django.test.client import AsyncRequestFactory
+
     assert isinstance(async_rf, AsyncRequestFactory)
 
 
