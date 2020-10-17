@@ -18,6 +18,7 @@ from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
 from pytest_django_test.app.models import Item
+from pytest_django.lazy_django import get_django_version
 
 
 @contextmanager
