@@ -118,6 +118,12 @@ def pytest_addoption(parser):
         type="bool",
         default=True,
     )
+    parser.addini(
+        "django_debug_mode",
+        "How to set the Django DEBUG setting (default `False`). "
+        "Use `keep` to not override.",
+        default="False",
+    )
     group.addoption(
         "--fail-on-template-vars",
         action="store_true",
@@ -445,11 +451,15 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.conf import settings as dj_settings
         from django.test.utils import setup_test_environment, teardown_test_environment
 
-        dj_settings.DEBUG = False
-        setup_test_environment()
+        debug_ini = request.config.getini("django_debug_mode")
+        if debug_ini == "keep":
+            debug = None
+        else:
+            debug = _get_boolean_value(debug_ini, False)
+
+        setup_test_environment(debug=debug)
         request.addfinalizer(teardown_test_environment)
 
 
