@@ -18,6 +18,7 @@ from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
 from pytest_django_test.app.models import Item
+from pytest_django.lazy_django import get_django_version
 
 
 @contextmanager
@@ -34,6 +35,13 @@ def nonverbose_config(config):
 
 def test_client(client):
     assert isinstance(client, Client)
+
+
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
+def test_async_client(async_client):
+    from django.test.client import AsyncClient
+
+    assert isinstance(async_client, AsyncClient)
 
 
 @pytest.mark.django_db
@@ -71,6 +79,13 @@ def test_admin_user_no_db_marker(admin_user, django_user_model):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+
+
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
+def test_async_rf(async_rf):
+    from django.test.client import AsyncRequestFactory
+
+    assert isinstance(async_rf, AsyncRequestFactory)
 
 
 @pytest.mark.django_db

@@ -20,8 +20,10 @@ __all__ = [
     "django_user_model",
     "django_username_field",
     "client",
+    "async_client",
     "admin_client",
     "rf",
+    "async_rf",
     "settings",
     "live_server",
     "_live_server_helper",
@@ -262,6 +264,16 @@ def client():
 
 
 @pytest.fixture()
+def async_client():
+    """A Django test async client instance."""
+    skip_if_no_django()
+
+    from django.test.client import AsyncClient
+
+    return AsyncClient()
+
+
+@pytest.fixture()
 def django_user_model(db):
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
@@ -320,6 +332,16 @@ def rf():
     from django.test.client import RequestFactory
 
     return RequestFactory()
+
+
+@pytest.fixture()
+def async_rf():
+    """AsyncRequestFactory instance"""
+    skip_if_no_django()
+
+    from django.test.client import AsyncRequestFactory
+
+    return AsyncRequestFactory()
 
 
 class SettingsWrapper:

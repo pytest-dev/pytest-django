@@ -135,6 +135,28 @@ Example
         response = my_view(request)
         assert response.status_code == 200
 
+.. fixture:: async_rf
+
+``async_rf`` - ``AsyncRequestFactory``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance of a `django.test.AsyncRequestFactory`
+
+.. _django.test.AsyncRequestFactory: https://docs.djangoproject.com/en/3.1/topics/testing/advanced/#asyncrequestfactory
+
+Example
+"""""""
+
+::
+
+    from myapp.views import my_view
+
+    @pytest.mark.asyncio
+    async def test_details(async_rf):
+        request = await async_rf.get('/customer/details')
+        response = my_view(request)
+        assert response.status_code == 200
+
 .. fixture:: client
 
 ``client`` - ``django.test.Client``
@@ -167,6 +189,25 @@ To use `client` as an authenticated standard user, call its
         client.login(username=username, password=password)
         response = client.get('/private')
         assert response.content == 'Protected Area'
+
+.. fixture:: async_client
+
+``async_client`` - ``django.test.AsyncClient``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An instance of a `django.test.AsyncClient`
+
+.. _django.test.AsyncClient: https://docs.djangoproject.com/en/stable/topics/testing/tools/#the-test-client
+
+Example
+"""""""
+
+::
+
+    @pytest.mark.asyncio
+    async def test_with_async_client(async_client):
+        response = await async_client.get('/')
+        assert response.content == 'Foobar'
 
 .. fixture:: admin_client
 
@@ -235,7 +276,7 @@ This fixture will ensure the Django database is set up.  Only
 required for fixtures that want to use the database themselves.  A
 test function should normally use the :func:`pytest.mark.django_db`
 mark to signal it needs the database. This fixture does
-not return a database connection object. When you need a Django 
+not return a database connection object. When you need a Django
 database connection or cursor, import it from Django using
 ``from django.db import connection``.
 
