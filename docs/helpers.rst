@@ -140,12 +140,14 @@ Example
 ``async_rf`` - ``AsyncRequestFactory``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.AsyncRequestFactory`
+An instance of a `django.test.AsyncRequestFactory`_.
 
-.. _django.test.AsyncRequestFactory: https://docs.djangoproject.com/en/3.1/topics/testing/advanced/#asyncrequestfactory
+.. _django.test.AsyncRequestFactory: https://docs.djangoproject.com/en/stable/topics/testing/advanced/#asyncrequestfactory
 
 Example
 """""""
+
+This example uses `pytest-asyncio <https://github.com/pytest-dev/pytest-asyncio>`_.
 
 ::
 
@@ -195,12 +197,14 @@ To use `client` as an authenticated standard user, call its
 ``async_client`` - ``django.test.AsyncClient``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An instance of a `django.test.AsyncClient`
+An instance of a `django.test.AsyncClient`_.
 
-.. _django.test.AsyncClient: https://docs.djangoproject.com/en/stable/topics/testing/tools/#the-test-client
+.. _django.test.AsyncClient: https://docs.djangoproject.com/en/stable/topics/testing/tools/#testing-asynchronous-code
 
 Example
 """""""
+
+This example uses `pytest-asyncio <https://github.com/pytest-dev/pytest-asyncio>`_.
 
 ::
 
