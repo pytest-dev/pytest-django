@@ -1,6 +1,24 @@
 Changelog
 =========
 
+v4.1.0 (2020-10-22)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add the :fixture:`async_client` and :fixture:`async_rf` fixtures (#864).
+
+* Add :ref:`django_debug_mode <usage>` to configure how ``DEBUG`` is set in tests (#228).
+
+* Documentation improvements.
+
+Bugfixes
+^^^^^^^^
+
+* Make :fixture:`admin_user` work for custom user models without an ``email`` field.
+
+
 v4.0.0 (2020-10-16)
 -------------------
 
