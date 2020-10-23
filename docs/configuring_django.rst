@@ -89,7 +89,7 @@ This can be done from your project's ``conftest.py`` file::
 Overriding individual settings
 ------------------------------
 
-Settings can be overriden easily by using the ``settings`` fixture::
+Settings can be overridden by using the :fixture:`settings` fixture::
 
     @pytest.fixture(autouse=True)
     def use_dummy_cache_backend(settings):
@@ -98,6 +98,9 @@ Settings can be overriden easily by using the ``settings`` fixture::
                 "BACKEND": "django.core.cache.backends.dummy.DummyCache",
             }
         }
+
+Here `autouse=True` is used, meaning the fixture is automatically applied to all tests,
+but it can also be requested individually per-test.
 
 Changing your app before Django gets set up
 -------------------------------------------
