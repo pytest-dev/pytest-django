@@ -76,7 +76,8 @@ INI File Contents::
 Using ``django.conf.settings.configure()``
 ------------------------------------------
 
-Django settings can be set up by calling ``django.conf.settings.configure()``.
+In case there is no ``DJANGO_SETTINGS_MODULE``, the ``settings`` object can be
+created by calling ``django.conf.settings.configure()``.
 
 This can be done from your project's ``conftest.py`` file::
 
@@ -84,6 +85,22 @@ This can be done from your project's ``conftest.py`` file::
 
     def pytest_configure():
         settings.configure(DATABASES=...)
+
+Overriding individual settings
+------------------------------
+
+Settings can be overridden by using the :fixture:`settings` fixture::
+
+    @pytest.fixture(autouse=True)
+    def use_dummy_cache_backend(settings):
+        settings.CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+            }
+        }
+
+Here `autouse=True` is used, meaning the fixture is automatically applied to all tests,
+but it can also be requested individually per-test.
 
 Changing your app before Django gets set up
 -------------------------------------------
