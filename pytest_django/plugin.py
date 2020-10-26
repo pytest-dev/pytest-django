@@ -52,6 +52,7 @@ _report_header = []
 # ############### pytest hooks ################
 
 
+@pytest.hookimpl()
 def pytest_addoption(parser):
     group = parser.getgroup("django")
     group.addoption(
@@ -241,6 +242,7 @@ def _get_boolean_value(x, name, default=None):
         )
 
 
+@pytest.hookimpl()
 def pytest_load_initial_conftests(early_config, parser, args):
     # Register the marks
     early_config.addinivalue_line(
@@ -322,6 +324,7 @@ def pytest_load_initial_conftests(early_config, parser, args):
     _setup_django()
 
 
+@pytest.hookimpl()
 def pytest_report_header():
     if _report_header:
         return ["django: " + ", ".join(_report_header)]
