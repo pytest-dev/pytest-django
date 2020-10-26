@@ -369,7 +369,7 @@ def pytest_collection_modifyitems(items):
 
         return 2
 
-    items[:] = sorted(items, key=get_order_number)
+    items.sort(key=get_order_number)
 
 
 @pytest.fixture(autouse=True, scope="session")
