@@ -157,7 +157,12 @@ def _disable_native_migrations():
     from django.conf import settings
     from django.core.management.commands import migrate
 
-    from .migrations import DisableMigrations
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
 
     settings.MIGRATION_MODULES = DisableMigrations()
 
