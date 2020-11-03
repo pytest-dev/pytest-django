@@ -139,6 +139,12 @@ def pytest_addoption(parser):
         type="bool",
         default=False,
     )
+    group.addoption(
+        "--only-query-count",
+        action="store_true",
+        default=False,
+        help="Run only tests using the assert_num_queries fixtures.",
+    )
 
 
 PROJECT_FOUND = (
@@ -338,10 +344,24 @@ def pytest_configure():
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_collection_modifyitems(items):
+def pytest_collection_modifyitems(items, config):
     # If Django is not configured we don't need to bother
     if not django_settings_is_configured():
         return
+
+    if config.getoption("--only-query-count"):
+        query_count_fixtures = ('django_assert_num_queries', 'django_assert_max_num_queries')
+        selected_items = []
+        deselected_items = []
+
+        for item in items:
+            if any(fixture in getattr(item, 'fixturenames', ())
+                   for fixture in query_count_fixtures):
+                selected_items.append(item)
+            else:
+                deselected_items.append(item)
+        config.hook.pytest_deselected(items=deselected_items)
+        items[:] = selected_items
 
     from django.test import TestCase, TransactionTestCase
 

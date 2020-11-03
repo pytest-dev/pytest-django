@@ -58,3 +58,24 @@ def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch):
         ]
     )
     assert result.ret == 0
+
+
+def test_django_only_query_count_option(django_testdir, monkeypatch):
+    """
+    Only tests using the query count fixtures are run.
+    """
+    django_testdir.makepyfile(
+        """
+        def test_assert(django_assert_num_queries):
+            pass
+
+        def test_assert_max(django_assert_max_num_queries):
+            pass
+
+        def test_simple():
+            pass
+    """
+    )
+    result = django_testdir.runpytest_subprocess("--only-query-count")
+    result.stdout.fnmatch_lines(["* 2 passed, 1 deselected*"])
+    assert result.ret == 0
