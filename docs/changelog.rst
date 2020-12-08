@@ -44,7 +44,7 @@ with some older/unsupported versions.
 Improvements
 ^^^^^^^^^^^^
 
-* Officialy support Python 3.9.
+* Officially support Python 3.9.
 
 * Add ``pytest_django.__version__`` (#880).
 
@@ -73,9 +73,9 @@ v3.10.0 (2020-08-25)
 Improvements
 ^^^^^^^^^^^^
 
-* Officialy support Django 3.1
+* Officially support Django 3.1
 
-* Preliminary supoprt for upcoming Django 3.2
+* Preliminary support for upcoming Django 3.2
 
 * Support for pytest-xdist 2.0
 
