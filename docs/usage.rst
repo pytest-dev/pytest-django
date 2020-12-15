@@ -29,6 +29,11 @@ Additional command line options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fail tests that render templates which make use of invalid template variables.
 
+You can switch it on in `pytest.ini`::
+
+    [pytest]
+    FAIL_INVALID_TEMPLATE_VARS = True
+    
 Additional pytest.ini settings
 ------------------------------
 
