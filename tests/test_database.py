@@ -138,7 +138,10 @@ class TestDatabaseFixtures:
         # Check finalizer has db access (teardown will fail if not)
         pass
 
-    def test_multi_database_true_if_settings_permit_db(self, settings, db):
+    def test_db_sets_transactions_in_all_configured_connections(self, settings, db):
+        assert all(conn.in_atomic_block for conn in connections.all())
+
+    def test_multi_database_true_if_settings_permit_db(self, request, settings, transactional_db):
         transactional_databases = set()
         for label, config in settings.DATABASES.items():
             if config.get("TEST", {}).get("PYTEST_DJANGO_ALLOW_TRANSACTIONS"):
@@ -150,7 +153,8 @@ class TestDatabaseFixtures:
                 "in databases outside of default"
             )
 
-        assert all(conn.in_atomic_block for conn in connections.all())
+        assert {"default", "secondary"} == request.config.django_transactional_databases
+
 
 class TestDatabaseFixturesAllOrder:
     @pytest.fixture

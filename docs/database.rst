@@ -66,21 +66,31 @@ select using an argument to the ``django_db`` mark::
 Tests requiring multiple databases
 ----------------------------------
 
-Currently ``pytest-django`` does not specifically support Django's
-multi-database support.
+You can configure ``pytest-django`` to create transactions (or cleanup) databases
+other than ``default`` by adding a special key to your database test configuration
+in your django settings.
 
-You can however use normal :class:`~django.test.TestCase` instances to use its
+for example::
+    DATABASES = {
+        "default": {
+            # ... normal default settings
+        },
+        "secondary": {
+            # ... engine settings and so forth
+            "TEST": {
+                "PYTEST_DJANGO_ALLOW_TRANSACTIONS": True
+            }
+        }
+    }
+
+With that database configuration in your test environment, tests that depend on the
+``db`` or ``transactional_db`` fixtures can make changes in the "secondary" database
+and have it cleaned up after each test.
+
+You could also use normal :class:`~django.test.TestCase` instances to use its
 :ref:`django:topics-testing-advanced-multidb` support.
 In particular, if your database is configured for replication, be sure to read
 about :ref:`django:topics-testing-primaryreplica`.
-
-If you have any ideas about the best API to support multiple databases
-directly in ``pytest-django`` please get in touch, we are interested
-in eventually supporting this but unsure about simply following
-Django's approach.
-
-See `pull request 431 <https://github.com/pytest-dev/pytest-django/pull/431>`_
-for an idea/discussion to approach this.
 
 ``--reuse-db`` - reuse the testing database between test runs
 --------------------------------------------------------------
