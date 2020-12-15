@@ -1,5 +1,5 @@
 import pytest
-from django.db import connection
+from django.db import connection, connections
 from django.test.testcases import connections_support_transactions
 
 from pytest_django_test.app.models import Item
@@ -138,6 +138,19 @@ class TestDatabaseFixtures:
         # Check finalizer has db access (teardown will fail if not)
         pass
 
+    def test_multi_database_true_if_settings_permit_db(self, settings, db):
+        transactional_databases = set()
+        for label, config in settings.DATABASES.items():
+            if config.get("TEST", {}).get("PYTEST_DJANGO_ALLOW_TRANSACTIONS"):
+                transactional_databases.add(label)
+
+        if not transactional_databases:
+            pytest.skip(
+                "settings.DATABASES is not configured to create transactions"
+                "in databases outside of default"
+            )
+
+        assert all(conn.in_atomic_block for conn in connections.all())
 
 class TestDatabaseFixturesAllOrder:
     @pytest.fixture

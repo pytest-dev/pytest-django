@@ -13,5 +13,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "/pytest_django_should_never_get_accessed",
         "TEST": {"NAME": _filename},
+    },
+    "secondary": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "/should_not_be_accessed_two",
+        "TEST": {
+            "PYTEST_DJANGO_ALLOW_TRANSACTIONS": True
+        }
     }
 }
