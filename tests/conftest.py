@@ -136,7 +136,7 @@ def django_testdir(request, testdir, monkeypatch):
     testdir.makeini(
         """
         [pytest]
-        addopts = --strict
+        addopts = --strict-markers
         console_output_style=classic
     """
     )
