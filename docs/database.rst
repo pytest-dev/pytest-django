@@ -40,8 +40,8 @@ documentation <pytest:scoped-marking>` for detail::
 
 
 By default ``pytest-django`` will set up the Django databases the
-first time a test needs them.  Once setup the database is cached for
-used for all subsequent tests and rolls back transactions to isolate
+first time a test needs them.  Once setup, the database is cached to be
+used for all subsequent tests and rolls back transactions, to isolate
 tests from each other.  This is the same way the standard Django
 :class:`~django.test.TestCase` uses the database.  However
 ``pytest-django`` also caters for transaction test cases and allows
