@@ -71,6 +71,7 @@ other than ``default`` by adding a special key to your database test configurati
 in your django settings.
 
 for example::
+
     DATABASES = {
         "default": {
             # ... normal default settings
@@ -82,6 +83,7 @@ for example::
             }
         }
     }
+
 
 With that database configuration in your test environment, tests that depend on the
 ``db`` or ``transactional_db`` fixtures can make changes in the "secondary" database

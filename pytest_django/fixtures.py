@@ -154,11 +154,6 @@ def _django_db_fixture_helper(
     if transactional_databases:
 
         class MultiDatabaseTransactionTestCase(django_case):
-            # django versions <= 1.8.X don't use `databases` attribute, it's all or nothing
-            # for those versions, django will create a transaction in every db in DATABASES
-            # if multi_db is True
-            # multi_db is not used in newer django versions
-            multi_db = True
             databases = transactional_databases
 
         django_case = MultiDatabaseTransactionTestCase

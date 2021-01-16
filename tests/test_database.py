@@ -139,7 +139,10 @@ class TestDatabaseFixtures:
         pass
 
     def test_db_sets_transactions_in_all_configured_connections(self, settings, db):
-        assert all(conn.in_atomic_block for conn in connections.all())
+        assert all(
+            conn.in_atomic_block
+            for conn in connections.all() if conn.features.supports_transactions
+        )
 
     def test_multi_database_true_if_settings_permit_db(self, request, settings, transactional_db):
         transactional_databases = set()
