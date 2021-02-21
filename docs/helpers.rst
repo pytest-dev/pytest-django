@@ -130,8 +130,9 @@ Example
 
     from myapp.views import my_view
 
-    def test_details(rf):
+    def test_details(rf, admin):
         request = rf.get('/customer/details')
+        request.user = admin
         response = my_view(request)
         assert response.status_code == 200
 
