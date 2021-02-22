@@ -122,7 +122,7 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
   re-creation of the test database.
 
 ``--no-migrations`` - Disable Django migrations
-----------------------------------------------
+-----------------------------------------------
 
 Using ``--no-migrations`` will disable Django migrations and create the database
 by inspecting all models. It may be faster when there are several migrations to
