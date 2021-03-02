@@ -147,6 +147,12 @@ def _django_db_fixture_helper(
             django_case = ResetSequenceTestCase
     else:
         from django.test import TestCase as django_case
+        from django.db import transaction
+        transaction.Atomic._ensure_durability = False
+
+        def reset_durability():
+            transaction.Atomic._ensure_durability = True
+        request.addfinalizer(reset_durability)
 
     test_case = django_case(methodName="__init__")
     test_case._pre_setup()
