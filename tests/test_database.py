@@ -1,7 +1,8 @@
 import pytest
-from django.db import connection
+from django.db import connection, transaction
 from django.test.testcases import connections_support_transactions
 
+from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 
 
@@ -137,6 +138,12 @@ class TestDatabaseFixtures:
     def test_fin(self, fin):
         # Check finalizer has db access (teardown will fail if not)
         pass
+
+    @pytest.mark.skipif(get_django_version() < (3, 2), reason="Django >= 3.2 required")
+    def test_durable_transactions(self, all_dbs):
+        with transaction.atomic(durable=True):
+            item = Item.objects.create(name="foo")
+        assert Item.objects.get() == item
 
 
 class TestDatabaseFixturesAllOrder:
