@@ -121,13 +121,13 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
 * When you alter your database schema, run ``pytest --create-db``, to force
   re-creation of the test database.
 
-``--nomigrations`` - Disable Django migrations
-----------------------------------------------
+``--no-migrations`` - Disable Django migrations
+-----------------------------------------------
 
-Using ``--nomigrations`` will disable Django migrations and create the database
+Using ``--no-migrations`` (alias: ``--nomigrations``) will disable Django migrations and create the database
 by inspecting all models. It may be faster when there are several migrations to
 run in the database setup.  You can use ``--migrations`` to force running
-migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
+migrations in case ``--no-migrations`` is used, e.g. in ``setup.cfg``.
 
 .. _advanced-database-configuration:
 
@@ -235,7 +235,7 @@ Returns whether or not to use migrations to create the test
 databases.
 
 The default implementation returns the value of the
-``--migrations``/``--nomigrations`` command line options.
+``--migrations``/``--no-migrations`` command line options.
 
 This fixture is by default requested from :fixture:`django_db_setup`.
 
