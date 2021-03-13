@@ -516,7 +516,7 @@ def _django_set_urlconf(request):
         def restore():
             django.conf.settings.ROOT_URLCONF = original_urlconf
             # Copy the pattern from
-            # https://github.com/django/django/blob/master/django/test/signals.py#L152
+            # https://github.com/django/django/blob/main/django/test/signals.py#L152
             clear_url_caches()
             set_urlconf(None)
 

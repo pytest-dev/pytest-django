@@ -87,7 +87,7 @@ jobs:
           python: 3.8
           allow_failure: false
 
-        - name: py39-djmaster-sqlite-coverage
+        - name: py39-djmain-sqlite-coverage
           python: 3.9
           allow_failure: true
 
