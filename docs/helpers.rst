@@ -292,7 +292,7 @@ database connection or cursor, import it from Django using
 This fixture can be used to request access to the database including
 transaction support.  This is only required for fixtures which need
 database access themselves.  A test function should normally use the
-func:`pytest.mark.django_db`  mark with ``transaction=True`` to signal
+:func:`pytest.mark.django_db`  mark with ``transaction=True`` to signal
 it needs the database.
 
 .. fixture:: django_db_reset_sequences
@@ -316,7 +316,7 @@ This fixture runs a live Django server in a background thread.  The
 server's URL can be retrieved using the ``live_server.url`` attribute
 or by requesting it's string value: ``str(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
-'/foo``.
+'/foo'``.
 
 .. note:: Combining database access fixtures.
 
