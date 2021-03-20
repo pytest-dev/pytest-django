@@ -5,9 +5,7 @@ Database creation/re-use
 access.  By default your tests will fail if they try to access the
 database.  Only if you explicitly request database access will this be
 allowed.  This encourages you to keep database-needing tests to a
-minimum which is a best practice since next-to-no business logic
-should be requiring the database.  Moreover it makes it very clear
-what code uses the database and catches any mistakes.
+minimum which and it makes it very clear what code uses the database.
 
 Enabling database access in tests
 ---------------------------------
