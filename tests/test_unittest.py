@@ -1,6 +1,5 @@
 import pytest
 from django.test import TestCase
-from pkg_resources import parse_version
 
 from pytest_django_test.app.models import Item
 
@@ -58,10 +57,11 @@ class TestFixturesWithSetup(TestCase):
 
 def test_sole_test(django_testdir):
     """
-    Make sure the database are configured when only Django TestCase classes
+    Make sure the database is configured when only Django TestCase classes
     are collected, without the django_db marker.
-    """
 
+    Also ensures that the DB is available after a failure (#824).
+    """
     django_testdir.create_test_module(
         """
         import os
@@ -80,12 +80,27 @@ def test_sole_test(django_testdir):
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
+
+                assert 0, "trigger_error"
+
+        class TestBar(TestCase):
+            def test_bar(self):
+                assert Item.objects.count() == 0
     """
     )
 
     result = django_testdir.runpytest_subprocess("-v")
-    result.stdout.fnmatch_lines(["*TestFoo*test_foo PASSED*"])
-    assert result.ret == 0
+    result.stdout.fnmatch_lines(
+        [
+            "*::test_foo FAILED",
+            "*::test_bar PASSED",
+            '>       assert 0, "trigger_error"',
+            "E       AssertionError: trigger_error",
+            "E       assert 0",
+            "*= 1 failed, 1 passed*",
+        ]
+    )
+    assert result.ret == 1
 
 
 class TestUnittestMethods:
@@ -145,16 +160,8 @@ class TestUnittestMethods:
         result = django_testdir.runpytest_subprocess("-v", "-s")
         expected_lines = [
             "* ERROR at setup of TestFoo.test_pass *",
+            "E * TypeError: *",
         ]
-        if parse_version(pytest.__version__) < parse_version("4.2"):
-            expected_lines += [
-                "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
-            ]
-        else:
-            expected_lines += [
-                "E * TypeError: *",
-            ]
-
         result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 
@@ -201,7 +208,7 @@ class TestUnittestMethods:
             """
             from django.test import TestCase
 
-            class TheMixin(object):
+            class TheMixin:
                 @classmethod
                 def setUpClass(cls):
                     super(TheMixin, cls).setUpClass()
@@ -273,7 +280,7 @@ class TestUnittestMethods:
             # Using a mixin is a regression test, see #280 for more details:
             # https://github.com/pytest-dev/pytest-django/issues/280
 
-            class SomeMixin(object):
+            class SomeMixin:
                 pass
 
             class TestA(SomeMixin, TestCase):
@@ -392,7 +399,7 @@ class TestUnittestMethods:
 
         result = django_testdir.runpytest_subprocess("-q", "-s")
         result.stdout.fnmatch_lines(
-            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed in*"]
+            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
         )
         assert result.ret == 0
 
@@ -458,7 +465,7 @@ def test_pdb_enabled(django_testdir):
     assert result.ret == 0
 
 
-def test_debug_restored(django_testdir):
+def test_debug_not_used(django_testdir):
     django_testdir.create_test_module(
         """
         from django.test import TestCase
@@ -468,22 +475,14 @@ def test_debug_restored(django_testdir):
 
         class TestClass1(TestCase):
 
+            def debug(self):
+                assert 0, "should not be called"
+
             def test_method(self):
                 pass
-
-
-        class TestClass2(TestClass1):
-
-            def _pre_setup(self):
-                global pre_setup_count
-                pre_setup_count += 1
-                super(TestClass2, self)._pre_setup()
-
-            def test_method(self):
-                assert pre_setup_count == 1
     """
     )
 
     result = django_testdir.runpytest_subprocess("--pdb")
-    result.stdout.fnmatch_lines(["*= 2 passed in *"])
+    result.stdout.fnmatch_lines(["*= 1 passed*"])
     assert result.ret == 0

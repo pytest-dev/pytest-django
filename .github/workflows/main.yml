@@ -1,0 +1,142 @@
+name: main
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    continue-on-error: ${{ matrix.allow_failure }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Setup mysql
+        if: contains(matrix.name, 'mysql')
+        run: |
+          sudo systemctl start mysql.service
+          echo "TEST_DB_USER=root" >> $GITHUB_ENV
+          echo "TEST_DB_PASSWORD=root" >> $GITHUB_ENV
+
+      - name: Setup postgresql
+        if: contains(matrix.name, 'postgres')
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres createuser --createdb $USER
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox==3.20.0
+
+      - name: Run tox
+        run: tox -e ${{ matrix.name }}
+
+      - name: Report coverage
+        if: contains(matrix.name, 'coverage')
+        run: |
+          bash <(curl -s https://codecov.io/bash) -Z -X gcov -X xcode -X gcovout
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: checkqa,docs
+          python: 3.8
+          allow_failure: false
+
+        - name: py39-dj32-postgres-xdist-coverage
+          python: 3.9
+          allow_failure: false
+
+        - name: py39-dj31-postgres-xdist-coverage
+          python: 3.9
+          allow_failure: false
+
+        - name: py37-dj30-mysql_innodb-coverage
+          python: 3.7
+          allow_failure: false
+
+        - name: py36-dj22-sqlite-xdist-coverage
+          python: 3.6
+          allow_failure: false
+
+        - name: py37-dj22-sqlite-xdist-coverage
+          python: 3.7
+          allow_failure: false
+
+        - name: py38-dj30-sqlite-xdist-coverage
+          python: 3.8
+          allow_failure: false
+
+        - name: py38-dj32-sqlite-xdist-coverage
+          python: 3.8
+          allow_failure: false
+
+        - name: py38-dj31-sqlite-xdist-coverage
+          python: 3.8
+          allow_failure: false
+
+        - name: py39-djmain-sqlite-coverage
+          python: 3.9
+          allow_failure: true
+
+        # Explicitly test (older) pytest 5.4.
+        - name: py35-dj22-postgres-pytest54-coverage
+          python: 3.5
+          allow_failure: false
+
+        - name: py35-dj22-sqlite_file-coverage
+          python: 3.5
+          allow_failure: false
+
+        - name: py36-dj31-mysql_myisam-coverage
+          python: 3.6
+          allow_failure: false
+
+        - name: py36-dj32-mysql_myisam-coverage
+          python: 3.6
+          allow_failure: false
+
+        # pypy3: not included with coverage reports (much slower then).
+        - name: pypy3-dj22-postgres
+          python: pypy3
+          allow_failure: false
+
+  deploy:
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
+    runs-on: ubuntu-20.04
+    needs: [test]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade wheel setuptools tox
+
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_token }}

@@ -3,7 +3,6 @@
 If these tests fail you probably forgot to run "python setup.py develop".
 """
 
-import django
 import pytest
 
 
@@ -38,10 +37,10 @@ def test_ds_ini(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    assert result.parseoutcomes()["passed"] == 1
-    result.stdout.fnmatch_lines(
-        ["Django settings: tpkg.settings_ini " "(from ini file)*"]
-    )
+    result.stdout.fnmatch_lines([
+        "django: settings: tpkg.settings_ini (from ini)",
+        "*= 1 passed*",
+    ])
     assert result.ret == 0
 
 
@@ -59,10 +58,10 @@ def test_ds_env(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(
-        ["Django settings: tpkg.settings_env (from " "environment variable)*"]
-    )
-    assert result.parseoutcomes()["passed"] == 1
+    result.stdout.fnmatch_lines([
+        "django: settings: tpkg.settings_env (from env)",
+        "*= 1 passed*",
+    ])
 
 
 def test_ds_option(testdir, monkeypatch):
@@ -85,10 +84,10 @@ def test_ds_option(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess("--ds=tpkg.settings_opt")
-    result.stdout.fnmatch_lines(
-        ["Django settings: tpkg.settings_opt " "(from command line option)"]
-    )
-    assert result.parseoutcomes()["passed"] == 1
+    result.stdout.fnmatch_lines([
+        "django: settings: tpkg.settings_opt (from option)",
+        "*= 1 passed*",
+    ])
 
 
 def test_ds_env_override_ini(testdir, monkeypatch):
@@ -138,7 +137,7 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     testdir.makepyfile(settings_after_conftest="SECRET_KEY='secret'")
     # testdir.makeconftest("import sys; print(sys.path)")
     result = testdir.runpytest_subprocess("-v")
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines(["* 1 passed*"])
     assert result.ret == 0
 
 
@@ -226,7 +225,7 @@ def test_django_settings_configure(testdir, monkeypatch):
     """
     )
     result = testdir.runpython(p)
-    result.stdout.fnmatch_lines(["* 4 passed in*"])
+    result.stdout.fnmatch_lines(["* 4 passed*"])
 
 
 def test_settings_in_hook(testdir, monkeypatch):
@@ -275,11 +274,11 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     """
     )
     result = testdir.runpytest_subprocess()
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines(["* 1 passed*"])
     assert result.ret == 0
 
 
-def test_debug_false(testdir, monkeypatch):
+def test_debug_false_by_default(testdir, monkeypatch):
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeconftest(
         """
@@ -308,10 +307,78 @@ def test_debug_false(testdir, monkeypatch):
     assert r.ret == 0
 
 
-@pytest.mark.skipif(
-    not hasattr(django, "setup"),
-    reason="This Django version does not support app loading",
-)
+@pytest.mark.parametrize('django_debug_mode', (False, True))
+def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode):
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       django_debug_mode = {}
+    """.format(django_debug_mode)
+    )
+    testdir.makeconftest(
+        """
+        from django.conf import settings
+
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DEBUG=%s,
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """ % (not django_debug_mode)
+    )
+
+    testdir.makepyfile(
+        """
+        from django.conf import settings
+        def test_debug_is_false():
+            assert settings.DEBUG is {}
+    """.format(django_debug_mode)
+    )
+
+    r = testdir.runpytest_subprocess()
+    assert r.ret == 0
+
+
+@pytest.mark.parametrize('settings_debug', (False, True))
+def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug):
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       django_debug_mode = keep
+    """
+    )
+    testdir.makeconftest(
+        """
+        from django.conf import settings
+
+        def pytest_configure():
+            settings.configure(SECRET_KEY='set from pytest_configure',
+                               DEBUG=%s,
+                               DATABASES={'default': {
+                                   'ENGINE': 'django.db.backends.sqlite3',
+                                   'NAME': ':memory:'}},
+                               INSTALLED_APPS=['django.contrib.auth',
+                                               'django.contrib.contenttypes',])
+    """ % settings_debug
+    )
+
+    testdir.makepyfile(
+        """
+        from django.conf import settings
+        def test_debug_is_false():
+            assert settings.DEBUG is {}
+    """.format(settings_debug)
+    )
+
+    r = testdir.runpytest_subprocess()
+    assert r.ret == 0
+
+
 @pytest.mark.django_project(
     extra_settings="""
     INSTALLED_APPS = [
@@ -329,10 +396,7 @@ def test_django_setup_sequence(django_testdir):
             name = 'tpkg.app'
 
             def ready(self):
-                try:
-                    populating = apps.loading
-                except AttributeError:  # Django < 2.0
-                    populating = apps._lock.locked()
+                populating = apps.loading
                 print('READY(): populating=%r' % populating)
         """,
         "apps.py",
@@ -342,10 +406,7 @@ def test_django_setup_sequence(django_testdir):
         """
         from django.apps import apps
 
-        try:
-            populating = apps.loading
-        except AttributeError:  # Django < 2.0
-            populating = apps._lock.locked()
+        populating = apps.loading
 
         print('IMPORT: populating=%r,ready=%r' % (populating, apps.ready))
         SOME_THING = 1234
@@ -360,10 +421,7 @@ def test_django_setup_sequence(django_testdir):
         from tpkg.app.models import SOME_THING
 
         def test_anything():
-            try:
-                populating = apps.loading
-            except AttributeError:  # Django < 2.0
-                populating = apps._lock.locked()
+            populating = apps.loading
 
             print('TEST: populating=%r,ready=%r' % (populating, apps.ready))
         """
@@ -372,10 +430,7 @@ def test_django_setup_sequence(django_testdir):
     result = django_testdir.runpytest_subprocess("-s", "--tb=line")
     result.stdout.fnmatch_lines(["*IMPORT: populating=True,ready=False*"])
     result.stdout.fnmatch_lines(["*READY(): populating=True*"])
-    if django.VERSION < (2, 0):
-        result.stdout.fnmatch_lines(["*TEST: populating=False,ready=True*"])
-    else:
-        result.stdout.fnmatch_lines(["*TEST: populating=True,ready=True*"])
+    result.stdout.fnmatch_lines(["*TEST: populating=True,ready=True*"])
     assert result.ret == 0
 
 

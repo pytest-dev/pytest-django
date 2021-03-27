@@ -178,10 +178,10 @@ Your coverage report is now ready in the ``htmlcov`` directory.
 Continuous integration
 ----------------------
 
-`Travis`_ is used to automatically run all tests against all supported versions
+`GitHub Actions`_ is used to automatically run all tests against all supported versions
 of Python, Django and different database backends.
 
-The `pytest-django Travis`_ page shows the latest test run. Travis will
+The `pytest-django Actions`_ page shows the latest test run. The CI will
 automatically pick up pull requests, test them and report the result directly
 in the pull request.
 
@@ -227,16 +227,16 @@ double cookie points. Seriously. You rock.
 
 .. _fork: https://github.com/pytest-dev/pytest-django
 .. _issue tracker: https://github.com/pytest-dev/pytest-django/issues
-.. _Sphinx: http://sphinx.pocoo.org/
-.. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _GitHub : http://www.github.com
-.. _GitHub help : http://help.github.com
-.. _freenode : http://freenode.net/
+.. _Sphinx: https://www.sphinx-doc.org/
+.. _PEP8: https://www.python.org/dev/peps/pep-0008/
+.. _GitHub : https://www.github.com
+.. _GitHub help : https://help.github.com
+.. _freenode : https://freenode.net/
 .. _@andreaspelme : https://twitter.com/andreaspelme
-.. _pull request : http://help.github.com/send-pull-requests/
-.. _git : http://git-scm.com/
-.. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _pull request : https://help.github.com/send-pull-requests/
+.. _git : https://git-scm.com/
+.. _restructuredText: https://docutils.sourceforge.io/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
-.. _Travis: https://travis-ci.org/
-.. _pytest-django Travis: https://travis-ci.org/pytest-dev/pytest-django
-.. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html
+.. _GitHub Actions: https://github.com/features/actions
+.. _pytest-django Actions: https://github.com/pytest-dev/pytest-django/actions
+.. _`subprocess section of coverage documentation`: https://coverage.readthedocs.io/en/latest/subprocess.html

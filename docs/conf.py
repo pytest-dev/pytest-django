@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import sys
 import datetime
@@ -42,9 +40,9 @@ htmlhelp_basename = 'pytest-djangodoc'
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'django': ('https://docs.djangoproject.com/en/dev/',
-               'https://docs.djangoproject.com/en/dev/_objects/'),
-    'pytest': ('https://docs.pytest.org/en/latest/', None),
+    'django': ('https://docs.djangoproject.com/en/stable/',
+               'https://docs.djangoproject.com/en/stable/_objects/'),
+    'pytest': ('https://docs.pytest.org/en/stable/', None),
 }
 
 

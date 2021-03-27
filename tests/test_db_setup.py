@@ -1,6 +1,5 @@
 import pytest
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.db_helpers import (
     db_exists,
     drop_database,
@@ -33,7 +32,9 @@ def test_db_order(django_testdir):
     """Test order in which tests are being executed."""
 
     django_testdir.create_test_module('''
+        from unittest import TestCase
         import pytest
+        from django.test import SimpleTestCase, TestCase as DjangoTestCase, TransactionTestCase
 
         from .app.models import Item
 
@@ -50,14 +51,34 @@ def test_db_order(django_testdir):
         @pytest.mark.django_db
         def test_run_first_decorator():
             pass
+
+        class MyTestCase(TestCase):
+            def test_run_last_test_case(self):
+                pass
+
+        class MySimpleTestCase(SimpleTestCase):
+            def test_run_last_simple_test_case(self):
+                pass
+
+        class MyDjangoTestCase(DjangoTestCase):
+            def test_run_first_django_test_case(self):
+                pass
+
+        class MyTransactionTestCase(TransactionTestCase):
+            def test_run_second_transaction_test_case(self):
+                pass
     ''')
     result = django_testdir.runpytest_subprocess('-v', '-s')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
         "*test_run_first_decorator*",
+        "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",
+        "*test_run_second_transaction_test_case*",
+        "*test_run_last_test_case*",
+        "*test_run_last_simple_test_case*",
     ])
 
 
@@ -152,6 +173,8 @@ def test_xdist_with_reuse(django_testdir):
 
     drop_database("gw0")
     drop_database("gw1")
+    assert not db_exists("gw0")
+    assert not db_exists("gw1")
 
     django_testdir.create_test_module(
         """
@@ -213,6 +236,10 @@ def test_xdist_with_reuse(django_testdir):
     result.stdout.fnmatch_lines(["*PASSED*test_b*"])
     result.stdout.fnmatch_lines(["*PASSED*test_c*"])
     result.stdout.fnmatch_lines(["*PASSED*test_d*"])
+
+    # Cleanup.
+    drop_database("gw0")
+    drop_database("gw1")
 
 
 class TestSqliteWithXdist:
@@ -425,33 +452,7 @@ class TestSqliteInMemoryWithXdist:
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
 
-@pytest.mark.skipif(
-    get_django_version() >= (1, 9),
-    reason=(
-        "Django 1.9 requires migration and has no concept of initial data fixtures"
-    ),
-)
-def test_initial_data(django_testdir_initial):
-    """Test that initial data gets loaded."""
-    django_testdir_initial.create_test_module(
-        """
-        import pytest
-
-        from .app.models import Item
-
-        @pytest.mark.django_db
-        def test_inner():
-            assert [x.name for x in Item.objects.all()] \
-                == ["mark_initial_data"]
-    """
-    )
-
-    result = django_testdir_initial.runpytest_subprocess("--tb=short", "-v")
-    assert result.ret == 0
-    result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
-
-
-class TestNativeMigrations(object):
+class TestNativeMigrations:
     """ Tests for Django Migrations """
 
     def test_no_migrations(self, django_testdir):
@@ -479,7 +480,7 @@ class TestNativeMigrations(object):
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()
-        result.stdout.fnmatch_lines(["*= 1 passed in *"])
+        result.stdout.fnmatch_lines(["*= 1 passed*"])
 
     def test_migrations_run(self, django_testdir):
         testdir = django_testdir

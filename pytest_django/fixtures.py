@@ -1,9 +1,7 @@
 """All pytest-django fixtures"""
 
-from __future__ import with_statement
 
 import os
-import warnings
 from contextlib import contextmanager
 from functools import partial
 
@@ -23,8 +21,10 @@ __all__ = [
     "django_user_model",
     "django_username_field",
     "client",
+    "async_client",
     "admin_client",
     "rf",
+    "async_rf",
     "settings",
     "live_server",
     "_live_server_helper",
@@ -34,7 +34,7 @@ __all__ = [
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_tox_suffix(request):
+def django_db_modify_db_settings_tox_suffix():
     skip_if_no_django()
 
     tox_environment = os.getenv("TOX_PARALLEL_ENV")
@@ -47,7 +47,7 @@ def django_db_modify_db_settings_tox_suffix(request):
 def django_db_modify_db_settings_xdist_suffix(request):
     skip_if_no_django()
 
-    xdist_suffix = getattr(request.config, "slaveinput", {}).get("slaveid")
+    xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     if xdist_suffix:
         # Put a suffix like _gw0, _gw1 etc on xdist processes
         _set_suffix_to_test_databases(suffix=xdist_suffix)
@@ -92,7 +92,7 @@ def django_db_setup(
     django_db_modify_db_settings,
 ):
     """Top level fixture to ensure test databases are available"""
-    from .compat import setup_databases, teardown_databases
+    from django.test.utils import setup_databases, teardown_databases
 
     setup_databases_args = {}
 
@@ -149,6 +149,12 @@ def _django_db_fixture_helper(
             django_case = ResetSequenceTestCase
     else:
         from django.test import TestCase as django_case
+        from django.db import transaction
+        transaction.Atomic._ensure_durability = False
+
+        def reset_durability():
+            transaction.Atomic._ensure_durability = True
+        request.addfinalizer(reset_durability)
 
     test_case = django_case(methodName="__init__")
     test_case.serialized_rollback = serialized_rollback
@@ -160,14 +166,19 @@ def _disable_native_migrations():
     from django.conf import settings
     from django.core.management.commands import migrate
 
-    from .migrations import DisableMigrations
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
 
     settings.MIGRATION_MODULES = DisableMigrations()
 
     class MigrateSilentCommand(migrate.Command):
         def handle(self, *args, **kwargs):
             kwargs["verbosity"] = 0
-            return super(MigrateSilentCommand, self).handle(*args, **kwargs)
+            return super().handle(*args, **kwargs)
 
     migrate.Command = MigrateSilentCommand
 
@@ -286,6 +297,16 @@ def client():
 
 
 @pytest.fixture()
+def async_client():
+    """A Django test async client instance."""
+    skip_if_no_django()
+
+    from django.test.client import AsyncClient
+
+    return AsyncClient()
+
+
+@pytest.fixture()
 def django_user_model(db):
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
@@ -311,14 +332,18 @@ def admin_user(db, django_user_model, django_username_field):
     username = "admin@example.com" if username_field == "email" else "admin"
 
     try:
-        user = UserModel._default_manager.get(**{username_field: username})
+        # The default behavior of `get_by_natural_key()` is to look up by `username_field`.
+        # However the user model is free to override it with any sort of custom behavior.
+        # The Django authentication backend already assumes the lookup is by username,
+        # so we can assume so as well.
+        user = UserModel._default_manager.get_by_natural_key(username)
     except UserModel.DoesNotExist:
-        extra_fields = {}
-        if username_field not in ("username", "email"):
-            extra_fields[username_field] = "admin"
-        user = UserModel._default_manager.create_superuser(
-            username, "admin@example.com", "password", **extra_fields
-        )
+        user_data = {}
+        if "email" in UserModel.REQUIRED_FIELDS:
+            user_data["email"] = "admin@example.com"
+        user_data["password"] = "password"
+        user_data[username_field] = username
+        user = UserModel._default_manager.create_superuser(**user_data)
     return user
 
 
@@ -328,7 +353,7 @@ def admin_client(db, admin_user):
     from django.test.client import Client
 
     client = Client()
-    client.login(username=admin_user.username, password="password")
+    client.force_login(admin_user)
     return client
 
 
@@ -342,7 +367,17 @@ def rf():
     return RequestFactory()
 
 
-class SettingsWrapper(object):
+@pytest.fixture()
+def async_rf():
+    """AsyncRequestFactory instance"""
+    skip_if_no_django()
+
+    from django.test.client import AsyncRequestFactory
+
+    return AsyncRequestFactory()
+
+
+class SettingsWrapper:
     _to_restore = []
 
     def __delattr__(self, attr):
@@ -375,7 +410,7 @@ class SettingsWrapper(object):
         del self._to_restore[:]
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def settings():
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
@@ -392,8 +427,8 @@ def live_server(request):
     The address the server is started from is taken from the
     --liveserver command line option or if this is not provided from
     the DJANGO_LIVE_TEST_SERVER_ADDRESS environment variable.  If
-    neither is provided ``localhost:8081,8100-8200`` is used.  See the
-    Django documentation for its full syntax.
+    neither is provided ``localhost`` is used.  See the Django
+    documentation for its full syntax.
 
     NOTE: If the live server needs database access to handle a request
           your test will have to request database access.  Furthermore
@@ -407,27 +442,9 @@ def live_server(request):
     """
     skip_if_no_django()
 
-    import django
-
     addr = request.config.getvalue("liveserver") or os.getenv(
         "DJANGO_LIVE_TEST_SERVER_ADDRESS"
-    )
-
-    if addr and ":" in addr:
-        if django.VERSION >= (1, 11):
-            ports = addr.split(":")[1]
-            if "-" in ports or "," in ports:
-                warnings.warn(
-                    "Specifying multiple live server ports is not supported "
-                    "in Django 1.11. This will be an error in a future "
-                    "pytest-django release."
-                )
-
-    if not addr:
-        if django.VERSION < (1, 11):
-            addr = "localhost:8081,8100-8200"
-        else:
-            addr = "localhost"
+    ) or "localhost"
 
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
@@ -480,14 +497,14 @@ def _assert_num_queries(config, num, exact=True, connection=None, info=None):
                 num,
                 "" if exact else "or less ",
                 "but {} done".format(
-                    num_performed == 1 and "1 was" or "%d were" % (num_performed,)
+                    num_performed == 1 and "1 was" or "{} were".format(num_performed)
                 ),
             )
             if info:
                 msg += "\n{}".format(info)
             if verbose:
                 sqls = (q["sql"] for q in context.captured_queries)
-                msg += "\n\nQueries:\n========\n\n%s" % "\n\n".join(sqls)
+                msg += "\n\nQueries:\n========\n\n" + "\n\n".join(sqls)
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)

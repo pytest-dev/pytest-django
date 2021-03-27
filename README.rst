@@ -6,9 +6,9 @@
     :alt: Supported Python versions
     :target: https://pypi.python.org/pypi/pytest-django
 
-.. image:: https://travis-ci.org/pytest-dev/pytest-django.svg?branch=master
+.. image:: https://github.com/pytest-dev/pytest-django/workflows/main/badge.svg
     :alt: Build Status
-    :target: https://travis-ci.org/pytest-dev/pytest-django
+    :target: https://github.com/pytest-dev/pytest-django/actions
 
 .. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
     :alt: Coverage
@@ -28,10 +28,12 @@ pytest-django allows you to test your Django project/applications with the
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
 * Version compatibility:
 
-  * Django: 1.8-1.11, 2.0-2.2,
-    and latest master branch (compatible at the time of each release)
-  * Python: CPython 2.7, 3.4-3.7 or PyPy 2, 3
-  * pytest: >=3.6
+  * Django: 2.2, 3.0, 3.1 and latest main branch (compatible at the time of
+    each release)
+  * Python: CPython>=3.5 or PyPy 3
+  * pytest: >=5.4
+
+  For compatibility with older versions, use the pytest-django 3.*.* series.
 
 * Licence: BSD
 * Project maintainers: Andreas Pelme, Floris Bruynooghe and Daniel Hahler

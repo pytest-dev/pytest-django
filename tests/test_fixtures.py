@@ -4,10 +4,10 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
-from __future__ import with_statement
 
 import socket
 from contextlib import contextmanager
+from urllib.request import urlopen, HTTPError
 
 import pytest
 from django.conf import settings as real_settings
@@ -17,9 +17,8 @@ from django.test.client import Client, RequestFactory
 from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
-from pytest_django_test.compat import HTTPError, urlopen
+from pytest_django.lazy_django import get_django_version
 
 
 @contextmanager
@@ -38,6 +37,13 @@ def test_client(client):
     assert isinstance(client, Client)
 
 
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
+def test_async_client(async_client):
+    from django.test.client import AsyncClient
+
+    assert isinstance(async_client, AsyncClient)
+
+
 @pytest.mark.django_db
 def test_admin_client(admin_client):
     assert isinstance(admin_client, Client)
@@ -47,6 +53,17 @@ def test_admin_client(admin_client):
 
 def test_admin_client_no_db_marker(admin_client):
     assert isinstance(admin_client, Client)
+    resp = admin_client.get("/admin-required/")
+    assert force_str(resp.content) == "You are an admin"
+
+
+# For test below.
+@pytest.fixture
+def existing_admin_user(django_user_model):
+    return django_user_model._default_manager.create_superuser('admin', None, None)
+
+
+def test_admin_client_existing_user(db, existing_admin_user, admin_user, admin_client):
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
 
@@ -62,6 +79,13 @@ def test_admin_user_no_db_marker(admin_user, django_user_model):
 
 def test_rf(rf):
     assert isinstance(rf, RequestFactory)
+
+
+@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
+def test_async_rf(async_rf):
+    from django.test.client import AsyncRequestFactory
+
+    assert isinstance(async_rf, AsyncRequestFactory)
 
 
 @pytest.mark.django_db
@@ -322,7 +346,7 @@ class TestLiveServer:
         from django.conf import settings
 
         assert (
-            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
         TestLiveServer._test_settings_before_run = True
@@ -335,18 +359,14 @@ class TestLiveServer:
 
     def test_settings_restored(self):
         """Ensure that settings are restored after test_settings_before."""
-        import django
         from django.conf import settings
 
         assert TestLiveServer._test_settings_before_run is True
         assert (
-            "%s.%s" % (settings.__class__.__module__, settings.__class__.__name__)
+            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
-        if django.VERSION >= (1, 11):
-            assert settings.ALLOWED_HOSTS == ["testserver"]
-        else:
-            assert settings.ALLOWED_HOSTS == ["*"]
+        assert settings.ALLOWED_HOSTS == ["testserver"]
 
     def test_transactions(self, live_server):
         if not connections_support_transactions():
@@ -417,13 +437,9 @@ class TestLiveServer:
         """
         django_testdir.create_test_module(
             """
-            import pytest
-            from django.utils.encoding import force_str
+            from urllib.request import urlopen
 
-            try:
-                from urllib2 import urlopen, HTTPError
-            except ImportError:
-                from urllib.request import urlopen, HTTPError
+            from django.utils.encoding import force_str
 
             class TestLiveServer:
                 def test_a(self, live_server, settings):
@@ -446,28 +462,6 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + "/static/a_file.txt").read()
 
-    @pytest.mark.skipif(
-        get_django_version() < (1, 11), reason="Django >= 1.11 required"
-    )
-    def test_specified_port_range_error_message_django_111(self, django_testdir):
-        django_testdir.create_test_module(
-            """
-        def test_with_live_server(live_server):
-            pass
-        """
-        )
-
-        result = django_testdir.runpytest_subprocess("--liveserver=localhost:1234-2345")
-        result.stdout.fnmatch_lines(
-            [
-                "*Specifying multiple live server ports is not supported in Django 1.11. This "
-                "will be an error in a future pytest-django release.*"
-            ]
-        )
-
-    @pytest.mark.skipif(
-        get_django_version() < (1, 11, 2), reason="Django >= 1.11.2 required"
-    )
     def test_specified_port_django_111(self, django_testdir):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -504,23 +498,49 @@ class TestLiveServer:
 def test_custom_user_model(django_testdir, username_field):
     django_testdir.create_app_file(
         """
-        from django.contrib.auth.models import AbstractUser
+        from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
         from django.db import models
 
-        class MyCustomUser(AbstractUser):
-            identifier = models.CharField(unique=True, max_length=100)
+        class MyCustomUserManager(BaseUserManager):
+            def create_user(self, {username_field}, password=None, **extra_fields):
+                extra_fields.setdefault('is_staff', False)
+                extra_fields.setdefault('is_superuser', False)
+                user = self.model({username_field}={username_field}, **extra_fields)
+                user.set_password(password)
+                user.save()
+                return user
 
-            USERNAME_FIELD = '%s'
-        """
-        % (username_field),
+            def create_superuser(self, {username_field}, password=None, **extra_fields):
+                extra_fields.setdefault('is_staff', True)
+                extra_fields.setdefault('is_superuser', True)
+                return self.create_user(
+                    {username_field}={username_field},
+                    password=password,
+                    **extra_fields
+                )
+
+        class MyCustomUser(AbstractBaseUser, PermissionsMixin):
+            email = models.EmailField(max_length=100, unique=True)
+            identifier = models.CharField(unique=True, max_length=100)
+            is_staff = models.BooleanField(
+                'staff status',
+                default=False,
+                help_text='Designates whether the user can log into this admin site.'
+            )
+
+            objects = MyCustomUserManager()
+
+            USERNAME_FIELD = '{username_field}'
+        """.format(username_field=username_field),
         "models.py",
     )
     django_testdir.create_app_file(
         """
-        from django.conf.urls import url
+        from django.urls import path
+
         from tpkg.app import views
 
-        urlpatterns = [url(r'admin-required/', views.admin_required_view)]
+        urlpatterns = [path('admin-required/', views.admin_required_view)]
         """,
         "urls.py",
     )
@@ -551,9 +571,6 @@ def test_custom_user_model(django_testdir, username_field):
     django_testdir.create_app_file("", "migrations/__init__.py")
     django_testdir.create_app_file(
         """
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import django.utils.timezone
 import django.core.validators
@@ -574,19 +591,13 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(null=True, verbose_name='last login', blank=True)),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=30, validators=[django.core.validators.RegexValidator(r'^[\\w.@+-]+$', 'Enter a valid username. This value may contain only letters, numbers and @/./+/-/_ characters.', 'invalid')], help_text='Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.', unique=True, verbose_name='username')),
-                ('first_name', models.CharField(max_length=30, verbose_name='first name', blank=True)),
-                ('last_name', models.CharField(max_length=30, verbose_name='last name', blank=True)),
-                ('email', models.EmailField(max_length=254, verbose_name='email address', blank=True)),
+                ('email', models.EmailField(error_messages={'unique': 'A user with that email address already exists.'}, max_length=100, unique=True, verbose_name='email address')),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('identifier', models.CharField(unique=True, max_length=100)),
                 ('groups', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Group', blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Permission', blank=True, help_text='Specific permissions for this user.', verbose_name='user permissions')),
             ],
             options={
-                'abstract': False,
                 'verbose_name': 'user',
                 'verbose_name_plural': 'users',
             },
@@ -598,7 +609,7 @@ class Migration(migrations.Migration):
     )
 
     result = django_testdir.runpytest_subprocess("-s")
-    result.stdout.fnmatch_lines(["* 1 passed in*"])
+    result.stdout.fnmatch_lines(["* 1 passed*"])
     assert result.ret == 0
 
 
