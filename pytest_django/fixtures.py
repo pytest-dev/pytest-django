@@ -142,11 +142,16 @@ def _django_db_fixture_helper(
         from django.test import TransactionTestCase as django_case
 
         if reset_sequences:
-
             class ResetSequenceTestCase(django_case):
                 reset_sequences = True
 
             django_case = ResetSequenceTestCase
+
+        if serialized_rollback:
+            class SerializedRollbackTestCase(django_case):
+                serialized_rollback = True
+
+            django_case = SerializedRollbackTestCase
     else:
         from django.test import TestCase as django_case
         from django.db import transaction
@@ -157,7 +162,6 @@ def _django_db_fixture_helper(
         request.addfinalizer(reset_durability)
 
     test_case = django_case(methodName="__init__")
-    test_case.serialized_rollback = serialized_rollback
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
