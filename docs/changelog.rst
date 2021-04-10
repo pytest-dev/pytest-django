@@ -1,6 +1,22 @@
 Changelog
 =========
 
+v4.2.0 (2021-04-10)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Official Django 3.2 support.
+
+* Documentation improvements.
+
+Bugfixes
+^^^^^^^^
+
+* Disable atomic durability check on non-transactional tests (#910).
+
+
 v4.1.0 (2020-10-22)
 -------------------
 
