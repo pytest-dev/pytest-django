@@ -112,11 +112,44 @@ def test_invalid_template_variable(django_testdir):
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_with_default_if_none(django_testdir):
+def test_invalid_template_with_default(django_testdir):
     django_testdir.create_app_file(
         """
             <div>{{ data.empty|default:'d' }}</div>
             <div>{{ data.none|default:'d' }}</div>
+            <div>{{ data.missing|default:'d' }}</div>
+        """,
+        "templates/the_template.html",
+    )
+    django_testdir.create_test_module(
+        """
+        def test_for_invalid_template():
+            from django.shortcuts import render
+
+
+            render(
+                request=None,
+                template_name='the_template.html',
+                context={'data': {'empty': '', 'none': None}},
+            )
+        """
+    )
+    result = django_testdir.runpytest_subprocess("--fail-on-template-vars")
+    result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py ."])
+
+
+@pytest.mark.django_project(
+    extra_settings="""
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+    ROOT_URLCONF = 'tpkg.app.urls'
+    """
+)
+def test_invalid_template_with_default_if_none(django_testdir):
+    django_testdir.create_app_file(
+        """
             <div>{{ data.empty|default_if_none:'d' }}</div>
             <div>{{ data.none|default_if_none:'d' }}</div>
             <div>{{ data.missing|default_if_none:'d' }}</div>

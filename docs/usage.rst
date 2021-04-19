@@ -33,7 +33,10 @@ You can switch it on in `pytest.ini`::
 
     [pytest]
     FAIL_INVALID_TEMPLATE_VARS = True
-    
+
+Invalid template variables will not fail the test if the variable uses the Django
+`default` filter, like `{{ does_not_exist:default:"ok" }}`.
+
 Additional pytest.ini settings
 ------------------------------
 
