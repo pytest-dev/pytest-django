@@ -551,6 +551,17 @@ def _fail_for_invalid_template_variable():
         def _get_origin():
             stack = inspect.stack()
 
+            # Don't flag non-existent variables with default filter applied.
+            from django.template.defaultfilters import default as default_filter
+            try:
+                has_default_filter = any(
+                    filter[0] is default_filter
+                    for filter in stack[2][0].f_locals["self"].filters)
+            except (AttributeError, IndexError, KeyError):
+                has_default_filter = False
+            if has_default_filter:
+                return True, None
+
             # Try to use topmost `self.origin` first (Django 1.9+, and with
             # TEMPLATE_DEBUG)..
             for f in stack[2:]:
@@ -562,7 +573,7 @@ def _fail_for_invalid_template_variable():
                     except (AttributeError, KeyError):
                         continue
                     if origin is not None:
-                        return origin
+                        return False, origin
 
             from django.template import Template
 
@@ -579,10 +590,14 @@ def _fail_for_invalid_template_variable():
             # ``django.template.base.Template``
             template = f_locals["self"]
             if isinstance(template, Template):
-                return template.name
+                return False, template.name
+
+            return False, None
 
         def __mod__(self, var):
-            origin = self._get_origin()
+            has_default_filter, origin = self._get_origin()
+            if has_default_filter:
+                return ""
             if origin:
                 msg = "Undefined template variable '{}' in '{}'".format(var, origin)
             else:
