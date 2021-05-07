@@ -1,14 +1,11 @@
 import copy
 import shutil
 from textwrap import dedent
+import pathlib
 
 import pytest
 from django.conf import settings
 
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
 
 pytest_plugins = "pytester"
 
