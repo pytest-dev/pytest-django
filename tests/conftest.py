@@ -1,3 +1,4 @@
+from typing import Optional
 import copy
 import shutil
 from textwrap import dedent
@@ -12,13 +13,17 @@ pytest_plugins = "pytester"
 REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 
-def pytest_configure(config):
+def pytest_configure(config) -> None:
     config.addinivalue_line(
         "markers", "django_project: options for the django_testdir fixture"
     )
 
 
-def _marker_apifun(extra_settings="", create_manage_py=False, project_root=None):
+def _marker_apifun(
+    extra_settings: str = "",
+    create_manage_py: bool = False,
+    project_root: Optional[str] = None,
+):
     return {
         "extra_settings": extra_settings,
         "create_manage_py": create_manage_py,
@@ -116,12 +121,12 @@ def django_testdir(request, testdir, monkeypatch):
 
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
 
-    def create_test_module(test_code, filename="test_the_test.py"):
+    def create_test_module(test_code: str, filename: str = "test_the_test.py"):
         r = tpkg_path.join(filename)
         r.write(dedent(test_code), ensure=True)
         return r
 
-    def create_app_file(code, filename):
+    def create_app_file(code: str, filename: str):
         r = test_app_path.join(filename)
         r.write(dedent(code), ensure=True)
         return r

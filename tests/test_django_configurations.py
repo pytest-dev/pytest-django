@@ -23,7 +23,7 @@ class MySettings(Configuration):
 """
 
 
-def test_dc_env(testdir, monkeypatch):
+def test_dc_env(testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "MySettings")
 
@@ -47,7 +47,7 @@ def test_dc_env(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_dc_env_overrides_ini(testdir, monkeypatch):
+def test_dc_env_overrides_ini(testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "MySettings")
 
@@ -78,7 +78,7 @@ def test_dc_env_overrides_ini(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_dc_ini(testdir, monkeypatch):
+def test_dc_ini(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
     testdir.makeini(
@@ -108,7 +108,7 @@ def test_dc_ini(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_dc_option(testdir, monkeypatch):
+def test_dc_option(testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "DO_NOT_USE_env")
 

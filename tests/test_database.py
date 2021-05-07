@@ -6,7 +6,7 @@ from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 
 
-def db_supports_reset_sequences():
+def db_supports_reset_sequences() -> bool:
     """Return if the current db engine supports `reset_sequences`."""
     return (
         connection.features.supports_transactions
@@ -14,7 +14,7 @@ def db_supports_reset_sequences():
     )
 
 
-def test_noaccess():
+def test_noaccess() -> None:
     with pytest.raises(RuntimeError):
         Item.objects.create(name="spam")
     with pytest.raises(RuntimeError):
@@ -22,20 +22,20 @@ def test_noaccess():
 
 
 @pytest.fixture
-def noaccess():
+def noaccess() -> None:
     with pytest.raises(RuntimeError):
         Item.objects.create(name="spam")
     with pytest.raises(RuntimeError):
         Item.objects.count()
 
 
-def test_noaccess_fixture(noaccess):
+def test_noaccess_fixture(noaccess: None) -> None:
     # Setup will fail if this test needs to fail
     pass
 
 
 @pytest.fixture
-def non_zero_sequences_counter(db):
+def non_zero_sequences_counter(db: None) -> None:
     """Ensure that the db's internal sequence counter is > 1.
 
     This is used to test the `reset_sequences` feature.
@@ -50,7 +50,7 @@ class TestDatabaseFixtures:
     """Tests for the different database fixtures."""
 
     @pytest.fixture(params=["db", "transactional_db", "django_db_reset_sequences"])
-    def all_dbs(self, request):
+    def all_dbs(self, request) -> None:
         if request.param == "django_db_reset_sequences":
             return request.getfixturevalue("django_db_reset_sequences")
         elif request.param == "transactional_db":
@@ -58,34 +58,36 @@ class TestDatabaseFixtures:
         elif request.param == "db":
             return request.getfixturevalue("db")
 
-    def test_access(self, all_dbs):
+    def test_access(self, all_dbs: None) -> None:
         Item.objects.create(name="spam")
 
-    def test_clean_db(self, all_dbs):
+    def test_clean_db(self, all_dbs: None) -> None:
         # Relies on the order: test_access created an object
         assert Item.objects.count() == 0
 
-    def test_transactions_disabled(self, db):
+    def test_transactions_disabled(self, db: None) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
-    def test_transactions_enabled(self, transactional_db):
+    def test_transactions_enabled(self, transactional_db: None) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
 
-    def test_transactions_enabled_via_reset_seq(self, django_db_reset_sequences):
+    def test_transactions_enabled_via_reset_seq(
+        self, django_db_reset_sequences: None,
+    ) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
 
     def test_django_db_reset_sequences_fixture(
-        self, db, django_testdir, non_zero_sequences_counter
-    ):
+        self, db: None, django_testdir, non_zero_sequences_counter: None,
+    ) -> None:
 
         if not db_supports_reset_sequences():
             pytest.skip(
@@ -113,11 +115,11 @@ class TestDatabaseFixtures:
         )
 
     @pytest.fixture
-    def mydb(self, all_dbs):
+    def mydb(self, all_dbs: None) -> None:
         # This fixture must be able to access the database
         Item.objects.create(name="spam")
 
-    def test_mydb(self, mydb):
+    def test_mydb(self, mydb: None) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
@@ -125,22 +127,22 @@ class TestDatabaseFixtures:
         item = Item.objects.get(name="spam")
         assert item
 
-    def test_fixture_clean(self, all_dbs):
+    def test_fixture_clean(self, all_dbs: None) -> None:
         # Relies on the order: test_mydb created an object
         # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, request, all_dbs):
+    def fin(self, request, all_dbs: None) -> None:
         # This finalizer must be able to access the database
         request.addfinalizer(lambda: Item.objects.create(name="spam"))
 
-    def test_fin(self, fin):
+    def test_fin(self, fin: None) -> None:
         # Check finalizer has db access (teardown will fail if not)
         pass
 
     @pytest.mark.skipif(get_django_version() < (3, 2), reason="Django >= 3.2 required")
-    def test_durable_transactions(self, all_dbs):
+    def test_durable_transactions(self, all_dbs: None) -> None:
         with transaction.atomic(durable=True):
             item = Item.objects.create(name="foo")
         assert Item.objects.get() == item
@@ -148,32 +150,35 @@ class TestDatabaseFixtures:
 
 class TestDatabaseFixturesAllOrder:
     @pytest.fixture
-    def fixture_with_db(self, db):
+    def fixture_with_db(self, db: None) -> None:
         Item.objects.create(name="spam")
 
     @pytest.fixture
-    def fixture_with_transdb(self, transactional_db):
+    def fixture_with_transdb(self, transactional_db: None) -> None:
         Item.objects.create(name="spam")
 
     @pytest.fixture
-    def fixture_with_reset_sequences(self, django_db_reset_sequences):
+    def fixture_with_reset_sequences(self, django_db_reset_sequences: None) -> None:
         Item.objects.create(name="spam")
 
-    def test_trans(self, fixture_with_transdb):
+    def test_trans(self, fixture_with_transdb: None) -> None:
         pass
 
-    def test_db(self, fixture_with_db):
+    def test_db(self, fixture_with_db: None) -> None:
         pass
 
-    def test_db_trans(self, fixture_with_db, fixture_with_transdb):
+    def test_db_trans(self, fixture_with_db: None, fixture_with_transdb: None) -> None:
         pass
 
-    def test_trans_db(self, fixture_with_transdb, fixture_with_db):
+    def test_trans_db(self, fixture_with_transdb: None, fixture_with_db: None) -> None:
         pass
 
     def test_reset_sequences(
-        self, fixture_with_reset_sequences, fixture_with_transdb, fixture_with_db
-    ):
+        self,
+        fixture_with_reset_sequences: None,
+        fixture_with_transdb: None,
+        fixture_with_db: None,
+    ) -> None:
         pass
 
 
@@ -181,47 +186,47 @@ class TestDatabaseMarker:
     "Tests for the django_db marker."
 
     @pytest.mark.django_db
-    def test_access(self):
+    def test_access(self) -> None:
         Item.objects.create(name="spam")
 
     @pytest.mark.django_db
-    def test_clean_db(self):
+    def test_clean_db(self) -> None:
         # Relies on the order: test_access created an object.
         assert Item.objects.count() == 0
 
     @pytest.mark.django_db
-    def test_transactions_disabled(self):
+    def test_transactions_disabled(self) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=False)
-    def test_transactions_disabled_explicit(self):
+    def test_transactions_disabled_explicit(self) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=True)
-    def test_transactions_enabled(self):
+    def test_transactions_enabled(self) -> None:
         if not connections_support_transactions():
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
 
     @pytest.mark.django_db
-    def test_reset_sequences_disabled(self, request):
+    def test_reset_sequences_disabled(self, request) -> None:
         marker = request.node.get_closest_marker("django_db")
         assert not marker.kwargs
 
     @pytest.mark.django_db(reset_sequences=True)
-    def test_reset_sequences_enabled(self, request):
+    def test_reset_sequences_enabled(self, request) -> None:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
 
 
-def test_unittest_interaction(django_testdir):
+def test_unittest_interaction(django_testdir) -> None:
     "Test that (non-Django) unittests cannot access the DB."
 
     django_testdir.create_test_module(
@@ -266,7 +271,7 @@ def test_unittest_interaction(django_testdir):
 
 
 class Test_database_blocking:
-    def test_db_access_in_conftest(self, django_testdir):
+    def test_db_access_in_conftest(self, django_testdir) -> None:
         """Make sure database access in conftest module is prohibited."""
 
         django_testdir.makeconftest(
@@ -284,7 +289,7 @@ class Test_database_blocking:
             ]
         )
 
-    def test_db_access_in_test_module(self, django_testdir):
+    def test_db_access_in_test_module(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from tpkg.app.models import Item

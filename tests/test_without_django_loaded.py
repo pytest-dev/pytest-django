@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.fixture
-def no_ds(monkeypatch):
+def no_ds(monkeypatch) -> None:
     """Ensure DJANGO_SETTINGS_MODULE is unset"""
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
@@ -10,7 +10,7 @@ def no_ds(monkeypatch):
 pytestmark = pytest.mark.usefixtures("no_ds")
 
 
-def test_no_ds(testdir):
+def test_no_ds(testdir) -> None:
     testdir.makepyfile(
         """
         import os
@@ -26,7 +26,7 @@ def test_no_ds(testdir):
     assert r.ret == 0
 
 
-def test_database(testdir):
+def test_database(testdir) -> None:
     testdir.makepyfile(
         """
         import pytest
@@ -51,7 +51,7 @@ def test_database(testdir):
     r.stdout.fnmatch_lines(["*4 skipped*"])
 
 
-def test_client(testdir):
+def test_client(testdir) -> None:
     testdir.makepyfile(
         """
         def test_client(client):
@@ -66,7 +66,7 @@ def test_client(testdir):
     r.stdout.fnmatch_lines(["*2 skipped*"])
 
 
-def test_rf(testdir):
+def test_rf(testdir) -> None:
     testdir.makepyfile(
         """
         def test_rf(rf):
@@ -78,7 +78,7 @@ def test_rf(testdir):
     r.stdout.fnmatch_lines(["*1 skipped*"])
 
 
-def test_settings(testdir):
+def test_settings(testdir) -> None:
     testdir.makepyfile(
         """
         def test_settings(settings):
@@ -90,7 +90,7 @@ def test_settings(testdir):
     r.stdout.fnmatch_lines(["*1 skipped*"])
 
 
-def test_live_server(testdir):
+def test_live_server(testdir) -> None:
     testdir.makepyfile(
         """
         def test_live_server(live_server):
@@ -102,7 +102,7 @@ def test_live_server(testdir):
     r.stdout.fnmatch_lines(["*1 skipped*"])
 
 
-def test_urls_mark(testdir):
+def test_urls_mark(testdir) -> None:
     testdir.makepyfile(
         """
         import pytest

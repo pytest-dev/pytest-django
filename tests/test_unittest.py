@@ -7,32 +7,32 @@ from pytest_django_test.app.models import Item
 class TestFixtures(TestCase):
     fixtures = ["items"]
 
-    def test_fixtures(self):
+    def test_fixtures(self) -> None:
         assert Item.objects.count() == 1
         assert Item.objects.get().name == "Fixture item"
 
-    def test_fixtures_again(self):
+    def test_fixtures_again(self) -> None:
         """Ensure fixtures are only loaded once."""
         self.test_fixtures()
 
 
 class TestSetup(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         """setUp should be called after starting a transaction"""
         assert Item.objects.count() == 0
         Item.objects.create(name="Some item")
         Item.objects.create(name="Some item again")
 
-    def test_count(self):
+    def test_count(self) -> None:
         self.assertEqual(Item.objects.count(), 2)
         assert Item.objects.count() == 2
         Item.objects.create(name="Foo")
         self.assertEqual(Item.objects.count(), 3)
 
-    def test_count_again(self):
+    def test_count_again(self) -> None:
         self.test_count()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """tearDown should be called before rolling back the database"""
         assert Item.objects.count() == 3
 
@@ -40,22 +40,22 @@ class TestSetup(TestCase):
 class TestFixturesWithSetup(TestCase):
     fixtures = ["items"]
 
-    def setUp(self):
+    def setUp(self) -> None:
         assert Item.objects.count() == 1
         Item.objects.create(name="Some item")
 
-    def test_count(self):
+    def test_count(self) -> None:
         assert Item.objects.count() == 2
         Item.objects.create(name="Some item again")
 
-    def test_count_again(self):
+    def test_count_again(self) -> None:
         self.test_count()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         assert Item.objects.count() == 3
 
 
-def test_sole_test(django_testdir):
+def test_sole_test(django_testdir) -> None:
     """
     Make sure the database is configured when only Django TestCase classes
     are collected, without the django_db marker.
@@ -106,7 +106,7 @@ def test_sole_test(django_testdir):
 class TestUnittestMethods:
     "Test that setup/teardown methods of unittests are being called."
 
-    def test_django(self, django_testdir):
+    def test_django(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -143,7 +143,7 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_not_being_a_classmethod(self, django_testdir):
+    def test_setUpClass_not_being_a_classmethod(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -165,7 +165,7 @@ class TestUnittestMethods:
         result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 
-    def test_setUpClass_multiple_subclasses(self, django_testdir):
+    def test_setUpClass_multiple_subclasses(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -203,7 +203,7 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_mixin(self, django_testdir):
+    def test_setUpClass_mixin(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -231,7 +231,7 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_skip(self, django_testdir):
+    def test_setUpClass_skip(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -272,7 +272,7 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_multi_inheritance_setUpClass(self, django_testdir):
+    def test_multi_inheritance_setUpClass(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import TestCase
@@ -338,7 +338,7 @@ class TestUnittestMethods:
         assert result.parseoutcomes()["passed"] == 6
         assert result.ret == 0
 
-    def test_unittest(self, django_testdir):
+    def test_unittest(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from unittest import TestCase
@@ -375,7 +375,7 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir):
+    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             from django.test import testcases
@@ -407,7 +407,7 @@ class TestUnittestMethods:
 class TestCaseWithDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures("db")
 
-    def test_simple(self):
+    def test_simple(self) -> None:
         # We only want to check setup/teardown does not conflict
         assert 1
 
@@ -415,12 +415,12 @@ class TestCaseWithDbFixture(TestCase):
 class TestCaseWithTrDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures("transactional_db")
 
-    def test_simple(self):
+    def test_simple(self) -> None:
         # We only want to check setup/teardown does not conflict
         assert 1
 
 
-def test_pdb_enabled(django_testdir):
+def test_pdb_enabled(django_testdir) -> None:
     """
     Make sure the database is flushed and tests are isolated when
     using the --pdb option.
@@ -465,7 +465,7 @@ def test_pdb_enabled(django_testdir):
     assert result.ret == 0
 
 
-def test_debug_not_used(django_testdir):
+def test_debug_not_used(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.test import TestCase
