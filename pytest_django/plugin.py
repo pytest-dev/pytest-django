@@ -395,7 +395,7 @@ def django_test_environment(request):
         if debug_ini == "keep":
             debug = None
         else:
-            debug = _get_boolean_value(debug_ini, False)
+            debug = _get_boolean_value(debug_ini, "django_debug_mode", False)
 
         setup_test_environment(debug=debug)
         request.addfinalizer(teardown_test_environment)
