@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found(django_testdir):
+def test_django_project_found(django_testdir) -> None:
     # XXX: Important: Do not chdir() to django_project_root since runpytest_subprocess
     # will call "python /path/to/pytest.py", which will impliclity add cwd to
     # the path. By instead calling "python /path/to/pytest.py
@@ -25,7 +25,7 @@ def test_django_project_found(django_testdir):
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found_with_k(django_testdir, monkeypatch):
+def test_django_project_found_with_k(django_testdir, monkeypatch) -> None:
     """Test that cwd is checked as fallback with non-args via '-k foo'."""
     testfile = django_testdir.create_test_module(
         """
@@ -44,7 +44,7 @@ def test_django_project_found_with_k(django_testdir, monkeypatch):
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found_with_k_and_cwd(django_testdir, monkeypatch):
+def test_django_project_found_with_k_and_cwd(django_testdir, monkeypatch) -> None:
     """Cover cwd not used as fallback if present already in args."""
     testfile = django_testdir.create_test_module(
         """
@@ -63,7 +63,7 @@ def test_django_project_found_with_k_and_cwd(django_testdir, monkeypatch):
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found_absolute(django_testdir, monkeypatch):
+def test_django_project_found_absolute(django_testdir, monkeypatch) -> None:
     """This only tests that "." is added as an absolute path (#637)."""
     django_testdir.create_test_module(
         """
@@ -82,7 +82,7 @@ def test_django_project_found_absolute(django_testdir, monkeypatch):
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found_invalid_settings(django_testdir, monkeypatch):
+def test_django_project_found_invalid_settings(django_testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
 
     result = django_testdir.runpytest_subprocess("django_project_root")
@@ -92,7 +92,7 @@ def test_django_project_found_invalid_settings(django_testdir, monkeypatch):
     result.stderr.fnmatch_lines(["*pytest-django found a Django project*"])
 
 
-def test_django_project_scan_disabled_invalid_settings(django_testdir, monkeypatch):
+def test_django_project_scan_disabled_invalid_settings(django_testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
 
     django_testdir.makeini(
@@ -112,7 +112,7 @@ def test_django_project_scan_disabled_invalid_settings(django_testdir, monkeypat
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_django_project_found_invalid_settings_version(django_testdir, monkeypatch):
+def test_django_project_found_invalid_settings_version(django_testdir, monkeypatch) -> None:
     """Invalid DSM should not cause an error with --help or --version."""
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
 
@@ -126,7 +126,7 @@ def test_django_project_found_invalid_settings_version(django_testdir, monkeypat
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
-def test_runs_without_error_on_long_args(django_testdir):
+def test_runs_without_error_on_long_args(django_testdir) -> None:
     django_testdir.create_test_module(
         """
     def test_this_is_a_long_message_which_caused_a_bug_when_scanning_for_manage_py_12346712341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234123412341234112341234112451234123412341234123412341234123412341234123412341234123412341234123412341234123412341234():

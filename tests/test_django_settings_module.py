@@ -18,7 +18,7 @@ SECRET_KEY = 'foobar'
 """
 
 
-def test_ds_ini(testdir, monkeypatch):
+def test_ds_ini(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeini(
         """
@@ -44,7 +44,7 @@ def test_ds_ini(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_ds_env(testdir, monkeypatch):
+def test_ds_env(testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     pkg = testdir.mkpydir("tpkg")
     settings = pkg.join("settings_env.py")
@@ -64,7 +64,7 @@ def test_ds_env(testdir, monkeypatch):
     ])
 
 
-def test_ds_option(testdir, monkeypatch):
+def test_ds_option(testdir, monkeypatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
     testdir.makeini(
         """
@@ -90,7 +90,7 @@ def test_ds_option(testdir, monkeypatch):
     ])
 
 
-def test_ds_env_override_ini(testdir, monkeypatch):
+def test_ds_env_override_ini(testdir, monkeypatch) -> None:
     "DSM env should override ini."
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     testdir.makeini(
@@ -115,7 +115,7 @@ def test_ds_env_override_ini(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_ds_non_existent(testdir, monkeypatch):
+def test_ds_non_existent(testdir, monkeypatch) -> None:
     """
     Make sure we do not fail with INTERNALERROR if an incorrect
     DJANGO_SETTINGS_MODULE is given.
@@ -127,7 +127,7 @@ def test_ds_non_existent(testdir, monkeypatch):
     assert result.ret != 0
 
 
-def test_ds_after_user_conftest(testdir, monkeypatch):
+def test_ds_after_user_conftest(testdir, monkeypatch) -> None:
     """
     Test that the settings module can be imported, after pytest has adjusted
     the sys.path.
@@ -141,7 +141,7 @@ def test_ds_after_user_conftest(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_ds_in_pytest_configure(testdir, monkeypatch):
+def test_ds_in_pytest_configure(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     pkg = testdir.mkpydir("tpkg")
     settings = pkg.join("settings_ds.py")
@@ -171,7 +171,7 @@ def test_ds_in_pytest_configure(testdir, monkeypatch):
     assert r.ret == 0
 
 
-def test_django_settings_configure(testdir, monkeypatch):
+def test_django_settings_configure(testdir, monkeypatch) -> None:
     """
     Make sure Django can be configured without setting
     DJANGO_SETTINGS_MODULE altogether, relying on calling
@@ -228,7 +228,7 @@ def test_django_settings_configure(testdir, monkeypatch):
     result.stdout.fnmatch_lines(["* 4 passed*"])
 
 
-def test_settings_in_hook(testdir, monkeypatch):
+def test_settings_in_hook(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeconftest(
         """
@@ -261,7 +261,7 @@ def test_settings_in_hook(testdir, monkeypatch):
     assert r.ret == 0
 
 
-def test_django_not_loaded_without_settings(testdir, monkeypatch):
+def test_django_not_loaded_without_settings(testdir, monkeypatch) -> None:
     """
     Make sure Django is not imported at all if no Django settings is specified.
     """
@@ -278,7 +278,7 @@ def test_django_not_loaded_without_settings(testdir, monkeypatch):
     assert result.ret == 0
 
 
-def test_debug_false_by_default(testdir, monkeypatch):
+def test_debug_false_by_default(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeconftest(
         """
@@ -308,7 +308,7 @@ def test_debug_false_by_default(testdir, monkeypatch):
 
 
 @pytest.mark.parametrize('django_debug_mode', (False, True))
-def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode):
+def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode: bool) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeini(
         """
@@ -344,7 +344,7 @@ def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode):
 
 
 @pytest.mark.parametrize('settings_debug', (False, True))
-def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug):
+def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug: bool) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeini(
         """
@@ -386,7 +386,7 @@ def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug):
     ]
 """
 )
-def test_django_setup_sequence(django_testdir):
+def test_django_setup_sequence(django_testdir) -> None:
     django_testdir.create_app_file(
         """
         from django.apps import apps, AppConfig
@@ -434,7 +434,7 @@ def test_django_setup_sequence(django_testdir):
     assert result.ret == 0
 
 
-def test_no_ds_but_django_imported(testdir, monkeypatch):
+def test_no_ds_but_django_imported(testdir, monkeypatch) -> None:
     """pytest-django should not bail out, if "django" has been imported
     somewhere, e.g. via pytest-splinter."""
 
@@ -461,7 +461,7 @@ def test_no_ds_but_django_imported(testdir, monkeypatch):
     assert r.ret == 0
 
 
-def test_no_ds_but_django_conf_imported(testdir, monkeypatch):
+def test_no_ds_but_django_conf_imported(testdir, monkeypatch) -> None:
     """pytest-django should not bail out, if "django.conf" has been imported
     somewhere, e.g. via hypothesis (#599)."""
 
@@ -498,7 +498,7 @@ def test_no_ds_but_django_conf_imported(testdir, monkeypatch):
     assert r.ret == 0
 
 
-def test_no_django_settings_but_django_imported(testdir, monkeypatch):
+def test_no_django_settings_but_django_imported(testdir, monkeypatch) -> None:
     """Make sure we do not crash when Django happens to be imported, but
     settings is not properly configured"""
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")

@@ -9,7 +9,7 @@ from pytest_django_test.db_helpers import (
 )
 
 
-def test_db_reuse_simple(django_testdir):
+def test_db_reuse_simple(django_testdir) -> None:
     "A test for all backends to check that `--reuse-db` works."
     django_testdir.create_test_module(
         """
@@ -28,7 +28,7 @@ def test_db_reuse_simple(django_testdir):
     result.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
 
 
-def test_db_order(django_testdir):
+def test_db_order(django_testdir) -> None:
     """Test order in which tests are being executed."""
 
     django_testdir.create_test_module('''
@@ -82,7 +82,7 @@ def test_db_order(django_testdir):
     ])
 
 
-def test_db_reuse(django_testdir):
+def test_db_reuse(django_testdir) -> None:
     """
     Test the re-use db functionality.
     """
@@ -144,7 +144,7 @@ class TestSqlite:
         }
     }
 
-    def test_sqlite_test_name_used(self, django_testdir):
+    def test_sqlite_test_name_used(self, django_testdir) -> None:
 
         django_testdir.create_test_module(
             """
@@ -167,7 +167,7 @@ class TestSqlite:
         result.stdout.fnmatch_lines(["*test_a*PASSED*"])
 
 
-def test_xdist_with_reuse(django_testdir):
+def test_xdist_with_reuse(django_testdir) -> None:
     pytest.importorskip("xdist")
     skip_if_sqlite_in_memory()
 
@@ -251,7 +251,7 @@ class TestSqliteWithXdist:
         }
     }
 
-    def test_sqlite_in_memory_used(self, django_testdir):
+    def test_sqlite_in_memory_used(self, django_testdir) -> None:
         pytest.importorskip("xdist")
 
         django_testdir.create_test_module(
@@ -288,7 +288,7 @@ class TestSqliteWithMultipleDbsAndXdist:
         }
     }
 
-    def test_sqlite_database_renamed(self, django_testdir):
+    def test_sqlite_database_renamed(self, django_testdir) -> None:
         pytest.importorskip("xdist")
 
         django_testdir.create_test_module(
@@ -334,7 +334,7 @@ class TestSqliteWithTox:
         }
     }
 
-    def test_db_with_tox_suffix(self, django_testdir, monkeypatch):
+    def test_db_with_tox_suffix(self, django_testdir, monkeypatch) -> None:
         "A test to check that Tox DB suffix works when running in parallel."
         monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
 
@@ -358,7 +358,7 @@ class TestSqliteWithTox:
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
 
-    def test_db_with_empty_tox_suffix(self, django_testdir, monkeypatch):
+    def test_db_with_empty_tox_suffix(self, django_testdir, monkeypatch) -> None:
         "A test to check that Tox DB suffix is not used when suffix would be empty."
         monkeypatch.setenv("TOX_PARALLEL_ENV", "")
 
@@ -393,7 +393,7 @@ class TestSqliteWithToxAndXdist:
         }
     }
 
-    def test_db_with_tox_suffix(self, django_testdir, monkeypatch):
+    def test_db_with_tox_suffix(self, django_testdir, monkeypatch) -> None:
         "A test to check that both Tox and xdist suffixes work together."
         pytest.importorskip("xdist")
         monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
@@ -429,7 +429,7 @@ class TestSqliteInMemoryWithXdist:
         }
     }
 
-    def test_sqlite_in_memory_used(self, django_testdir):
+    def test_sqlite_in_memory_used(self, django_testdir) -> None:
         pytest.importorskip("xdist")
 
         django_testdir.create_test_module(
@@ -455,7 +455,7 @@ class TestSqliteInMemoryWithXdist:
 class TestNativeMigrations:
     """ Tests for Django Migrations """
 
-    def test_no_migrations(self, django_testdir):
+    def test_no_migrations(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             import pytest
@@ -482,7 +482,7 @@ class TestNativeMigrations:
         assert "Operations to perform:" not in result.stdout.str()
         result.stdout.fnmatch_lines(["*= 1 passed*"])
 
-    def test_migrations_run(self, django_testdir):
+    def test_migrations_run(self, django_testdir) -> None:
         testdir = django_testdir
         testdir.create_test_module(
             """

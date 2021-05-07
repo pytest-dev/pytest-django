@@ -1,7 +1,7 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
-from typing import Set
+from typing import Any, Callable, Set
 from functools import wraps
 
 from django.test import (
@@ -9,10 +9,13 @@ from django.test import (
     LiveServerTestCase, TransactionTestCase
 )
 
+TYPE_CHECKING = False
+
+
 test_case = TestCase('run')
 
 
-def _wrapper(name):
+def _wrapper(name: str):
     func = getattr(test_case, name)
 
     @wraps(func)
@@ -34,3 +37,8 @@ assertions_names.update(
 for assert_func in assertions_names:
     globals()[assert_func] = _wrapper(assert_func)
     __all__.append(assert_func)
+
+
+if TYPE_CHECKING:
+    def __getattr__(name: str) -> Callable[..., Any]:
+        ...
