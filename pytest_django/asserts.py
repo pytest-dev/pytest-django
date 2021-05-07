@@ -1,7 +1,9 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
+from typing import Set
 from functools import wraps
+
 from django.test import (
     TestCase, SimpleTestCase,
     LiveServerTestCase, TransactionTestCase
@@ -21,7 +23,7 @@ def _wrapper(name):
 
 
 __all__ = []
-assertions_names = set()
+assertions_names = set()  # type: Set[str]
 assertions_names.update(
     {attr for attr in vars(TestCase) if attr.startswith('assert')},
     {attr for attr in vars(SimpleTestCase) if attr.startswith('assert')},

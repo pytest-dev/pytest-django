@@ -3,11 +3,10 @@
 Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
-
-
 import socket
 from contextlib import contextmanager
-from urllib.request import urlopen, HTTPError
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 import pytest
 from django.conf import settings as real_settings
