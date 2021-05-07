@@ -1,6 +1,5 @@
 """All pytest-django fixtures"""
-
-
+from typing import List, Any
 import os
 from contextlib import contextmanager
 from functools import partial
@@ -356,7 +355,7 @@ def async_rf():
 
 
 class SettingsWrapper:
-    _to_restore = []
+    _to_restore = []  # type: List[Any]
 
     def __delattr__(self, attr):
         from django.test import override_settings
