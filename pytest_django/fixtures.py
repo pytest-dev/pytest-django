@@ -159,12 +159,8 @@ def _django_db_fixture_helper(
         if transactional and _reset_sequences:
             reset_sequences = True
 
-    if not transactional:
-        django.db.transaction.Atomic._ensure_durability = False
-
-        def reset_durability() -> None:
-            django.db.transaction.Atomic._ensure_durability = True
-        request.addfinalizer(reset_durability)
+    PytestDjangoTestCase.setUpClass()
+    request.addfinalizer(PytestDjangoTestCase.tearDownClass)
 
     test_case = PytestDjangoTestCase(methodName="__init__")
     test_case._pre_setup()
