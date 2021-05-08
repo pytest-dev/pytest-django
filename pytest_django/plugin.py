@@ -262,10 +262,12 @@ def pytest_load_initial_conftests(
     # Register the marks
     early_config.addinivalue_line(
         "markers",
-        "django_db(transaction=False): Mark the test as using "
-        "the Django test database.  The *transaction* argument marks will "
-        "allow you to use real transactions in the test like Django's "
-        "TransactionTestCase.",
+        "django_db(transaction=False, reset_sequences=False): "
+        "Mark the test as using the Django test database.  "
+        "The *transaction* argument allows you to use real transactions "
+        "in the test like Django's TransactionTestCase.  ",
+        "The *reset_sequences* argument resets database sequences before "
+        "the test."
     )
     early_config.addinivalue_line(
         "markers",
