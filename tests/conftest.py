@@ -39,7 +39,9 @@ def testdir(testdir, monkeypatch):
 
 @pytest.fixture(scope="function")
 def django_testdir(request, testdir, monkeypatch):
-    from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
+    from pytest_django_test.db_helpers import (
+        DB_NAME, TEST_DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME,
+    )
 
     marker = request.node.get_closest_marker("django_project")
 
@@ -51,6 +53,8 @@ def django_testdir(request, testdir, monkeypatch):
         db_settings = copy.deepcopy(settings.DATABASES)
         db_settings["default"]["NAME"] = DB_NAME
         db_settings["default"]["TEST"]["NAME"] = TEST_DB_NAME
+        db_settings["second"]["NAME"] = SECOND_DB_NAME
+        db_settings["second"].setdefault("TEST", {})["NAME"] = SECOND_TEST_DB_NAME
 
     test_settings = (
         dedent(
@@ -66,6 +70,7 @@ def django_testdir(request, testdir, monkeypatch):
             compat.register()
 
         DATABASES = %(db_settings)s
+        DATABASE_ROUTERS = ['pytest_django_test.db_router.DbRouter']
 
         INSTALLED_APPS = [
             'django.contrib.auth',

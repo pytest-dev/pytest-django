@@ -48,6 +48,8 @@ if TYPE_CHECKING:
 
     import django
 
+    from .fixtures import _DjangoDb, _DjangoDbDatabases
+
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
 CONFIGURATION_ENV = "DJANGO_CONFIGURATION"
@@ -262,12 +264,14 @@ def pytest_load_initial_conftests(
     # Register the marks
     early_config.addinivalue_line(
         "markers",
-        "django_db(transaction=False, reset_sequences=False): "
+        "django_db(transaction=False, reset_sequences=False, databases=None): "
         "Mark the test as using the Django test database.  "
         "The *transaction* argument allows you to use real transactions "
         "in the test like Django's TransactionTestCase.  "
         "The *reset_sequences* argument resets database sequences before "
-        "the test.",
+        "the test.  "
+        "The *databases* argument sets which database aliases the test "
+        "uses (by default, only 'default'). Use '__all__' for all databases.",
     )
     early_config.addinivalue_line(
         "markers",
@@ -452,7 +456,11 @@ def _django_db_marker(request) -> None:
     """
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences = validate_django_db(marker)
+        transaction, reset_sequences, databases = validate_django_db(marker)
+
+        # TODO: Use pytest Store (item.store) once that's stable.
+        request.node._pytest_django_databases = databases
+
         if reset_sequences:
             request.getfixturevalue("django_db_reset_sequences")
         elif transaction:
@@ -727,12 +735,12 @@ class _DatabaseBlocker:
 _blocking_manager = _DatabaseBlocker()
 
 
-def validate_django_db(marker) -> Tuple[bool, bool]:
+def validate_django_db(marker) -> "_DjangoDb":
     """Validate the django_db marker.
 
-    It checks the signature and creates the ``transaction`` and
-    ``reset_sequences`` attributes on the marker which will have the
-    correct values.
+    It checks the signature and creates the ``transaction``,
+    ``reset_sequences`` and ``databases`` attributes on the marker
+    which will have the correct values.
 
     A sequence reset is only allowed when combined with a transaction.
     """
@@ -740,8 +748,9 @@ def validate_django_db(marker) -> Tuple[bool, bool]:
     def apifun(
         transaction: bool = False,
         reset_sequences: bool = False,
-    ) -> Tuple[bool, bool]:
-        return transaction, reset_sequences
+        databases: "_DjangoDbDatabases" = None,
+    ) -> "_DjangoDb":
+        return transaction, reset_sequences, databases
 
     return apifun(*marker.args, **marker.kwargs)
 
