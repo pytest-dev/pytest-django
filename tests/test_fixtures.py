@@ -14,7 +14,6 @@ from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
-from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
 from pytest_django_test.app.models import Item
@@ -374,7 +373,7 @@ class TestLiveServer:
         assert settings.ALLOWED_HOSTS == ["testserver"]
 
     def test_transactions(self, live_server) -> None:
-        if not connections_support_transactions():
+        if not connection.features.support_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block

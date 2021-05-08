@@ -1,6 +1,5 @@
 import pytest
 from django.db import connection, transaction
-from django.test.testcases import connections_support_transactions
 
 from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
@@ -66,13 +65,13 @@ class TestDatabaseFixtures:
         assert Item.objects.count() == 0
 
     def test_transactions_disabled(self, db: None) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
     def test_transactions_enabled(self, transactional_db: None) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
@@ -80,7 +79,7 @@ class TestDatabaseFixtures:
     def test_transactions_enabled_via_reset_seq(
         self, django_db_reset_sequences: None,
     ) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
@@ -120,7 +119,7 @@ class TestDatabaseFixtures:
         Item.objects.create(name="spam")
 
     def test_mydb(self, mydb: None) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         # Check the fixture had access to the db
@@ -196,21 +195,21 @@ class TestDatabaseMarker:
 
     @pytest.mark.django_db
     def test_transactions_disabled(self) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=False)
     def test_transactions_disabled_explicit(self) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
     @pytest.mark.django_db(transaction=True)
     def test_transactions_enabled(self) -> None:
-        if not connections_support_transactions():
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
