@@ -145,25 +145,28 @@ def _django_db_fixture_helper(
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
 
+    import django.test
+    import django.db
+
     if transactional:
-        from django.test import TransactionTestCase as django_case
-
-        if reset_sequences:
-
-            class ResetSequenceTestCase(django_case):
-                reset_sequences = True
-
-            django_case = ResetSequenceTestCase
+        test_case_class = django.test.TransactionTestCase
     else:
-        from django.test import TestCase as django_case
-        from django.db import transaction
-        transaction.Atomic._ensure_durability = False
+        test_case_class = django.test.TestCase
+
+    _reset_sequences = reset_sequences
+
+    class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+        if transactional and _reset_sequences:
+            reset_sequences = True
+
+    if not transactional:
+        django.db.transaction.Atomic._ensure_durability = False
 
         def reset_durability() -> None:
-            transaction.Atomic._ensure_durability = True
+            django.db.transaction.Atomic._ensure_durability = True
         request.addfinalizer(reset_durability)
 
-    test_case = django_case(methodName="__init__")
+    test_case = PytestDjangoTestCase(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
