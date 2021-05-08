@@ -519,6 +519,15 @@ class TestNativeMigrations:
                         },
                         bases=(models.Model,),
                     ),
+                    migrations.CreateModel(
+                        name='SecondItem',
+                        fields=[
+                            ('id', models.AutoField(serialize=False,
+                                                    auto_created=True,
+                                                    primary_key=True)),
+                            ('name', models.CharField(max_length=100)),
+                        ],
+                    ),
                     migrations.RunPython(
                         print_it,
                     ),

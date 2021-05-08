@@ -1,5 +1,5 @@
 """All pytest-django fixtures"""
-from typing import Any, Generator, List
+from typing import Any, Generator, Iterable, List, Optional, Tuple, Union
 import os
 from contextlib import contextmanager
 from functools import partial
@@ -12,7 +12,12 @@ from .lazy_django import skip_if_no_django
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from typing import Literal
+
     import django
+
+    _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
+    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases]
 
 
 __all__ = [
@@ -142,6 +147,10 @@ def _django_db_fixture_helper(
         # Do nothing, we get called with transactional=True, too.
         return
 
+    _databases = getattr(
+        request.node, "_pytest_django_databases", None,
+    )  # type: Optional[_DjangoDbDatabases]
+
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
 
@@ -158,6 +167,8 @@ def _django_db_fixture_helper(
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         if transactional and _reset_sequences:
             reset_sequences = True
+        if _databases is not None:
+            databases = _databases
 
     PytestDjangoTestCase.setUpClass()
     request.addfinalizer(PytestDjangoTestCase.tearDownClass)

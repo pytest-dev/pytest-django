@@ -24,7 +24,7 @@ Markers
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False])
+.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False, databases=None])
 
   This is used to mark a test function as requiring the database. It
   will ensure the database is set up correctly for the test. Each test
@@ -53,6 +53,23 @@ Markers
     ``False``.  Must be used together with ``transaction=True`` to have an
     effect.  Please be aware that not all databases support this feature.
     For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
+
+
+  :type databases: Union[Iterable[str], str, None]
+  :param databases:
+    .. caution::
+
+      This argument is **experimental** and is subject to change without
+      deprecation. We are still figuring out the best way to expose this
+      functionality. If you are using this successfully or unsuccessfully,
+      `let us know <https://github.com/pytest-dev/pytest-django/issues/924>`_!
+
+    The ``databases`` argument defines which databases in a multi-database
+    configuration will be set up and may be used by the test.  Defaults to
+    only the ``default`` database.  The special value ``"__all__"`` may be use
+    to specify all configured databases.
+    For details see :py:attr:`django.test.TransactionTestCase.databases` and
+    :py:attr:`django.test.TestCase.databases`.
 
 .. note::
 

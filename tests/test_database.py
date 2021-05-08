@@ -2,7 +2,7 @@ import pytest
 from django.db import connection, transaction
 
 from pytest_django.lazy_django import get_django_version
-from pytest_django_test.app.models import Item
+from pytest_django_test.app.models import Item, SecondItem
 
 
 def db_supports_reset_sequences() -> bool:
@@ -223,6 +223,38 @@ class TestDatabaseMarker:
     def test_reset_sequences_enabled(self, request) -> None:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
+
+    @pytest.mark.django_db(databases=['default', 'replica', 'second'])
+    def test_databases(self, request) -> None:
+        marker = request.node.get_closest_marker("django_db")
+        assert marker.kwargs["databases"] == ['default', 'replica', 'second']
+
+    @pytest.mark.django_db(databases=['second'])
+    def test_second_database(self, request) -> None:
+        SecondItem.objects.create(name="spam")
+
+    @pytest.mark.django_db(databases=['default'])
+    def test_not_allowed_database(self, request) -> None:
+        with pytest.raises(AssertionError, match='not allowed'):
+            SecondItem.objects.count()
+        with pytest.raises(AssertionError, match='not allowed'):
+            SecondItem.objects.create(name="spam")
+
+    @pytest.mark.django_db(databases=['replica'])
+    def test_replica_database(self, request) -> None:
+        Item.objects.using('replica').count()
+
+    @pytest.mark.django_db(databases=['replica'])
+    def test_replica_database_not_allowed(self, request) -> None:
+        with pytest.raises(AssertionError, match='not allowed'):
+            Item.objects.count()
+
+    @pytest.mark.django_db(databases='__all__')
+    def test_all_databases(self, request) -> None:
+        Item.objects.count()
+        Item.objects.create(name="spam")
+        SecondItem.objects.count()
+        SecondItem.objects.create(name="spam")
 
 
 def test_unittest_interaction(django_testdir) -> None:
