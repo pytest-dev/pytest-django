@@ -373,7 +373,7 @@ class TestLiveServer:
         assert settings.ALLOWED_HOSTS == ["testserver"]
 
     def test_transactions(self, live_server) -> None:
-        if not connection.features.support_transactions:
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
