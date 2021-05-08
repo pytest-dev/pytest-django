@@ -83,6 +83,13 @@ test runner like this:
             self.failfast = failfast
             self.keepdb = keepdb
 
+        @classmethod
+        def add_arguments(cls, parser):
+            parser.add_argument(
+                '--keepdb', action='store_true',
+                help='Preserves the test DB between runs.'
+            )
+
         def run_tests(self, test_labels):
             """Run pytest and return the exitcode.
 
