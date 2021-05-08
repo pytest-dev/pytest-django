@@ -1,5 +1,5 @@
-Database creation/re-use
-========================
+Database access
+===============
 
 ``pytest-django`` takes a conservative approach to enabling database
 access.  By default your tests will fail if they try to access the
