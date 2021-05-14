@@ -18,7 +18,9 @@ Markers
 
 ``pytest-django`` registers and uses markers.  See the pytest
 :ref:`documentation <pytest:mark>` on what marks are and for notes on
-:ref:`using <pytest:scoped-marking>` them.
+:ref:`using <pytest:scoped-marking>` them. Remember that you can apply
+marks at the single test level, the class level, the module level, and
+dynamically in a hook or fixture.
 
 
 ``pytest.mark.django_db`` - request database access
