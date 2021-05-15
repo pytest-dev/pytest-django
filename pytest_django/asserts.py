@@ -116,7 +116,7 @@ if TYPE_CHECKING:
         expected_exception: BaseException,
         expected_message: str,
         *args,
-        **kwargs,
+        **kwargs
     ):
         ...
 
@@ -124,7 +124,7 @@ if TYPE_CHECKING:
         expected_warning: Warning,
         expected_message: str,
         *args,
-        **kwargs,
+        **kwargs
     ):
         ...
 
@@ -202,7 +202,7 @@ if TYPE_CHECKING:
         func=...,
         *args,
         using: str = ...,
-        **kwargs,
+        **kwargs
     ):
         ...
 
