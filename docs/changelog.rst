@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v4.3.0 (2021-05-15)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add experimental :ref:`multiple databases <multi-db>` (multi db) support.
+
+* Add type annotations. If you previously excluded ``pytest_django`` from
+  your type-checker, you can remove the exclusion.
+
+* Documentation improvements.
+
+
 v4.2.0 (2021-04-10)
 -------------------
 

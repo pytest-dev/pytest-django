@@ -60,9 +60,12 @@ select using an argument to the ``django_db`` mark::
    def test_spam():
        pass  # test relying on transactions
 
+.. _`multi-db`:
 
 Tests requiring multiple databases
 ----------------------------------
+
+.. versionadded:: 4.3
 
 .. caution::
 
