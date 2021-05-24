@@ -25,6 +25,7 @@ from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
+from .fixtures import django_capture_on_commit_callbacks  # noqa
 from .fixtures import _live_server_helper  # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa

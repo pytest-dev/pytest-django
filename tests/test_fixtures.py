@@ -230,6 +230,70 @@ def test_django_assert_num_queries_output_info(django_testdir) -> None:
     assert result.ret == 1
 
 
+@pytest.mark.django_db
+def test_django_capture_on_commit_callbacks(django_capture_on_commit_callbacks) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    scratch = []
+    with django_capture_on_commit_callbacks() as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 1
+    assert scratch == []
+    callbacks[0]()
+    assert scratch == ["one"]
+
+    scratch = []
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("two"))
+        transaction.on_commit(lambda: scratch.append("three"))
+    assert len(callbacks) == 2
+    assert scratch == ["two", "three"]
+    callbacks[0]()
+    assert scratch == ["two", "three", "two"]
+
+
+@pytest.mark.django_db(databases=["default", "second"])
+def test_django_capture_on_commit_callbacks_multidb(django_capture_on_commit_callbacks) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="default", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 1
+    assert scratch == ["one"]
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="second", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("two"))  # pragma: no cover
+    assert len(callbacks) == 0
+    assert scratch == []
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="default", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("ten"))
+        transaction.on_commit(lambda: scratch.append("twenty"), using="second")  # pragma: no cover
+        transaction.on_commit(lambda: scratch.append("thirty"))
+    assert len(callbacks) == 2
+    assert scratch == ["ten", "thirty"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_django_capture_on_commit_callbacks_transactional(
+    django_capture_on_commit_callbacks,
+) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    # Bad usage: no transaction (executes immediately).
+    scratch = []
+    with django_capture_on_commit_callbacks() as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 0
+    assert scratch == ["one"]
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 
