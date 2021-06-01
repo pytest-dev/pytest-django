@@ -15,8 +15,11 @@ Community
 The fastest way to get feedback on contributions/bugs is usually to open an
 issue in the `issue tracker`_.
 
-Discussions also happen via IRC in #pylib on irc.freenode.org. You may also
-be interested in following `@andreaspelme`_ on Twitter.
+Discussions also happen via IRC in #pytest `on irc.libera.chat
+<ircs://irc.libera.chat:6697/#pytest>`_ (join using an IRC client, `via webchat
+<https://web.libera.chat/#pytest>`_, or `via Matrix
+<https://matrix.to/#/%23pytest:libera.chat>`_).
+You may also be interested in following `@andreaspelme`_ on Twitter.
 
 *************
 In a nutshell

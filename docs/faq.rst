@@ -149,7 +149,10 @@ If you think you've found a bug or something that is wrong in the
 documentation, feel free to `open an issue on the GitHub project`_ for
 pytest-django.
 
-Direct help can be found in the #pylib IRC channel on irc.freenode.org.
+Direct help can be found in the #pytest IRC channel `on irc.libera.chat
+<ircs://irc.libera.chat:6697/#pytest>`_ (using an IRC client, `via webchat
+<https://web.libera.chat/#pytest>`_, or `via Matrix
+<https://matrix.to/#/%23pytest:libera.chat>`_).
 
 .. _pytest tag: https://stackoverflow.com/search?q=pytest
 .. _open an issue on the GitHub project:
