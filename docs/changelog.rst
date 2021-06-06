@@ -1,6 +1,17 @@
 Changelog
 =========
 
+v4.4.0 (2021-06-06)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add a fixture :fixture:`django_capture_on_commit_callbacks` to capture
+  :func:`transaction.on_commit() <django.db.transaction.on_commit>` callbacks
+  in tests.
+
+
 v4.3.0 (2021-05-15)
 -------------------
 
