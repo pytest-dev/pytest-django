@@ -42,6 +42,7 @@ __all__ = [
     "django_capture_on_commit_callbacks",
 ]
 
+
 def import_from_string(val, setting_name):
     """
     Attempt to import a class from a string representation.
@@ -49,7 +50,8 @@ def import_from_string(val, setting_name):
     try:
         return import_string(val)
     except ImportError as e:
-        msg = "Could not import '%s' for API setting '%s'. %s: %s." % (val, setting_name, e.__class__.__name__, e)
+        msg = f"Could not import '{val}' for API setting " \
+              f"'{setting_name}'. {e.__class__.__name__}: {e}."
         raise ImportError(msg)
 
 
@@ -167,9 +169,15 @@ def _django_db_fixture_helper(
     request.addfinalizer(django_db_blocker.restore)
 
     if transactional:
-        test_case_classname = settings.PYTEST.get("PYTEST_TRANSACTION_TEST_CASE", "django.test.TransactionTestCase")
+        test_case_classname = settings.PYTEST.get(
+            "PYTEST_TRANSACTION_TEST_CASE",
+            "django.test.TransactionTestCase"
+        )
     else:
-        test_case_classname = settings.PYTEST.get("PYTEST_TEST_CASE", "django.test.TestCase")
+        test_case_classname = settings.PYTEST.get(
+            "PYTEST_TEST_CASE",
+            "django.test.TestCase"
+        )
     test_case_class = import_string(test_case_classname)
 
     _reset_sequences = reset_sequences
