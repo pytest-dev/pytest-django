@@ -154,6 +154,8 @@ def _django_db_fixture_helper(
     transactional: bool = False,
     reset_sequences: bool = False,
 ) -> None:
+    from django.conf import settings
+
     if is_django_unittest(request):
         return
 
@@ -169,13 +171,15 @@ def _django_db_fixture_helper(
     request.addfinalizer(django_db_blocker.restore)
 
     if transactional:
-        test_case_classname = settings.PYTEST.get(
-            "PYTEST_TRANSACTION_TEST_CASE",
+        test_case_classname = getattr(
+            settings,
+            "PYTEST_TRANSACTION_TEST_CASE_CLASS",
             "django.test.TransactionTestCase"
         )
     else:
-        test_case_classname = settings.PYTEST.get(
-            "PYTEST_TEST_CASE",
+        test_case_classname = getattr(
+            settings,
+            "PYTEST_TEST_CASE_CLASS",
             "django.test.TestCase"
         )
     test_case_class = import_string(test_case_classname)
