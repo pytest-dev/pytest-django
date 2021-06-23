@@ -41,6 +41,16 @@ __all__ = [
     "django_capture_on_commit_callbacks",
 ]
 
+def import_from_string(val, setting_name):
+    """
+    Attempt to import a class from a string representation.
+    """
+    try:
+        return import_string(val)
+    except ImportError as e:
+        msg = "Could not import '%s' for API setting '%s'. %s: %s." % (val, setting_name, e.__class__.__name__, e)
+        raise ImportError(msg)
+
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_tox_suffix() -> None:
@@ -159,9 +169,10 @@ def _django_db_fixture_helper(
     import django.db
 
     if transactional:
-        test_case_class = django.test.TransactionTestCase
+        test_case_classname = settings.PYTEST.get("PYTEST_TRANSACTION_TEST_CASE", "django.test.TransactionTestCase")
     else:
-        test_case_class = django.test.TestCase
+        test_case_classname = settings.PYTEST.get("PYTEST_TEST_CASE", "django.test.TestCase")
+    test_case_class = import_string(test_case_classname)
 
     _reset_sequences = reset_sequences
 
