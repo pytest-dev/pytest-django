@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from functools import partial
 
 import pytest
+from django.utils.module_loading import import_string
 
 from . import live_server_helper
 from .django_compat import is_django_unittest
@@ -164,9 +165,6 @@ def _django_db_fixture_helper(
 
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
-
-    import django.test
-    import django.db
 
     if transactional:
         test_case_classname = settings.PYTEST.get("PYTEST_TRANSACTION_TEST_CASE", "django.test.TransactionTestCase")
