@@ -153,7 +153,6 @@ def _django_db_fixture_helper(
         transactional: bool = False,
         reset_sequences: bool = False,
 ) -> None:
-    from django.conf import settings
 
     if is_django_unittest(request):
         return
