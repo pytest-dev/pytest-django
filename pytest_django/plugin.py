@@ -128,7 +128,8 @@ def pytest_addoption(parser) -> None:
     group.addoption(
         "--transaction-testcase-class",
         default=None,
-        help="The base TransactionTestCase class to patch for use with django. Useful for hypothesis users",
+        help="The base TransactionTestCase class to patch for use with django. "
+             "Useful for hypothesis users",
     )
     parser.addini(
         SETTINGS_MODULE_ENV, "Django settings module to use by pytest-django."
