@@ -121,12 +121,12 @@ def pytest_addoption(parser) -> None:
         help="Address and port for the live_server fixture.",
     )
     group.addoption(
-        "--testcase",
+        "--testcase-class",
         default=None,
         help="The base TestCase class to patch for use with django. Useful for hypothesis users",
     )
     group.addoption(
-        "--transaction-testcase",
+        "--transaction-testcase-class",
         default=None,
         help="The base TransactionTestCase class to patch for use with django. Useful for hypothesis users",
     )
