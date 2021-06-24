@@ -120,6 +120,16 @@ def pytest_addoption(parser) -> None:
         default=None,
         help="Address and port for the live_server fixture.",
     )
+    group.addoption(
+        "--testcase",
+        default=None,
+        help="The base TestCase class to patch for use with django. Useful for hypothesis users",
+    )
+    group.addoption(
+        "--transaction-testcase",
+        default=None,
+        help="The base TransactionTestCase class to patch for use with django. Useful for hypothesis users",
+    )
     parser.addini(
         SETTINGS_MODULE_ENV, "Django settings module to use by pytest-django."
     )

@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
     _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases]
 
-
 __all__ = [
     "django_db_setup",
     "db",
@@ -77,15 +76,15 @@ def django_db_modify_db_settings_xdist_suffix(request) -> None:
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_parallel_suffix(
-    django_db_modify_db_settings_tox_suffix: None,
-    django_db_modify_db_settings_xdist_suffix: None,
+        django_db_modify_db_settings_tox_suffix: None,
+        django_db_modify_db_settings_xdist_suffix: None,
 ) -> None:
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings(
-    django_db_modify_db_settings_parallel_suffix: None,
+        django_db_modify_db_settings_parallel_suffix: None,
 ) -> None:
     skip_if_no_django()
 
@@ -107,13 +106,13 @@ def django_db_createdb(request) -> bool:
 
 @pytest.fixture(scope="session")
 def django_db_setup(
-    request,
-    django_test_environment: None,
-    django_db_blocker,
-    django_db_use_migrations: bool,
-    django_db_keepdb: bool,
-    django_db_createdb: bool,
-    django_db_modify_db_settings: None,
+        request,
+        django_test_environment: None,
+        django_db_blocker,
+        django_db_use_migrations: bool,
+        django_db_keepdb: bool,
+        django_db_createdb: bool,
+        django_db_modify_db_settings: None,
 ) -> None:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
@@ -149,10 +148,10 @@ def django_db_setup(
 
 
 def _django_db_fixture_helper(
-    request,
-    django_db_blocker,
-    transactional: bool = False,
-    reset_sequences: bool = False,
+        request,
+        django_db_blocker,
+        transactional: bool = False,
+        reset_sequences: bool = False,
 ) -> None:
     from django.conf import settings
 
@@ -171,17 +170,14 @@ def _django_db_fixture_helper(
     request.addfinalizer(django_db_blocker.restore)
 
     if transactional:
-        test_case_classname = getattr(
-            settings,
-            "PYTEST_TRANSACTION_TEST_CASE_CLASS",
-            "django.test.TransactionTestCase"
-        )
+        test_case_classname = request.config.getvalue("transaction_testcase_class") or os.getenv(
+            "DJANGO_TRANSACTION_TEST_CASE_CLASS"
+        ) or "django.test.TransactionTestCase"
     else:
-        test_case_classname = getattr(
-            settings,
-            "PYTEST_TEST_CASE_CLASS",
-            "django.test.TestCase"
-        )
+        test_case_classname = request.config.getvalue("testcase_class") or os.getenv(
+            "DJANGO_TEST_CASE_CLASS"
+        ) or "django.test.TestCase"
+
     test_case_class = import_string(test_case_classname)
 
     _reset_sequences = reset_sequences
@@ -244,9 +240,9 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 @pytest.fixture(scope="function")
 def db(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
+        request,
+        django_db_setup: None,
+        django_db_blocker,
 ) -> None:
     """Require a django test database.
 
@@ -264,8 +260,8 @@ def db(
     if "django_db_reset_sequences" in request.fixturenames:
         request.getfixturevalue("django_db_reset_sequences")
     if (
-        "transactional_db" in request.fixturenames
-        or "live_server" in request.fixturenames
+            "transactional_db" in request.fixturenames
+            or "live_server" in request.fixturenames
     ):
         request.getfixturevalue("transactional_db")
     else:
@@ -274,9 +270,9 @@ def db(
 
 @pytest.fixture(scope="function")
 def transactional_db(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
+        request,
+        django_db_setup: None,
+        django_db_blocker,
 ) -> None:
     """Require a django test database with transaction support.
 
@@ -297,9 +293,9 @@ def transactional_db(
 
 @pytest.fixture(scope="function")
 def django_db_reset_sequences(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
+        request,
+        django_db_setup: None,
+        django_db_blocker,
 ) -> None:
     """Require a transactional test database with sequence reset support.
 
@@ -353,9 +349,9 @@ def django_username_field(django_user_model) -> str:
 
 @pytest.fixture()
 def admin_user(
-    db: None,
-    django_user_model,
-    django_username_field: str,
+        db: None,
+        django_user_model,
+        django_username_field: str,
 ):
     """A Django admin user.
 
@@ -384,8 +380,8 @@ def admin_user(
 
 @pytest.fixture()
 def admin_client(
-    db: None,
-    admin_user,
+        db: None,
+        admin_user,
 ) -> "django.test.client.Client":
     """A Django test client logged in as an admin user."""
     from django.test.client import Client
@@ -517,11 +513,11 @@ def _live_server_helper(request) -> None:
 
 @contextmanager
 def _assert_num_queries(
-    config,
-    num: int,
-    exact: bool = True,
-    connection=None,
-    info=None,
+        config,
+        num: int,
+        exact: bool = True,
+        connection=None,
+        info=None,
 ) -> Generator["django.test.utils.CaptureQueriesContext", None, None]:
     from django.test.utils import CaptureQueriesContext
 
@@ -568,9 +564,9 @@ def django_assert_max_num_queries(pytestconfig):
 
 @contextmanager
 def _capture_on_commit_callbacks(
-    *,
-    using: Optional[str] = None,
-    execute: bool = False
+        *,
+        using: Optional[str] = None,
+        execute: bool = False
 ):
     from django.db import DEFAULT_DB_ALIAS, connections
     from django.test import TestCase
