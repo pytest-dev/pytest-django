@@ -368,11 +368,7 @@ Put this into ``conftest.py``::
 
     @pytest.fixture(scope='session')
     def django_db_setup():
-        settings.DATABASES['default'] = {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': 'db.example.com',
-            'NAME': 'external_db',
-        }
+        pass
 
 
 Populate the database with initial test data
