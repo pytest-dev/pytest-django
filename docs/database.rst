@@ -386,7 +386,7 @@ Populate the test database if you don't use transactional or live_server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are using the :func:`pytest.mark.django_db` marker or :fixture:`db`
-fixture, you probably don't want to explictly handle transactions in your
+fixture, you probably don't want to explicitly handle transactions in your
 tests. In this case, it is sufficient to populate your database only
 once. You can put code like this in ``conftest.py``::
 
