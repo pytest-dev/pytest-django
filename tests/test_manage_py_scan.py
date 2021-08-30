@@ -4,9 +4,9 @@ import pytest
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
 def test_django_project_found(django_testdir) -> None:
     # XXX: Important: Do not chdir() to django_project_root since runpytest_subprocess
-    # will call "python /path/to/pytest.py", which will impliclity add cwd to
+    # will call "python /path/to/pytest.py", which will implicitly add cwd to
     # the path. By instead calling "python /path/to/pytest.py
-    # django_project_root", we avoid impliclity adding the project to sys.path
+    # django_project_root", we avoid implicitly adding the project to sys.path
     # This matches the behaviour when pytest is called directly as an
     # executable (cwd is not added to the Python path)
 
