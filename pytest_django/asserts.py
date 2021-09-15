@@ -41,7 +41,7 @@ for assert_func in assertions_names:
 
 if TYPE_CHECKING:
     from django.http import HttpResponse
-    from django.test.testcases import _AssertTemplateUsedContext
+    from django.test.testcases import _AssertTemplateNotUsedContext, _AssertTemplateUsedContext
 
     def assertRedirects(
         response: HttpResponse,
@@ -110,7 +110,7 @@ if TYPE_CHECKING:
         response: Optional[HttpResponse] = ...,
         template_name: Optional[str] = ...,
         msg_prefix: str = ...,
-    ) -> None:
+    ) -> _AssertTemplateNotUsedContext:
         ...
 
     def assertRaisesMessage(
