@@ -1,6 +1,16 @@
 Changelog
 =========
 
+unreleased
+----------
+
+Bugfixes
+^^^^^^^^
+
+* Fix :fixture:`live_server` when using an in-memory SQLite database on
+  Django >= 3.0.
+
+
 v4.4.0 (2021-06-06)
 -------------------
 
