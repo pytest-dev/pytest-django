@@ -24,7 +24,10 @@ class LiveServer:
                 and conn.settings_dict["NAME"] == ":memory:"
             ):
                 # Explicitly enable thread-shareability for this connection
-                conn.allow_thread_sharing = True
+                try:
+                    conn.inc_thread_sharing()
+                except AttributeError:  # Django < 3
+                    conn.allow_thread_sharing = True
                 connections_override[conn.alias] = conn
 
         liveserver_kwargs["connections_override"] = connections_override
