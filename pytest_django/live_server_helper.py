@@ -24,7 +24,7 @@ class LiveServer:
                 and conn.settings_dict["NAME"] == ":memory:"
             ):
                 # Explicitly enable thread-shareability for this connection
-                conn.allow_thread_sharing = True
+                conn.inc_thread_sharing()
                 connections_override[conn.alias] = conn
 
         liveserver_kwargs["connections_override"] = connections_override
@@ -60,8 +60,12 @@ class LiveServer:
 
     def stop(self) -> None:
         """Stop the server"""
+        # Terminate the live server's thread.
         self.thread.terminate()
         self.thread.join()
+        # Restore shared connections' non-shareability.
+        for conn in self.thread.connections_override.values():
+            conn.dec_thread_sharing()
 
     @property
     def url(self) -> str:
