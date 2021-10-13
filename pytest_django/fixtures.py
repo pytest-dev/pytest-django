@@ -1,4 +1,5 @@
 """All pytest-django fixtures"""
+import copy
 import os
 from contextlib import contextmanager
 from functools import partial
@@ -399,6 +400,8 @@ def async_rf() -> "django.test.client.AsyncRequestFactory":
 
 class SettingsWrapper:
     _to_restore = []  # type: List[Any]
+    # Used to verify values were not mutated
+    _original_values = {}  # type: Dict[str, Any]
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
@@ -420,14 +423,26 @@ class SettingsWrapper:
 
     def __getattr__(self, attr: str):
         from django.conf import settings
-
-        return getattr(settings, attr)
+        value = getattr(settings, attr)
+        if attr not in self._original_values:
+            self._original_values[attr] = copy.copy(value)
+        return value
 
     def finalize(self) -> None:
+        from django.conf import settings
         for override in reversed(self._to_restore):
             override.disable()
 
         del self._to_restore[:]
+
+        for attr, value in self._original_values.items():
+            if not hasattr(self, attr):
+                continue
+
+            if value != getattr(self, attr):
+                setattr(settings, attr, value)
+
+        self._original_values.clear()
 
 
 @pytest.fixture()

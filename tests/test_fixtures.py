@@ -555,7 +555,7 @@ class TestLiveServer:
     MY_LIST = [1]
     """
 )
-def test_setting_mutation_does_not_leak(django_testdir, settings):
+def test_setting_mutation_does_not_leak(django_testdir, settings) -> None:
     django_testdir.makepyfile(
         """
         def test_dict_initial_value(settings):
@@ -578,6 +578,15 @@ def test_setting_mutation_does_not_leak(django_testdir, settings):
     )
     result = django_testdir.runpytest_subprocess("-s")
     result.stdout.fnmatch_lines(["* 4 passed*"])
+
+
+def test_finalize_resets_mutated_value(settings) -> None:
+    original = settings.ALLOWED_HOSTS.copy()
+    settings.ALLOWED_HOSTS.append('foo')
+    settings.finalize()
+    assert settings._to_restore == []
+    assert settings._original_values == {}
+    assert original == settings.ALLOWED_HOSTS
 
 
 @pytest.mark.parametrize("username_field", ("email", "identifier"))
