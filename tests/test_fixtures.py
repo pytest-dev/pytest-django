@@ -549,6 +549,37 @@ class TestLiveServer:
         django_testdir.runpytest_subprocess("--liveserver=localhost:%s" % port)
 
 
+@pytest.mark.django_project(
+    extra_settings="""
+    MY_DICT = {'a': 1}
+    MY_LIST = [1]
+    """
+)
+def test_setting_mutation_does_not_leak(django_testdir, settings):
+    django_testdir.makepyfile(
+        """
+        def test_dict_initial_value(settings):
+            assert settings.MY_DICT == {'a': 1}
+            settings.MY_DICT['a'] = 2  # This should be cleared
+
+
+        def test_dict_value_does_not_leak(settings):
+            assert settings.MY_DICT == {'a': 1}
+
+
+        def test_list_initial_value(settings):
+            assert settings.MY_LIST == [1]
+            settings.MY_LIST.append(2)
+
+
+        def test_list_value_does_not_leak(settings):
+            assert settings.MY_LIST == [1]
+        """
+    )
+    result = django_testdir.runpytest_subprocess("-s")
+    result.stdout.fnmatch_lines(["* 4 passed*"])
+
+
 @pytest.mark.parametrize("username_field", ("email", "identifier"))
 @pytest.mark.django_project(
     extra_settings="""
