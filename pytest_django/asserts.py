@@ -1,12 +1,11 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
-from typing import Any, Callable, Optional, Sequence, Set, Union
 from functools import wraps
+from typing import Any, Callable, Optional, Sequence, Set, Union
 
 from django.test import (
-    TestCase, SimpleTestCase,
-    LiveServerTestCase, TransactionTestCase
+    LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
 )
 
 TYPE_CHECKING = False

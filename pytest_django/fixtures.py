@@ -1,14 +1,16 @@
 """All pytest-django fixtures"""
-from typing import Any, Callable, Generator, Iterable, List, Optional, Tuple, Union
 import os
 from contextlib import contextmanager
 from functools import partial
+from typing import (
+    Any, Callable, Generator, Iterable, List, Optional, Tuple, Union,
+)
 
 import pytest
 
 from . import live_server_helper
 from .django_compat import is_django_unittest
-from .lazy_django import skip_if_no_django, get_django_version
+from .lazy_django import get_django_version, skip_if_no_django
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -155,8 +157,8 @@ def _django_db_fixture_helper(
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
 
-    import django.test
     import django.db
+    import django.test
 
     if transactional:
         test_case_class = django.test.TransactionTestCase

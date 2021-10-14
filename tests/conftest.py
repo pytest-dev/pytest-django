@@ -1,12 +1,11 @@
-from typing import Optional
 import copy
+import pathlib
 import shutil
 from textwrap import dedent
-import pathlib
+from typing import Optional
 
 import pytest
 from django.conf import settings
-
 
 pytest_plugins = "pytester"
 
@@ -40,7 +39,7 @@ def testdir(testdir, monkeypatch):
 @pytest.fixture(scope="function")
 def django_testdir(request, testdir, monkeypatch):
     from pytest_django_test.db_helpers import (
-        DB_NAME, TEST_DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME,
+        DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME, TEST_DB_NAME,
     )
 
     marker = request.node.get_closest_marker("django_project")
