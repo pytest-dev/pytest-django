@@ -4,43 +4,42 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 
-from typing import Generator, List, Optional, Tuple, Union
 import contextlib
 import inspect
-from functools import reduce
 import os
 import pathlib
 import sys
+from functools import reduce
+from typing import Generator, List, Optional, Tuple, Union
 
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
-from .fixtures import django_assert_num_queries  # noqa
-from .fixtures import django_assert_max_num_queries  # noqa
-from .fixtures import django_db_setup  # noqa
-from .fixtures import django_db_use_migrations  # noqa
-from .fixtures import django_db_keepdb  # noqa
-from .fixtures import django_db_createdb  # noqa
-from .fixtures import django_db_modify_db_settings  # noqa
-from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
-from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
-from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
-from .fixtures import django_capture_on_commit_callbacks  # noqa
 from .fixtures import _live_server_helper  # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
 from .fixtures import async_client  # noqa
+from .fixtures import async_rf  # noqa
 from .fixtures import client  # noqa
 from .fixtures import db  # noqa
+from .fixtures import django_assert_max_num_queries  # noqa
+from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import django_capture_on_commit_callbacks  # noqa
+from .fixtures import django_db_createdb  # noqa
+from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_modify_db_settings  # noqa
+from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
+from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
+from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
-from .fixtures import django_db_reset_sequences  # noqa
-from .fixtures import async_rf  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 TYPE_CHECKING = False
@@ -416,7 +415,9 @@ def django_test_environment(request) -> None:
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.test.utils import setup_test_environment, teardown_test_environment
+        from django.test.utils import (
+            setup_test_environment, teardown_test_environment,
+        )
 
         debug_ini = request.config.getini("django_debug_mode")
         if debug_ini == "keep":

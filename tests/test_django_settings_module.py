@@ -5,7 +5,6 @@ If these tests fail you probably forgot to run "python setup.py develop".
 
 import pytest
 
-
 BARE_SETTINGS = """
 # At least one database must be configured
 DATABASES = {

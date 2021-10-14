@@ -3,9 +3,9 @@
 Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
-from typing import Generator
 import socket
 from contextlib import contextmanager
+from typing import Generator
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
@@ -16,8 +16,8 @@ from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
 from django.utils.encoding import force_str
 
-from pytest_django_test.app.models import Item
 from pytest_django.lazy_django import get_django_version
+from pytest_django_test.app.models import Item
 
 
 @contextmanager

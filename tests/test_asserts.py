@@ -1,12 +1,12 @@
 """
 Tests the dynamic loading of all Django assertion cases.
 """
-from typing import List
 import inspect
+from typing import List
 
 import pytest
-import pytest_django
 
+import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
 
 
@@ -14,8 +14,9 @@ def _get_actual_assertions_names() -> List[str]:
     """
     Returns list with names of all assertion helpers in Django.
     """
-    from django.test import TestCase as DjangoTestCase
     from unittest import TestCase as DefaultTestCase
+
+    from django.test import TestCase as DjangoTestCase
 
     obj = DjangoTestCase('run')
 
@@ -42,6 +43,7 @@ def test_django_asserts_available() -> None:
 @pytest.mark.django_db
 def test_sanity() -> None:
     from django.http import HttpResponse
+
     from pytest_django.asserts import assertContains, assertNumQueries
 
     response = HttpResponse('My response')

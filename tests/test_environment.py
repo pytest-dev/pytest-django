@@ -1,14 +1,13 @@
 import os
 
 import pytest
-from django.contrib.sites.models import Site
 from django.contrib.sites import models as site_models
+from django.contrib.sites.models import Site
 from django.core import mail
 from django.db import connection
 from django.test import TestCase
 
 from pytest_django_test.app.models import Item
-
 
 # It doesn't matter which order all the _again methods are run, we just need
 # to check the environment remains constant.

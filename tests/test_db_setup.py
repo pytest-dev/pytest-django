@@ -1,10 +1,7 @@
 import pytest
 
 from pytest_django_test.db_helpers import (
-    db_exists,
-    drop_database,
-    mark_database,
-    mark_exists,
+    db_exists, drop_database, mark_database, mark_exists,
     skip_if_sqlite_in_memory,
 )
 
