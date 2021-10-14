@@ -22,7 +22,7 @@ docs:
 
 # See setup.cfg for configuration.
 isort:
-	find pytest_django tests -name '*.py' -exec isort {} +
+	isort pytest_django pytest_django_test tests
 
 clean:
 	rm -rf bin include/ lib/ man/ pytest_django.egg-info/ build/
