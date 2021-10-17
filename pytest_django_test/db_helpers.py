@@ -6,6 +6,7 @@ import pytest
 from django.conf import settings
 from django.utils.encoding import force_str
 
+
 # Construct names for the "inner" database used in runpytest tests
 _settings = settings.DATABASES["default"]
 

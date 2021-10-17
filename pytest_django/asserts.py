@@ -8,6 +8,7 @@ from django.test import (
     LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
 )
 
+
 TYPE_CHECKING = False
 
 

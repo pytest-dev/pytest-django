@@ -9,6 +9,7 @@ from django.test import TestCase
 
 from pytest_django_test.app.models import Item
 
+
 # It doesn't matter which order all the _again methods are run, we just need
 # to check the environment remains constant.
 # This is possible with some of the testdir magic, but this is the lazy way

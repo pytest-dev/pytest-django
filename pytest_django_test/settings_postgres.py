@@ -2,6 +2,7 @@ from os import environ
 
 from .settings_base import *  # noqa: F401 F403
 
+
 # PyPy compatibility
 try:
     from psycopg2cffi import compat

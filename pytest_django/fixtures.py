@@ -12,6 +12,7 @@ from . import live_server_helper
 from .django_compat import is_django_unittest
 from .lazy_django import get_django_version, skip_if_no_django
 
+
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import Literal

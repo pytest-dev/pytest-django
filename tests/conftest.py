@@ -7,6 +7,7 @@ from typing import Optional
 import pytest
 from django.conf import settings
 
+
 pytest_plugins = "pytester"
 
 REPOSITORY_ROOT = pathlib.Path(__file__).parent

@@ -42,6 +42,7 @@ from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
+
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import ContextManager, NoReturn
