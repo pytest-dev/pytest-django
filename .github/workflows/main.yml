@@ -55,6 +55,10 @@ jobs:
           python: 3.8
           allow_failure: false
 
+        - name: py310-dj32-postgres-xdist-coverage
+          python: '3.10'
+          allow_failure: false
+
         - name: py39-dj32-postgres-xdist-coverage
           python: 3.9
           allow_failure: false
