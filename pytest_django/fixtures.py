@@ -144,6 +144,8 @@ def _django_db_fixture_helper(
     transactional: bool = False,
     reset_sequences: bool = False,
 ) -> None:
+    from django import VERSION
+
     if is_django_unittest(request):
         return
 
@@ -175,6 +177,8 @@ def _django_db_fixture_helper(
             databases = _databases
 
     PytestDjangoTestCase.setUpClass()
+    if VERSION >= (4, 0):
+        request.addfinalizer(PytestDjangoTestCase.doClassCleanups)
     request.addfinalizer(PytestDjangoTestCase.tearDownClass)
 
     test_case = PytestDjangoTestCase(methodName="__init__")
