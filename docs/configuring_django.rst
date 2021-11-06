@@ -14,12 +14,12 @@ Django settings the same way Django does by default.
 
 Example::
 
-    $ export DJANGO_SETTINGS_MODULE=test_settings
+    $ export DJANGO_SETTINGS_MODULE=test.settings
     $ pytest
 
 or::
 
-    $ DJANGO_SETTINGS_MODULE=test_settings pytest
+    $ DJANGO_SETTINGS_MODULE=test.settings pytest
 
 
 Command line option ``--ds=SETTINGS``
@@ -27,7 +27,7 @@ Command line option ``--ds=SETTINGS``
 
 Example::
 
-    $ pytest --ds=test_settings
+    $ pytest --ds=test.settings
 
 
 ``pytest.ini`` settings
@@ -36,7 +36,7 @@ Example::
 Example contents of pytest.ini::
 
     [pytest]
-    DJANGO_SETTINGS_MODULE = test_settings
+    DJANGO_SETTINGS_MODULE = test.settings
 
 Order of choosing settings
 --------------------------
