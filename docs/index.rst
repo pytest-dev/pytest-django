@@ -23,7 +23,7 @@ Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
 
    # -- FILE: pytest.ini (or tox.ini)
    [pytest]
-   DJANGO_SETTINGS_MODULE = test_settings
+   DJANGO_SETTINGS_MODULE = test.settings
    # -- recommended but optional:
    python_files = tests.py test_*.py *_tests.py
 
