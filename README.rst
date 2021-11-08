@@ -28,7 +28,7 @@ pytest-django allows you to test your Django project/applications with the
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
 * Version compatibility:
 
-  * Django: 2.2, 3.0, 3.1 and latest main branch (compatible at the time of
+  * Django: 2.2, 3.0, 3.1, 3.2 and latest main branch (compatible at the time of
     each release)
   * Python: CPython>=3.5 or PyPy 3
   * pytest: >=5.4
@@ -55,11 +55,11 @@ Why would I use this instead of Django's `manage.py test` command?
 Running your test suite with pytest-django allows you to tap into the features
 that are already present in pytest. Here are some advantages:
 
-* `Manage test dependencies with pytest fixtures. <https://pytest.org/en/latest/fixture.html>`_
+* `Manage test dependencies with pytest fixtures. <https://pytest.org/en/latest/how-to/fixtures.html>`_
 * Less boilerplate tests: no need to import unittest, create a subclass with methods. Write tests as regular functions.
 * Database re-use: no need to re-create the test database for every test run.
 * Run tests in multiple processes for increased speed (with the pytest-xdist plugin).
-* Make use of other `pytest plugins <https://pytest.org/en/latest/plugins.html>`_.
+* Make use of other `pytest plugins <https://pytest.org/en/latest/how-to/plugins.html>`_.
 * Works with both worlds: Existing unittest-style TestCase's still work without any modifications.
 
 See the `pytest documentation <https://pytest.org/en/latest/>`_ for more information on pytest itself.

@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from django.contrib.sites.models import Site
 from django.contrib.sites import models as site_models
+from django.contrib.sites.models import Site
 from django.core import mail
 from django.db import connection
 from django.test import TestCase
@@ -17,7 +17,7 @@ from pytest_django_test.app.models import Item
 
 
 @pytest.mark.parametrize("subject", ["subject1", "subject2"])
-def test_autoclear_mailbox(subject):
+def test_autoclear_mailbox(subject: str) -> None:
     assert len(mail.outbox) == 0
     mail.send_mail(subject, "body", "from@example.com", ["to@example.com"])
     assert len(mail.outbox) == 1
@@ -30,15 +30,15 @@ def test_autoclear_mailbox(subject):
 
 
 class TestDirectAccessWorksForDjangoTestCase(TestCase):
-    def _do_test(self):
+    def _do_test(self) -> None:
         assert len(mail.outbox) == 0
         mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
         assert len(mail.outbox) == 1
 
-    def test_one(self):
+    def test_one(self) -> None:
         self._do_test()
 
-    def test_two(self):
+    def test_two(self) -> None:
         self._do_test()
 
 
@@ -51,7 +51,7 @@ class TestDirectAccessWorksForDjangoTestCase(TestCase):
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_variable(django_testdir):
+def test_invalid_template_variable(django_testdir) -> None:
     django_testdir.create_app_file(
         """
         from django.urls import path
@@ -112,7 +112,7 @@ def test_invalid_template_variable(django_testdir):
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_with_default_if_none(django_testdir):
+def test_invalid_template_with_default_if_none(django_testdir) -> None:
     django_testdir.create_app_file(
         """
             <div>{{ data.empty|default:'d' }}</div>
@@ -154,7 +154,7 @@ def test_invalid_template_with_default_if_none(django_testdir):
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_variable_opt_in(django_testdir):
+def test_invalid_template_variable_opt_in(django_testdir) -> None:
     django_testdir.create_app_file(
         """
         from django.urls import path
@@ -195,24 +195,24 @@ def test_invalid_template_variable_opt_in(django_testdir):
 
 
 @pytest.mark.django_db
-def test_database_rollback():
+def test_database_rollback() -> None:
     assert Item.objects.count() == 0
     Item.objects.create(name="blah")
     assert Item.objects.count() == 1
 
 
 @pytest.mark.django_db
-def test_database_rollback_again():
+def test_database_rollback_again() -> None:
     test_database_rollback()
 
 
 @pytest.mark.django_db
-def test_database_name():
+def test_database_name() -> None:
     dirname, name = os.path.split(connection.settings_dict["NAME"])
     assert "file:memorydb" in name or name == ":memory:" or name.startswith("test_")
 
 
-def test_database_noaccess():
+def test_database_noaccess() -> None:
     with pytest.raises(RuntimeError):
         Item.objects.count()
 
@@ -235,17 +235,17 @@ class TestrunnerVerbosity:
         )
         return django_testdir
 
-    def test_default(self, testdir):
+    def test_default(self, testdir) -> None:
         """Not verbose by default."""
         result = testdir.runpytest_subprocess("-s")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
-    def test_vq_verbosity_0(self, testdir):
+    def test_vq_verbosity_0(self, testdir) -> None:
         """-v and -q results in verbosity 0."""
         result = testdir.runpytest_subprocess("-s", "-v", "-q")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
-    def test_verbose_with_v(self, testdir):
+    def test_verbose_with_v(self, testdir) -> None:
         """Verbose output with '-v'."""
         result = testdir.runpytest_subprocess("-s", "-v")
         result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py:*", "*PASSED*"])
@@ -253,7 +253,7 @@ class TestrunnerVerbosity:
             ["*Destroying test database for alias 'default'*"]
         )
 
-    def test_more_verbose_with_vv(self, testdir):
+    def test_more_verbose_with_vv(self, testdir) -> None:
         """More verbose output with '-v -v'."""
         result = testdir.runpytest_subprocess("-s", "-v", "-v")
         result.stdout.fnmatch_lines_random(
@@ -271,7 +271,7 @@ class TestrunnerVerbosity:
             ]
         )
 
-    def test_more_verbose_with_vv_and_reusedb(self, testdir):
+    def test_more_verbose_with_vv_and_reusedb(self, testdir) -> None:
         """More verbose output with '-v -v', and --create-db."""
         result = testdir.runpytest_subprocess("-s", "-v", "-v", "--create-db")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py:*", "*PASSED*"])
@@ -284,7 +284,7 @@ class TestrunnerVerbosity:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("site_name", ["site1", "site2"])
-def test_clear_site_cache(site_name, rf, monkeypatch):
+def test_clear_site_cache(site_name: str, rf, monkeypatch) -> None:
     request = rf.get("/")
     monkeypatch.setattr(request, "get_host", lambda: "foo.com")
     Site.objects.create(domain="foo.com", name=site_name)
@@ -293,7 +293,7 @@ def test_clear_site_cache(site_name, rf, monkeypatch):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("site_name", ["site1", "site2"])
-def test_clear_site_cache_check_site_cache_size(site_name, settings):
+def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> None:
     assert len(site_models.SITE_CACHE) == 0
     site = Site.objects.create(domain="foo.com", name=site_name)
     settings.SITE_ID = site.id

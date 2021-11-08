@@ -18,13 +18,19 @@ Markers
 
 ``pytest-django`` registers and uses markers.  See the pytest
 :ref:`documentation <pytest:mark>` on what marks are and for notes on
-:ref:`using <pytest:scoped-marking>` them.
+:ref:`using <pytest:scoped-marking>` them. Remember that you can apply
+marks at the single test level, the class level, the module level, and
+dynamically in a hook or fixture.
 
 
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<<<<<<< HEAD
 .. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False, serialized_rollback=False])
+=======
+.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False, databases=None])
+>>>>>>> master
 
   This is used to mark a test function as requiring the database. It
   will ensure the database is set up correctly for the test. Each test
@@ -54,6 +60,7 @@ Markers
     effect.  Please be aware that not all databases support this feature.
     For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
 
+<<<<<<< HEAD
   :type serialized_rollback: bool
   :param serialized_rollback:
    The ``serialized_rollback`` argument enables `rollback emulation`_.
@@ -61,6 +68,24 @@ Markers
    flushed, destroying data created in data migrations. This is the
    default behavior of Django. Setting ``serialized_rollback=True``
    tells Django to restore that data.
+=======
+
+  :type databases: Union[Iterable[str], str, None]
+  :param databases:
+    .. caution::
+
+      This argument is **experimental** and is subject to change without
+      deprecation. We are still figuring out the best way to expose this
+      functionality. If you are using this successfully or unsuccessfully,
+      `let us know <https://github.com/pytest-dev/pytest-django/issues/924>`_!
+
+    The ``databases`` argument defines which databases in a multi-database
+    configuration will be set up and may be used by the test.  Defaults to
+    only the ``default`` database.  The special value ``"__all__"`` may be use
+    to specify all configured databases.
+    For details see :py:attr:`django.test.TransactionTestCase.databases` and
+    :py:attr:`django.test.TestCase.databases`.
+>>>>>>> master
 
 .. note::
 
@@ -434,6 +459,51 @@ Example usage::
         with django_assert_max_num_queries(2):
             Item.objects.create('foo')
             Item.objects.create('bar')
+
+
+.. fixture:: django_capture_on_commit_callbacks
+
+``django_capture_on_commit_callbacks``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_capture_on_commit_callbacks(*, using=DEFAULT_DB_ALIAS, execute=False)
+
+  :param using:
+    The alias of the database connection to capture callbacks for.
+  :param execute:
+    If True, all the callbacks will be called as the context manager exits, if
+    no exception occurred. This emulates a commit after the wrapped block of
+    code.
+
+.. versionadded:: 4.4
+
+Returns a context manager that captures
+:func:`transaction.on_commit() <django.db.transaction.on_commit>` callbacks for
+the given database connection. It returns a list that contains, on exit of the
+context, the captured callback functions. From this list you can make assertions
+on the callbacks or call them to invoke their side effects, emulating a commit.
+
+Avoid this fixture in tests using ``transaction=True``; you are not likely to
+get useful results.
+
+This fixture is based on Django's :meth:`django.test.TestCase.captureOnCommitCallbacks`
+helper.
+
+Example usage::
+
+    def test_on_commit(client, mailoutbox, django_capture_on_commit_callbacks):
+        with django_capture_on_commit_callbacks(execute=True) as callbacks:
+            response = client.post(
+                '/contact/',
+                {'message': 'I like your site'},
+            )
+
+        assert response.status_code == 200
+        assert len(callbacks) == 1
+        assert len(mailoutbox) == 1
+        assert mailoutbox[0].subject == 'Contact Form'
+        assert mailoutbox[0].body == 'I like your site'
+
 
 .. fixture:: mailoutbox
 

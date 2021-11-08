@@ -6,40 +6,51 @@ test database and provides some useful text fixtures.
 
 import contextlib
 import inspect
-from functools import reduce
 import os
 import pathlib
 import sys
+from functools import reduce
+from typing import Generator, List, Optional, Tuple, Union
 
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
-from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import _live_server_helper  # noqa; noqa
+from .fixtures import admin_client  # noqa
+from .fixtures import admin_user  # noqa
+from .fixtures import async_client  # noqa
+from .fixtures import async_rf  # noqa
+from .fixtures import client  # noqa
+from .fixtures import db  # noqa
 from .fixtures import django_assert_max_num_queries  # noqa
-from .fixtures import django_db_setup  # noqa
-from .fixtures import django_db_use_migrations  # noqa
-from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import django_capture_on_commit_callbacks  # noqa
 from .fixtures import django_db_createdb  # noqa
+from .fixtures import django_db_keepdb  # noqa
 from .fixtures import django_db_modify_db_settings  # noqa
 from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
-from .fixtures import _live_server_helper  # noqa
-from .fixtures import admin_client  # noqa
-from .fixtures import admin_user  # noqa
-from .fixtures import async_client  # noqa
-from .fixtures import client  # noqa
-from .fixtures import db  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
-from .fixtures import django_db_reset_sequences  # noqa
-from .fixtures import async_rf , django_db_serialized_rollback # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-
+from .fixtures import django_db_serialized_rollback
 from .lazy_django import django_settings_is_configured, skip_if_no_django
+
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import ContextManager, NoReturn
+
+    import django
+
+    from .fixtures import _DjangoDb, _DjangoDbDatabases
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
@@ -53,7 +64,7 @@ _report_header = []
 
 
 @pytest.hookimpl()
-def pytest_addoption(parser):
+def pytest_addoption(parser) -> None:
     group = parser.getgroup("django")
     group.addoption(
         "--reuse-db",
@@ -163,7 +174,7 @@ PROJECT_SCAN_DISABLED = (
 
 
 @contextlib.contextmanager
-def _handle_import_error(extra_message):
+def _handle_import_error(extra_message: str) -> Generator[None, None, None]:
     try:
         yield
     except ImportError as e:
@@ -172,29 +183,29 @@ def _handle_import_error(extra_message):
         raise ImportError(msg)
 
 
-def _add_django_project_to_path(args):
-    def is_django_project(path):
+def _add_django_project_to_path(args) -> str:
+    def is_django_project(path: pathlib.Path) -> bool:
         try:
             return path.is_dir() and (path / "manage.py").exists()
         except OSError:
             return False
 
-    def arg_to_path(arg):
+    def arg_to_path(arg: str) -> pathlib.Path:
         # Test classes or functions can be appended to paths separated by ::
         arg = arg.split("::", 1)[0]
         return pathlib.Path(arg)
 
-    def find_django_path(args):
-        args = map(str, args)
-        args = [arg_to_path(x) for x in args if not x.startswith("-")]
+    def find_django_path(args) -> Optional[pathlib.Path]:
+        str_args = (str(arg) for arg in args)
+        path_args = [arg_to_path(x) for x in str_args if not x.startswith("-")]
 
         cwd = pathlib.Path.cwd()
-        if not args:
-            args.append(cwd)
-        elif cwd not in args:
-            args.append(cwd)
+        if not path_args:
+            path_args.append(cwd)
+        elif cwd not in path_args:
+            path_args.append(cwd)
 
-        for arg in args:
+        for arg in path_args:
             if is_django_project(arg):
                 return arg
             for parent in arg.parents:
@@ -209,7 +220,7 @@ def _add_django_project_to_path(args):
     return PROJECT_NOT_FOUND
 
 
-def _setup_django():
+def _setup_django() -> None:
     if "django" not in sys.modules:
         return
 
@@ -227,10 +238,14 @@ def _setup_django():
     _blocking_manager.block()
 
 
-def _get_boolean_value(x, name, default=None):
+def _get_boolean_value(
+    x: Union[None, bool, str],
+    name: str,
+    default: Optional[bool] = None,
+) -> bool:
     if x is None:
-        return default
-    if x in (True, False):
+        return bool(default)
+    if isinstance(x, bool):
         return x
     possible_values = {"true": True, "false": False, "1": True, "0": False}
     try:
@@ -243,14 +258,22 @@ def _get_boolean_value(x, name, default=None):
 
 
 @pytest.hookimpl()
-def pytest_load_initial_conftests(early_config, parser, args):
+def pytest_load_initial_conftests(
+    early_config,
+    parser,
+    args: List[str],
+) -> None:
     # Register the marks
     early_config.addinivalue_line(
         "markers",
-        "django_db(transaction=False): Mark the test as using "
-        "the Django test database.  The *transaction* argument marks will "
-        "allow you to use real transactions in the test like Django's "
-        "TransactionTestCase.",
+        "django_db(transaction=False, reset_sequences=False, databases=None): "
+        "Mark the test as using the Django test database.  "
+        "The *transaction* argument allows you to use real transactions "
+        "in the test like Django's TransactionTestCase.  "
+        "The *reset_sequences* argument resets database sequences before "
+        "the test.  "
+        "The *databases* argument sets which database aliases the test "
+        "uses (by default, only 'default'). Use '__all__' for all databases.",
     )
     early_config.addinivalue_line(
         "markers",
@@ -288,7 +311,10 @@ def pytest_load_initial_conftests(early_config, parser, args):
     ):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
 
-    def _get_option_with_source(option, envname):
+    def _get_option_with_source(
+        option: Optional[str],
+        envname: str,
+    ) -> Union[Tuple[str, str], Tuple[None, None]]:
         if option:
             return option, "option"
         if envname in os.environ:
@@ -325,43 +351,45 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
 
 @pytest.hookimpl()
-def pytest_report_header():
+def pytest_report_header() -> Optional[List[str]]:
     if _report_header:
         return ["django: " + ", ".join(_report_header)]
+    return None
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_configure():
+def pytest_configure() -> None:
     # Allow Django settings to be configured in a user pytest_configure call,
     # but make sure we call django.setup()
     _setup_django()
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_collection_modifyitems(items):
+def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
     # If Django is not configured we don't need to bother
     if not django_settings_is_configured():
         return
 
     from django.test import TestCase, TransactionTestCase
 
-    def get_order_number(test):
-        if hasattr(test, "cls") and test.cls:
+    def get_order_number(test: pytest.Item) -> int:
+        test_cls = getattr(test, "cls", None)
+        if test_cls:
             # Beware, TestCase is a subclass of TransactionTestCase
-            if issubclass(test.cls, TestCase):
+            if issubclass(test_cls, TestCase):
                 return 0
-            if issubclass(test.cls, TransactionTestCase):
+            if issubclass(test_cls, TransactionTestCase):
                 return 1
 
-        marker_db = test.get_closest_marker('django_db')
-        if marker_db:
+        marker_db = test.get_closest_marker("django_db")
+        if not marker_db:
+            transaction = None
+        else:
             transaction = validate_django_db(marker_db)[0]
             if transaction is True:
                 return 1
-        else:
-            transaction = None
 
-        fixtures = getattr(test, 'fixturenames', [])
+        fixtures = getattr(test, "fixturenames", [])
         if "transactional_db" in fixtures:
             return 1
 
@@ -376,7 +404,7 @@ def pytest_collection_modifyitems(items):
 
 
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request):
+def django_test_environment(request) -> None:
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -389,20 +417,23 @@ def django_test_environment(request):
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.test.utils import setup_test_environment, teardown_test_environment
+        from django.test.utils import (
+            setup_test_environment,
+            teardown_test_environment,
+        )
 
         debug_ini = request.config.getini("django_debug_mode")
         if debug_ini == "keep":
             debug = None
         else:
-            debug = _get_boolean_value(debug_ini, False)
+            debug = _get_boolean_value(debug_ini, "django_debug_mode", False)
 
         setup_test_environment(debug=debug)
         request.addfinalizer(teardown_test_environment)
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker():
+def django_db_blocker() -> "Optional[_DatabaseBlocker]":
     """Wrapper around Django's database access.
 
     This object can be used to re-enable database access.  This fixture is used
@@ -422,7 +453,7 @@ def django_db_blocker():
 
 
 @pytest.fixture(autouse=True)
-def _django_db_marker(request):
+def _django_db_marker(request) -> None:
     """Implement the django_db marker, internal to pytest-django.
 
     This will dynamically request the ``db``, ``transactional_db``,
@@ -431,7 +462,16 @@ def _django_db_marker(request):
     """
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences, serialized_rollback = validate_django_db(marker)
+        (
+            transaction,
+            reset_sequences,
+            serialized_rollback,
+            databases,
+        ) = validate_django_db(marker)
+
+        # TODO: Use pytest Store (item.store) once that's stable.
+        request.node._pytest_django_databases = databases
+
         if reset_sequences:
             request.getfixturevalue("django_db_reset_sequences")
         elif serialized_rollback:
@@ -443,7 +483,10 @@ def _django_db_marker(request):
 
 
 @pytest.fixture(autouse=True, scope="class")
-def _django_setup_unittest(request, django_db_blocker):
+def _django_setup_unittest(
+    request,
+    django_db_blocker: "_DatabaseBlocker",
+) -> Generator[None, None, None]:
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
         yield
@@ -453,24 +496,25 @@ def _django_setup_unittest(request, django_db_blocker):
     # Before pytest 5.4: https://github.com/pytest-dev/pytest/issues/5991
     # After pytest 5.4: https://github.com/pytest-dev/pytest-django/issues/824
     from _pytest.unittest import TestCaseFunction
+
     original_runtest = TestCaseFunction.runtest
 
-    def non_debugging_runtest(self):
+    def non_debugging_runtest(self) -> None:
         self._testcase(result=self)
 
     try:
-        TestCaseFunction.runtest = non_debugging_runtest
+        TestCaseFunction.runtest = non_debugging_runtest  # type: ignore[assignment]
 
         request.getfixturevalue("django_db_setup")
 
         with django_db_blocker.unblock():
             yield
     finally:
-        TestCaseFunction.runtest = original_runtest
+        TestCaseFunction.runtest = original_runtest  # type: ignore[assignment]
 
 
 @pytest.fixture(scope="function", autouse=True)
-def _dj_autoclear_mailbox():
+def _dj_autoclear_mailbox() -> None:
     if not django_settings_is_configured():
         return
 
@@ -480,9 +524,12 @@ def _dj_autoclear_mailbox():
 
 
 @pytest.fixture(scope="function")
-def mailoutbox(django_mail_patch_dns, _dj_autoclear_mailbox):
+def mailoutbox(
+    django_mail_patch_dns: None,
+    _dj_autoclear_mailbox: None,
+) -> "Optional[List[django.core.mail.EmailMessage]]":
     if not django_settings_is_configured():
-        return
+        return None
 
     from django.core import mail
 
@@ -490,19 +537,22 @@ def mailoutbox(django_mail_patch_dns, _dj_autoclear_mailbox):
 
 
 @pytest.fixture(scope="function")
-def django_mail_patch_dns(monkeypatch, django_mail_dnsname):
+def django_mail_patch_dns(
+    monkeypatch,
+    django_mail_dnsname: str,
+) -> None:
     from django.core import mail
 
     monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
 
 
 @pytest.fixture(scope="function")
-def django_mail_dnsname():
+def django_mail_dnsname() -> str:
     return "fake-tests.example.com"
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _django_set_urlconf(request):
+def _django_set_urlconf(request) -> None:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("urls")
     if marker:
@@ -516,7 +566,7 @@ def _django_set_urlconf(request):
         clear_url_caches()
         set_urlconf(None)
 
-        def restore():
+        def restore() -> None:
             django.conf.settings.ROOT_URLCONF = original_urlconf
             # Copy the pattern from
             # https://github.com/django/django/blob/main/django/test/signals.py#L152
@@ -544,10 +594,10 @@ def _fail_for_invalid_template_variable():
     class InvalidVarException:
         """Custom handler for invalid strings in templates."""
 
-        def __init__(self):
+        def __init__(self) -> None:
             self.fail = True
 
-        def __contains__(self, key):
+        def __contains__(self, key: str) -> bool:
             return key == "%s"
 
         @staticmethod
@@ -570,11 +620,11 @@ def _fail_for_invalid_template_variable():
             from django.template import Template
 
             # finding the ``render`` needle in the stack
-            frame = reduce(
+            frameinfo = reduce(
                 lambda x, y: y[3] == "render" and "base.py" in y[1] and y or x, stack
             )
             # assert 0, stack
-            frame = frame[0]
+            frame = frameinfo[0]
             # finding only the frame locals in all frame members
             f_locals = reduce(
                 lambda x, y: y[0] == "f_locals" and y or x, inspect.getmembers(frame)
@@ -584,7 +634,7 @@ def _fail_for_invalid_template_variable():
             if isinstance(template, Template):
                 return template.name
 
-        def __mod__(self, var):
+        def __mod__(self, var: str) -> str:
             origin = self._get_origin()
             if origin:
                 msg = "Undefined template variable '{}' in '{}'".format(var, origin)
@@ -602,13 +652,15 @@ def _fail_for_invalid_template_variable():
         from django.conf import settings as dj_settings
 
         if dj_settings.TEMPLATES:
-            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = InvalidVarException()
+            dj_settings.TEMPLATES[0]["OPTIONS"][
+                "string_if_invalid"
+            ] = InvalidVarException()
 
 
 @pytest.fixture(autouse=True)
-def _template_string_if_invalid_marker(request):
+def _template_string_if_invalid_marker(request) -> None:
     """Apply the @pytest.mark.ignore_template_errors marker,
-     internal to pytest-django."""
+    internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true":
         if marker and django_settings_is_configured():
@@ -619,7 +671,7 @@ def _template_string_if_invalid_marker(request):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _django_clear_site_cache():
+def _django_clear_site_cache() -> None:
     """Clears ``django.contrib.sites.models.SITE_CACHE`` to avoid
     unexpected behavior with cached site objects.
     """
@@ -637,13 +689,13 @@ def _django_clear_site_cache():
 
 
 class _DatabaseBlockerContextManager:
-    def __init__(self, db_blocker):
+    def __init__(self, db_blocker) -> None:
         self._db_blocker = db_blocker
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self._db_blocker.restore()
 
 
@@ -658,7 +710,7 @@ class _DatabaseBlocker:
         self._real_ensure_connection = None
 
     @property
-    def _dj_db_wrapper(self):
+    def _dj_db_wrapper(self) -> "django.db.backends.base.base.BaseDatabaseWrapper":
         from django.db.backends.base.base import BaseDatabaseWrapper
 
         # The first time the _dj_db_wrapper is accessed, we will save a
@@ -668,10 +720,10 @@ class _DatabaseBlocker:
 
         return BaseDatabaseWrapper
 
-    def _save_active_wrapper(self):
-        return self._history.append(self._dj_db_wrapper.ensure_connection)
+    def _save_active_wrapper(self) -> None:
+        self._history.append(self._dj_db_wrapper.ensure_connection)
 
-    def _blocking_wrapper(*args, **kwargs):
+    def _blocking_wrapper(*args, **kwargs) -> "NoReturn":
         __tracebackhide__ = True
         __tracebackhide__  # Silence pyflakes
         raise RuntimeError(
@@ -680,26 +732,26 @@ class _DatabaseBlocker:
             '"db" or "transactional_db" fixtures to enable it.'
         )
 
-    def unblock(self):
+    def unblock(self) -> "ContextManager[None]":
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
         return _DatabaseBlockerContextManager(self)
 
-    def block(self):
+    def block(self) -> "ContextManager[None]":
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
         return _DatabaseBlockerContextManager(self)
 
-    def restore(self):
+    def restore(self) -> None:
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
 
 _blocking_manager = _DatabaseBlocker()
 
 
-def validate_django_db(marker):
+def validate_django_db(marker) -> "_DjangoDb":
     """Validate the django_db marker.
 
     It checks the signature and creates the ``transaction``,
@@ -710,20 +762,25 @@ def validate_django_db(marker):
     A serialized rollback is only allowed when combined with a transaction.
     """
 
-    def apifun(transaction=False, reset_sequences=False, serialized_rollback=False):
-        return transaction, reset_sequences, serialized_rollback
+    def apifun(
+        transaction=False,
+        reset_sequences=False,
+        serialized_rollback=False,
+        databases: "_DjangoDbDatabases" = None,
+    ):
+        return transaction, reset_sequences, serialized_rollback, databases
 
     return apifun(*marker.args, **marker.kwargs)
 
 
-def validate_urls(marker):
+def validate_urls(marker) -> List[str]:
     """Validate the urls marker.
 
     It checks the signature and creates the `urls` attribute on the
     marker which will have the correct value.
     """
 
-    def apifun(urls):
+    def apifun(urls: List[str]) -> List[str]:
         return urls
 
     return apifun(*marker.args, **marker.kwargs)

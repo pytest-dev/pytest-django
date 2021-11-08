@@ -1,27 +1,29 @@
 import copy
+import pathlib
 import shutil
 from textwrap import dedent
+from typing import Optional
 
 import pytest
 from django.conf import settings
 
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
 
 pytest_plugins = "pytester"
 
 REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 
-def pytest_configure(config):
+def pytest_configure(config) -> None:
     config.addinivalue_line(
         "markers", "django_project: options for the django_testdir fixture"
     )
 
 
-def _marker_apifun(extra_settings="", create_manage_py=False, project_root=None):
+def _marker_apifun(
+    extra_settings: str = "",
+    create_manage_py: bool = False,
+    project_root: Optional[str] = None,
+):
     return {
         "extra_settings": extra_settings,
         "create_manage_py": create_manage_py,
@@ -37,7 +39,9 @@ def testdir(testdir, monkeypatch):
 
 @pytest.fixture(scope="function")
 def django_testdir(request, testdir, monkeypatch):
-    from pytest_django_test.db_helpers import DB_NAME, TEST_DB_NAME
+    from pytest_django_test.db_helpers import (
+        DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME, TEST_DB_NAME,
+    )
 
     marker = request.node.get_closest_marker("django_project")
 
@@ -49,6 +53,8 @@ def django_testdir(request, testdir, monkeypatch):
         db_settings = copy.deepcopy(settings.DATABASES)
         db_settings["default"]["NAME"] = DB_NAME
         db_settings["default"]["TEST"]["NAME"] = TEST_DB_NAME
+        db_settings["second"]["NAME"] = SECOND_DB_NAME
+        db_settings["second"].setdefault("TEST", {})["NAME"] = SECOND_TEST_DB_NAME
 
     test_settings = (
         dedent(
@@ -64,6 +70,7 @@ def django_testdir(request, testdir, monkeypatch):
             compat.register()
 
         DATABASES = %(db_settings)s
+        DATABASE_ROUTERS = ['pytest_django_test.db_router.DbRouter']
 
         INSTALLED_APPS = [
             'django.contrib.auth',
@@ -119,12 +126,12 @@ def django_testdir(request, testdir, monkeypatch):
 
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
 
-    def create_test_module(test_code, filename="test_the_test.py"):
+    def create_test_module(test_code: str, filename: str = "test_the_test.py"):
         r = tpkg_path.join(filename)
         r.write(dedent(test_code), ensure=True)
         return r
 
-    def create_app_file(code, filename):
+    def create_app_file(code: str, filename: str):
         r = test_app_path.join(filename)
         r.write(dedent(code), ensure=True)
         return r

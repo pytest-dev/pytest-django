@@ -2,7 +2,7 @@
 # this is the case before you call them.
 
 
-def is_django_unittest(request_or_item):
+def is_django_unittest(request_or_item) -> bool:
     """Returns True if the request_or_item is a Django test case, otherwise False"""
     from django.test import SimpleTestCase
 

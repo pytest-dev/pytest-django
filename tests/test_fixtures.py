@@ -3,26 +3,25 @@
 Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
-
-
 import socket
 from contextlib import contextmanager
-from urllib.request import urlopen, HTTPError
+from typing import Generator
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
-from django.test.testcases import connections_support_transactions
 from django.utils.encoding import force_str
 
-from pytest_django_test.app.models import Item
 from pytest_django.lazy_django import get_django_version
+from pytest_django_test.app.models import Item
 
 
 @contextmanager
-def nonverbose_config(config):
+def nonverbose_config(config) -> Generator[None, None, None]:
     """Ensure that pytest's config.option.verbose is <= 0."""
     if config.option.verbose <= 0:
         yield
@@ -33,25 +32,25 @@ def nonverbose_config(config):
         config.option.verbose = saved
 
 
-def test_client(client):
+def test_client(client) -> None:
     assert isinstance(client, Client)
 
 
 @pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
-def test_async_client(async_client):
+def test_async_client(async_client) -> None:
     from django.test.client import AsyncClient
 
     assert isinstance(async_client, AsyncClient)
 
 
 @pytest.mark.django_db
-def test_admin_client(admin_client):
+def test_admin_client(admin_client: Client) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
 
 
-def test_admin_client_no_db_marker(admin_client):
+def test_admin_client_no_db_marker(admin_client: Client) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
@@ -63,33 +62,38 @@ def existing_admin_user(django_user_model):
     return django_user_model._default_manager.create_superuser('admin', None, None)
 
 
-def test_admin_client_existing_user(db, existing_admin_user, admin_user, admin_client):
+def test_admin_client_existing_user(
+    db: None,
+    existing_admin_user,
+    admin_user,
+    admin_client: Client,
+) -> None:
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
 
 
 @pytest.mark.django_db
-def test_admin_user(admin_user, django_user_model):
+def test_admin_user(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
-def test_admin_user_no_db_marker(admin_user, django_user_model):
+def test_admin_user_no_db_marker(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
-def test_rf(rf):
+def test_rf(rf) -> None:
     assert isinstance(rf, RequestFactory)
 
 
 @pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
-def test_async_rf(async_rf):
+def test_async_rf(async_rf) -> None:
     from django.test.client import AsyncRequestFactory
 
     assert isinstance(async_rf, AsyncRequestFactory)
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_db(request, django_assert_num_queries):
+def test_django_assert_num_queries_db(request, django_assert_num_queries) -> None:
     with nonverbose_config(request.config):
         with django_assert_num_queries(3):
             Item.objects.create(name="foo")
@@ -107,7 +111,7 @@ def test_django_assert_num_queries_db(request, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries):
+def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries) -> None:
     with nonverbose_config(request.config):
         with django_assert_max_num_queries(2):
             Item.objects.create(name="1-foo")
@@ -129,8 +133,8 @@ def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries
 
 @pytest.mark.django_db(transaction=True)
 def test_django_assert_num_queries_transactional_db(
-    request, transactional_db, django_assert_num_queries
-):
+    request, transactional_db: None, django_assert_num_queries
+) -> None:
     with nonverbose_config(request.config):
         with transaction.atomic():
             with django_assert_num_queries(3):
@@ -143,7 +147,7 @@ def test_django_assert_num_queries_transactional_db(
                     Item.objects.create(name="quux")
 
 
-def test_django_assert_num_queries_output(django_testdir):
+def test_django_assert_num_queries_output(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
@@ -161,7 +165,7 @@ def test_django_assert_num_queries_output(django_testdir):
     assert result.ret == 1
 
 
-def test_django_assert_num_queries_output_verbose(django_testdir):
+def test_django_assert_num_queries_output_verbose(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
@@ -182,7 +186,7 @@ def test_django_assert_num_queries_output_verbose(django_testdir):
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_db_connection(django_assert_num_queries):
+def test_django_assert_num_queries_db_connection(django_assert_num_queries) -> None:
     from django.db import connection
 
     with django_assert_num_queries(1, connection=connection):
@@ -197,7 +201,7 @@ def test_django_assert_num_queries_db_connection(django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_output_info(django_testdir):
+def test_django_assert_num_queries_output_info(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
@@ -226,43 +230,107 @@ def test_django_assert_num_queries_output_info(django_testdir):
     assert result.ret == 1
 
 
+@pytest.mark.django_db
+def test_django_capture_on_commit_callbacks(django_capture_on_commit_callbacks) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    scratch = []
+    with django_capture_on_commit_callbacks() as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 1
+    assert scratch == []
+    callbacks[0]()
+    assert scratch == ["one"]
+
+    scratch = []
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("two"))
+        transaction.on_commit(lambda: scratch.append("three"))
+    assert len(callbacks) == 2
+    assert scratch == ["two", "three"]
+    callbacks[0]()
+    assert scratch == ["two", "three", "two"]
+
+
+@pytest.mark.django_db(databases=["default", "second"])
+def test_django_capture_on_commit_callbacks_multidb(django_capture_on_commit_callbacks) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="default", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 1
+    assert scratch == ["one"]
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="second", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("two"))  # pragma: no cover
+    assert len(callbacks) == 0
+    assert scratch == []
+
+    scratch = []
+    with django_capture_on_commit_callbacks(using="default", execute=True) as callbacks:
+        transaction.on_commit(lambda: scratch.append("ten"))
+        transaction.on_commit(lambda: scratch.append("twenty"), using="second")  # pragma: no cover
+        transaction.on_commit(lambda: scratch.append("thirty"))
+    assert len(callbacks) == 2
+    assert scratch == ["ten", "thirty"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_django_capture_on_commit_callbacks_transactional(
+    django_capture_on_commit_callbacks,
+) -> None:
+    if not connection.features.supports_transactions:
+        pytest.skip("transactions required for this test")
+
+    # Bad usage: no transaction (executes immediately).
+    scratch = []
+    with django_capture_on_commit_callbacks() as callbacks:
+        transaction.on_commit(lambda: scratch.append("one"))
+    assert len(callbacks) == 0
+    assert scratch == ["one"]
+
+
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 
-    def test_modify_existing(self, settings):
+    def test_modify_existing(self, settings) -> None:
         assert settings.SECRET_KEY == "foobar"
         assert real_settings.SECRET_KEY == "foobar"
         settings.SECRET_KEY = "spam"
         assert settings.SECRET_KEY == "spam"
         assert real_settings.SECRET_KEY == "spam"
 
-    def test_modify_existing_again(self, settings):
+    def test_modify_existing_again(self, settings) -> None:
         assert settings.SECRET_KEY == "foobar"
         assert real_settings.SECRET_KEY == "foobar"
 
-    def test_new(self, settings):
+    def test_new(self, settings) -> None:
         assert not hasattr(settings, "SPAM")
         assert not hasattr(real_settings, "SPAM")
         settings.SPAM = "ham"
         assert settings.SPAM == "ham"
         assert real_settings.SPAM == "ham"
 
-    def test_new_again(self, settings):
+    def test_new_again(self, settings) -> None:
         assert not hasattr(settings, "SPAM")
         assert not hasattr(real_settings, "SPAM")
 
-    def test_deleted(self, settings):
+    def test_deleted(self, settings) -> None:
         assert hasattr(settings, "SECRET_KEY")
         assert hasattr(real_settings, "SECRET_KEY")
         del settings.SECRET_KEY
         assert not hasattr(settings, "SECRET_KEY")
         assert not hasattr(real_settings, "SECRET_KEY")
 
-    def test_deleted_again(self, settings):
+    def test_deleted_again(self, settings) -> None:
         assert hasattr(settings, "SECRET_KEY")
         assert hasattr(real_settings, "SECRET_KEY")
 
-    def test_signals(self, settings):
+    def test_signals(self, settings) -> None:
         result = []
 
         def assert_signal(signal, sender, setting, value, enter):
@@ -284,7 +352,7 @@ class TestSettings:
         settings.FOOBAR = "abc123"
         assert sorted(result) == [("FOOBAR", "abc123", True)]
 
-    def test_modification_signal(self, django_testdir):
+    def test_modification_signal(self, django_testdir) -> None:
         django_testdir.create_test_module(
             """
             import pytest
@@ -342,77 +410,77 @@ class TestSettings:
 
 
 class TestLiveServer:
-    def test_settings_before(self):
+    def test_settings_before(self) -> None:
         from django.conf import settings
 
         assert (
             "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
-        TestLiveServer._test_settings_before_run = True
+        TestLiveServer._test_settings_before_run = True  # type: ignore[attr-defined]
 
-    def test_url(self, live_server):
+    def test_url(self, live_server) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_change_settings(self, live_server, settings):
+    def test_change_settings(self, live_server, settings) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_settings_restored(self):
+    def test_settings_restored(self) -> None:
         """Ensure that settings are restored after test_settings_before."""
         from django.conf import settings
 
-        assert TestLiveServer._test_settings_before_run is True
+        assert TestLiveServer._test_settings_before_run is True  # type: ignore[attr-defined]
         assert (
             "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
             == "django.conf.Settings"
         )
         assert settings.ALLOWED_HOSTS == ["testserver"]
 
-    def test_transactions(self, live_server):
-        if not connections_support_transactions():
+    def test_transactions(self, live_server) -> None:
+        if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert not connection.in_atomic_block
 
-    def test_db_changes_visibility(self, live_server):
+    def test_db_changes_visibility(self, live_server) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 0"
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
-    def test_fixture_db(self, db, live_server):
+    def test_fixture_db(self, db: None, live_server) -> None:
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
-    def test_fixture_transactional_db(self, transactional_db, live_server):
+    def test_fixture_transactional_db(self, transactional_db: None, live_server) -> None:
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
-    def item(self):
+    def item(self) -> None:
         # This has not requested database access explicitly, but the
         # live_server fixture auto-uses the transactional_db fixture.
         Item.objects.create(name="foo")
 
-    def test_item(self, item, live_server):
+    def test_item(self, item, live_server) -> None:
         pass
 
     @pytest.fixture
-    def item_db(self, db):
+    def item_db(self, db: None) -> Item:
         return Item.objects.create(name="foo")
 
-    def test_item_db(self, item_db, live_server):
+    def test_item_db(self, item_db: Item, live_server) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
-    def item_transactional_db(self, transactional_db):
+    def item_transactional_db(self, transactional_db: None) -> Item:
         return Item.objects.create(name="foo")
 
-    def test_item_transactional_db(self, item_transactional_db, live_server):
+    def test_item_transactional_db(self, item_transactional_db: Item, live_server) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
@@ -430,7 +498,7 @@ class TestLiveServer:
         STATIC_URL = '/static/'
         """
     )
-    def test_serve_static_with_staticfiles_app(self, django_testdir, settings):
+    def test_serve_static_with_staticfiles_app(self, django_testdir, settings) -> None:
         """
         LiveServer always serves statics with ``django.contrib.staticfiles``
         handler.
@@ -454,7 +522,7 @@ class TestLiveServer:
         result.stdout.fnmatch_lines(["*test_a*PASSED*"])
         assert result.ret == 0
 
-    def test_serve_static_dj17_without_staticfiles_app(self, live_server, settings):
+    def test_serve_static_dj17_without_staticfiles_app(self, live_server, settings) -> None:
         """
         Because ``django.contrib.staticfiles`` is not installed
         LiveServer can not serve statics with django >= 1.7 .
@@ -462,7 +530,7 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + "/static/a_file.txt").read()
 
-    def test_specified_port_django_111(self, django_testdir):
+    def test_specified_port_django_111(self, django_testdir) -> None:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             sock.bind(("", 0))
@@ -495,7 +563,7 @@ class TestLiveServer:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_custom_user_model(django_testdir, username_field):
+def test_custom_user_model(django_testdir, username_field) -> None:
     django_testdir.create_app_file(
         """
         from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -615,7 +683,7 @@ class Migration(migrations.Migration):
 
 class Test_django_db_blocker:
     @pytest.mark.django_db
-    def test_block_manually(self, django_db_blocker):
+    def test_block_manually(self, django_db_blocker) -> None:
         try:
             django_db_blocker.block()
             with pytest.raises(RuntimeError):
@@ -624,24 +692,24 @@ class Test_django_db_blocker:
             django_db_blocker.restore()
 
     @pytest.mark.django_db
-    def test_block_with_block(self, django_db_blocker):
+    def test_block_with_block(self, django_db_blocker) -> None:
         with django_db_blocker.block():
             with pytest.raises(RuntimeError):
                 Item.objects.exists()
 
-    def test_unblock_manually(self, django_db_blocker):
+    def test_unblock_manually(self, django_db_blocker) -> None:
         try:
             django_db_blocker.unblock()
             Item.objects.exists()
         finally:
             django_db_blocker.restore()
 
-    def test_unblock_with_block(self, django_db_blocker):
+    def test_unblock_with_block(self, django_db_blocker) -> None:
         with django_db_blocker.unblock():
             Item.objects.exists()
 
 
-def test_mail(mailoutbox):
+def test_mail(mailoutbox) -> None:
     assert (
         mailoutbox is mail.outbox
     )  # check that mail.outbox and fixture value is same object
@@ -655,18 +723,18 @@ def test_mail(mailoutbox):
     assert list(m.to) == ["to@example.com"]
 
 
-def test_mail_again(mailoutbox):
+def test_mail_again(mailoutbox) -> None:
     test_mail(mailoutbox)
 
 
-def test_mail_message_uses_mocked_DNS_NAME(mailoutbox):
+def test_mail_message_uses_mocked_DNS_NAME(mailoutbox) -> None:
     mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
     m = mailoutbox[0]
     message = m.message()
     assert message["Message-ID"].endswith("@fake-tests.example.com>")
 
 
-def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
+def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.core import mail
@@ -689,7 +757,7 @@ def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir):
     assert result.ret == 0
 
 
-def test_mail_message_dns_patching_can_be_skipped(django_testdir):
+def test_mail_message_dns_patching_can_be_skipped(django_testdir) -> None:
     django_testdir.create_test_module(
         """
         from django.core import mail

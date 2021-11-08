@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 
-def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch):
+def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch) -> None:
     """
     The django.setup() function shall not be called multiple times by
     pytest-django, since it resets logging conf each time.

@@ -1,6 +1,7 @@
 Changelog
 =========
 
+<<<<<<< HEAD
 NEXT
 ----
 
@@ -9,6 +10,47 @@ Features
 * Add support for serialized rollback in transactional tests. (#721)
   Thanks to Piotr Karkut for `the bug report
   <https://github.com/pytest-dev/pytest-django/issues/329>`_.
+=======
+v4.4.0 (2021-06-06)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add a fixture :fixture:`django_capture_on_commit_callbacks` to capture
+  :func:`transaction.on_commit() <django.db.transaction.on_commit>` callbacks
+  in tests.
+
+
+v4.3.0 (2021-05-15)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add experimental :ref:`multiple databases <multi-db>` (multi db) support.
+
+* Add type annotations. If you previously excluded ``pytest_django`` from
+  your type-checker, you can remove the exclusion.
+
+* Documentation improvements.
+
+
+v4.2.0 (2021-04-10)
+-------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* Official Django 3.2 support.
+
+* Documentation improvements.
+
+Bugfixes
+^^^^^^^^
+
+* Disable atomic durability check on non-transactional tests (#910).
+>>>>>>> master
 
 
 v4.1.0 (2020-10-22)

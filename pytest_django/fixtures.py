@@ -1,15 +1,34 @@
 """All pytest-django fixtures"""
-
-
 import os
 from contextlib import contextmanager
 from functools import partial
+from typing import (
+    Any,
+    Callable,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import pytest
 
 from . import live_server_helper
 from .django_compat import is_django_unittest
-from .lazy_django import skip_if_no_django
+from .lazy_django import get_django_version, skip_if_no_django
+
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import Literal
+
+    import django
+
+    _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
+    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases]
+
 
 __all__ = [
     "django_db_setup",
@@ -30,11 +49,12 @@ __all__ = [
     "_live_server_helper",
     "django_assert_num_queries",
     "django_assert_max_num_queries",
+    "django_capture_on_commit_callbacks",
 ]
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_tox_suffix():
+def django_db_modify_db_settings_tox_suffix() -> None:
     skip_if_no_django()
 
     tox_environment = os.getenv("TOX_PARALLEL_ENV")
@@ -44,7 +64,7 @@ def django_db_modify_db_settings_tox_suffix():
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_xdist_suffix(request):
+def django_db_modify_db_settings_xdist_suffix(request) -> None:
     skip_if_no_django()
 
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
@@ -55,42 +75,44 @@ def django_db_modify_db_settings_xdist_suffix(request):
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_parallel_suffix(
-    django_db_modify_db_settings_tox_suffix,
-    django_db_modify_db_settings_xdist_suffix,
-):
+    django_db_modify_db_settings_tox_suffix: None,
+    django_db_modify_db_settings_xdist_suffix: None,
+) -> None:
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings(django_db_modify_db_settings_parallel_suffix):
+def django_db_modify_db_settings(
+    django_db_modify_db_settings_parallel_suffix: None,
+) -> None:
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
-def django_db_use_migrations(request):
+def django_db_use_migrations(request) -> bool:
     return not request.config.getvalue("nomigrations")
 
 
 @pytest.fixture(scope="session")
-def django_db_keepdb(request):
+def django_db_keepdb(request) -> bool:
     return request.config.getvalue("reuse_db")
 
 
 @pytest.fixture(scope="session")
-def django_db_createdb(request):
+def django_db_createdb(request) -> bool:
     return request.config.getvalue("create_db")
 
 
 @pytest.fixture(scope="session")
 def django_db_setup(
     request,
-    django_test_environment,
+    django_test_environment: None,
     django_db_blocker,
-    django_db_use_migrations,
-    django_db_keepdb,
-    django_db_createdb,
-    django_db_modify_db_settings,
-):
+    django_db_use_migrations: bool,
+    django_db_keepdb: bool,
+    django_db_createdb: bool,
+    django_db_modify_db_settings: None,
+) -> None:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
 
@@ -109,7 +131,7 @@ def django_db_setup(
             **setup_databases_args
         )
 
-    def teardown_database():
+    def teardown_database() -> None:
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
@@ -125,9 +147,12 @@ def django_db_setup(
 
 
 def _django_db_fixture_helper(
-    request, django_db_blocker, transactional=False, reset_sequences=False,
-    serialized_rollback=False
-):
+    request,
+    django_db_blocker,
+    transactional: bool = False,
+    reset_sequences: bool = False,
+    serialized_rollback: bool = False,
+) -> None:
     if is_django_unittest(request):
         return
 
@@ -135,46 +160,63 @@ def _django_db_fixture_helper(
         # Do nothing, we get called with transactional=True, too.
         return
 
+    _databases = getattr(
+        request.node,
+        "_pytest_django_databases",
+        None,
+    )  # type: Optional[_DjangoDbDatabases]
+
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
 
+    import django.db
+    import django.test
+
     if transactional:
-        from django.test import TransactionTestCase as django_case
+        test_case_class = django.test.TransactionTestCase
 
         if reset_sequences:
-            class ResetSequenceTestCase(django_case):
+
+            class ResetSequenceTestCase(test_case_class):
                 reset_sequences = True
 
-            django_case = ResetSequenceTestCase
+            test_case_class = ResetSequenceTestCase
 
         if serialized_rollback:
-            class SerializedRollbackTestCase(django_case):
+
+            class SerializedRollbackTestCase(test_case_class):
                 serialized_rollback = True
 
-            django_case = SerializedRollbackTestCase
+            test_case_class = SerializedRollbackTestCase
+
     else:
-        from django.test import TestCase as django_case
-        from django.db import transaction
-        transaction.Atomic._ensure_durability = False
+        test_case_class = django.test.TestCase
 
-        def reset_durability():
-            transaction.Atomic._ensure_durability = True
-        request.addfinalizer(reset_durability)
+    _reset_sequences = reset_sequences
 
-    test_case = django_case(methodName="__init__")
+    class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+        if transactional and _reset_sequences:
+            reset_sequences = True
+        if _databases is not None:
+            databases = _databases
+
+    PytestDjangoTestCase.setUpClass()
+    request.addfinalizer(PytestDjangoTestCase.tearDownClass)
+
+    test_case = PytestDjangoTestCase(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
 
 
-def _disable_native_migrations():
+def _disable_native_migrations() -> None:
     from django.conf import settings
     from django.core.management.commands import migrate
 
     class DisableMigrations:
-        def __contains__(self, item):
+        def __contains__(self, item: str) -> bool:
             return True
 
-        def __getitem__(self, item):
+        def __getitem__(self, item: str) -> None:
             return None
 
     settings.MIGRATION_MODULES = DisableMigrations()
@@ -187,7 +229,7 @@ def _disable_native_migrations():
     migrate.Command = MigrateSilentCommand
 
 
-def _set_suffix_to_test_databases(suffix):
+def _set_suffix_to_test_databases(suffix: str) -> None:
     from django.conf import settings
 
     for db_settings in settings.DATABASES.values():
@@ -209,7 +251,11 @@ def _set_suffix_to_test_databases(suffix):
 
 
 @pytest.fixture(scope="function")
-def db(request, django_db_setup, django_db_blocker):
+def db(
+    request,
+    django_db_setup: None,
+    django_db_blocker,
+) -> None:
     """Require a django test database.
 
     This database will be setup with the default fixtures and will have
@@ -233,12 +279,17 @@ def db(request, django_db_setup, django_db_blocker):
     ):
         request.getfixturevalue("transactional_db")
     else:
-        _django_db_fixture_helper(request, django_db_blocker, transactional=False,
-                                  serialized_rollback=False)
+        _django_db_fixture_helper(
+            request, django_db_blocker, transactional=False, serialized_rollback=False
+        )
 
 
 @pytest.fixture(scope="function")
-def transactional_db(request, django_db_setup, django_db_blocker):
+def transactional_db(
+    request,
+    django_db_setup: None,
+    django_db_blocker,
+) -> None:
     """Require a django test database with transaction support.
 
     This will re-initialise the django database for each test and is
@@ -259,7 +310,11 @@ def transactional_db(request, django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(scope="function")
-def django_db_reset_sequences(request, django_db_setup, django_db_blocker):
+def django_db_reset_sequences(
+    request,
+    django_db_setup: None,
+    django_db_blocker,
+) -> None:
     """Require a transactional test database with sequence reset support.
 
     This behaves like the ``transactional_db`` fixture, with the addition
@@ -291,7 +346,7 @@ def django_db_serialized_rollback(request, django_db_setup, django_db_blocker):
 
 
 @pytest.fixture()
-def client():
+def client() -> "django.test.client.Client":
     """A Django test client instance."""
     skip_if_no_django()
 
@@ -301,7 +356,7 @@ def client():
 
 
 @pytest.fixture()
-def async_client():
+def async_client() -> "django.test.client.AsyncClient":
     """A Django test async client instance."""
     skip_if_no_django()
 
@@ -311,7 +366,7 @@ def async_client():
 
 
 @pytest.fixture()
-def django_user_model(db):
+def django_user_model(db: None):
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
 
@@ -319,13 +374,17 @@ def django_user_model(db):
 
 
 @pytest.fixture()
-def django_username_field(django_user_model):
+def django_username_field(django_user_model) -> str:
     """The fieldname for the username used with Django's user model."""
     return django_user_model.USERNAME_FIELD
 
 
 @pytest.fixture()
-def admin_user(db, django_user_model, django_username_field):
+def admin_user(
+    db: None,
+    django_user_model,
+    django_username_field: str,
+):
     """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
@@ -352,7 +411,10 @@ def admin_user(db, django_user_model, django_username_field):
 
 
 @pytest.fixture()
-def admin_client(db, admin_user):
+def admin_client(
+    db: None,
+    admin_user,
+) -> "django.test.client.Client":
     """A Django test client logged in as an admin user."""
     from django.test.client import Client
 
@@ -362,7 +424,7 @@ def admin_client(db, admin_user):
 
 
 @pytest.fixture()
-def rf():
+def rf() -> "django.test.client.RequestFactory":
     """RequestFactory instance"""
     skip_if_no_django()
 
@@ -372,7 +434,7 @@ def rf():
 
 
 @pytest.fixture()
-def async_rf():
+def async_rf() -> "django.test.client.AsyncRequestFactory":
     """AsyncRequestFactory instance"""
     skip_if_no_django()
 
@@ -382,9 +444,9 @@ def async_rf():
 
 
 class SettingsWrapper:
-    _to_restore = []
+    _to_restore = []  # type: List[Any]
 
-    def __delattr__(self, attr):
+    def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
 
         override = override_settings()
@@ -395,19 +457,19 @@ class SettingsWrapper:
 
         self._to_restore.append(override)
 
-    def __setattr__(self, attr, value):
+    def __setattr__(self, attr: str, value) -> None:
         from django.test import override_settings
 
         override = override_settings(**{attr: value})
         override.enable()
         self._to_restore.append(override)
 
-    def __getattr__(self, item):
+    def __getattr__(self, attr: str):
         from django.conf import settings
 
-        return getattr(settings, item)
+        return getattr(settings, attr)
 
-    def finalize(self):
+    def finalize(self) -> None:
         for override in reversed(self._to_restore):
             override.disable()
 
@@ -446,9 +508,11 @@ def live_server(request):
     """
     skip_if_no_django()
 
-    addr = request.config.getvalue("liveserver") or os.getenv(
-        "DJANGO_LIVE_TEST_SERVER_ADDRESS"
-    ) or "localhost"
+    addr = (
+        request.config.getvalue("liveserver")
+        or os.getenv("DJANGO_LIVE_TEST_SERVER_ADDRESS")
+        or "localhost"
+    )
 
     server = live_server_helper.LiveServer(addr)
     request.addfinalizer(server.stop)
@@ -456,7 +520,7 @@ def live_server(request):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _live_server_helper(request):
+def _live_server_helper(request) -> None:
     """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
@@ -482,14 +546,22 @@ def _live_server_helper(request):
 
 
 @contextmanager
-def _assert_num_queries(config, num, exact=True, connection=None, info=None):
+def _assert_num_queries(
+    config,
+    num: int,
+    exact: bool = True,
+    connection=None,
+    info=None,
+) -> Generator["django.test.utils.CaptureQueriesContext", None, None]:
     from django.test.utils import CaptureQueriesContext
 
     if connection is None:
-        from django.db import connection
+        from django.db import connection as conn
+    else:
+        conn = connection
 
     verbose = config.getoption("verbose") > 0
-    with CaptureQueriesContext(connection) as context:
+    with CaptureQueriesContext(conn) as context:
         yield context
         num_performed = len(context)
         if exact:
@@ -522,3 +594,36 @@ def django_assert_num_queries(pytestconfig):
 @pytest.fixture(scope="function")
 def django_assert_max_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig, exact=False)
+
+
+@contextmanager
+def _capture_on_commit_callbacks(*, using: Optional[str] = None, execute: bool = False):
+    from django.db import DEFAULT_DB_ALIAS, connections
+    from django.test import TestCase
+
+    if using is None:
+        using = DEFAULT_DB_ALIAS
+
+    # Polyfill of Django code as of Django 3.2.
+    if get_django_version() < (3, 2):
+        callbacks = []  # type: List[Callable[[], Any]]
+        start_count = len(connections[using].run_on_commit)
+        try:
+            yield callbacks
+        finally:
+            run_on_commit = connections[using].run_on_commit[start_count:]
+            callbacks[:] = [func for sids, func in run_on_commit]
+            if execute:
+                for callback in callbacks:
+                    callback()
+
+    else:
+        with TestCase.captureOnCommitCallbacks(
+            using=using, execute=execute
+        ) as callbacks:
+            yield callbacks
+
+
+@pytest.fixture(scope="function")
+def django_capture_on_commit_callbacks():
+    return _capture_on_commit_callbacks
