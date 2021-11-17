@@ -10,6 +10,10 @@
     :alt: Build Status
     :target: https://github.com/pytest-dev/pytest-django/actions
 
+.. image:: https://img.shields.io/pypi/djversions/pytest-django.svg
+   :alt: Supported Django versions
+   :target: https://pypi.org/project/pytest-django/
+
 .. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
     :alt: Coverage
     :target: https://codecov.io/gh/pytest-dev/pytest-django
