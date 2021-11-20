@@ -180,8 +180,16 @@ def _django_db_fixture_helper(
 
 
 def _disable_native_migrations() -> None:
+    # https://github.com/django/django/commit/f5ebdfce5c417f9844e86bccc2f12577064d4bad
+    if get_django_version() >= (3, 1):
+        from django.db import connections
+        for alias in connections:
+            connection = connections[alias]
+            test_settings = connection.settings_dict['TEST']
+            test_settings['MIGRATE'] = False
+        return
+
     from django.conf import settings
-    from django.core.management.commands import migrate
 
     class DisableMigrations:
         def __contains__(self, item: str) -> bool:
@@ -191,6 +199,8 @@ def _disable_native_migrations() -> None:
             return None
 
     settings.MIGRATION_MODULES = DisableMigrations()
+
+    from django.core.management.commands import migrate
 
     class MigrateSilentCommand(migrate.Command):
         def handle(self, *args, **kwargs):

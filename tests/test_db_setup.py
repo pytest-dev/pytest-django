@@ -456,6 +456,8 @@ class TestNativeMigrations:
     """ Tests for Django Migrations """
 
     def test_no_migrations(self, django_testdir) -> None:
+        skip_if_sqlite_in_memory()
+
         django_testdir.create_test_module(
             """
             import pytest
@@ -467,16 +469,30 @@ class TestNativeMigrations:
         """
         )
 
+        result_first = django_testdir.runpytest_subprocess("-v", "--reuse-db")
+        assert result_first.ret == 0
+
         migration_file = django_testdir.project_root.join(
             "tpkg/app/migrations/0001_initial.py"
         )
         assert migration_file.isfile()
         migration_file.write(
-            'raise Exception("This should not get imported.")', ensure=True
+            """
+from django.db import migrations
+
+def fail(*args):
+    raise Exception("This should not get run.")
+
+class Migration(migrations.Migration):
+    operations = [
+        migrations.RunPython(fail),
+    ]
+            """
+            , ensure=True
         )
 
         result = django_testdir.runpytest_subprocess(
-            "--nomigrations", "--tb=short", "-vv", "-s",
+            "--reuse-db", "--nomigrations", "--tb=short", "-vv", "-s",
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()
