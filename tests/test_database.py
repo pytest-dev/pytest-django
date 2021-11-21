@@ -249,6 +249,14 @@ class TestDatabaseMarker:
         with pytest.raises(AssertionError, match='not allowed'):
             Item.objects.count()
 
+    @pytest.mark.django_db(transaction=True, databases=['default', 'replica'])
+    def test_replica_mirrors_default_database(self, request) -> None:
+        Item.objects.create(name='spam')
+        Item.objects.using('replica').create(name='spam')
+
+        assert Item.objects.count() == 2
+        assert Item.objects.using('replica').count() == 2
+
     @pytest.mark.django_db(databases='__all__')
     def test_all_databases(self, request) -> None:
         Item.objects.count()
