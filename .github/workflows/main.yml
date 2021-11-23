@@ -105,12 +105,8 @@ jobs:
           allow_failure: true
 
         # Explicitly test (older) pytest 5.4.
-        - name: py35-dj22-postgres-pytest54-coverage
-          python: 3.5
-          allow_failure: false
-
-        - name: py35-dj22-sqlite_file-coverage
-          python: 3.5
+        - name: py36-dj22-postgres-psycopg28-pytest54-coverage
+          python: 3.6
           allow_failure: false
 
         - name: py36-dj32-mysql_myisam-coverage
