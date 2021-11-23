@@ -34,7 +34,7 @@ pytest-django allows you to test your Django project/applications with the
 
   * Django: 2.2, 3.2, 4.0 and latest main branch (compatible at the time of
     each release)
-  * Python: CPython>=3.5 or PyPy 3
+  * Python: CPython>=3.6 or PyPy 3
   * pytest: >=5.4
 
   For compatibility with older versions, use the pytest-django 3.*.* series.
