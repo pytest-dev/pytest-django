@@ -69,13 +69,13 @@ class LiveServer:
 
     @property
     def url(self) -> str:
-        return "http://{}:{}".format(self.thread.host, self.thread.port)
+        return f"http://{self.thread.host}:{self.thread.port}"
 
     def __str__(self) -> str:
         return self.url
 
     def __add__(self, other) -> str:
-        return "{}{}".format(self, other)
+        return f"{self}{other}"
 
     def __repr__(self) -> str:
         return "<LiveServer listening at %s>" % self.url

@@ -414,7 +414,7 @@ class TestLiveServer:
         from django.conf import settings
 
         assert (
-            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
+            f"{settings.__class__.__module__}.{settings.__class__.__name__}"
             == "django.conf.Settings"
         )
         TestLiveServer._test_settings_before_run = True  # type: ignore[attr-defined]
@@ -431,7 +431,7 @@ class TestLiveServer:
 
         assert TestLiveServer._test_settings_before_run is True  # type: ignore[attr-defined]
         assert (
-            "{}.{}".format(settings.__class__.__module__, settings.__class__.__name__)
+            f"{settings.__class__.__module__}.{settings.__class__.__name__}"
             == "django.conf.Settings"
         )
         assert settings.ALLOWED_HOSTS == ["testserver"]

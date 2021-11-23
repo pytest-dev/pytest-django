@@ -22,10 +22,10 @@ else:
 
     if TEST_DB_NAME is None:
         # No explicit test db name was given, construct a default one
-        TEST_DB_NAME = "test_{}_inner".format(DB_NAME)
+        TEST_DB_NAME = f"test_{DB_NAME}_inner"
     else:
         # An explicit test db name was given, is that as the base name
-        TEST_DB_NAME = "{}_inner".format(TEST_DB_NAME)
+        TEST_DB_NAME = f"{TEST_DB_NAME}_inner"
 
     SECOND_DB_NAME = DB_NAME + '_second' if DB_NAME is not None else None
     SECOND_TEST_DB_NAME = TEST_DB_NAME + '_second' if DB_NAME is not None else None
@@ -93,7 +93,7 @@ def skip_if_sqlite_in_memory():
 def _get_db_name(db_suffix=None):
     name = TEST_DB_NAME
     if db_suffix:
-        name = "{}_{}".format(name, db_suffix)
+        name = f"{name}_{db_suffix}"
     return name
 
 
