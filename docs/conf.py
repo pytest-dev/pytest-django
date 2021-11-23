@@ -26,8 +26,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pytest-django'
-copyright = u'%d, Andreas Pelme and contributors' % datetime.date.today().year
+project = 'pytest-django'
+copyright = '%d, Andreas Pelme and contributors' % datetime.date.today().year
 
 exclude_patterns = ['_build']
 

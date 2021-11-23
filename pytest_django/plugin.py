@@ -331,11 +331,11 @@ def pytest_load_initial_conftests(
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
     if ds:
-        _report_header.append("settings: {} (from {})".format(ds, ds_source))
+        _report_header.append(f"settings: {ds} (from {ds_source})")
         os.environ[SETTINGS_MODULE_ENV] = ds
 
         if dc:
-            _report_header.append("configuration: {} (from {})".format(dc, dc_source))
+            _report_header.append(f"configuration: {dc} (from {dc_source})")
             os.environ[CONFIGURATION_ENV] = dc
 
             # Install the django-configurations importer
@@ -619,7 +619,7 @@ def _fail_for_invalid_template_variable():
         def __mod__(self, var: str) -> str:
             origin = self._get_origin()
             if origin:
-                msg = "Undefined template variable '{}' in '{}'".format(var, origin)
+                msg = f"Undefined template variable '{var}' in '{origin}'"
             else:
                 msg = "Undefined template variable '%s'" % var
             if self.fail:

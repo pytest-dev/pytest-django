@@ -293,7 +293,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
             continue
 
         db_settings.setdefault("TEST", {})
-        db_settings["TEST"]["NAME"] = "{}_{}".format(test_name, suffix)
+        db_settings["TEST"]["NAME"] = f"{test_name}_{suffix}"
 
 
 # ############### User visible fixtures ################
@@ -595,11 +595,11 @@ def _assert_num_queries(
                 num,
                 "" if exact else "or less ",
                 "but {} done".format(
-                    num_performed == 1 and "1 was" or "{} were".format(num_performed)
+                    num_performed == 1 and "1 was" or f"{num_performed} were"
                 ),
             )
             if info:
-                msg += "\n{}".format(info)
+                msg += f"\n{info}"
             if verbose:
                 sqls = (q["sql"] for q in context.captured_queries)
                 msg += "\n\nQueries:\n========\n\n" + "\n\n".join(sqls)
