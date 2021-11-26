@@ -1,7 +1,4 @@
 from setuptools import setup
 
-setup(
-    use_scm_version={
-        'write_to': 'pytest_django/_version.py',
-    },
-)
+if __name__ == "__main__":
+    setup()
