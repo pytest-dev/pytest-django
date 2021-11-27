@@ -111,7 +111,7 @@ def django_db_setup(
     setup_databases_args = {}
 
     if not django_db_use_migrations:
-        _disable_native_migrations()
+        _disable_migrations()
 
     if django_db_keepdb and not django_db_createdb:
         setup_databases_args["keepdb"] = True
@@ -186,7 +186,7 @@ def _django_db_fixture_helper(
     request.addfinalizer(test_case._post_teardown)
 
 
-def _disable_native_migrations() -> None:
+def _disable_migrations() -> None:
     from django.conf import settings
     from django.core.management.commands import migrate
 

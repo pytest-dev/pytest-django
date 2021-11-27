@@ -449,8 +449,8 @@ class TestSqliteInMemoryWithXdist:
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
 
-class TestNativeMigrations:
-    """ Tests for Django Migrations """
+class TestMigrations:
+    """Tests for Django Migrations."""
 
     def test_no_migrations(self, django_testdir) -> None:
         django_testdir.create_test_module(
@@ -464,12 +464,11 @@ class TestNativeMigrations:
         """
         )
 
-        migration_file = django_testdir.project_root.join(
-            "tpkg/app/migrations/0001_initial.py"
-        )
-        assert migration_file.isfile()
-        migration_file.write(
-            'raise Exception("This should not get imported.")', ensure=True
+        django_testdir.create_test_module(
+            """
+            raise Exception("This should not get imported.")
+            """,
+            "migrations/0001_initial.py",
         )
 
         result = django_testdir.runpytest_subprocess(
