@@ -457,11 +457,7 @@ def django_db_blocker() -> "Optional[_DatabaseBlocker]":
 
 @pytest.fixture(autouse=True)
 def _django_db_marker(request) -> None:
-    """Implement the django_db marker, internal to pytest-django.
-
-    This will dynamically request the ``db``, ``transactional_db`` or
-    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
-    """
+    """Implement the django_db marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("django_db")
     if marker:
         request.getfixturevalue("_django_db_helper")
