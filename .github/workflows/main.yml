@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - name: checkqa,docs
+        - name: linting,docs
           python: 3.8
           allow_failure: false
 
