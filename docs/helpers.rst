@@ -73,15 +73,27 @@ dynamically in a hook or fixture.
     For details see :py:attr:`django.test.TransactionTestCase.databases` and
     :py:attr:`django.test.TestCase.databases`.
 
+  :type serialized_rollback: bool
+  :param serialized_rollback:
+    The ``serialized_rollback`` argument enables :ref:`rollback emulation
+    <test-case-serialized-rollback>`.  After a transactional test (or any test
+    using a database backend which doesn't support transactions) runs, the
+    database is flushed, destroying data created in data migrations.  Setting
+    ``serialized_rollback=True`` tells Django to serialize the database content
+    during setup, and restore it during teardown.
+
+    Note that this will slow down that test suite by approximately 3x.
+
 .. note::
 
   If you want access to the Django database inside a *fixture*, this marker may
   or may not help even if the function requesting your fixture has this marker
-  applied, depending on pytest's fixture execution order. To access the
-  database in a fixture, it is recommended that the fixture explicitly request
-  one of the :fixture:`db`, :fixture:`transactional_db` or
-  :fixture:`django_db_reset_sequences` fixtures. See below for a description of
-  them.
+  applied, depending on pytest's fixture execution order. To access the database
+  in a fixture, it is recommended that the fixture explicitly request one of the
+  :fixture:`db`, :fixture:`transactional_db`,
+  :fixture:`django_db_reset_sequences` or
+  :fixture:`django_db_serialized_rollback` fixtures. See below for a description
+  of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
@@ -331,6 +343,17 @@ fixtures which need database access themselves. A test function should normally
 use the :func:`pytest.mark.django_db` mark with ``transaction=True`` and
 ``reset_sequences=True``.
 
+.. fixture:: django_db_serialized_rollback
+
+``django_db_serialized_rollback``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture triggers :ref:`rollback emulation <test-case-serialized-rollback>`.
+This is only required for fixtures which need to enforce this behavior.  A test
+function should normally use :func:`pytest.mark.django_db` with
+``serialized_rollback=True`` (and most likely also ``transaction=True``) to
+request this behavior.
+
 .. fixture:: live_server
 
 ``live_server``
@@ -342,6 +365,12 @@ or by requesting it's string value: ``str(live_server)``.  You can
 also directly concatenate a string to form a URL: ``live_server +
 '/foo'``.
 
+Since the live server and the tests run in different threads, they
+cannot share a database transaction. For this reason, ``live_server``
+depends on the ``transactional_db`` fixture. If tests depend on data
+created in data migrations, you should add the
+``django_db_serialized_rollback`` fixture.
+
 .. note:: Combining database access fixtures.
 
   When using multiple database fixtures together, only one of them is
@@ -349,10 +378,10 @@ also directly concatenate a string to form a URL: ``live_server +
 
   * ``db``
   * ``transactional_db``
-  * ``django_db_reset_sequences``
 
-  In addition, using ``live_server`` will also trigger transactional
-  database access, if not specified.
+  In addition, using ``live_server`` or ``django_db_reset_sequences`` will also
+  trigger transactional database access, and ``django_db_serialized_rollback``
+  regular database access, if not specified.
 
 .. fixture:: settings
 

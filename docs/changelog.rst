@@ -4,11 +4,18 @@ Changelog
 unreleased
 ----------
 
+Improvements
+^^^^^^^^^^^^
+
+* Add support for :ref:`rollback emulation/serialized rollback
+  <test-case-serialized-rollback>`. The :func:`pytest.mark.django_db` marker
+  has a new ``serialized_rollback`` option, and a
+  :fixture:`django_db_serialized_rollback` fixture is added.
+
 Bugfixes
 ^^^^^^^^
 
-* Fix :fixture:`live_server` when using an in-memory SQLite database on
-  Django >= 3.0.
+* Fix :fixture:`live_server` when using an in-memory SQLite database.
 
 
 v4.4.0 (2021-06-06)

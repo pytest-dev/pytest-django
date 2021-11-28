@@ -33,6 +33,7 @@ from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
 from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
 from .fixtures import django_db_reset_sequences  # noqa
+from .fixtures import django_db_serialized_rollback  # noqa
 from .fixtures import django_db_setup  # noqa
 from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_user_model  # noqa
@@ -265,14 +266,17 @@ def pytest_load_initial_conftests(
     # Register the marks
     early_config.addinivalue_line(
         "markers",
-        "django_db(transaction=False, reset_sequences=False, databases=None): "
+        "django_db(transaction=False, reset_sequences=False, databases=None, "
+        "serialized_rollback=False): "
         "Mark the test as using the Django test database.  "
         "The *transaction* argument allows you to use real transactions "
         "in the test like Django's TransactionTestCase.  "
         "The *reset_sequences* argument resets database sequences before "
         "the test.  "
         "The *databases* argument sets which database aliases the test "
-        "uses (by default, only 'default'). Use '__all__' for all databases.",
+        "uses (by default, only 'default'). Use '__all__' for all databases.  "
+        "The *serialized_rollback* argument enables rollback emulation for "
+        "the test.",
     )
     early_config.addinivalue_line(
         "markers",
@@ -387,7 +391,12 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
         else:
             marker_db = test.get_closest_marker('django_db')
             if marker_db:
-                transaction, reset_sequences, databases = validate_django_db(marker_db)
+                (
+                    transaction,
+                    reset_sequences,
+                    databases,
+                    serialized_rollback,
+                ) = validate_django_db(marker_db)
                 uses_db = True
                 transactional = transaction or reset_sequences
             else:

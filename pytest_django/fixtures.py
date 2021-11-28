@@ -20,7 +20,8 @@ if TYPE_CHECKING:
     import django
 
     _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
-    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases]
+    # transaction, reset_sequences, databases, serialized_rollback
+    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool]
 
 
 __all__ = [
@@ -28,6 +29,7 @@ __all__ = [
     "db",
     "transactional_db",
     "django_db_reset_sequences",
+    "django_db_serialized_rollback",
     "admin_user",
     "django_user_model",
     "django_username_field",
@@ -151,9 +153,19 @@ def _django_db_helper(
 
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transactional, reset_sequences, databases = validate_django_db(marker)
+        (
+            transactional,
+            reset_sequences,
+            databases,
+            serialized_rollback,
+        ) = validate_django_db(marker)
     else:
-        transactional, reset_sequences, databases = False, False, None
+        (
+            transactional,
+            reset_sequences,
+            databases,
+            serialized_rollback,
+        ) = False, False, None, False
 
     transactional = transactional or (
         "transactional_db" in request.fixturenames
@@ -161,6 +173,9 @@ def _django_db_helper(
     )
     reset_sequences = reset_sequences or (
         "django_db_reset_sequences" in request.fixturenames
+    )
+    serialized_rollback = serialized_rollback or (
+        "django_db_serialized_rollback" in request.fixturenames
     )
 
     django_db_blocker.unblock()
@@ -175,10 +190,12 @@ def _django_db_helper(
         test_case_class = django.test.TestCase
 
     _reset_sequences = reset_sequences
+    _serialized_rollback = serialized_rollback
     _databases = databases
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         reset_sequences = _reset_sequences
+        serialized_rollback = _serialized_rollback
         if _databases is not None:
             databases = _databases
 
@@ -196,18 +213,20 @@ def validate_django_db(marker) -> "_DjangoDb":
     """Validate the django_db marker.
 
     It checks the signature and creates the ``transaction``,
-    ``reset_sequences`` and ``databases`` attributes on the marker
-    which will have the correct values.
+    ``reset_sequences``, ``databases`` and ``serialized_rollback`` attributes on
+    the marker which will have the correct values.
 
-    A sequence reset is only allowed when combined with a transaction.
+    Sequence reset and serialized_rollback are only allowed when combined with
+    transaction.
     """
 
     def apifun(
         transaction: bool = False,
         reset_sequences: bool = False,
         databases: "_DjangoDbDatabases" = None,
+        serialized_rollback: bool = False,
     ) -> "_DjangoDb":
-        return transaction, reset_sequences, databases
+        return transaction, reset_sequences, databases, serialized_rollback
 
     return apifun(*marker.args, **marker.kwargs)
 
@@ -300,6 +319,27 @@ def django_db_reset_sequences(
     request this resource to ensure they are consistent across tests.
     """
     # The `_django_db_helper` fixture checks if `django_db_reset_sequences`
+    # is requested.
+
+
+@pytest.fixture(scope="function")
+def django_db_serialized_rollback(
+    _django_db_helper: None,
+    db: None,
+) -> None:
+    """Require a test database with serialized rollbacks.
+
+    This requests the ``db`` fixture, and additionally performs rollback
+    emulation - serializes the database contents during setup and restores
+    it during teardown.
+
+    This fixture may be useful for transactional tests, so is usually combined
+    with ``transactional_db``, but can also be useful on databases which do not
+    support transactions.
+
+    Note that this will slow down that test suite by approximately 3x.
+    """
+    # The `_django_db_helper` fixture checks if `django_db_serialized_rollback`
     # is requested.
 
 
