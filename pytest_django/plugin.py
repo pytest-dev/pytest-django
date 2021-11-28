@@ -376,28 +376,33 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
         if test_cls:
             # Beware, TestCase is a subclass of TransactionTestCase
             if issubclass(test_cls, TestCase):
-                return 0
-            if issubclass(test_cls, TransactionTestCase):
-                return 1
-
-        marker_db = test.get_closest_marker('django_db')
-        if not marker_db:
-            transaction = None
+                uses_db = True
+                transactional = False
+            elif issubclass(test_cls, TransactionTestCase):
+                uses_db = True
+                transactional = True
+            else:
+                uses_db = False
+                transactional = False
         else:
-            transaction = validate_django_db(marker_db)[0]
-            if transaction is True:
-                return 1
+            marker_db = test.get_closest_marker('django_db')
+            if marker_db:
+                transaction, reset_sequences, databases = validate_django_db(marker_db)
+                uses_db = True
+                transactional = transaction or reset_sequences
+            else:
+                uses_db = False
+                transactional = False
+            fixtures = getattr(test, 'fixturenames', [])
+            transactional = transactional or "transactional_db" in fixtures
+            uses_db = uses_db or "db" in fixtures
 
-        fixtures = getattr(test, 'fixturenames', [])
-        if "transactional_db" in fixtures:
+        if transactional:
             return 1
-
-        if transaction is False:
+        elif uses_db:
             return 0
-        if "db" in fixtures:
-            return 0
-
-        return 2
+        else:
+            return 2
 
     items.sort(key=get_order_number)
 
