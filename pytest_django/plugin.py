@@ -461,7 +461,7 @@ def _django_db_marker(request) -> None:
     if marker:
         transaction, reset_sequences, databases = validate_django_db(marker)
 
-        # TODO: Use pytest Store (item.store) once that's stable.
+        # TODO: Use pytest Stash (item.stash) once that's stable.
         request.node._pytest_django_databases = databases
 
         if reset_sequences:
