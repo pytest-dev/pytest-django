@@ -151,9 +151,9 @@ def _django_db_helper(
 
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transactional, reset_sequences, _databases = validate_django_db(marker)
+        transactional, reset_sequences, databases = validate_django_db(marker)
     else:
-        transactional, reset_sequences, _databases = False, False, None
+        transactional, reset_sequences, databases = False, False, None
 
     transactional = transactional or (
         "transactional_db" in request.fixturenames
@@ -175,6 +175,7 @@ def _django_db_helper(
         test_case_class = django.test.TestCase
 
     _reset_sequences = reset_sequences
+    _databases = databases
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         if transactional and _reset_sequences:
