@@ -80,9 +80,9 @@ def test_db_order(django_testdir) -> None:
         "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",
+        "*test_run_second_reset_sequences_fixture*",
         "*test_run_second_reset_sequences_decorator*",
         "*test_run_second_transaction_test_case*",
-        "*test_run_second_reset_sequences_fixture*",
         "*test_run_last_test_case*",
         "*test_run_last_simple_test_case*",
     ])

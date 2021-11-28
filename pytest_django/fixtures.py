@@ -138,24 +138,30 @@ def django_db_setup(
         request.addfinalizer(teardown_database)
 
 
-def _django_db_fixture_helper(
+@pytest.fixture()
+def _django_db_helper(
     request,
+    django_db_setup: None,
     django_db_blocker,
-    transactional: bool = False,
-    reset_sequences: bool = False,
 ) -> None:
     from django import VERSION
 
     if is_django_unittest(request):
         return
 
-    if not transactional and "live_server" in request.fixturenames:
-        # Do nothing, we get called with transactional=True, too.
-        return
+    marker = request.node.get_closest_marker("django_db")
+    if marker:
+        transactional, reset_sequences, _databases = validate_django_db(marker)
+    else:
+        transactional, reset_sequences, _databases = False, False, None
 
-    _databases = getattr(
-        request.node, "_pytest_django_databases", None,
-    )  # type: Optional[_DjangoDbDatabases]
+    transactional = transactional or (
+        "transactional_db" in request.fixturenames
+        or "live_server" in request.fixturenames
+    )
+    reset_sequences = reset_sequences or (
+        "django_db_reset_sequences" in request.fixturenames
+    )
 
     django_db_blocker.unblock()
     request.addfinalizer(django_db_blocker.restore)
@@ -184,6 +190,26 @@ def _django_db_fixture_helper(
     test_case = PytestDjangoTestCase(methodName="__init__")
     test_case._pre_setup()
     request.addfinalizer(test_case._post_teardown)
+
+
+def validate_django_db(marker) -> "_DjangoDb":
+    """Validate the django_db marker.
+
+    It checks the signature and creates the ``transaction``,
+    ``reset_sequences`` and ``databases`` attributes on the marker
+    which will have the correct values.
+
+    A sequence reset is only allowed when combined with a transaction.
+    """
+
+    def apifun(
+        transaction: bool = False,
+        reset_sequences: bool = False,
+        databases: "_DjangoDbDatabases" = None,
+    ) -> "_DjangoDb":
+        return transaction, reset_sequences, databases
+
+    return apifun(*marker.args, **marker.kwargs)
 
 
 def _disable_migrations() -> None:
@@ -229,41 +255,24 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture(scope="function")
-def db(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
-) -> None:
+def db(_django_db_helper: None) -> None:
     """Require a django test database.
 
     This database will be setup with the default fixtures and will have
     the transaction management disabled. At the end of the test the outer
     transaction that wraps the test itself will be rolled back to undo any
     changes to the database (in case the backend supports transactions).
-    This is more limited than the ``transactional_db`` resource but
+    This is more limited than the ``transactional_db`` fixture but
     faster.
 
-    If multiple database fixtures are requested, they take precedence
-    over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``django_db_reset_sequences``.
+    If both ``db`` and ``transactional_db`` are requested,
+    ``transactional_db`` takes precedence.
     """
-    if "django_db_reset_sequences" in request.fixturenames:
-        request.getfixturevalue("django_db_reset_sequences")
-    if (
-        "transactional_db" in request.fixturenames
-        or "live_server" in request.fixturenames
-    ):
-        request.getfixturevalue("transactional_db")
-    else:
-        _django_db_fixture_helper(request, django_db_blocker, transactional=False)
+    # The `_django_db_helper` fixture checks if `db` is requested.
 
 
 @pytest.fixture(scope="function")
-def transactional_db(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
-) -> None:
+def transactional_db(_django_db_helper: None) -> None:
     """Require a django test database with transaction support.
 
     This will re-initialise the django database for each test and is
@@ -272,35 +281,26 @@ def transactional_db(
     If you want to use the database with transactions you must request
     this resource.
 
-    If multiple database fixtures are requested, they take precedence
-    over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``django_db_reset_sequences``.
+    If both ``db`` and ``transactional_db`` are requested,
+    ``transactional_db`` takes precedence.
     """
-    if "django_db_reset_sequences" in request.fixturenames:
-        request.getfixturevalue("django_db_reset_sequences")
-    _django_db_fixture_helper(request, django_db_blocker, transactional=True)
+    # The `_django_db_helper` fixture checks if `transactional_db` is requested.
 
 
 @pytest.fixture(scope="function")
 def django_db_reset_sequences(
-    request,
-    django_db_setup: None,
-    django_db_blocker,
+    _django_db_helper: None,
+    transactional_db: None,
 ) -> None:
     """Require a transactional test database with sequence reset support.
 
-    This behaves like the ``transactional_db`` fixture, with the addition
-    of enforcing a reset of all auto increment sequences.  If the enquiring
+    This requests the ``transactional_db`` fixture, and additionally
+    enforces a reset of all auto increment sequences.  If the enquiring
     test relies on such values (e.g. ids as primary keys), you should
     request this resource to ensure they are consistent across tests.
-
-    If multiple database fixtures are requested, they take precedence
-    over each other in the following order (the last one wins): ``db``,
-    ``transactional_db``, ``django_db_reset_sequences``.
     """
-    _django_db_fixture_helper(
-        request, django_db_blocker, transactional=True, reset_sequences=True
-    )
+    # The `_django_db_helper` fixture checks if `django_db_reset_sequences`
+    # is requested.
 
 
 @pytest.fixture()

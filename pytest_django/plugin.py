@@ -15,6 +15,7 @@ from typing import Generator, List, Optional, Tuple, Union
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
+from .fixtures import _django_db_helper  # noqa
 from .fixtures import _live_server_helper  # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
@@ -40,6 +41,7 @@ from .fixtures import live_server  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
+from .fixtures import validate_django_db
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
@@ -48,8 +50,6 @@ if TYPE_CHECKING:
     from typing import ContextManager, NoReturn
 
     import django
-
-    from .fixtures import _DjangoDb, _DjangoDbDatabases
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
@@ -464,17 +464,7 @@ def _django_db_marker(request) -> None:
     """
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences, databases = validate_django_db(marker)
-
-        # TODO: Use pytest Stash (item.stash) once that's stable.
-        request.node._pytest_django_databases = databases
-
-        if reset_sequences:
-            request.getfixturevalue("django_db_reset_sequences")
-        elif transaction:
-            request.getfixturevalue("transactional_db")
-        else:
-            request.getfixturevalue("db")
+        request.getfixturevalue("_django_db_helper")
 
 
 @pytest.fixture(autouse=True, scope="class")
@@ -741,26 +731,6 @@ class _DatabaseBlocker:
 
 
 _blocking_manager = _DatabaseBlocker()
-
-
-def validate_django_db(marker) -> "_DjangoDb":
-    """Validate the django_db marker.
-
-    It checks the signature and creates the ``transaction``,
-    ``reset_sequences`` and ``databases`` attributes on the marker
-    which will have the correct values.
-
-    A sequence reset is only allowed when combined with a transaction.
-    """
-
-    def apifun(
-        transaction: bool = False,
-        reset_sequences: bool = False,
-        databases: "_DjangoDbDatabases" = None,
-    ) -> "_DjangoDb":
-        return transaction, reset_sequences, databases
-
-    return apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker) -> List[str]:
