@@ -56,6 +56,10 @@ def test_db_order(django_testdir) -> None:
         def test_run_first_decorator():
             pass
 
+        @pytest.mark.django_db(serialized_rollback=True)
+        def test_run_first_serialized_rollback_decorator():
+            pass
+
         class MyTestCase(TestCase):
             def test_run_last_test_case(self):
                 pass
@@ -77,6 +81,7 @@ def test_db_order(django_testdir) -> None:
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
         "*test_run_first_decorator*",
+        "*test_run_first_serialized_rollback_decorator*",
         "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",

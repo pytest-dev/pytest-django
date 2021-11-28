@@ -48,7 +48,12 @@ def non_zero_sequences_counter(db: None) -> None:
 class TestDatabaseFixtures:
     """Tests for the different database fixtures."""
 
-    @pytest.fixture(params=["db", "transactional_db", "django_db_reset_sequences"])
+    @pytest.fixture(params=[
+        "db",
+        "transactional_db",
+        "django_db_reset_sequences",
+        "django_db_serialized_rollback",
+    ])
     def all_dbs(self, request) -> None:
         if request.param == "django_db_reset_sequences":
             return request.getfixturevalue("django_db_reset_sequences")
@@ -56,6 +61,10 @@ class TestDatabaseFixtures:
             return request.getfixturevalue("transactional_db")
         elif request.param == "db":
             return request.getfixturevalue("db")
+        elif request.param == "django_db_serialized_rollback":
+            return request.getfixturevalue("django_db_serialized_rollback")
+        else:
+            assert False  # pragma: no cover
 
     def test_access(self, all_dbs: None) -> None:
         Item.objects.create(name="spam")
@@ -113,6 +122,51 @@ class TestDatabaseFixtures:
             ["*test_django_db_reset_sequences_requested PASSED*"]
         )
 
+    def test_serialized_rollback(self, db: None, django_testdir) -> None:
+        django_testdir.create_app_file(
+            """
+            from django.db import migrations
+
+            def load_data(apps, schema_editor):
+                Item = apps.get_model("app", "Item")
+                Item.objects.create(name="loaded-in-migration")
+
+            class Migration(migrations.Migration):
+                dependencies = [
+                    ("app", "0001_initial"),
+                ]
+
+                operations = [
+                    migrations.RunPython(load_data),
+                ]
+            """,
+            "migrations/0002_data_migration.py",
+        )
+
+        django_testdir.create_test_module(
+            """
+            import pytest
+            from .app.models import Item
+
+            @pytest.mark.django_db(transaction=True, serialized_rollback=True)
+            def test_serialized_rollback_1():
+                assert Item.objects.filter(name="loaded-in-migration").exists()
+
+            @pytest.mark.django_db(transaction=True)
+            def test_serialized_rollback_2(django_db_serialized_rollback):
+                assert Item.objects.filter(name="loaded-in-migration").exists()
+                Item.objects.create(name="test2")
+
+            @pytest.mark.django_db(transaction=True, serialized_rollback=True)
+            def test_serialized_rollback_3():
+                assert Item.objects.filter(name="loaded-in-migration").exists()
+                assert not Item.objects.filter(name="test2").exists()
+            """
+        )
+
+        result = django_testdir.runpytest_subprocess("-v")
+        assert result.ret == 0
+
     @pytest.fixture
     def mydb(self, all_dbs: None) -> None:
         # This fixture must be able to access the database
@@ -160,6 +214,10 @@ class TestDatabaseFixturesAllOrder:
     def fixture_with_reset_sequences(self, django_db_reset_sequences: None) -> None:
         Item.objects.create(name="spam")
 
+    @pytest.fixture
+    def fixture_with_serialized_rollback(self, django_db_serialized_rollback: None) -> None:
+        Item.objects.create(name="ham")
+
     def test_trans(self, fixture_with_transdb: None) -> None:
         pass
 
@@ -176,6 +234,16 @@ class TestDatabaseFixturesAllOrder:
         self,
         fixture_with_reset_sequences: None,
         fixture_with_transdb: None,
+        fixture_with_db: None,
+    ) -> None:
+        pass
+
+    # The test works when transactions are not supported, but it interacts
+    # badly with other tests.
+    @pytest.mark.skipif('not connection.features.supports_transactions')
+    def test_serialized_rollback(
+        self,
+        fixture_with_serialized_rollback: None,
         fixture_with_db: None,
     ) -> None:
         pass
@@ -263,6 +331,19 @@ class TestDatabaseMarker:
         Item.objects.create(name="spam")
         SecondItem.objects.count()
         SecondItem.objects.create(name="spam")
+
+    @pytest.mark.django_db
+    def test_serialized_rollback_disabled(self, request):
+        marker = request.node.get_closest_marker("django_db")
+        assert not marker.kwargs
+
+    # The test works when transactions are not supported, but it interacts
+    # badly with other tests.
+    @pytest.mark.skipif('not connection.features.supports_transactions')
+    @pytest.mark.django_db(serialized_rollback=True)
+    def test_serialized_rollback_enabled(self, request):
+        marker = request.node.get_closest_marker("django_db")
+        assert marker.kwargs["serialized_rollback"]
 
 
 def test_unittest_interaction(django_testdir) -> None:
