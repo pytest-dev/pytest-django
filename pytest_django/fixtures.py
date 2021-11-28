@@ -178,8 +178,7 @@ def _django_db_helper(
     _databases = databases
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
-        if transactional and _reset_sequences:
-            reset_sequences = True
+        reset_sequences = _reset_sequences
         if _databases is not None:
             databases = _databases
 

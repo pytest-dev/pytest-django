@@ -219,7 +219,7 @@ class TestDatabaseMarker:
         marker = request.node.get_closest_marker("django_db")
         assert not marker.kwargs
 
-    @pytest.mark.django_db(reset_sequences=True)
+    @pytest.mark.django_db(transaction=True, reset_sequences=True)
     def test_reset_sequences_enabled(self, request) -> None:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
