@@ -199,6 +199,32 @@ def _django_db_helper(
         if _databases is not None:
             databases = _databases
 
+        # For non-transactional tests, skip executing `django.test.TestCase`'s
+        # `setUpClass`/`tearDownClass`, only execute the super class ones.
+        #
+        # `TestCase`'s class setup manages the `setUpTestData`/class-level
+        # transaction functionality. We don't use it; instead we (will) offer
+        # our own alternatives. So it only adds overhead, and does some things
+        # which conflict with our (planned) functionality, particularly, it
+        # closes all database connections in `tearDownClass` which inhibits
+        # wrapping tests in higher-scoped transactions.
+        #
+        # It's possible a new version of Django will add some unrelated
+        # functionality to these methods, in which case skipping them completely
+        # would not be desirable. Let's cross that bridge when we get there...
+        if not transactional:
+            @classmethod
+            def setUpClass(cls) -> None:
+                super(django.test.TestCase, cls).setUpClass()
+                if (3, 2) <= VERSION < (4, 1):
+                    django.db.transaction.Atomic._ensure_durability = False
+
+            @classmethod
+            def tearDownClass(cls) -> None:
+                if (3, 2) <= VERSION < (4, 1):
+                    django.db.transaction.Atomic._ensure_durability = True
+                super(django.test.TestCase, cls).tearDownClass()
+
     PytestDjangoTestCase.setUpClass()
     if VERSION >= (4, 0):
         request.addfinalizer(PytestDjangoTestCase.doClassCleanups)
