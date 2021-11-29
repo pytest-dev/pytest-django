@@ -182,6 +182,21 @@ def _django_db_helper(
         if _databases is not None:
             databases = _databases
 
+    if VERSION >= (3, 2):
+        from django.test.testcases import TestData
+        # If the test class has defined a Django-style setUpTestData,
+        # arrange for it to be called by the DjangoTestCase classmethods that we're calling here.
+        if request.cls and hasattr(request.cls, 'setUpTestData'):
+            def wrappedSetUpTestData(klass):
+                pre_attrs = request.cls.__dict__.copy()
+                request.cls.setUpTestData()
+                for name, value in request.cls.__dict__.items():
+                    if value is not pre_attrs.get(name):
+                        setattr(request.cls, name, TestData(name, value))
+
+            # Re-bind our new classmethod to the class we're attaching it to using the function's descriptor.
+            PytestDjangoTestCase.setUpTestData = wrappedSetUpTestData.__get__(PytestDjangoTestCase, PytestDjangoTestCase)
+
     PytestDjangoTestCase.setUpClass()
     if VERSION >= (4, 0):
         request.addfinalizer(PytestDjangoTestCase.doClassCleanups)

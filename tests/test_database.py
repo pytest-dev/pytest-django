@@ -343,3 +343,21 @@ class Test_database_blocking:
                 'or the "db" or "transactional_db" fixtures to enable it.'
             ]
         )
+
+
+# TODO: If this is omitted, the error is confusing:
+#  AttributeError: 'TestDatabaseClassAutoCaching' object has no attribute 'item_1'
+@pytest.mark.django_db
+class TestDatabaseClassAutoCaching:
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.item_1 = Item.objects.create()
+
+    # But it's not idiomatic for pytest:
+    def test_foo_c(self):
+        self.item_1.name = 'foo'
+        self.item_1.save()
+
+    def test_bar_c(self):
+        assert not self.item_1.name
