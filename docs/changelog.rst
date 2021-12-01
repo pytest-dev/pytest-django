@@ -1,8 +1,8 @@
 Changelog
 =========
 
-unreleased
-----------
+v4.5.0 (2021-12-01)
+-------------------
 
 Improvements
 ^^^^^^^^^^^^
@@ -12,10 +12,26 @@ Improvements
   has a new ``serialized_rollback`` option, and a
   :fixture:`django_db_serialized_rollback` fixture is added.
 
+* Official Python 3.10 support.
+
+* Official Django 4.0 support (tested against 4.0rc1 at the time of release).
+
+* Drop official Django 3.0 support. Django 2.2 is still supported, and 3.0
+  will likely keep working until 2.2 is dropped, but it's not tested.
+
+* Added pyproject.toml file.
+
+* Skip Django's `setUpTestData` mechanism in pytest-django tests. It is not
+  used for those, and interferes with some planned features. Note that this
+  does not affect ``setUpTestData`` in unittest tests (test classes which
+  inherit from Django's `TestCase`).
+
 Bugfixes
 ^^^^^^^^
 
 * Fix :fixture:`live_server` when using an in-memory SQLite database.
+
+* Fix typing of ``assertTemplateUsed`` and ``assertTemplateNotUsed``.
 
 
 v4.4.0 (2021-06-06)
