@@ -50,13 +50,17 @@ class LiveServer:
         self._live_server_modified_settings = modify_settings(
             ALLOWED_HOSTS={"append": host}
         )
+        # `_live_server_modified_settings` is enabled and disabled by
+        # `_live_server_helper`.
 
         self.thread.daemon = True
         self.thread.start()
         self.thread.is_ready.wait()
 
         if self.thread.error:
-            raise self.thread.error
+            error = self.thread.error
+            self.stop()
+            raise error
 
     def stop(self) -> None:
         """Stop the server"""
