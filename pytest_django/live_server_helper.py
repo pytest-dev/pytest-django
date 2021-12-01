@@ -62,7 +62,6 @@ class LiveServer:
         """Stop the server"""
         # Terminate the live server's thread.
         self.thread.terminate()
-        self.thread.join()
         # Restore shared connections' non-shareability.
         for conn in self.thread.connections_override.values():
             conn.dec_thread_sharing()
