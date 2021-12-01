@@ -7,8 +7,8 @@ unreleased
 Bugfixes
 ^^^^^^^^
 
-* Fix fixture :fixture:`LiveServer` when using an in-memory SQLite database on
-  Django >= 3.
+* Fix fixture ``.live_server_helper.LiveServer`` when using an in-memory SQLite
+  database on Django >= 3.
 
 
 v4.4.0 (2021-06-06)
