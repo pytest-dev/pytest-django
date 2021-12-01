@@ -1,4 +1,5 @@
 from typing import Dict, Any
+from .django_compat import IS_DJANGO_2
 
 
 class LiveServer:
@@ -24,10 +25,10 @@ class LiveServer:
                 and conn.settings_dict["NAME"] == ":memory:"
             ):
                 # Explicitly enable thread-shareability for this connection
-                try:
-                    conn.inc_thread_sharing()
-                except AttributeError:  # Django < 3
+                if IS_DJANGO_2:
                     conn.allow_thread_sharing = True
+                else:
+                    conn.inc_thread_sharing()
                 connections_override[conn.alias] = conn
 
         liveserver_kwargs["connections_override"] = connections_override
@@ -63,6 +64,36 @@ class LiveServer:
 
     def stop(self) -> None:
         """Stop the server"""
+
+        liveserver_kwargs = {}  # type: Dict[str, Any]
+
+        connections_override = {}
+        for conn in connections.all():
+            # If using in-memory sqlite databases, pass the connections to
+            # the server thread.
+            if (
+                conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3"
+                and conn.settings_dict["NAME"] == ":memory:"
+            ):
+                # Explicitly enable thread-shareability for this connection
+                if IS_DJANGO_2:
+                    conn.allow_thread_sharing = False
+                else:
+                    conn.dec_thread_sharing()
+                connections_override[conn.alias] = conn
+
+        liveserver_kwargs["connections_override"] = connections_override
+        from django.conf import settings
+
+        if "django.contrib.staticfiles" in settings.INSTALLED_APPS:
+            from django.contrib.staticfiles.handlers import StaticFilesHandler
+
+            liveserver_kwargs["static_handler"] = StaticFilesHandler
+        else:
+            from django.test.testcases import _StaticFilesHandler
+
+            liveserver_kwargs["static_handler"] = _StaticFilesHandler
+
         self.thread.terminate()
         self.thread.join()
 
