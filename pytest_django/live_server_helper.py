@@ -64,6 +64,7 @@ class LiveServer:
 
     def stop(self) -> None:
         """Stop the server"""
+        from django.db import connections
 
         liveserver_kwargs = {}  # type: Dict[str, Any]
 
