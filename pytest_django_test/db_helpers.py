@@ -15,6 +15,8 @@ TEST_DB_NAME = _settings["TEST"]["NAME"]
 
 if _settings["ENGINE"] == "django.db.backends.sqlite3" and TEST_DB_NAME is None:
     TEST_DB_NAME = ":memory:"
+    SECOND_DB_NAME = ":memory:"
+    SECOND_TEST_DB_NAME = ":memory:"
 else:
     DB_NAME += "_inner"
 
@@ -25,8 +27,8 @@ else:
         # An explicit test db name was given, is that as the base name
         TEST_DB_NAME = "{}_inner".format(TEST_DB_NAME)
 
-SECOND_DB_NAME = DB_NAME + '_second' if DB_NAME is not None else None
-SECOND_TEST_DB_NAME = TEST_DB_NAME + '_second' if DB_NAME is not None else None
+    SECOND_DB_NAME = DB_NAME + '_second' if DB_NAME is not None else None
+    SECOND_TEST_DB_NAME = TEST_DB_NAME + '_second' if DB_NAME is not None else None
 
 
 def get_db_engine():

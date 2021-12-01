@@ -4,17 +4,17 @@ from .settings_base import *  # noqa: F401 F403
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/should_not_be_accessed",
+        "NAME": ":memory:",
     },
     "replica": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/should_not_be_accessed",
+        "NAME": ":memory:",
         "TEST": {
             "MIRROR": "default",
         },
     },
     "second": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/should_not_be_accessed",
+        "NAME": ":memory:",
     },
 }
