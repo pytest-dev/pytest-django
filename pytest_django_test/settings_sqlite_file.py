@@ -15,7 +15,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "/pytest_django_tests_default",
-        "TEST": {"NAME": _filename_default},
+        "TEST": {
+            "NAME": _filename_default,
+        },
     },
     "replica": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -28,6 +30,8 @@ DATABASES = {
     "second": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "/pytest_django_tests_second",
-        "TEST": {"NAME": _filename_second},
+        "TEST": {
+            "NAME": _filename_second,
+        },
     },
 }

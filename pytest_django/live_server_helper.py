@@ -19,11 +19,8 @@ class LiveServer:
         for conn in connections.all():
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
-            if (
-                conn.settings_dict["ENGINE"] == "django.db.backends.sqlite3"
-                and conn.settings_dict["NAME"] == ":memory:"
-            ):
-                # Explicitly enable thread-shareability for this connection
+            if conn.vendor == 'sqlite' and conn.is_in_memory_db():
+                # Explicitly enable thread-shareability for this connection.
                 conn.inc_thread_sharing()
                 connections_override[conn.alias] = conn
 
