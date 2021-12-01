@@ -219,7 +219,7 @@ class TestDatabaseMarker:
         marker = request.node.get_closest_marker("django_db")
         assert not marker.kwargs
 
-    @pytest.mark.django_db(reset_sequences=True)
+    @pytest.mark.django_db(transaction=True, reset_sequences=True)
     def test_reset_sequences_enabled(self, request) -> None:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
@@ -248,6 +248,14 @@ class TestDatabaseMarker:
     def test_replica_database_not_allowed(self, request) -> None:
         with pytest.raises(AssertionError, match='not allowed'):
             Item.objects.count()
+
+    @pytest.mark.django_db(transaction=True, databases=['default', 'replica'])
+    def test_replica_mirrors_default_database(self, request) -> None:
+        Item.objects.create(name='spam')
+        Item.objects.using('replica').create(name='spam')
+
+        assert Item.objects.count() == 2
+        assert Item.objects.using('replica').count() == 2
 
     @pytest.mark.django_db(databases='__all__')
     def test_all_databases(self, request) -> None:

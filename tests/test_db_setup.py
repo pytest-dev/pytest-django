@@ -1,10 +1,7 @@
 import pytest
 
 from pytest_django_test.db_helpers import (
-    db_exists,
-    drop_database,
-    mark_database,
-    mark_exists,
+    db_exists, drop_database, mark_database, mark_exists,
     skip_if_sqlite_in_memory,
 )
 
@@ -45,7 +42,14 @@ def test_db_order(django_testdir) -> None:
         def test_run_second_fixture(transactional_db):
             pass
 
+        def test_run_second_reset_sequences_fixture(django_db_reset_sequences):
+            pass
+
         def test_run_first_fixture(db):
+            pass
+
+        @pytest.mark.django_db(reset_sequences=True)
+        def test_run_second_reset_sequences_decorator():
             pass
 
         @pytest.mark.django_db
@@ -68,7 +72,7 @@ def test_db_order(django_testdir) -> None:
             def test_run_second_transaction_test_case(self):
                 pass
     ''')
-    result = django_testdir.runpytest_subprocess('-v', '-s')
+    result = django_testdir.runpytest_subprocess('-q', '--collect-only')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
@@ -76,6 +80,8 @@ def test_db_order(django_testdir) -> None:
         "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",
+        "*test_run_second_reset_sequences_fixture*",
+        "*test_run_second_reset_sequences_decorator*",
         "*test_run_second_transaction_test_case*",
         "*test_run_last_test_case*",
         "*test_run_last_simple_test_case*",
@@ -452,8 +458,8 @@ class TestSqliteInMemoryWithXdist:
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
 
-class TestNativeMigrations:
-    """ Tests for Django Migrations """
+class TestMigrations:
+    """Tests for Django Migrations."""
 
     def test_no_migrations(self, django_testdir) -> None:
         django_testdir.create_test_module(
@@ -467,12 +473,11 @@ class TestNativeMigrations:
         """
         )
 
-        migration_file = django_testdir.project_root.join(
-            "tpkg/app/migrations/0001_initial.py"
-        )
-        assert migration_file.isfile()
-        migration_file.write(
-            'raise Exception("This should not get imported.")', ensure=True
+        django_testdir.create_test_module(
+            """
+            raise Exception("This should not get imported.")
+            """,
+            "migrations/0001_initial.py",
         )
 
         result = django_testdir.runpytest_subprocess(

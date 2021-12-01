@@ -10,6 +10,10 @@
     :alt: Build Status
     :target: https://github.com/pytest-dev/pytest-django/actions
 
+.. image:: https://img.shields.io/pypi/djversions/pytest-django.svg
+   :alt: Supported Django versions
+   :target: https://pypi.org/project/pytest-django/
+
 .. image:: https://img.shields.io/codecov/c/github/pytest-dev/pytest-django.svg?style=flat
     :alt: Coverage
     :target: https://codecov.io/gh/pytest-dev/pytest-django
@@ -28,7 +32,7 @@ pytest-django allows you to test your Django project/applications with the
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
 * Version compatibility:
 
-  * Django: 2.2, 3.0, 3.1, 3.2 and latest main branch (compatible at the time of
+  * Django: 2.2, 3.1, 3.2, 4.0 and latest main branch (compatible at the time of
     each release)
   * Python: CPython>=3.5 or PyPy 3
   * pytest: >=5.4

@@ -1,9 +1,8 @@
 import os
-import subprocess
 import sqlite3
+import subprocess
 
 import pytest
-
 from django.conf import settings
 from django.utils.encoding import force_str
 
@@ -167,8 +166,7 @@ def mark_exists():
     if db_engine == "postgresql":
         r = run_psql(TEST_DB_NAME, "-c", "SELECT 1 FROM mark_table")
 
-        # When something pops out on std_out, we are good
-        return bool(r.std_out)
+        return r.status_code == 0
 
     if db_engine == "mysql":
         r = run_mysql(TEST_DB_NAME, "-e", "SELECT 1 FROM mark_table")

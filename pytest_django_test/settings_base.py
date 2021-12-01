@@ -29,3 +29,5 @@ TEMPLATES = [
 ]
 
 DATABASE_ROUTERS = ['pytest_django_test.db_router.DbRouter']
+
+USE_TZ = True

@@ -4,52 +4,52 @@ This plugin handles creating and destroying the test environment and
 test database and provides some useful text fixtures.
 """
 
-from typing import Generator, List, Optional, Tuple, Union
 import contextlib
 import inspect
-from functools import reduce
 import os
 import pathlib
 import sys
+from functools import reduce
+from typing import Generator, List, Optional, Tuple, Union
 
 import pytest
 
 from .django_compat import is_django_unittest  # noqa
-from .fixtures import django_assert_num_queries  # noqa
-from .fixtures import django_assert_max_num_queries  # noqa
-from .fixtures import django_db_setup  # noqa
-from .fixtures import django_db_use_migrations  # noqa
-from .fixtures import django_db_keepdb  # noqa
-from .fixtures import django_db_createdb  # noqa
-from .fixtures import django_db_modify_db_settings  # noqa
-from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
-from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
-from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
-from .fixtures import django_capture_on_commit_callbacks  # noqa
+from .fixtures import _django_db_helper  # noqa
 from .fixtures import _live_server_helper  # noqa
 from .fixtures import admin_client  # noqa
 from .fixtures import admin_user  # noqa
 from .fixtures import async_client  # noqa
+from .fixtures import async_rf  # noqa
 from .fixtures import client  # noqa
 from .fixtures import db  # noqa
+from .fixtures import django_assert_max_num_queries  # noqa
+from .fixtures import django_assert_num_queries  # noqa
+from .fixtures import django_capture_on_commit_callbacks  # noqa
+from .fixtures import django_db_createdb  # noqa
+from .fixtures import django_db_keepdb  # noqa
+from .fixtures import django_db_modify_db_settings  # noqa
+from .fixtures import django_db_modify_db_settings_parallel_suffix  # noqa
+from .fixtures import django_db_modify_db_settings_tox_suffix  # noqa
+from .fixtures import django_db_modify_db_settings_xdist_suffix  # noqa
+from .fixtures import django_db_reset_sequences  # noqa
+from .fixtures import django_db_setup  # noqa
+from .fixtures import django_db_use_migrations  # noqa
 from .fixtures import django_user_model  # noqa
 from .fixtures import django_username_field  # noqa
 from .fixtures import live_server  # noqa
-from .fixtures import django_db_reset_sequences  # noqa
-from .fixtures import async_rf  # noqa
 from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
-
+from .fixtures import validate_django_db
 from .lazy_django import django_settings_is_configured, skip_if_no_django
+
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import ContextManager, NoReturn
 
     import django
-
-    from .fixtures import _DjangoDb, _DjangoDbDatabases
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
@@ -376,28 +376,33 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
         if test_cls:
             # Beware, TestCase is a subclass of TransactionTestCase
             if issubclass(test_cls, TestCase):
-                return 0
-            if issubclass(test_cls, TransactionTestCase):
-                return 1
-
-        marker_db = test.get_closest_marker('django_db')
-        if not marker_db:
-            transaction = None
+                uses_db = True
+                transactional = False
+            elif issubclass(test_cls, TransactionTestCase):
+                uses_db = True
+                transactional = True
+            else:
+                uses_db = False
+                transactional = False
         else:
-            transaction = validate_django_db(marker_db)[0]
-            if transaction is True:
-                return 1
+            marker_db = test.get_closest_marker('django_db')
+            if marker_db:
+                transaction, reset_sequences, databases = validate_django_db(marker_db)
+                uses_db = True
+                transactional = transaction or reset_sequences
+            else:
+                uses_db = False
+                transactional = False
+            fixtures = getattr(test, 'fixturenames', [])
+            transactional = transactional or "transactional_db" in fixtures
+            uses_db = uses_db or "db" in fixtures
 
-        fixtures = getattr(test, 'fixturenames', [])
-        if "transactional_db" in fixtures:
+        if transactional:
             return 1
-
-        if transaction is False:
+        elif uses_db:
             return 0
-        if "db" in fixtures:
-            return 0
-
-        return 2
+        else:
+            return 2
 
     items.sort(key=get_order_number)
 
@@ -416,7 +421,9 @@ def django_test_environment(request) -> None:
     """
     if django_settings_is_configured():
         _setup_django()
-        from django.test.utils import setup_test_environment, teardown_test_environment
+        from django.test.utils import (
+            setup_test_environment, teardown_test_environment,
+        )
 
         debug_ini = request.config.getini("django_debug_mode")
         if debug_ini == "keep":
@@ -450,24 +457,10 @@ def django_db_blocker() -> "Optional[_DatabaseBlocker]":
 
 @pytest.fixture(autouse=True)
 def _django_db_marker(request) -> None:
-    """Implement the django_db marker, internal to pytest-django.
-
-    This will dynamically request the ``db``, ``transactional_db`` or
-    ``django_db_reset_sequences`` fixtures as required by the django_db marker.
-    """
+    """Implement the django_db marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("django_db")
     if marker:
-        transaction, reset_sequences, databases = validate_django_db(marker)
-
-        # TODO: Use pytest Store (item.store) once that's stable.
-        request.node._pytest_django_databases = databases
-
-        if reset_sequences:
-            request.getfixturevalue("django_db_reset_sequences")
-        elif transaction:
-            request.getfixturevalue("transactional_db")
-        else:
-            request.getfixturevalue("db")
+        request.getfixturevalue("_django_db_helper")
 
 
 @pytest.fixture(autouse=True, scope="class")
@@ -734,26 +727,6 @@ class _DatabaseBlocker:
 
 
 _blocking_manager = _DatabaseBlocker()
-
-
-def validate_django_db(marker) -> "_DjangoDb":
-    """Validate the django_db marker.
-
-    It checks the signature and creates the ``transaction``,
-    ``reset_sequences`` and ``databases`` attributes on the marker
-    which will have the correct values.
-
-    A sequence reset is only allowed when combined with a transaction.
-    """
-
-    def apifun(
-        transaction: bool = False,
-        reset_sequences: bool = False,
-        databases: "_DjangoDbDatabases" = None,
-    ) -> "_DjangoDb":
-        return transaction, reset_sequences, databases
-
-    return apifun(*marker.args, **marker.kwargs)
 
 
 def validate_urls(marker) -> List[str]:

@@ -1,9 +1,9 @@
 """
 Helpers to load Django lazily when Django settings can't be configured.
 """
-from typing import Any, Tuple
 import os
 import sys
+from typing import Any, Tuple
 
 import pytest
 

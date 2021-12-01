@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 from .django_compat import IS_DJANGO_2
 
 

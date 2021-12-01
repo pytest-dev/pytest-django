@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from django.contrib.sites.models import Site
 from django.contrib.sites import models as site_models
+from django.contrib.sites.models import Site
 from django.core import mail
 from django.db import connection
 from django.test import TestCase

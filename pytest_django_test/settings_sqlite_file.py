@@ -2,6 +2,7 @@ import tempfile
 
 from .settings_base import *  # noqa: F401 F403
 
+
 # This is a SQLite configuration, which uses a file based database for
 # tests (via setting TEST_NAME / TEST['NAME']).
 
