@@ -4,11 +4,8 @@ VENV:=build/venv
 
 export DJANGO_SETTINGS_MODULE?=pytest_django_test.settings_sqlite_file
 
-testenv: $(VENV)/bin/pytest
-
 test: $(VENV)/bin/pytest
-	$(VENV)/bin/pip install -e .
-	$(VENV)/bin/py.test
+	$(VENV)/bin/pytest
 
 $(VENV)/bin/python $(VENV)/bin/pip:
 	virtualenv $(VENV)
