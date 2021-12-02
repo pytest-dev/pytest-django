@@ -12,7 +12,7 @@ from django.test import (
 TYPE_CHECKING = False
 
 
-test_case = TestCase('run')
+test_case = TestCase("run")
 
 
 def _wrapper(name: str):
@@ -28,10 +28,10 @@ def _wrapper(name: str):
 __all__ = []
 assertions_names = set()  # type: Set[str]
 assertions_names.update(
-    {attr for attr in vars(TestCase) if attr.startswith('assert')},
-    {attr for attr in vars(SimpleTestCase) if attr.startswith('assert')},
-    {attr for attr in vars(LiveServerTestCase) if attr.startswith('assert')},
-    {attr for attr in vars(TransactionTestCase) if attr.startswith('assert')},
+    {attr for attr in vars(TestCase) if attr.startswith("assert")},
+    {attr for attr in vars(SimpleTestCase) if attr.startswith("assert")},
+    {attr for attr in vars(LiveServerTestCase) if attr.startswith("assert")},
+    {attr for attr in vars(TransactionTestCase) if attr.startswith("assert")},
 )
 
 for assert_func in assertions_names:

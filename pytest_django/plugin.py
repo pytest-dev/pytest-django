@@ -382,7 +382,7 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
             uses_db = True
             transactional = not issubclass(test_cls, TestCase)
         else:
-            marker_db = test.get_closest_marker('django_db')
+            marker_db = test.get_closest_marker("django_db")
             if marker_db:
                 (
                     transaction,
@@ -395,7 +395,7 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
             else:
                 uses_db = False
                 transactional = False
-            fixtures = getattr(test, 'fixturenames', [])
+            fixtures = getattr(test, "fixturenames", [])
             transactional = transactional or "transactional_db" in fixtures
             uses_db = uses_db or "db" in fixtures
 
