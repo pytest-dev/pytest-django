@@ -1,6 +1,17 @@
 Changelog
 =========
 
+v4.5.1 (2021-12-02)
+-------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fix regression in v4.5.0 - database tests inside (non-unittest) classes were
+  not ordered correctly to run before non-database tests, same for transactional
+  tests before non-transactional tests.
+
+
 v4.5.0 (2021-12-01)
 -------------------
 
