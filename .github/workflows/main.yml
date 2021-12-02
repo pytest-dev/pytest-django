@@ -128,7 +128,6 @@ jobs:
   deploy:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
     runs-on: ubuntu-20.04
-    needs: [test]
 
     steps:
       - uses: actions/checkout@v2
