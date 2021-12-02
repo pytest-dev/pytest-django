@@ -29,9 +29,11 @@ def test_db_order(django_testdir) -> None:
     """Test order in which tests are being executed."""
 
     django_testdir.create_test_module('''
-        from unittest import TestCase
         import pytest
-        from django.test import SimpleTestCase, TestCase as DjangoTestCase, TransactionTestCase
+        from unittest import TestCase
+        from django.test import SimpleTestCase
+        from django.test import TestCase as DjangoTestCase
+        from django.test import TransactionTestCase
 
         from .app.models import Item
 
@@ -45,12 +47,31 @@ def test_db_order(django_testdir) -> None:
         def test_run_second_reset_sequences_fixture(django_db_reset_sequences):
             pass
 
+        class MyTransactionTestCase(TransactionTestCase):
+            def test_run_second_transaction_test_case(self):
+                pass
+
         def test_run_first_fixture(db):
             pass
+
+        class TestClass:
+            def test_run_second_fixture_class(self, transactional_db):
+                pass
+
+            def test_run_first_fixture_class(self, db):
+                pass
 
         @pytest.mark.django_db(reset_sequences=True)
         def test_run_second_reset_sequences_decorator():
             pass
+
+        class MyDjangoTestCase(DjangoTestCase):
+            def test_run_first_django_test_case(self):
+                pass
+
+        class MySimpleTestCase(SimpleTestCase):
+            def test_run_last_simple_test_case(self):
+                pass
 
         @pytest.mark.django_db
         def test_run_first_decorator():
@@ -63,34 +84,24 @@ def test_db_order(django_testdir) -> None:
         class MyTestCase(TestCase):
             def test_run_last_test_case(self):
                 pass
-
-        class MySimpleTestCase(SimpleTestCase):
-            def test_run_last_simple_test_case(self):
-                pass
-
-        class MyDjangoTestCase(DjangoTestCase):
-            def test_run_first_django_test_case(self):
-                pass
-
-        class MyTransactionTestCase(TransactionTestCase):
-            def test_run_second_transaction_test_case(self):
-                pass
     ''')
     result = django_testdir.runpytest_subprocess('-q', '--collect-only')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
+        "*test_run_first_fixture_class*",
+        "*test_run_first_django_test_case*",
         "*test_run_first_decorator*",
         "*test_run_first_serialized_rollback_decorator*",
-        "*test_run_first_django_test_case*",
         "*test_run_second_decorator*",
         "*test_run_second_fixture*",
         "*test_run_second_reset_sequences_fixture*",
-        "*test_run_second_reset_sequences_decorator*",
         "*test_run_second_transaction_test_case*",
-        "*test_run_last_test_case*",
+        "*test_run_second_fixture_class*",
+        "*test_run_second_reset_sequences_decorator*",
         "*test_run_last_simple_test_case*",
-    ])
+        "*test_run_last_test_case*",
+    ], consecutive=True)
 
 
 def test_db_reuse(django_testdir) -> None:

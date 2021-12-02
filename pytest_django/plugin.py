@@ -377,17 +377,10 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
 
     def get_order_number(test: pytest.Item) -> int:
         test_cls = getattr(test, "cls", None)
-        if test_cls:
-            # Beware, TestCase is a subclass of TransactionTestCase
-            if issubclass(test_cls, TestCase):
-                uses_db = True
-                transactional = False
-            elif issubclass(test_cls, TransactionTestCase):
-                uses_db = True
-                transactional = True
-            else:
-                uses_db = False
-                transactional = False
+        if test_cls and issubclass(test_cls, TransactionTestCase):
+            # Note, TestCase is a subclass of TransactionTestCase.
+            uses_db = True
+            transactional = not issubclass(test_cls, TestCase)
         else:
             marker_db = test.get_closest_marker('django_db')
             if marker_db:
