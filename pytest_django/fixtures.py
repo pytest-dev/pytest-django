@@ -167,7 +167,7 @@ def _django_db_helper(
             serialized_rollback,
         ) = False, False, None, False
 
-    transactional = transactional or (
+    transactional = transactional or reset_sequences or (
         "transactional_db" in request.fixturenames
         or "live_server" in request.fixturenames
     )
