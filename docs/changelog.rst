@@ -1,6 +1,16 @@
 Changelog
 =========
 
+v4.5.2 (2021-12-07)
+-------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fix regression in v4.5.0 - ``pytest.mark.django_db(reset_sequence=True)`` now
+  implies ``transaction=True`` again.
+
+
 v4.5.1 (2021-12-02)
 -------------------
 
