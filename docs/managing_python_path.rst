@@ -60,7 +60,7 @@ This ``setup.py`` file is not sufficient to distribute your package to PyPI or
 more general packaging, but it should help you get started. Please refer to the
 `Python Packaging User Guide
 <https://python-packaging-user-guide.readthedocs.io/en/latest/tutorial.html#creating-your-own-project>`_
-for more information on packaging Python applications.`
+for more information on packaging Python applications.
 
 To install the project afterwards::
 
