@@ -36,7 +36,7 @@ Example::
 Example contents of pytest.ini::
 
     [pytest]
-    DJANGO_SETTINGS_MODULE = test.settings
+    DJANGO_SETTINGS_MODULE=test.settings
 
 Order of choosing settings
 --------------------------

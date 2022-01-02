@@ -52,7 +52,7 @@ contains:
 .. code-block:: ini
 
     [pytest]
-    DJANGO_SETTINGS_MODULE = yourproject.settings
+    DJANGO_SETTINGS_MODULE=yourproject.settings
 
 You can also specify your Django settings by setting the
 ``DJANGO_SETTINGS_MODULE`` environment variable or specifying the
