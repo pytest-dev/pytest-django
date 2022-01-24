@@ -43,7 +43,7 @@ from .fixtures import rf  # noqa
 from .fixtures import settings  # noqa
 from .fixtures import transactional_db  # noqa
 from .fixtures import validate_django_db
-from .lazy_django import django_settings_is_configured, skip_if_no_django
+from .lazy_django import django_settings_is_configured, get_django_version, skip_if_no_django
 
 
 TYPE_CHECKING = False
@@ -313,6 +313,13 @@ def pytest_load_initial_conftests(
         or early_config.getini(INVALID_TEMPLATE_VARS_ENV)
     ):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
+
+    django_version = get_django_version()
+
+    if django_version:
+        from django.utils.version import get_version
+
+        _report_header.append("version: {}".format(get_version(django_version)))
 
     def _get_option_with_source(
         option: Optional[str],
