@@ -102,7 +102,7 @@ For a Django package using the ``src`` layout, with test settings located in a
         ├── settings.py
         └── test_main.py
 
-You'll need to specify both the top level directory and ``src` for things to work::
+You'll need to specify both the top level directory and ``src`` for things to work::
 
     [pytest]
     DJANGO_SETTINGS_MODULE = tests.settings
