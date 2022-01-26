@@ -80,4 +80,33 @@ Using pytest-pythonpath
 
 You can also use the `pytest-pythonpath
 <https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin to explicitly add paths to
-the Python path.
+the Python path. This will be natively supported in pytest 7 via the ``pythonpath``
+option.
+
+Example: project with src layout
+````````````````````````````````
+
+For a Django package using the ``src`` layout, with test settings located in a 
+``tests`` package at the top level::
+
+    myproj
+    ├── src
+    │   └── myproj
+    │       ├── __init__.py
+    │       └── main.py
+    └── tests
+        ├── testapp
+        |   ├── __init__.py
+        |   └── apps.py
+        ├── __init__.py
+        ├── settings.py
+        └── test_main.py
+
+You'll need to specify both the top level directory and ``src` for things to work::
+
+    [pytest]
+    DJANGO_SETTINGS_MODULE = tests.settings
+    pythonpaths = . src  # replace by pythonpath with pytest 7
+
+If you don't specify ``.``, the settings module won't be found and
+you'll get an import error: ``ImportError: No module named 'tests'``.
