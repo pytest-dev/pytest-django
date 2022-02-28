@@ -75,9 +75,39 @@ add this directly to your project's requirements.txt file like this::
     pytest-django
 
 
-Using pytest-pythonpath
-~~~~~~~~~~~~~~~~~~~~~~~
+Using pytest's ``pythonpath`` option
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also use the `pytest-pythonpath
-<https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin to explicitly add paths to
-the Python path.
+You can explicitly add paths to the Python search path using pytest's
+:pytest-confval:`pythonpath` option.
+This option is available since pytest 7; for older versions you can use the
+`pytest-pythonpath <https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin.
+
+Example: project with src layout
+````````````````````````````````
+
+For a Django package using the ``src`` layout, with test settings located in a 
+``tests`` package at the top level::
+
+    myproj
+    ├── pytest.ini
+    ├── src
+    │   └── myproj
+    │       ├── __init__.py
+    │       └── main.py
+    └── tests
+        ├── testapp
+        |   ├── __init__.py
+        |   └── apps.py
+        ├── __init__.py
+        ├── settings.py
+        └── test_main.py
+
+You'll need to specify both the top level directory and ``src`` for things to work::
+
+    [pytest]
+    DJANGO_SETTINGS_MODULE = tests.settings
+    pythonpath = . src
+
+If you don't specify ``.``, the settings module won't be found and
+you'll get an import error: ``ImportError: No module named 'tests'``.
