@@ -118,7 +118,12 @@ def test_django_project_found_invalid_settings_version(django_testdir, monkeypat
 
     result = django_testdir.runpytest_subprocess("django_project_root", "--version", "--version")
     assert result.ret == 0
-    result.stderr.fnmatch_lines(["*This is pytest version*"])
+    if hasattr(pytest, "version_tuple") and pytest.version_tuple >= (7, 0):
+        version_out = result.stdout
+    else:
+        version_out = result.stderr
+
+    version_out.fnmatch_lines(["*This is pytest version*"])
 
     result = django_testdir.runpytest_subprocess("django_project_root", "--help")
     assert result.ret == 0
