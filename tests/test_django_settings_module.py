@@ -535,6 +535,27 @@ def setup():
     assert result.ret == 0
 
 
+def test_dch_ini_invalid_path(testdir, monkeypatch) -> None:
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       DJANGO_CONFIGURATION_HOOK = invalid_path
+    """
+    )
+    testdir.makepyfile(
+        """
+        import os
+
+        def test_ds():
+            pass
+    """
+    )
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(["ImportError: Invalid path for configuration hook: invalid_path"])
+    assert result.ret == 1
+
+
 def test_dch_ini_no_module(testdir, monkeypatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     testdir.makeini(
