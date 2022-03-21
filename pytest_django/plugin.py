@@ -386,7 +386,8 @@ def pytest_load_initial_conftests(
         func = getattr(mod, function_name, None)
 
         if not func:
-            raise ImportError(f"No function found with name {function_name} in module {module_path}!")
+            raise ImportError(f"No function found with name {function_name} in module "
+                              f"{module_path}!")
 
         # Call the function
         func()

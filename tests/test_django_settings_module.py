@@ -516,13 +516,12 @@ def test_dch_ini(testdir, monkeypatch) -> None:
     """
     )
     pkg = testdir.mkpydir("tpkg")
-    pkg.join("test.py").write(
-        """
+    pkg.join("test.py").write("""
 # Test
 from django.conf import settings
 
 def setup():
-  settings.configure() 
+  settings.configure()
 """)
     testdir.makepyfile(
         """
