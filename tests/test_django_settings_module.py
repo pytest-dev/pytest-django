@@ -505,3 +505,32 @@ def test_no_django_settings_but_django_imported(testdir, monkeypatch) -> None:
     testdir.makeconftest("import django")
     r = testdir.runpytest_subprocess("--help")
     assert r.ret == 0
+
+
+def test_dch_ini(testdir, monkeypatch) -> None:
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       DJANGO_CONFIGURATION_HOOK = tpkg.test.setup
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    pkg.join("test.py").write(
+        """
+# Test
+from django.conf import settings
+
+def setup():
+  settings.configure() 
+""")
+    testdir.makepyfile(
+        """
+        import os
+
+        def test_ds():
+            pass
+    """
+    )
+    result = testdir.runpytest_subprocess()
+    assert result.ret == 0
