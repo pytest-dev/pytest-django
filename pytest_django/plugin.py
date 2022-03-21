@@ -371,7 +371,7 @@ def pytest_load_initial_conftests(
         # object with a custom configuration
 
         if "." not in dch:
-            raise ImportError(f"Invalid path for configuration hook: {dch}")
+            raise ImportError("Invalid path for configuration hook: {}".format(dch))
 
         pkg_parts = dch.split(".")
         module_path = ".".join(pkg_parts[:-1])
@@ -382,12 +382,12 @@ def pytest_load_initial_conftests(
         try:
             mod = importlib.import_module(module_path)
         except (ImportError, AttributeError):
-            raise ImportError(f"Unable to import module {module_path}")
+            raise ImportError("Unable to import module {}".format(module_path))
         func = getattr(mod, function_name, None)
 
         if not func:
-            raise ImportError(f"No function found with name {function_name} in module "
-                              f"{module_path}!")
+            raise ImportError("No function found with name {} in module {}!"
+                              .format(function_name, module_path))
 
         # Call the function
         func()
