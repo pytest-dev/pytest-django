@@ -533,3 +533,54 @@ def setup():
     )
     result = testdir.runpytest_subprocess()
     assert result.ret == 0
+
+
+def test_dch_ini_no_module(testdir, monkeypatch) -> None:
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       DJANGO_CONFIGURATION_HOOK = tpkg.not_existing.setup
+    """
+    )
+    testdir.makepyfile(
+        """
+        import os
+
+        def test_ds():
+            pass
+    """
+    )
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(["ImportError: Unable to import module tpkg.not_existing"])
+    assert result.ret == 1
+
+
+def test_dch_ini_module_but_no_func(testdir, monkeypatch) -> None:
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    testdir.makeini(
+        """
+       [pytest]
+       DJANGO_CONFIGURATION_HOOK = tpkg.test.not_existing_function
+    """
+    )
+    pkg = testdir.mkpydir("tpkg")
+    pkg.join("test.py").write("""
+# Test
+from django.conf import settings
+
+def setup():
+  settings.configure()
+""")
+    testdir.makepyfile(
+        """
+        import os
+
+        def test_ds():
+            pass
+    """
+    )
+    result = testdir.runpytest_subprocess()
+    result.stderr.fnmatch_lines(["ImportError: No function found with name "
+                                 "not_existing_function in module tpkg.test!"])
+    assert result.ret == 1
