@@ -84,14 +84,6 @@ jobs:
           python: 3.9
           allow_failure: false
 
-        - name: py36-dj22-sqlite-xdist-coverage
-          python: 3.6
-          allow_failure: false
-
-        - name: py37-dj22-sqlite-xdist-coverage
-          python: 3.7
-          allow_failure: false
-
         - name: py38-dj32-sqlite-xdist-coverage
           python: 3.8
           allow_failure: false
@@ -104,17 +96,12 @@ jobs:
           python: 3.9
           allow_failure: true
 
-        # Explicitly test (older) pytest 5.4.
-        - name: py36-dj22-postgres-psycopg28-pytest54-coverage
-          python: 3.6
-          allow_failure: false
-
         - name: py36-dj32-mysql_myisam-coverage
           python: 3.6
           allow_failure: false
 
         # pypy3: not included with coverage reports (much slower then).
-        - name: pypy3-dj22-postgres
+        - name: pypy3-dj32-postgres
           python: pypy3
           allow_failure: false
 
