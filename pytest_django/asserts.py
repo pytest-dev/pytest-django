@@ -2,7 +2,7 @@
 Dynamically load all Django assertion cases and expose them for importing.
 """
 from functools import wraps
-from typing import Any, Callable, Optional, Sequence, Set, Union
+from typing import Any, Callable, Optional, Sequence, Set, Type, Union
 
 from django.test import (
     LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
@@ -113,7 +113,7 @@ if TYPE_CHECKING:
         ...
 
     def assertRaisesMessage(
-        expected_exception: BaseException,
+        expected_exception: Type[Exception],
         expected_message: str,
         *args,
         **kwargs
