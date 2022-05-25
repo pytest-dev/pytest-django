@@ -161,13 +161,13 @@ Example
 
     from myapp.views import my_view
 
-    def test_details(rf, admin):
+    def test_details(rf, admin_user):
         request = rf.get('/customer/details')
         # Remember that when using RequestFactory, the request does not pass
         # through middleware. If your view expects fields such as request.user
         # to be set, you need to set them explicitly.
         # The following line sets request.user to an admin user.
-        request.user = admin
+        request.user = admin_user
         response = my_view(request)
         assert response.status_code == 200
 
