@@ -310,12 +310,10 @@ def test_debug_false_by_default(testdir, monkeypatch) -> None:
 @pytest.mark.parametrize('django_debug_mode', (False, True))
 def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode: bool) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
-    testdir.makeini(
-        """
+    testdir.makeini(f"""
        [pytest]
-       django_debug_mode = {}
-    """.format(django_debug_mode)
-    )
+       django_debug_mode = {django_debug_mode}
+    """)
     testdir.makeconftest(
         """
         from django.conf import settings
@@ -331,13 +329,11 @@ def test_django_debug_mode_true_false(testdir, monkeypatch, django_debug_mode: b
     """ % (not django_debug_mode)
     )
 
-    testdir.makepyfile(
-        """
+    testdir.makepyfile(f"""
         from django.conf import settings
         def test_debug_is_false():
-            assert settings.DEBUG is {}
-    """.format(django_debug_mode)
-    )
+            assert settings.DEBUG is {django_debug_mode}
+    """)
 
     r = testdir.runpytest_subprocess()
     assert r.ret == 0
@@ -368,11 +364,11 @@ def test_django_debug_mode_keep(testdir, monkeypatch, settings_debug: bool) -> N
     )
 
     testdir.makepyfile(
-        """
+        f"""
         from django.conf import settings
         def test_debug_is_false():
-            assert settings.DEBUG is {}
-    """.format(settings_debug)
+            assert settings.DEBUG is {settings_debug}
+    """
     )
 
     r = testdir.runpytest_subprocess()

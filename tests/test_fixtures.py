@@ -546,7 +546,7 @@ class TestLiveServer:
             % port
         )
 
-        django_testdir.runpytest_subprocess("--liveserver=localhost:%s" % port)
+        django_testdir.runpytest_subprocess(f"--liveserver=localhost:{port}")
 
 
 @pytest.mark.parametrize("username_field", ("email", "identifier"))
@@ -565,7 +565,7 @@ class TestLiveServer:
 )
 def test_custom_user_model(django_testdir, username_field) -> None:
     django_testdir.create_app_file(
-        """
+        f"""
         from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
         from django.db import models
 
@@ -599,7 +599,7 @@ def test_custom_user_model(django_testdir, username_field) -> None:
             objects = MyCustomUserManager()
 
             USERNAME_FIELD = '{username_field}'
-        """.format(username_field=username_field),
+        """,
         "models.py",
     )
     django_testdir.create_app_file(

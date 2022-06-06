@@ -132,7 +132,7 @@ def django_db_setup(
             except Exception as exc:
                 request.node.warn(
                     pytest.PytestWarning(
-                        "Error when trying to teardown test databases: %r" % exc
+                        f"Error when trying to teardown test databases: {exc!r}"
                     )
                 )
 
@@ -287,7 +287,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
         if not test_name:
             if db_settings["ENGINE"] == "django.db.backends.sqlite3":
                 continue
-            test_name = "test_{}".format(db_settings["NAME"])
+            test_name = f"test_{db_settings['NAME']}"
 
         if test_name == ":memory:":
             continue
@@ -591,13 +591,11 @@ def _assert_num_queries(
         else:
             failed = num_performed > num
         if failed:
-            msg = "Expected to perform {} queries {}{}".format(
-                num,
-                "" if exact else "or less ",
-                "but {} done".format(
-                    num_performed == 1 and "1 was" or f"{num_performed} were"
-                ),
-            )
+            msg = f"Expected to perform {num} queries "
+            if not exact:
+                msg += "or less "
+            verb = "was" if num_performed == 1 else "were"
+            msg += f"but {num_performed} {verb} done"
             if info:
                 msg += f"\n{info}"
             if verbose:

@@ -251,9 +251,9 @@ def _get_boolean_value(
     try:
         return possible_values[x.lower()]
     except KeyError:
+        possible = ", ".join(possible_values)
         raise ValueError(
-            "{} is not a valid value for {}. "
-            "It must be one of {}.".format(x, name, ", ".join(possible_values.keys()))
+            f"{x} is not a valid value for {name}. It must be one of {possible}."
         )
 
 
@@ -621,7 +621,7 @@ def _fail_for_invalid_template_variable():
             if origin:
                 msg = f"Undefined template variable '{var}' in '{origin}'"
             else:
-                msg = "Undefined template variable '%s'" % var
+                msg = f"Undefined template variable '{var}'"
             if self.fail:
                 pytest.fail(msg)
             else:

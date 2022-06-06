@@ -102,18 +102,18 @@ def drop_database(db_suffix=None):
     db_engine = get_db_engine()
 
     if db_engine == "postgresql":
-        r = run_psql("postgres", "-c", "DROP DATABASE %s" % name)
+        r = run_psql("postgres", "-c", f"DROP DATABASE {name}")
         assert "DROP DATABASE" in force_str(
             r.std_out
         ) or "does not exist" in force_str(r.std_err)
         return
 
     if db_engine == "mysql":
-        r = run_mysql("-e", "DROP DATABASE %s" % name)
+        r = run_mysql("-e", f"DROP DATABASE {name}")
         assert "database doesn't exist" in force_str(r.std_err) or r.status_code == 0
         return
 
-    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
     assert name != ":memory:", "sqlite in-memory database cannot be dropped!"
     if os.path.exists(name):  # pragma: no branch
         os.unlink(name)
@@ -131,7 +131,7 @@ def db_exists(db_suffix=None):
         r = run_mysql(name, "-e", "SELECT 1")
         return r.status_code == 0
 
-    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
     assert TEST_DB_NAME != ":memory:", (
         "sqlite in-memory database cannot be checked for existence!")
     return os.path.exists(name)
@@ -150,7 +150,7 @@ def mark_database():
         assert r.status_code == 0
         return
 
-    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
     assert TEST_DB_NAME != ":memory:", (
         "sqlite in-memory database cannot be marked!")
 
@@ -175,7 +175,7 @@ def mark_exists():
 
         return r.status_code == 0
 
-    assert db_engine == "sqlite3", "%s cannot be tested properly!" % db_engine
+    assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
     assert TEST_DB_NAME != ":memory:", (
         "sqlite in-memory database cannot be checked for mark!")
 

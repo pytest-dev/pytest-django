@@ -11,4 +11,4 @@ def admin_required_view(request: HttpRequest) -> HttpResponse:
 
 
 def item_count(request: HttpRequest) -> HttpResponse:
-    return HttpResponse("Item count: %d" % Item.objects.count())
+    return HttpResponse(f"Item count: {Item.objects.count()}")
