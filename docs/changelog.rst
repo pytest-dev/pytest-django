@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Pending
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Official Django 4.1 support.
+
 v4.5.2 (2021-12-07)
 -------------------
 
