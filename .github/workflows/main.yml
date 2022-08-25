@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install tox==3.24.4
+          pip install tox==3.25.1
 
       - name: Run tox
         run: tox -e ${{ matrix.name }}
@@ -68,6 +68,10 @@ jobs:
           python: 3.8
           allow_failure: false
 
+        - name: py310-dj41-postgres-xdist-coverage
+          python: '3.10'
+          allow_failure: false
+
         - name: py310-dj40-postgres-xdist-coverage
           python: '3.10'
           allow_failure: false
@@ -76,7 +80,7 @@ jobs:
           python: '3.10'
           allow_failure: false
 
-        - name: py39-dj32-postgres-xdist-coverage
+        - name: py39-dj41-mysql_innodb-coverage
           python: 3.9
           allow_failure: false
 
@@ -84,7 +88,11 @@ jobs:
           python: 3.9
           allow_failure: false
 
-        - name: py38-dj32-sqlite-xdist-coverage
+        - name: py39-dj32-mysql_innodb-xdist-coverage
+          python: 3.9
+          allow_failure: false
+
+        - name: py38-dj41-sqlite-xdist-coverage
           python: 3.8
           allow_failure: false
 
@@ -92,8 +100,12 @@ jobs:
           python: 3.8
           allow_failure: false
 
-        - name: py39-djmain-sqlite-coverage
-          python: 3.9
+        - name: py38-dj32-sqlite-xdist-coverage
+          python: 3.8
+          allow_failure: false
+
+        - name: py310-djmain-sqlite-coverage
+          python: '3.10'
           allow_failure: true
 
         - name: py36-dj32-mysql_myisam-coverage
