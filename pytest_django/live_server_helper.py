@@ -8,9 +8,12 @@ class LiveServer:
     The ``live_server`` fixture handles creation and stopping.
     """
 
+    def get_live_server_thread_class(self):
+        from django.test.testcases import LiveServerThread
+        return LiveServerThread
+
     def __init__(self, addr: str) -> None:
         from django.db import connections
-        from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
 
         liveserver_kwargs = {}  # type: Dict[str, Any]
@@ -42,7 +45,9 @@ class LiveServer:
             host = addr
         else:
             liveserver_kwargs["port"] = int(port)
-        self.thread = LiveServerThread(host, **liveserver_kwargs)
+
+        live_server_thread_class = self.get_live_server_thread_class()
+        self.thread = live_server_thread_class(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
             ALLOWED_HOSTS={"append": host}
@@ -79,3 +84,9 @@ class LiveServer:
 
     def __repr__(self) -> str:
         return "<LiveServer listening at %s>" % self.url
+
+
+class VerboseLiveServer(LiveServer):
+    def get_live_server_thread_class(self):
+        from .verbose_live_server import VerboseLiveServerThread
+        return VerboseLiveServerThread

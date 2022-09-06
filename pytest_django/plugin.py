@@ -124,6 +124,14 @@ def pytest_addoption(parser) -> None:
     parser.addini(
         SETTINGS_MODULE_ENV, "Django settings module to use by pytest-django."
     )
+    group.addoption(
+        "--liveserver-verbose",
+        "--liveserver_verbose",
+        action="store_true",
+        dest="liveserver_verbose",
+        default=False,
+        help="Enable verbose logging for live_server fixture",
+    )
 
     parser.addini(
         "django_find_project",
