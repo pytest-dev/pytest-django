@@ -90,3 +90,9 @@ class VerboseLiveServer(LiveServer):
     def get_live_server_thread_class(self):
         from .verbose_live_server import VerboseLiveServerThread
         return VerboseLiveServerThread
+
+
+class VerboseDebuggingLiveServer(LiveServer):
+    def get_live_server_thread_class(self):
+        from .verbose_live_server import VerboseDebuggingLiveServerThread
+        return VerboseDebuggingLiveServerThread

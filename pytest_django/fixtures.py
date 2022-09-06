@@ -540,6 +540,9 @@ def live_server(request):
     if request.config.getvalue("liveserver_verbose") is True:
         live_server_class = live_server_helper.VerboseLiveServer
 
+        if request.config.getvalue("liveserver_debug") is True:
+            live_server_class = live_server_helper.VerboseDebuggingLiveServer
+
     server = live_server_class(addr)
     request.addfinalizer(server.stop)
     return server

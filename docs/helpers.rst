@@ -378,6 +378,9 @@ Take note, logs will be written to standard output, which is being supressed
 by pytest by default, so you will need to use ``-s`` or ``--capture=no``
 parameter too.
 
+And if your live server still keeps acting weird, there is a switch called
+``--liveserver-debug`` which drops into debugger in the console
+whenever traceback occurs in a live server page.
 
 .. note:: Combining database access fixtures.
 
