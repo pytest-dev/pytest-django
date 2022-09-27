@@ -11,7 +11,7 @@ However, when Python is started via the ``pytest`` command, some extra care is
 needed to have the Python path setup properly. There are two ways to handle
 this problem, described below.
 
-Automatic looking for of Django projects
+Automatic looking for Django projects
 ----------------------------------------
 
 By default, pytest-django tries to find Django projects by automatically
