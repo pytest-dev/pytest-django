@@ -12,7 +12,7 @@ needed to have the Python path setup properly. There are two ways to handle
 this problem, described below.
 
 Automatic looking for Django projects
-----------------------------------------
+-------------------------------------
 
 By default, pytest-django tries to find Django projects by automatically
 looking for the project's ``manage.py`` file and adding its directory to the
