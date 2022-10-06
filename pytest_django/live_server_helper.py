@@ -8,7 +8,7 @@ class LiveServer:
     The ``live_server`` fixture handles creation and stopping.
     """
 
-    def __init__(self, addr: str) -> None:
+    def __init__(self, addr: str, *, start: bool = True) -> None:
         from django.db import connections
         from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
@@ -20,8 +20,6 @@ class LiveServer:
             # If using in-memory sqlite databases, pass the connections to
             # the server thread.
             if conn.vendor == "sqlite" and conn.is_in_memory_db():
-                # Explicitly enable thread-shareability for this connection.
-                conn.inc_thread_sharing()
                 connections_override[conn.alias] = conn
 
         liveserver_kwargs["connections_override"] = connections_override
@@ -51,6 +49,16 @@ class LiveServer:
         # `_live_server_helper`.
 
         self.thread.daemon = True
+
+        if start:
+            self.start()
+
+    def start(self) -> None:
+        """Start the server"""
+        for conn in self.thread.connections_override.values():
+            # Explicitly enable thread-shareability for this connection.
+            conn.inc_thread_sharing()
+
         self.thread.start()
         self.thread.is_ready.wait()
 
