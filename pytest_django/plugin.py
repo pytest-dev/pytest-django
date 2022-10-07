@@ -502,7 +502,8 @@ def _dj_autoclear_mailbox() -> None:
 
     from django.core import mail
 
-    del mail.outbox[:]
+    if hasattr(mail, "outbox"):
+        del mail.outbox[:]
 
 
 @pytest.fixture(scope="function")
