@@ -1,6 +1,16 @@
 Changelog
 =========
 
+vunreleased ()
+--------------
+
+Improvements
+^^^^^^^^^^^^
+
+* ``--liveserver-verbose`` command-line parameter, which allows to see
+  logs from live_server on the standard output, including tracebacks.
+  Useful for debugging.
+
 v4.5.2 (2021-12-07)
 -------------------
 

@@ -536,7 +536,14 @@ def live_server(request):
         "DJANGO_LIVE_TEST_SERVER_ADDRESS"
     ) or "localhost"
 
-    server = live_server_helper.LiveServer(addr)
+    live_server_class = live_server_helper.LiveServer
+    if request.config.getvalue("liveserver_verbose") is True:
+        live_server_class = live_server_helper.VerboseLiveServer
+
+        if request.config.getvalue("liveserver_debug") is True:
+            live_server_class = live_server_helper.VerboseDebuggingLiveServer
+
+    server = live_server_class(addr)
     request.addfinalizer(server.stop)
     return server
 

@@ -371,6 +371,17 @@ depends on the ``transactional_db`` fixture. If tests depend on data
 created in data migrations, you should add the
 ``django_db_serialized_rollback`` fixture.
 
+You can also use ``--liveserver-verbose`` command-line argument, to outputs
+the liveserver logs to the standard output, including tracebacks. This is
+useful for debugging live server behaviour and environment-related problems.
+Take note, logs will be written to standard output, which is being supressed
+by pytest by default, so you will need to use ``-s`` or ``--capture=no``
+parameter too.
+
+And if your live server still keeps acting weird, there is a switch called
+``--liveserver-debug`` which drops into debugger in the console
+whenever traceback occurs in a live server page.
+
 .. note:: Combining database access fixtures.
 
   When using multiple database fixtures together, only one of them is
