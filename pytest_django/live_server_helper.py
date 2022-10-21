@@ -78,4 +78,4 @@ class LiveServer:
         return f"{self}{other}"
 
     def __repr__(self) -> str:
-        return "<LiveServer listening at %s>" % self.url
+        return f"<LiveServer listening at {self.url}>"

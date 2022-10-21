@@ -27,7 +27,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pytest-django'
-copyright = '%d, Andreas Pelme and contributors' % datetime.date.today().year
+copyright = f'{datetime.date.today().year}, Andreas Pelme and contributors'
 
 exclude_patterns = ['_build']
 
