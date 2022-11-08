@@ -40,10 +40,10 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
-    from django.http import HttpResponse
+    from django.http.response import HttpResponseBase
 
     def assertRedirects(
-        response: HttpResponse,
+        response: HttpResponseBase,
         expected_url: str,
         status_code: int = ...,
         target_status_code: int = ...,
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
         ...
 
     def assertContains(
-        response: HttpResponse,
+        response: HttpResponseBase,
         text: object,
         count: Optional[int] = ...,
         status_code: int = ...,
@@ -70,7 +70,7 @@ if TYPE_CHECKING:
         ...
 
     def assertNotContains(
-        response: HttpResponse,
+        response: HttpResponseBase,
         text: object,
         status_code: int = ...,
         msg_prefix: str = ...,
@@ -79,7 +79,7 @@ if TYPE_CHECKING:
         ...
 
     def assertFormError(
-        response: HttpResponse,
+        response: HttpResponseBase,
         form: str,
         field: Optional[str],
         errors: Union[str, Sequence[str]],
@@ -88,7 +88,7 @@ if TYPE_CHECKING:
         ...
 
     def assertFormsetError(
-        response: HttpResponse,
+        response: HttpResponseBase,
         formset: str,
         form_index: Optional[int],
         field: Optional[str],
@@ -98,7 +98,7 @@ if TYPE_CHECKING:
         ...
 
     def assertTemplateUsed(
-        response: Optional[HttpResponse] = ...,
+        response: Optional[Union[HttpResponseBase, str]] = ...,
         template_name: Optional[str] = ...,
         msg_prefix: str = ...,
         count: Optional[int] = ...,
@@ -106,7 +106,7 @@ if TYPE_CHECKING:
         ...
 
     def assertTemplateNotUsed(
-        response: Optional[HttpResponse] = ...,
+        response: Optional[Union[HttpResponseBase, str]] = ...,
         template_name: Optional[str] = ...,
         msg_prefix: str = ...,
     ):
