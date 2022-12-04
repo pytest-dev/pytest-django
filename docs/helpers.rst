@@ -13,6 +13,8 @@ All of Django's :py:class:`~django:django.test.TestCase`
 
     from pytest_django.asserts import assertTemplateUsed
 
+For now, ``assertTemplateUsed`` only works for django templates https://code.djangoproject.com/ticket/24622
+
 Markers
 -------
 
