@@ -231,6 +231,13 @@ def test_django_assert_num_queries_output_info(django_testdir) -> None:
 
 
 @pytest.mark.django_db
+def test_django_assert_num_queries_pattern(django_assert_num_queries) -> None:
+    with django_assert_num_queries(1, pattern=r'^INSERT\s'):
+        Item.objects.create(name="foo")
+        Item.objects.filter(name="foo").update(name="bar")
+
+
+@pytest.mark.django_db
 def test_django_capture_on_commit_callbacks(django_capture_on_commit_callbacks) -> None:
     if not connection.features.supports_transactions:
         pytest.skip("transactions required for this test")

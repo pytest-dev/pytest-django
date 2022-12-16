@@ -412,6 +412,7 @@ Example
   :param num: expected number of queries
   :param connection: optional non-default DB connection
   :param str info: optional info message to display on failure
+  :param str pattern: optional regex pattern to filter queries to take into account
 
 This fixture allows to check for an expected number of DB queries.
 
@@ -431,6 +432,13 @@ Example usage::
 
         assert 'foo' in captured.captured_queries[0]['sql']
 
+Example counting only ``INSERT`` queries::
+
+    def test_queries(django_assert_num_queries):
+        with django_assert_num_queries(1, pattern=r'^INSERT\s') as captured:
+            Item.objects.create('foo')
+            Item.objects.filter(name='foo').update(name='bar')
+
 
 .. fixture:: django_assert_max_num_queries
 
@@ -442,6 +450,7 @@ Example usage::
   :param num: expected maximum number of queries
   :param connection: optional non-default DB connection
   :param str info: optional info message to display on failure
+  :param str pattern: optional regex pattern to filter queries to take into account
 
 This fixture allows to check for an expected maximum number of DB queries.
 

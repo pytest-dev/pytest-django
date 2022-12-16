@@ -1,5 +1,6 @@
 """All pytest-django fixtures"""
 import os
+import re
 from contextlib import contextmanager
 from functools import partial
 from typing import (
@@ -574,6 +575,7 @@ def _assert_num_queries(
     exact: bool = True,
     connection=None,
     info=None,
+    pattern=None,
 ) -> Generator["django.test.utils.CaptureQueriesContext", None, None]:
     from django.test.utils import CaptureQueriesContext
 
@@ -585,7 +587,12 @@ def _assert_num_queries(
     verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
         yield context
-        num_performed = len(context)
+        sqls = list(q["sql"] for q in context.captured_queries)
+        if pattern:
+            sqls = list(
+                q for q in sqls if re.match(pattern, _remove_comments(q))
+            )
+        num_performed = len(sqls)
         if exact:
             failed = num != num_performed
         else:
@@ -599,11 +606,14 @@ def _assert_num_queries(
             if info:
                 msg += f"\n{info}"
             if verbose:
-                sqls = (q["sql"] for q in context.captured_queries)
                 msg += "\n\nQueries:\n========\n\n" + "\n\n".join(sqls)
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)
+
+
+def _remove_comments(sql):
+    return ' '.join(re.sub(r'/\*.*?\*/', '', sql).split())
 
 
 @pytest.fixture(scope="function")
