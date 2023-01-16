@@ -16,7 +16,6 @@ from django.db import connection, transaction
 from django.test.client import Client, RequestFactory
 from django.utils.encoding import force_str
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item
 
 
@@ -36,7 +35,6 @@ def test_client(client) -> None:
     assert isinstance(client, Client)
 
 
-@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
 def test_async_client(async_client) -> None:
     from django.test.client import AsyncClient
 
@@ -85,7 +83,6 @@ def test_rf(rf) -> None:
     assert isinstance(rf, RequestFactory)
 
 
-@pytest.mark.skipif(get_django_version() < (3, 1), reason="Django >= 3.1 required")
 def test_async_rf(async_rf) -> None:
     from django.test.client import AsyncRequestFactory
 
