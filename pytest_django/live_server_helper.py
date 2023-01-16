@@ -13,7 +13,7 @@ class LiveServer:
         from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
 
-        liveserver_kwargs = {}  # type: Dict[str, Any]
+        liveserver_kwargs: Dict[str, Any] = {}
 
         connections_override = {}
         for conn in connections.all():
