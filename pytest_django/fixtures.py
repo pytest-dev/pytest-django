@@ -2,15 +2,13 @@
 import os
 from contextlib import contextmanager
 from functools import partial
-from typing import (
-    Any, Callable, Generator, Iterable, List, Optional, Tuple, Union,
-)
+from typing import Any, Generator, Iterable, List, Optional, Tuple, Union
 
 import pytest
 
 from . import live_server_helper
 from .django_compat import is_django_unittest
-from .lazy_django import get_django_version, skip_if_no_django
+from .lazy_django import skip_if_no_django
 
 
 TYPE_CHECKING = False
@@ -216,12 +214,12 @@ def _django_db_helper(
             @classmethod
             def setUpClass(cls) -> None:
                 super(django.test.TestCase, cls).setUpClass()
-                if (3, 2) <= VERSION < (4, 1):
+                if VERSION < (4, 1):
                     django.db.transaction.Atomic._ensure_durability = False
 
             @classmethod
             def tearDownClass(cls) -> None:
-                if (3, 2) <= VERSION < (4, 1):
+                if VERSION < (4, 1):
                     django.db.transaction.Atomic._ensure_durability = True
                 super(django.test.TestCase, cls).tearDownClass()
 
@@ -616,36 +614,8 @@ def django_assert_max_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
-@contextmanager
-def _capture_on_commit_callbacks(
-    *,
-    using: Optional[str] = None,
-    execute: bool = False
-):
-    from django.db import DEFAULT_DB_ALIAS, connections
-    from django.test import TestCase
-
-    if using is None:
-        using = DEFAULT_DB_ALIAS
-
-    # Polyfill of Django code as of Django 3.2.
-    if get_django_version() < (3, 2):
-        callbacks: List[Callable[[], Any]] = []
-        start_count = len(connections[using].run_on_commit)
-        try:
-            yield callbacks
-        finally:
-            run_on_commit = connections[using].run_on_commit[start_count:]
-            callbacks[:] = [func for sids, func in run_on_commit]
-            if execute:
-                for callback in callbacks:
-                    callback()
-
-    else:
-        with TestCase.captureOnCommitCallbacks(using=using, execute=execute) as callbacks:
-            yield callbacks
-
-
 @pytest.fixture(scope="function")
 def django_capture_on_commit_callbacks():
-    return _capture_on_commit_callbacks
+    from django.test import TestCase
+
+    return TestCase.captureOnCommitCallbacks

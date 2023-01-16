@@ -1,7 +1,6 @@
 import pytest
 from django.db import connection, transaction
 
-from pytest_django.lazy_django import get_django_version
 from pytest_django_test.app.models import Item, SecondItem
 
 
@@ -194,7 +193,6 @@ class TestDatabaseFixtures:
         # Check finalizer has db access (teardown will fail if not)
         pass
 
-    @pytest.mark.skipif(get_django_version() < (3, 2), reason="Django >= 3.2 required")
     def test_durable_transactions(self, all_dbs: None) -> None:
         with transaction.atomic(durable=True):
             item = Item.objects.create(name="foo")
