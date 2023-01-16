@@ -26,7 +26,7 @@ def _wrapper(name: str):
 
 
 __all__ = []
-assertions_names = set()  # type: Set[str]
+assertions_names: Set[str] = set()
 assertions_names.update(
     {attr for attr in vars(TestCase) if attr.startswith("assert")},
     {attr for attr in vars(SimpleTestCase) if attr.startswith("assert")},

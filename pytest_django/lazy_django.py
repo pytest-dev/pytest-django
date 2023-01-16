@@ -24,7 +24,7 @@ def django_settings_is_configured() -> bool:
     ret = bool(os.environ.get("DJANGO_SETTINGS_MODULE"))
 
     if not ret and "django.conf" in sys.modules:
-        django_conf = sys.modules["django.conf"]  # type: Any
+        django_conf: Any = sys.modules["django.conf"]
         return django_conf.settings.configured
 
     return ret

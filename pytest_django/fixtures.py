@@ -468,7 +468,7 @@ def async_rf() -> "django.test.client.AsyncRequestFactory":
 
 
 class SettingsWrapper:
-    _to_restore = []  # type: List[Any]
+    _to_restore: List[Any] = []
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
@@ -630,7 +630,7 @@ def _capture_on_commit_callbacks(
 
     # Polyfill of Django code as of Django 3.2.
     if get_django_version() < (3, 2):
-        callbacks = []  # type: List[Callable[[], Any]]
+        callbacks: List[Callable[[], Any]] = []
         start_count = len(connections[using].run_on_commit)
         try:
             yield callbacks
