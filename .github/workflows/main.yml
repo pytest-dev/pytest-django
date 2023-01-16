@@ -65,11 +65,11 @@ jobs:
       matrix:
         include:
         - name: linting,docs
-          python: '3.8'
+          python: '3.10'
           allow_failure: false
 
-        - name: py310-dj41-postgres-xdist-coverage
-          python: '3.10'
+        - name: py311-dj41-postgres-xdist-coverage
+          python: '3.11'
           allow_failure: false
 
         - name: py310-dj40-postgres-xdist-coverage
@@ -80,12 +80,12 @@ jobs:
           python: '3.10'
           allow_failure: false
 
-        - name: py39-dj41-mysql_innodb-coverage
-          python: '3.9'
+        - name: py311-dj41-mysql_innodb-coverage
+          python: '3.11'
           allow_failure: false
 
-        - name: py39-dj40-mysql_innodb-coverage
-          python: '3.9'
+        - name: py310-dj40-mysql_innodb-coverage
+          python: '3.10'
           allow_failure: false
 
         - name: py39-dj32-mysql_innodb-xdist-coverage
@@ -100,8 +100,8 @@ jobs:
           python: '3.8'
           allow_failure: false
 
-        - name: py38-dj32-sqlite-xdist-coverage
-          python: '3.8'
+        - name: py37-dj32-sqlite-xdist-coverage
+          python: '3.7'
           allow_failure: false
 
         - name: py310-djmain-sqlite-coverage
