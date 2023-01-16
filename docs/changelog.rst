@@ -9,6 +9,8 @@ Improvements
 
 * Official Django 4.1 support.
 
+* Drop support for Python version 3.6.
+
 v4.5.2 (2021-12-07)
 -------------------
 
