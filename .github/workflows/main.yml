@@ -108,8 +108,8 @@ jobs:
           python: '3.10'
           allow_failure: true
 
-        - name: py36-dj32-mysql_myisam-coverage
-          python: 3.6
+        - name: py37-dj32-mysql_myisam-coverage
+          python: 3.7
           allow_failure: false
 
         # pypy3: not included with coverage reports (much slower then).
