@@ -27,6 +27,14 @@ Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
    # -- recommended but optional:
    python_files = tests.py test_*.py *_tests.py
 
+.. code-block:: toml
+
+   # -- FILE: pyproject.toml
+   [tool.pytest.ini_options]
+   DJANGO_SETTINGS_MODULE = test.settings
+   # -- recommended but optional:
+   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+
 Run your tests with ``pytest``:
 
 .. code-block:: bash
