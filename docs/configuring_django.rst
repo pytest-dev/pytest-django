@@ -38,6 +38,14 @@ Example contents of pytest.ini::
     [pytest]
     DJANGO_SETTINGS_MODULE = test.settings
 
+``pyproject.toml`` settings
+-----------------------
+
+Example contents of pyproject.toml::
+
+    [tool.pytest.ini_options]
+    DJANGO_SETTINGS_MODULE = "test.settings"
+
 Order of choosing settings
 --------------------------
 
@@ -46,7 +54,7 @@ The order of precedence is, from highest to lowest:
 * The command line option ``--ds``
 * The environment variable ``DJANGO_SETTINGS_MODULE``
 * The ``DJANGO_SETTINGS_MODULE`` option in the configuration file -
-  ``pytest.ini``, or other file that Pytest finds such as ``tox.ini``
+  ``pytest.ini``, or other file that Pytest finds such as ``tox.ini`` or ``pyproject.toml``
 
 If you want to use the highest precedence in the configuration file, you can
 use ``addopts = --ds=yourtestsettings``.
@@ -57,7 +65,7 @@ Using django-configurations
 There is support for using `django-configurations <https://pypi.python.org/pypi/django-configurations/>`_.
 
 To do so configure the settings class using an environment variable, the
-``--dc`` flag, or ``pytest.ini`` option ``DJANGO_CONFIGURATION``.
+``--dc`` flag, ``pytest.ini`` option ``DJANGO_CONFIGURATION`` or ``pyproject.toml`` option ``DJANGO_CONFIGURATION``.
 
 Environment Variable::
 
@@ -72,6 +80,11 @@ INI File Contents::
 
     [pytest]
     DJANGO_CONFIGURATION=MySettings
+
+pyproject.toml File Contents::
+
+    [tool.pytest.ini_options]
+    DJANGO_CONFIGURATION = "MySettings"
 
 Using ``django.conf.settings.configure()``
 ------------------------------------------

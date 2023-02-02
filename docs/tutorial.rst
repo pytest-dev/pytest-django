@@ -54,6 +54,13 @@ contains:
     [pytest]
     DJANGO_SETTINGS_MODULE = yourproject.settings
 
+Another options for people that use ``pyproject.toml`` is add the following code:
+
+.. code-block:: toml
+
+    [tool.pytest.ini_options]
+    DJANGO_SETTINGS_MODULE = "yourproject.settings"
+
 You can also specify your Django settings by setting the
 ``DJANGO_SETTINGS_MODULE`` environment variable or specifying the
 ``--ds=yourproject.settings`` command line flag when running the tests.
