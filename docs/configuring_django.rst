@@ -39,7 +39,7 @@ Example contents of pytest.ini::
     DJANGO_SETTINGS_MODULE = test.settings
 
 ``pyproject.toml`` settings
------------------------
+---------------------------
 
 Example contents of pyproject.toml::
 
