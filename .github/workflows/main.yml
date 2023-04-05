@@ -97,10 +97,6 @@ jobs:
           python: '3.8'
           allow_failure: false
 
-        - name: py38-dj40-sqlite-xdist-coverage
-          python: '3.8'
-          allow_failure: false
-
         - name: py37-dj32-sqlite-xdist-coverage
           python: '3.7'
           allow_failure: false
