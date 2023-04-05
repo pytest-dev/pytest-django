@@ -13,6 +13,8 @@ Improvements
 
 * Drop support for Python version 3.6.
 
+* Add precise `pytest_django.asserts.assertQuerySetEqual` typing.
+
 v4.5.2 (2021-12-07)
 -------------------
 

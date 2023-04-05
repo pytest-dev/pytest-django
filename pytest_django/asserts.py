@@ -188,7 +188,17 @@ if TYPE_CHECKING:
     ) -> None:
         ...
 
+    # Removed in Django 5.1: use assertQuerySetEqual.
     def assertQuerysetEqual(
+        qs,
+        values,
+        transform=...,
+        ordered: bool = ...,
+        msg: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    def assertQuerySetEqual(
         qs,
         values,
         transform=...,
