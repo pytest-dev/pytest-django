@@ -66,7 +66,7 @@ jobs:
       matrix:
         include:
         - name: linting,docs
-          python: '3.10'
+          python: '3.11'
           allow_failure: false
 
         - name: py311-dj42-postgres-xdist-coverage
@@ -121,7 +121,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -134,7 +134,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -145,7 +145,7 @@ jobs:
         run: python -m build
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@v1.6.4
+        uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
         with:
           user: __token__
           password: ${{ secrets.pypi_token }}
