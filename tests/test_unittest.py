@@ -1,4 +1,5 @@
 import pytest
+import sys
 from django.test import TestCase
 
 from pytest_django_test.app.models import Item
@@ -486,3 +487,45 @@ def test_debug_not_used(django_testdir) -> None:
     result = django_testdir.runpytest_subprocess("--pdb")
     result.stdout.fnmatch_lines(["*= 1 passed*"])
     assert result.ret == 0
+
+
+@pytest.mark.skipif(sys.version_info < (3,), reason="py27: no print function")
+def test_teardown_behavior(django_testdir):
+    django_testdir.create_test_module(
+        """
+        from unittest import SkipTest
+        from django.test import TestCase
+
+        post_teardown_count = 0
+
+        class TestClass1(TestCase):
+
+            def _post_teardown(self):
+                global post_teardown_count
+                post_teardown_count += 1
+
+            def test_1_skip(self):
+                self.addCleanup(lambda: print("clean1"))
+                assert post_teardown_count == 0
+                raise SkipTest("skipped!")
+
+            def test_2_pass(self):
+                self.addCleanup(lambda: print("clean2"))
+                assert post_teardown_count == 1
+
+            def test_3_fail(self):
+                self.addCleanup(lambda: print("clean3"))
+                assert post_teardown_count == 2
+                assert 0, "fail"
+    """
+    )
+
+    result = django_testdir.runpytest_subprocess("--pdb", "-s")
+    result.stdout.fnmatch_lines([
+        "tpkg/test_the_test.py clean1",
+        "sclean2",
+        ".clean3",
+        "F",
+        "*> entering PDB >*",
+        "*= 1 failed, 1 passed, 1 skipped in *",
+    ])
