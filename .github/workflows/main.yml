@@ -69,11 +69,11 @@ jobs:
           python: '3.10'
           allow_failure: false
 
-        - name: py311-dj41-postgres-xdist-coverage
+        - name: py311-dj42-postgres-xdist-coverage
           python: '3.11'
           allow_failure: false
 
-        - name: py310-dj40-postgres-xdist-coverage
+        - name: py310-dj41-postgres-xdist-coverage
           python: '3.10'
           allow_failure: false
 
@@ -85,7 +85,7 @@ jobs:
           python: '3.11'
           allow_failure: false
 
-        - name: py310-dj40-mysql_innodb-coverage
+        - name: py310-dj42-mysql_innodb-coverage
           python: '3.10'
           allow_failure: false
 

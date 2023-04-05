@@ -7,7 +7,7 @@ Pending
 Improvements
 ^^^^^^^^^^^^
 
-* Official Django 4.1 support.
+* Official Django 4.1 & 4.2 support.
 
 * Official Python 3.11 support.
 
