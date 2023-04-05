@@ -109,6 +109,11 @@ jobs:
           python: '3.7'
           allow_failure: false
 
+        # Explicitly test min pytest.
+        - name: py37-dj32-sqlite-pytestmin-coverage
+          python: '3.7'
+          allow_failure: false
+
         # pypy3: not included with coverage reports (much slower then).
         - name: pypy3-dj32-postgres
           python: 'pypy3.9'
