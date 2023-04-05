@@ -19,6 +19,9 @@ Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
 :ref:`configuring_django_settings`) and make your tests discoverable
 (see :ref:`faq-tests-not-being-picked-up`):
 
+Example using pytest.ini or tox.ini
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code-block:: ini
 
    # -- FILE: pytest.ini (or tox.ini)
@@ -26,6 +29,17 @@ Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
    DJANGO_SETTINGS_MODULE = test.settings
    # -- recommended but optional:
    python_files = tests.py test_*.py *_tests.py
+
+Example using pyproject.toml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: toml
+
+   # -- Example FILE: pyproject.toml
+   [tool.pytest.ini_options]
+   DJANGO_SETTINGS_MODULE = "test.settings"
+   # -- recommended but optional:
+   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
 
 Run your tests with ``pytest``:
 
