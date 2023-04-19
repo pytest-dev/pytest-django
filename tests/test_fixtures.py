@@ -102,7 +102,7 @@ def test_django_assert_num_queries_db(request, django_assert_num_queries) -> Non
                 Item.objects.create(name="quux")
         assert excinfo.value.args == (
             "Expected to perform 2 queries but 1 was done "
-            "(add -v option to show queries)",
+            "(add -vv option to show queries)",
         )
         assert len(captured.captured_queries) == 1
 
@@ -122,7 +122,7 @@ def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries
 
         assert excinfo.value.args == (
             "Expected to perform 2 queries or less but 3 were done "
-            "(add -v option to show queries)",
+            "(add -vv option to show queries)",
         )
         assert len(captured.captured_queries) == 3
         assert "1-foo" in captured.captured_queries[0]["sql"]

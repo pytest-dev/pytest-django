@@ -600,7 +600,7 @@ def _assert_num_queries(
                 sqls = (q["sql"] for q in context.captured_queries)
                 msg += "\n\nQueries:\n========\n\n" + "\n\n".join(sqls)
             else:
-                msg += " (add -v option to show queries)"
+                msg += " (add -vv option to show queries)"
             pytest.fail(msg)
 
 
