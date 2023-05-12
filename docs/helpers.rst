@@ -401,6 +401,15 @@ Example
         settings.USE_TZ = True
         assert settings.USE_TZ
 
+Setting modifications within tests can be nested with the ``nested()`` context manager:
+
+::
+
+    def test_with_nested_settings(settings):
+        settings.USE_TZ = False
+        with settings.nested():
+            settings.USE_TZ = True
+        assert not settings.USE_TZ
 
 .. fixture:: django_assert_num_queries
 

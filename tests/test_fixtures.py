@@ -327,6 +327,18 @@ class TestSettings:
         assert hasattr(settings, "SECRET_KEY")
         assert hasattr(real_settings, "SECRET_KEY")
 
+    def test_nested_settings(self, settings) -> None:
+        settings.SPAM = "SPAM"
+        with settings.nested():
+            settings.SPAM = "HAM"
+            with settings.nested():
+                settings.SPAM = "EGGS"
+                settings.FOO = "foobar"
+            assert settings.SPAM == "HAM"
+            assert not hasattr(settings, "FOO")
+
+        assert settings.SPAM == "SPAM"
+
     def test_signals(self, settings) -> None:
         result = []
 
