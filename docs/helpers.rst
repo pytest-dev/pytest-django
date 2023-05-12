@@ -108,7 +108,8 @@ dynamically in a hook or fixture.
 
 .. py:function:: pytest.mark.urls(urls)
 
-   Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
+   Specify a different ``settings.ROOT_URLCONF`` module for the marked tests. Use
+   the :fixture:`django_set_urlconf` fixture to specify a different value inside tests.
 
    :type urls: str
    :param urls:
@@ -528,6 +529,30 @@ This uses the ``django_mail_patch_dns`` fixture, which patches
 the ``django_mail_dnsname`` fixture, which defaults to
 "fake-tests.example.com".
 
+
+.. fixture:: django_set_urlconf
+
+``django_set_urlconf``
+~~~~~~~~~~~~~~~~~~~~~~
+
+Call this fixture to set ``settings.ROOT_URLCONF`` to a list of urlpatterns created within the test.
+This keeps the URLs local unlike :func:`pytest.mark.urls`.
+
+Example
+"""""""
+
+::
+
+    from django import http, urls
+
+    def test_can_override_a_root_urlconf(django_set_urlconf):
+        def my_view(request):
+            raise http.Http404()
+
+        django_set_urlconf([
+            urls.path("test/view", my_view, name="test_view")
+        ])
+        assert urls.reverse("test_view") == "/test/view"
 
 Automatic cleanup
 -----------------

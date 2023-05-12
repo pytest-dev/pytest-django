@@ -10,6 +10,7 @@ from urllib.error import HTTPError
 from urllib.request import urlopen
 
 import pytest
+from django import http, urls
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
@@ -787,3 +788,12 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir) -> None:
         ["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"]
     )
     assert result.ret == 0
+
+
+def test_django_set_urlconf(django_set_urlconf, client) -> None:
+    def my_view(request):
+        return http.HttpResponse(status=200, content="Success!")
+
+    urlpatterns = (urls.path("test/view", my_view, name="test_view"),)
+    django_set_urlconf(urlpatterns)
+    assert b'Success!' in client.get("/test/view").content
