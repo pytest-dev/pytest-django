@@ -1,4 +1,5 @@
 """All pytest-django fixtures"""
+import contextlib
 import os
 from contextlib import contextmanager
 from functools import partial
@@ -496,6 +497,16 @@ class SettingsWrapper:
             override.disable()
 
         del self._to_restore[:]
+
+    @contextlib.contextmanager
+    def nested(self):
+        to_restore = self.__class__._to_restore
+        self.__class__._to_restore = []
+        try:
+            yield
+        finally:
+            self.finalize()
+            self.__class__._to_restore = to_restore
 
 
 @pytest.fixture()
