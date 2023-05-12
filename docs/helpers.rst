@@ -542,7 +542,7 @@ Example
     from django import http, urls
 
     def test_can_override_a_root_urlconf(django_set_urlconf):
-        def my_view(request: http.request.HttpRequest) -> http.response.HttpResponse:
+        def my_view(request):
             raise http.Http404()
 
         my_urlpatterns = (urls.path("test/view", my_view, name="test_view"),)
