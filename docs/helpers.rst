@@ -529,6 +529,26 @@ the ``django_mail_dnsname`` fixture, which defaults to
 "fake-tests.example.com".
 
 
+``django_set_urlconf``
+~~~~~~~~~~~~~~~~~~~~~~
+
+This fixture allows setting the ``settings.ROOT_URLCONF`` to a value created within the test.
+
+Example
+"""""""
+
+::
+
+    from django import http, urls
+
+    def test_can_override_a_root_urlconf(django_set_urlconf):
+        def my_view(request: http.request.HttpRequest) -> http.response.HttpResponse:
+            raise http.Http404()
+
+        my_urlpatterns = (urls.path("test/view", my_view, name="test_view"),)
+        django_set_urlconf(my_urlpatterns)
+        assert urls.reverse("test_view") == "/test/view"
+
 Automatic cleanup
 -----------------
 

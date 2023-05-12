@@ -533,16 +533,13 @@ def django_mail_dnsname() -> str:
     return "fake-tests.example.com"
 
 
-@pytest.fixture(autouse=True, scope="function")
-def _django_set_urlconf(request) -> None:
-    """Apply the @pytest.mark.urls marker, internal to pytest-django."""
-    marker = request.node.get_closest_marker("urls")
-    if marker:
-        skip_if_no_django()
+@pytest.fixture()
+def django_set_urlconf(request):
+    """Set the Django urlconf directly without using a marker"""
+    def _set_urlconf(urls):
         import django.conf
         from django.urls import clear_url_caches, set_urlconf
 
-        urls = validate_urls(marker)
         original_urlconf = django.conf.settings.ROOT_URLCONF
         django.conf.settings.ROOT_URLCONF = urls
         clear_url_caches()
@@ -556,6 +553,17 @@ def _django_set_urlconf(request) -> None:
             set_urlconf(None)
 
         request.addfinalizer(restore)
+    return _set_urlconf
+
+
+@pytest.fixture(autouse=True, scope="function")
+def _django_set_urlconf(request, django_set_urlconf) -> None:
+    """Apply the @pytest.mark.urls marker, internal to pytest-django."""
+    marker = request.node.get_closest_marker("urls")
+    if marker:
+        skip_if_no_django()
+        urls = validate_urls(marker)
+        django_set_urlconf(urls)
 
 
 @pytest.fixture(autouse=True, scope="session")
