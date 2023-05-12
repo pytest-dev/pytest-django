@@ -23,30 +23,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-    env:
-      TEST_DB_USER: "test"
-      TEST_DB_PASSWORD: "test"
-    services:
-      mysql:
-        image: mysql:5.7
-        ports:
-          - 33306:3306
-        env:
-          MYSQL_USER: ${{ env.TEST_DB_USER }}
-          MYSQL_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-      postgres:
-        image: postgres
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: ${{ env.TEST_DB_USER }}
-          POSTGRES_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,6 +31,23 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
+
+      - name: Setup mysql
+        if: contains(matrix.name, 'mysql')
+        timeout-minutes: 1
+        run: |
+          sudo systemctl start mysql.service
+          echo "TEST_DB_USER=root" >> $GITHUB_ENV
+          echo "TEST_DB_PASSWORD=root" >> $GITHUB_ENV
+          until mysqladmin pin; do sleep 1; done
+
+      - name: Setup postgresql
+        if: contains(matrix.name, 'postgres')
+        timeout-minutes: 1
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres createuser --createdb $USER
+          until pg_isready; do sleep 1; done
 
       - name: Install dependencies
         run: |
