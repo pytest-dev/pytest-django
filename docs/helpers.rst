@@ -545,8 +545,9 @@ Example
         def my_view(request):
             raise http.Http404()
 
-        my_urlpatterns = (urls.path("test/view", my_view, name="test_view"),)
-        django_set_urlconf(my_urlpatterns)
+        django_set_urlconf([
+            urls.path("test/view", my_view, name="test_view")
+        ])
         assert urls.reverse("test_view") == "/test/view"
 
 Automatic cleanup
