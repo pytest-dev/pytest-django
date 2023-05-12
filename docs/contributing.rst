@@ -114,21 +114,18 @@ Running the tests
 There is a Makefile in the repository which aids in setting up a virtualenv
 and running the tests::
 
-    $ make test
-
-You can manually create the virtualenv using::
-
-    $ make testenv
+    $ make test-sqlite
 
 This will install a virtualenv with pytest and the latest stable version of
-Django. The virtualenv can then be activated with::
+Django, then run the basic sqlite tests.
+
+The virtualenv can then be activated with::
 
     $ source bin/activate
 
 Then, simply invoke pytest to run the test suite::
 
     $ pytest --ds=pytest_django_test.settings_sqlite
-
 
 tox can be used to run the test suite under different configurations by
 invoking::

@@ -21,5 +21,8 @@ docs:
 isort:
 	isort pytest_django pytest_django_test tests
 
+test-sqlite: $(VENV)/bin/pytest
+	$(VENV)/bin/tox -e py310-stable-sqlite
+
 clean:
 	rm -rf bin include/ lib/ man/ pytest_django.egg-info/ build/
