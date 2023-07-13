@@ -627,6 +627,34 @@ def _fail_for_invalid_template_variable():
             else:
                 return msg
 
+        def __bool__(self) -> bool:
+            # This is needed to avoid problems with conditionals on related objects.
+            #
+            # Given:
+            #   class Person(models.Model):
+            #     pass
+            #
+            #   class Purpose(models.Model):
+            #     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="purpose")
+            #
+            # and the following template (assuming person is an instance of Person with no
+            # associated Purpose)
+            #
+            #   {% if person.purpose %}
+            #       yes
+            #   {% else %}
+            #       no
+            #   {% endif %}
+            #
+            # Here, person.purpose raises RelatedObjectDoesNotExist, which is then caught by django
+            # and converted into the string_if_invalid, which is set to an InvalidVarException
+            # instance.
+            # The IfNode then uses if match: to determine whether to render the content, with match
+            # being our InvalidVarException.
+            #
+            # Thus, to avoid erroneously taking the true-branch, we make InvalidVarExceptions falsy.
+            return False
+
     if (
         os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
         and django_settings_is_configured()
