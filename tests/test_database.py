@@ -348,6 +348,35 @@ class TestDatabaseMarker:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["serialized_rollback"]
 
+    @pytest.mark.django_db
+    def test_available_apps_disabled(self, request) -> None:
+        marker = request.node.get_closest_marker("django_db")
+        assert not marker.kwargs
+
+    @pytest.mark.django_db(available_apps=['pytest_django_test.app'])
+    def test_available_apps_enabled(self, request) -> None:
+        marker = request.node.get_closest_marker("django_db")
+        assert marker.kwargs["available_apps"] == ['pytest_django_test.app']
+
+    @pytest.mark.django_db
+    def test_available_apps_default(self, request) -> None:
+        from django.apps import apps
+        from django.conf import settings
+
+        for app in settings.INSTALLED_APPS:
+            assert apps.is_installed(app)
+
+    @pytest.mark.django_db(available_apps=['pytest_django_test.app'])
+    def test_available_apps_limited(self, request) -> None:
+        from django.apps import apps
+        from django.conf import settings
+
+        assert apps.is_installed("pytest_django_test.app")
+
+        for app in settings.INSTALLED_APPS:
+            if app != "pytest_django_test.app":
+                assert not apps.is_installed(app)
+
 
 def test_unittest_interaction(django_testdir) -> None:
     "Test that (non-Django) unittests cannot access the DB."
