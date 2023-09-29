@@ -97,21 +97,21 @@ jobs:
           python: '3.8'
           allow_failure: false
 
-        - name: py37-dj32-sqlite-xdist-coverage
-          python: '3.7'
+        - name: py38-dj32-sqlite-xdist-coverage
+          python: '3.8'
           allow_failure: false
 
         - name: py310-djmain-sqlite-coverage
           python: '3.10'
           allow_failure: true
 
-        - name: py37-dj32-mysql_myisam-coverage
-          python: '3.7'
+        - name: py38-dj32-mysql_myisam-coverage
+          python: '3.8'
           allow_failure: false
 
         # Explicitly test min pytest.
-        - name: py37-dj32-sqlite-pytestmin-coverage
-          python: '3.7'
+        - name: py38-dj32-sqlite-pytestmin-coverage
+          python: '3.8'
           allow_failure: false
 
         # pypy3: not included with coverage reports (much slower then).
