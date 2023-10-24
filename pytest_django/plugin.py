@@ -639,7 +639,7 @@ def _fail_for_invalid_template_variable():
 
 
 @pytest.fixture(autouse=True)
-def _template_string_if_invalid_marker(request) -> None:
+def _template_string_if_invalid_marker(monkeypatch, request) -> None:
     """Apply the @pytest.mark.ignore_template_errors marker,
      internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)
@@ -648,7 +648,11 @@ def _template_string_if_invalid_marker(request) -> None:
             from django.conf import settings as dj_settings
 
             if dj_settings.TEMPLATES:
-                dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"].fail = False
+                monkeypatch.setattr(
+                    dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"],
+                    "fail",
+                    False,
+                )
 
 
 @pytest.fixture(autouse=True, scope="function")
