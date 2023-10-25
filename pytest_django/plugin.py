@@ -55,6 +55,7 @@ if TYPE_CHECKING:
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
 CONFIGURATION_ENV = "DJANGO_CONFIGURATION"
+CONFIGURATION_HOOK_ENV = "DJANGO_CONFIGURATION_HOOK"
 INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
 _report_header = []
@@ -99,6 +100,14 @@ def pytest_addoption(parser) -> None:
         help="Set DJANGO_CONFIGURATION.",
     )
     group.addoption(
+        "--dch",
+        action="store",
+        type=str,
+        dest="dch",
+        default=None,
+        help="Set DJANGO_CONFIGURATION_HOOK.",
+    )
+    group.addoption(
         "--nomigrations",
         "--no-migrations",
         action="store_true",
@@ -123,6 +132,9 @@ def pytest_addoption(parser) -> None:
     )
     parser.addini(
         SETTINGS_MODULE_ENV, "Django settings module to use by pytest-django."
+    )
+    parser.addini(
+        CONFIGURATION_HOOK_ENV, "Callback Hook to prepare Django settings alternatively."
     )
 
     parser.addini(
@@ -329,6 +341,7 @@ def pytest_load_initial_conftests(
 
     ds, ds_source = _get_option_with_source(options.ds, SETTINGS_MODULE_ENV)
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
+    dch, dch_source = _get_option_with_source(options.dch, CONFIGURATION_HOOK_ENV)
 
     if ds:
         _report_header.append(f"settings: {ds} (from {ds_source})")
@@ -349,6 +362,35 @@ def pytest_load_initial_conftests(
 
         with _handle_import_error(_django_project_scan_outcome):
             dj_settings.DATABASES
+    elif dch:
+        # Forcefully load Django settings, throws ImportError or
+        # ImproperlyConfigured if settings cannot be loaded.
+        from django.conf import settings as dj_settings
+
+        # Call a HOOK that could initialize djangos
+        # object with a custom configuration
+
+        if "." not in dch:
+            raise ImportError("Invalid path for configuration hook: {}".format(dch))
+
+        pkg_parts = dch.split(".")
+        module_path = ".".join(pkg_parts[:-1])
+        function_name = pkg_parts[-1]
+
+        import importlib
+
+        try:
+            mod = importlib.import_module(module_path)
+        except (ImportError, AttributeError):
+            raise ImportError("Unable to import module {}".format(module_path))
+        func = getattr(mod, function_name, None)
+
+        if not func:
+            raise ImportError("No function found with name {} in module {}!"
+                              .format(function_name, module_path))
+
+        # Call the function
+        func()
 
     _setup_django()
 
