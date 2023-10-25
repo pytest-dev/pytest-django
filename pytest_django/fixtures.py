@@ -157,7 +157,7 @@ def _django_db_helper(
             reset_sequences,
             databases,
             serialized_rollback,
-            available_apps
+            available_apps,
         ) = validate_django_db(marker)
     else:
         (
@@ -165,7 +165,7 @@ def _django_db_helper(
             reset_sequences,
             databases,
             serialized_rollback,
-            available_apps
+            available_apps,
         ) = False, False, None, False, None
 
     transactional = transactional or reset_sequences or (
