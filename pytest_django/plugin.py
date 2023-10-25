@@ -389,6 +389,7 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
                     reset_sequences,
                     databases,
                     serialized_rollback,
+                    available_apps,
                 ) = validate_django_db(marker_db)
                 uses_db = True
                 transactional = transaction or reset_sequences

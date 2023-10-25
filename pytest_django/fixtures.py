@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     import django
 
     _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
-    # transaction, reset_sequences, databases, serialized_rollback
-    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool]
+    _DjangoDbAvailableApps = Optional[List[str]]
+    # transaction, reset_sequences, databases, serialized_rollback, available_apps
+    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 
 
 __all__ = [
@@ -156,6 +157,7 @@ def _django_db_helper(
             reset_sequences,
             databases,
             serialized_rollback,
+            available_apps,
         ) = validate_django_db(marker)
     else:
         (
@@ -163,7 +165,8 @@ def _django_db_helper(
             reset_sequences,
             databases,
             serialized_rollback,
-        ) = False, False, None, False
+            available_apps,
+        ) = False, False, None, False, None
 
     transactional = transactional or reset_sequences or (
         "transactional_db" in request.fixturenames
@@ -190,12 +193,15 @@ def _django_db_helper(
     _reset_sequences = reset_sequences
     _serialized_rollback = serialized_rollback
     _databases = databases
+    _available_apps = available_apps
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         reset_sequences = _reset_sequences
         serialized_rollback = _serialized_rollback
         if _databases is not None:
             databases = _databases
+        if _available_apps is not None:
+            available_apps = _available_apps
 
         # For non-transactional tests, skip executing `django.test.TestCase`'s
         # `setUpClass`/`tearDownClass`, only execute the super class ones.
@@ -237,11 +243,12 @@ def validate_django_db(marker) -> "_DjangoDb":
     """Validate the django_db marker.
 
     It checks the signature and creates the ``transaction``,
-    ``reset_sequences``, ``databases`` and ``serialized_rollback`` attributes on
-    the marker which will have the correct values.
+    ``reset_sequences``, ``databases``, ``serialized_rollback`` and
+    ``available_apps`` attributes on the marker which will have the correct
+    values.
 
-    Sequence reset and serialized_rollback are only allowed when combined with
-    transaction.
+    Sequence reset, serialized_rollback, and available_apps are only allowed
+    when combined with transaction.
     """
 
     def apifun(
@@ -249,8 +256,9 @@ def validate_django_db(marker) -> "_DjangoDb":
         reset_sequences: bool = False,
         databases: "_DjangoDbDatabases" = None,
         serialized_rollback: bool = False,
+        available_apps: "_DjangoDbAvailableApps" = None,
     ) -> "_DjangoDb":
-        return transaction, reset_sequences, databases, serialized_rollback
+        return transaction, reset_sequences, databases, serialized_rollback, available_apps
 
     return apifun(*marker.args, **marker.kwargs)
 

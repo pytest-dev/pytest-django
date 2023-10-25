@@ -84,6 +84,22 @@ dynamically in a hook or fixture.
 
     Note that this will slow down that test suite by approximately 3x.
 
+  :type available_apps: Union[List[str], None]
+  :param available_apps:
+    .. caution::
+
+      This argument is **experimental** and is subject to change without
+      deprecation.
+
+    The ``available_apps`` argument defines a subset of apps that are enabled
+    for a specific set of tests. Setting ``available_apps`` configures models
+    for which types/permissions will be created before each test, and which
+    model tables will be emptied after each test (this truncation may cascade
+    to unavailable apps models).
+
+    For details see :py:attr:`django.test.TransactionTestCase.available_apps`
+
+
 .. note::
 
   If you want access to the Django database inside a *fixture*, this marker may
