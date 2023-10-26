@@ -57,8 +57,6 @@ SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
 CONFIGURATION_ENV = "DJANGO_CONFIGURATION"
 INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
-_report_header = []
-
 
 # ############### pytest hooks ################
 
@@ -257,6 +255,9 @@ def _get_boolean_value(
         )
 
 
+report_header_key = pytest.StashKey[List[str]]()
+
+
 @pytest.hookimpl()
 def pytest_load_initial_conftests(
     early_config: pytest.Config,
@@ -330,12 +331,15 @@ def pytest_load_initial_conftests(
     ds, ds_source = _get_option_with_source(options.ds, SETTINGS_MODULE_ENV)
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
+    report_header: List[str] = []
+    early_config.stash[report_header_key] = report_header
+
     if ds:
-        _report_header.append(f"settings: {ds} (from {ds_source})")
+        report_header.append(f"settings: {ds} (from {ds_source})")
         os.environ[SETTINGS_MODULE_ENV] = ds
 
         if dc:
-            _report_header.append(f"configuration: {dc} (from {dc_source})")
+            report_header.append(f"configuration: {dc} (from {dc_source})")
             os.environ[CONFIGURATION_ENV] = dc
 
             # Install the django-configurations importer
@@ -353,18 +357,19 @@ def pytest_load_initial_conftests(
     _setup_django()
 
 
-@pytest.hookimpl()
-def pytest_report_header() -> Optional[List[str]]:
-    if _report_header:
-        return ["django: " + ", ".join(_report_header)]
-    return None
-
-
 @pytest.hookimpl(trylast=True)
 def pytest_configure() -> None:
     # Allow Django settings to be configured in a user pytest_configure call,
     # but make sure we call django.setup()
     _setup_django()
+
+
+@pytest.hookimpl()
+def pytest_report_header(config: pytest.Config) -> Optional[List[str]]:
+    report_header = config.stash[report_header_key]
+    if report_header:
+        return ["django: " + ", ".join(report_header)]
+    return None
 
 
 @pytest.hookimpl(tryfirst=True)
