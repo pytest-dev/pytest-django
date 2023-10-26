@@ -10,7 +10,10 @@ import os
 import pathlib
 import sys
 from functools import reduce
-from typing import Generator, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING, ContextManager, Generator, List, NoReturn, Optional, Tuple,
+    Union,
+)
 
 import pytest
 
@@ -46,10 +49,7 @@ from .fixtures import validate_django_db
 from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
-TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from typing import ContextManager, NoReturn
-
     import django
 
 

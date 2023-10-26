@@ -2,14 +2,13 @@
 Dynamically load all Django assertion cases and expose them for importing.
 """
 from functools import wraps
-from typing import Any, Callable, Optional, Sequence, Set, Type, Union
+from typing import (
+    TYPE_CHECKING, Any, Callable, Optional, Sequence, Set, Type, Union,
+)
 
 from django.test import (
     LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
 )
-
-
-TYPE_CHECKING = False
 
 
 test_case = TestCase("run")
