@@ -45,6 +45,9 @@ intersphinx_mapping = {
     'pytest': ('https://docs.pytest.org/en/stable/', None),
 }
 
+# Warn about all references where the target cannot be found
+nitpicky = True
+
 
 def setup(app):
     # Allow linking to pytest's confvals.
