@@ -426,7 +426,7 @@ v3.3.3 (2018-07-26)
 Bug fixes
 ^^^^^^^^^
 
-* Fixed registration of :py:func:`~pytest.mark.ignore_template_errors` marker,
+* Fixed registration of :func:`~pytest.mark.ignore_template_errors` marker,
   which is required with ``pytest --strict`` (#609).
 * Fixed another regression with unittest (#624, #625).
 
@@ -458,7 +458,7 @@ Features
 
 * Added new fixtures ``django_mail_dnsname`` and ``django_mail_patch_dns``,
   used by ``mailoutbox`` to monkeypatch the ``DNS_NAME`` used in
-  :py:mod:`django.core.mail` to improve performance and
+  :mod:`django.core.mail` to improve performance and
   reproducibility.
 
 Bug fixes

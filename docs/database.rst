@@ -77,14 +77,14 @@ Tests requiring multiple databases
 ``pytest-django`` has experimental support for multi-database configurations.
 Currently ``pytest-django`` does not specifically support Django's
 multi-database support, using the ``databases`` argument to the
-:py:func:`django_db <pytest.mark.django_db>` mark::
+:func:`django_db <pytest.mark.django_db>` mark::
 
    @pytest.mark.django_db(databases=['default', 'other'])
    def test_spam():
        assert MyModel.objects.using('other').count() == 0
 
-For details see :py:attr:`django.test.TransactionTestCase.databases` and
-:py:attr:`django.test.TestCase.databases`.
+For details see :attr:`django.test.TransactionTestCase.databases` and
+:attr:`django.test.TestCase.databases`.
 
 
 ``--reuse-db`` - reuse the testing database between test runs

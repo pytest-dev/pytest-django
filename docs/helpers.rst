@@ -6,7 +6,7 @@ Django helpers
 Assertions
 ----------
 
-All of Django's :py:class:`~django:django.test.TestCase`
+All of Django's :class:`~django:django.test.TestCase`
 :ref:`django:assertions` are available in ``pytest_django.asserts``, e.g.
 
 ::
@@ -26,7 +26,7 @@ dynamically in a hook or fixture.
 ``pytest.mark.django_db`` - request database access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.django_db([transaction=False, reset_sequences=False, databases=None])
+.. decorator:: pytest.mark.django_db([transaction=False, reset_sequences=False, databases=None, serialized_rollback=False, available_apps=None])
 
   This is used to mark a test function as requiring the database. It
   will ensure the database is set up correctly for the test. Each test
@@ -54,10 +54,10 @@ dynamically in a hook or fixture.
     values (e.g. primary keys) before running the test.  Defaults to
     ``False``.  Must be used together with ``transaction=True`` to have an
     effect.  Please be aware that not all databases support this feature.
-    For details see :py:attr:`django.test.TransactionTestCase.reset_sequences`.
+    For details see :attr:`django.test.TransactionTestCase.reset_sequences`.
 
 
-  :type databases: Union[Iterable[str], str, None]
+  :type databases: Iterable[str] | str | None
   :param databases:
     .. caution::
 
@@ -70,8 +70,8 @@ dynamically in a hook or fixture.
     configuration will be set up and may be used by the test.  Defaults to
     only the ``default`` database.  The special value ``"__all__"`` may be use
     to specify all configured databases.
-    For details see :py:attr:`django.test.TransactionTestCase.databases` and
-    :py:attr:`django.test.TestCase.databases`.
+    For details see :attr:`django.test.TransactionTestCase.databases` and
+    :attr:`django.test.TestCase.databases`.
 
   :type serialized_rollback: bool
   :param serialized_rollback:
@@ -84,7 +84,7 @@ dynamically in a hook or fixture.
 
     Note that this will slow down that test suite by approximately 3x.
 
-  :type available_apps: Union[List[str], None]
+  :type available_apps: Iterable[str] | None
   :param available_apps:
     .. caution::
 
@@ -97,7 +97,7 @@ dynamically in a hook or fixture.
     model tables will be emptied after each test (this truncation may cascade
     to unavailable apps models).
 
-    For details see :py:attr:`django.test.TransactionTestCase.available_apps`
+    For details see :attr:`django.test.TransactionTestCase.available_apps`
 
 
 .. note::
@@ -122,7 +122,7 @@ dynamically in a hook or fixture.
 ``pytest.mark.urls`` - override the urlconf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.urls(urls)
+.. decorator:: pytest.mark.urls(urls)
 
    Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
 
@@ -141,7 +141,7 @@ dynamically in a hook or fixture.
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: pytest.mark.ignore_template_errors
+.. decorator:: pytest.mark.ignore_template_errors
 
   Ignore errors when using the ``--fail-on-template-vars`` option, i.e.
   do not cause tests to fail if your templates contain invalid variables.
@@ -540,7 +540,7 @@ Example
 
 
 This uses the ``django_mail_patch_dns`` fixture, which patches
-``DNS_NAME`` used by :py:mod:`django.core.mail` with the value from
+``DNS_NAME`` used by :mod:`django.core.mail` with the value from
 the ``django_mail_dnsname`` fixture, which defaults to
 "fake-tests.example.com".
 
