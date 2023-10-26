@@ -628,20 +628,26 @@ def _fail_for_invalid_template_variable():
             else:
                 return msg
 
-    with pytest.MonkeyPatch.context() as mp:
-        if (
-            os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
-            and django_settings_is_configured()
-        ):
-            from django.conf import settings as dj_settings
+    # TODO: use pytest.MonkeyPatch once pytest<6.2 is not supported anymore
+    NOT_SET = object()
+    changed = False
+    previous_value = NOT_SET
+    if (
+        os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
+        and django_settings_is_configured()
+    ):
+        from django.conf import settings as dj_settings
 
-            if dj_settings.TEMPLATES:
-                mp.setitem(
-                    dj_settings.TEMPLATES[0]["OPTIONS"],
-                    "string_if_invalid",
-                    InvalidVarException(),
-                )
-        yield
+        if dj_settings.TEMPLATES:
+            previous_value = dj_settings.TEMPLATES[0]["OPTIONS"].get("string_if_invalid", NOT_SET)
+            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = InvalidVarException()
+            changed = True
+    yield
+    if changed:
+        if previous_value is NOT_SET:
+            del dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"]
+        else:
+            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = previous_value
 
 
 @pytest.fixture(autouse=True)
