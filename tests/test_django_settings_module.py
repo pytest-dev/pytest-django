@@ -38,7 +38,7 @@ def test_ds_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     )
     result = pytester.runpytest_subprocess()
     result.stdout.fnmatch_lines([
-        "django: settings: tpkg.settings_ini (from ini)",
+        "django: version: *, settings: tpkg.settings_ini (from ini)",
         "*= 1 passed*",
     ])
     assert result.ret == 0
@@ -59,7 +59,7 @@ def test_ds_env(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     )
     result = pytester.runpytest_subprocess()
     result.stdout.fnmatch_lines([
-        "django: settings: tpkg.settings_env (from env)",
+        "django: version: *, settings: tpkg.settings_env (from env)",
         "*= 1 passed*",
     ])
 
@@ -85,7 +85,7 @@ def test_ds_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
     )
     result = pytester.runpytest_subprocess("--ds=tpkg.settings_opt")
     result.stdout.fnmatch_lines([
-        "django: settings: tpkg.settings_opt (from option)",
+        "django: version: *, settings: tpkg.settings_opt (from option)",
         "*= 1 passed*",
     ])
 

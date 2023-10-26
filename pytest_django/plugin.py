@@ -367,6 +367,11 @@ def pytest_configure() -> None:
 @pytest.hookimpl()
 def pytest_report_header(config: pytest.Config) -> Optional[List[str]]:
     report_header = config.stash[report_header_key]
+
+    if "django" in sys.modules:
+        import django
+        report_header.insert(0, f"version: {django.get_version()}")
+
     if report_header:
         return ["django: " + ", ".join(report_header)]
     return None
