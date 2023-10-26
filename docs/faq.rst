@@ -90,7 +90,7 @@ test runner like this:
                 help='Preserves the test DB between runs.'
             )
 
-        def run_tests(self, test_labels):
+        def run_tests(self, test_labels, **kwargs):
             """Run pytest and return the exitcode.
 
             It translates some of Django's test command option to pytest's.
@@ -126,7 +126,7 @@ Usage:
 
 **Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
 compatible with this approach, you need to use the standard Django methods of
-setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
+setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environment
 variables or the ``--settings`` command line option.
 
 How can I give database access to all my tests without the `django_db` marker?

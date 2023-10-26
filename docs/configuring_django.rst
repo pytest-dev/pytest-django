@@ -118,9 +118,9 @@ but it can also be requested individually per-test.
 Changing your app before Django gets set up
 -------------------------------------------
 
-pytest-django calls :py:func:`django.setup` automatically.  If you want to do
+pytest-django calls :func:`django.setup` automatically.  If you want to do
 anything before this, you have to create a pytest plugin and use
-the :py:func:`~_pytest.hookspec.pytest_load_initial_conftests` hook, with
+the :func:`~_pytest.hookspec.pytest_load_initial_conftests` hook, with
 ``tryfirst=True``, so that it gets run before the hook in pytest-django
 itself::
 
