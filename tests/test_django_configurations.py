@@ -24,14 +24,14 @@ class MySettings(Configuration):
 """
 
 
-def test_dc_env(testdir, monkeypatch) -> None:
+def test_dc_env(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "MySettings")
 
-    pkg = testdir.mkpydir("tpkg")
-    settings = pkg.join("settings_env.py")
-    settings.write(BARE_SETTINGS)
-    testdir.makepyfile(
+    pkg = pytester.mkpydir("tpkg")
+    settings = pkg.joinpath("settings_env.py")
+    settings.write_text(BARE_SETTINGS)
+    pytester.makepyfile(
         """
         import os
 
@@ -40,7 +40,7 @@ def test_dc_env(testdir, monkeypatch) -> None:
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """
     )
-    result = testdir.runpytest_subprocess()
+    result = pytester.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
         "* 1 passed*",
@@ -48,21 +48,21 @@ def test_dc_env(testdir, monkeypatch) -> None:
     assert result.ret == 0
 
 
-def test_dc_env_overrides_ini(testdir, monkeypatch) -> None:
+def test_dc_env_overrides_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "MySettings")
 
-    testdir.makeini(
+    pytester.makeini(
         """
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
        DJANGO_CONFIGURATION = DO_NOT_USE_ini
     """
     )
-    pkg = testdir.mkpydir("tpkg")
-    settings = pkg.join("settings_env.py")
-    settings.write(BARE_SETTINGS)
-    testdir.makepyfile(
+    pkg = pytester.mkpydir("tpkg")
+    settings = pkg.joinpath("settings_env.py")
+    settings.write_text(BARE_SETTINGS)
+    pytester.makepyfile(
         """
         import os
 
@@ -71,7 +71,7 @@ def test_dc_env_overrides_ini(testdir, monkeypatch) -> None:
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """
     )
-    result = testdir.runpytest_subprocess()
+    result = pytester.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_env (from env), configuration: MySettings (from env)',
         "* 1 passed*",
@@ -79,20 +79,20 @@ def test_dc_env_overrides_ini(testdir, monkeypatch) -> None:
     assert result.ret == 0
 
 
-def test_dc_ini(testdir, monkeypatch) -> None:
+def test_dc_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
-    testdir.makeini(
+    pytester.makeini(
         """
        [pytest]
        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
        DJANGO_CONFIGURATION = MySettings
     """
     )
-    pkg = testdir.mkpydir("tpkg")
-    settings = pkg.join("settings_ini.py")
-    settings.write(BARE_SETTINGS)
-    testdir.makepyfile(
+    pkg = pytester.mkpydir("tpkg")
+    settings = pkg.joinpath("settings_ini.py")
+    settings.write_text(BARE_SETTINGS)
+    pytester.makepyfile(
         """
         import os
 
@@ -101,7 +101,7 @@ def test_dc_ini(testdir, monkeypatch) -> None:
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """
     )
-    result = testdir.runpytest_subprocess()
+    result = pytester.runpytest_subprocess()
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_ini (from ini), configuration: MySettings (from ini)',
         "* 1 passed*",
@@ -109,21 +109,21 @@ def test_dc_ini(testdir, monkeypatch) -> None:
     assert result.ret == 0
 
 
-def test_dc_option(testdir, monkeypatch) -> None:
+def test_dc_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
     monkeypatch.setenv("DJANGO_CONFIGURATION", "DO_NOT_USE_env")
 
-    testdir.makeini(
+    pytester.makeini(
         """
        [pytest]
        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
        DJANGO_CONFIGURATION = DO_NOT_USE_ini
     """
     )
-    pkg = testdir.mkpydir("tpkg")
-    settings = pkg.join("settings_opt.py")
-    settings.write(BARE_SETTINGS)
-    testdir.makepyfile(
+    pkg = pytester.mkpydir("tpkg")
+    settings = pkg.joinpath("settings_opt.py")
+    settings.write_text(BARE_SETTINGS)
+    pytester.makepyfile(
         """
         import os
 
@@ -132,7 +132,7 @@ def test_dc_option(testdir, monkeypatch) -> None:
             assert os.environ['DJANGO_CONFIGURATION'] == 'MySettings'
     """
     )
-    result = testdir.runpytest_subprocess("--ds=tpkg.settings_opt", "--dc=MySettings")
+    result = pytester.runpytest_subprocess("--ds=tpkg.settings_opt", "--dc=MySettings")
     result.stdout.fnmatch_lines([
         'django: settings: tpkg.settings_opt (from option),'
         ' configuration: MySettings (from option)',

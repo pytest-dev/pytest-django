@@ -1,12 +1,19 @@
 from textwrap import dedent
 
+import pytest
 
-def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch) -> None:
+from .helpers import DjangoPytester
+
+
+def test_django_setup_order_and_uniqueness(
+    django_pytester: DjangoPytester,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """
     The django.setup() function shall not be called multiple times by
     pytest-django, since it resets logging conf each time.
     """
-    django_testdir.makeconftest(
+    django_pytester.makeconftest(
         """
         import django.apps
         assert django.apps.apps.ready
@@ -20,7 +27,7 @@ def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch) -> None:
     """
     )
 
-    django_testdir.project_root.join("tpkg", "plugin.py").write(
+    django_pytester.project_root.joinpath("tpkg", "plugin.py").write_text(
         dedent(
             """
         import pytest
@@ -40,13 +47,13 @@ def test_django_setup_order_and_uniqueness(django_testdir, monkeypatch) -> None:
     """
         )
     )
-    django_testdir.makepyfile(
+    django_pytester.makepyfile(
         """
         def test_ds():
             pass
     """
     )
-    result = django_testdir.runpytest_subprocess("-s", "-p", "tpkg.plugin")
+    result = django_pytester.runpytest_subprocess("-s", "-p", "tpkg.plugin")
     result.stdout.fnmatch_lines(
         [
             "plugin",

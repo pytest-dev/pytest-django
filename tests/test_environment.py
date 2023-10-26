@@ -7,12 +7,14 @@ from django.core import mail
 from django.db import connection
 from django.test import TestCase
 
+from .helpers import DjangoPytester
+
 from pytest_django_test.app.models import Item
 
 
 # It doesn't matter which order all the _again methods are run, we just need
 # to check the environment remains constant.
-# This is possible with some of the testdir magic, but this is the lazy way
+# This is possible with some of the pytester magic, but this is the lazy way
 # to do it.
 
 
@@ -51,8 +53,8 @@ class TestDirectAccessWorksForDjangoTestCase(TestCase):
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_variable(django_testdir) -> None:
-    django_testdir.create_app_file(
+def test_invalid_template_variable(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_app_file(
         """
         from django.urls import path
 
@@ -62,7 +64,7 @@ def test_invalid_template_variable(django_testdir) -> None:
         """,
         "urls.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         """
         from django.shortcuts import render
 
@@ -72,13 +74,13 @@ def test_invalid_template_variable(django_testdir) -> None:
         """,
         "views.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         "<div>{{ invalid_var }}</div>", "templates/invalid_template_base.html"
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         "{% include 'invalid_template_base.html' %}", "templates/invalid_template.html"
     )
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -90,7 +92,7 @@ def test_invalid_template_variable(django_testdir) -> None:
             client.get('/invalid_template/')
         """
     )
-    result = django_testdir.runpytest_subprocess("-s", "--fail-on-template-vars")
+    result = django_pytester.runpytest_subprocess("-s", "--fail-on-template-vars")
 
     origin = "'*/tpkg/app/templates/invalid_template_base.html'"
     result.stdout.fnmatch_lines_random(
@@ -109,14 +111,14 @@ def test_invalid_template_variable(django_testdir) -> None:
     )
     """
 )
-def test_invalid_template_variable_marker_cleanup(django_testdir) -> None:
-    django_testdir.create_app_file(
+def test_invalid_template_variable_marker_cleanup(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_app_file(
         "<div>{{ invalid_var }}</div>", "templates/invalid_template_base.html"
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         "{% include 'invalid_template_base.html' %}", "templates/invalid_template.html"
     )
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         from django.template.loader import render_to_string
 
@@ -131,7 +133,7 @@ def test_invalid_template_variable_marker_cleanup(django_testdir) -> None:
 
         """
     )
-    result = django_testdir.runpytest_subprocess("-s", "--fail-on-template-vars")
+    result = django_pytester.runpytest_subprocess("-s", "--fail-on-template-vars")
 
     origin = "'*/tpkg/app/templates/invalid_template_base.html'"
     result.stdout.fnmatch_lines_random(
@@ -151,8 +153,8 @@ def test_invalid_template_variable_marker_cleanup(django_testdir) -> None:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_with_default_if_none(django_testdir) -> None:
-    django_testdir.create_app_file(
+def test_invalid_template_with_default_if_none(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_app_file(
         """
             <div>{{ data.empty|default:'d' }}</div>
             <div>{{ data.none|default:'d' }}</div>
@@ -162,7 +164,7 @@ def test_invalid_template_with_default_if_none(django_testdir) -> None:
         """,
         "templates/the_template.html",
     )
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         def test_for_invalid_template():
             from django.shortcuts import render
@@ -175,7 +177,7 @@ def test_invalid_template_with_default_if_none(django_testdir) -> None:
             )
         """
     )
-    result = django_testdir.runpytest_subprocess("--fail-on-template-vars")
+    result = django_pytester.runpytest_subprocess("--fail-on-template-vars")
     result.stdout.fnmatch_lines(
         [
             "tpkg/test_the_test.py F",
@@ -193,8 +195,8 @@ def test_invalid_template_with_default_if_none(django_testdir) -> None:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_invalid_template_variable_opt_in(django_testdir) -> None:
-    django_testdir.create_app_file(
+def test_invalid_template_variable_opt_in(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_app_file(
         """
         from django.urls import path
 
@@ -204,7 +206,7 @@ def test_invalid_template_variable_opt_in(django_testdir) -> None:
         """,
         "urls.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         """
         from django.shortcuts import render
 
@@ -214,10 +216,10 @@ def test_invalid_template_variable_opt_in(django_testdir) -> None:
         """,
         "views.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         "<div>{{ invalid_var }}</div>", "templates/invalid_template.html"
     )
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -229,7 +231,7 @@ def test_invalid_template_variable_opt_in(django_testdir) -> None:
             client.get('/invalid_template/')
         """
     )
-    result = django_testdir.runpytest_subprocess("-s")
+    result = django_pytester.runpytest_subprocess("-s")
     result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py ..*"])
 
 
@@ -261,9 +263,9 @@ class TestrunnerVerbosity:
     pytest's verbosity level."""
 
     @pytest.fixture
-    def testdir(self, django_testdir):
-        print("testdir")
-        django_testdir.create_test_module(
+    def pytester(self, django_pytester: DjangoPytester) -> pytest.Pytester:
+        print("pytester")
+        django_pytester.create_test_module(
             """
             import pytest
 
@@ -272,29 +274,29 @@ class TestrunnerVerbosity:
                 pass
             """
         )
-        return django_testdir
+        return django_pytester
 
-    def test_default(self, testdir) -> None:
+    def test_default(self, pytester: pytest.Pytester) -> None:
         """Not verbose by default."""
-        result = testdir.runpytest_subprocess("-s")
+        result = pytester.runpytest_subprocess("-s")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
-    def test_vq_verbosity_0(self, testdir) -> None:
+    def test_vq_verbosity_0(self, pytester: pytest.Pytester) -> None:
         """-v and -q results in verbosity 0."""
-        result = testdir.runpytest_subprocess("-s", "-v", "-q")
+        result = pytester.runpytest_subprocess("-s", "-v", "-q")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py .*"])
 
-    def test_verbose_with_v(self, testdir) -> None:
+    def test_verbose_with_v(self, pytester: pytest.Pytester) -> None:
         """Verbose output with '-v'."""
-        result = testdir.runpytest_subprocess("-s", "-v")
+        result = pytester.runpytest_subprocess("-s", "-v")
         result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py:*", "*PASSED*"])
         result.stderr.fnmatch_lines(
             ["*Destroying test database for alias 'default'*"]
         )
 
-    def test_more_verbose_with_vv(self, testdir) -> None:
+    def test_more_verbose_with_vv(self, pytester: pytest.Pytester) -> None:
         """More verbose output with '-v -v'."""
-        result = testdir.runpytest_subprocess("-s", "-v", "-v")
+        result = pytester.runpytest_subprocess("-s", "-v", "-v")
         result.stdout.fnmatch_lines_random(
             [
                 "tpkg/test_the_test.py:*",
@@ -310,9 +312,9 @@ class TestrunnerVerbosity:
             ]
         )
 
-    def test_more_verbose_with_vv_and_reusedb(self, testdir) -> None:
+    def test_more_verbose_with_vv_and_reusedb(self, pytester: pytest.Pytester) -> None:
         """More verbose output with '-v -v', and --create-db."""
-        result = testdir.runpytest_subprocess("-s", "-v", "-v", "--create-db")
+        result = pytester.runpytest_subprocess("-s", "-v", "-v", "--create-db")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py:*", "*PASSED*"])
         result.stderr.fnmatch_lines(["*Creating test database for alias*"])
         assert (
@@ -323,7 +325,7 @@ class TestrunnerVerbosity:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("site_name", ["site1", "site2"])
-def test_clear_site_cache(site_name: str, rf, monkeypatch) -> None:
+def test_clear_site_cache(site_name: str, rf, monkeypatch: pytest.MonkeyPatch) -> None:
     request = rf.get("/")
     monkeypatch.setattr(request, "get_host", lambda: "foo.com")
     Site.objects.create(domain="foo.com", name=site_name)

@@ -1,6 +1,8 @@
 import pytest
 from django.test import TestCase
 
+from .helpers import DjangoPytester
+
 from pytest_django_test.app.models import Item
 
 
@@ -55,14 +57,14 @@ class TestFixturesWithSetup(TestCase):
         assert Item.objects.count() == 3
 
 
-def test_sole_test(django_testdir) -> None:
+def test_sole_test(django_pytester: DjangoPytester) -> None:
     """
     Make sure the database is configured when only Django TestCase classes
     are collected, without the django_db marker.
 
     Also ensures that the DB is available after a failure (#824).
     """
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import os
 
@@ -89,7 +91,7 @@ def test_sole_test(django_testdir) -> None:
     """
     )
 
-    result = django_testdir.runpytest_subprocess("-v")
+    result = django_pytester.runpytest_subprocess("-v")
     result.stdout.fnmatch_lines(
         [
             "*::test_foo FAILED",
@@ -106,8 +108,8 @@ def test_sole_test(django_testdir) -> None:
 class TestUnittestMethods:
     "Test that setup/teardown methods of unittests are being called."
 
-    def test_django(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_django(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -131,7 +133,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         result.stdout.fnmatch_lines(
             [
                 "CALLED: setUpClass",
@@ -143,8 +145,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_not_being_a_classmethod(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_setUpClass_not_being_a_classmethod(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -157,7 +159,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         expected_lines = [
             "* ERROR at setup of TestFoo.test_pass *",
             "E * TypeError: *",
@@ -165,8 +167,8 @@ class TestUnittestMethods:
         result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 
-    def test_setUpClass_multiple_subclasses(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_setUpClass_multiple_subclasses(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -191,7 +193,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
+        result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
                 "*TestFoo::test_shared PASSED*",
@@ -203,8 +205,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_mixin(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_setUpClass_mixin(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -225,14 +227,14 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
+        result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             ["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"]
         )
         assert result.ret == 0
 
-    def test_setUpClass_skip(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_setUpClass_skip(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
             import pytest
@@ -260,7 +262,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
+        result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
                 "*TestFoo::test_shared SKIPPED*",
@@ -272,8 +274,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_multi_inheritance_setUpClass(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_multi_inheritance_setUpClass(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -334,12 +336,12 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-vvvv", "-s")
+        result = django_pytester.runpytest_subprocess("-vvvv", "-s")
         assert result.parseoutcomes()["passed"] == 6
         assert result.ret == 0
 
-    def test_unittest(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_unittest(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from unittest import TestCase
 
@@ -363,7 +365,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         result.stdout.fnmatch_lines(
             [
                 "CALLED: setUpClass",
@@ -375,8 +377,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import testcases
 
@@ -397,7 +399,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-q", "-s")
+        result = django_pytester.runpytest_subprocess("-q", "-s")
         result.stdout.fnmatch_lines(
             ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
         )
@@ -420,7 +422,7 @@ class TestCaseWithTrDbFixture(TestCase):
         assert 1
 
 
-def test_pdb_enabled(django_testdir) -> None:
+def test_pdb_enabled(django_pytester: DjangoPytester) -> None:
     """
     Make sure the database is flushed and tests are isolated when
     using the --pdb option.
@@ -429,7 +431,7 @@ def test_pdb_enabled(django_testdir) -> None:
     https://github.com/pytest-dev/pytest-django/issues/405
     """
 
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         '''
         import os
 
@@ -461,12 +463,12 @@ def test_pdb_enabled(django_testdir) -> None:
     '''
     )
 
-    result = django_testdir.runpytest_subprocess("-v", "--pdb")
+    result = django_pytester.runpytest_subprocess("-v", "--pdb")
     assert result.ret == 0
 
 
-def test_debug_not_used(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_debug_not_used(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.test import TestCase
 
@@ -483,6 +485,6 @@ def test_debug_not_used(django_testdir) -> None:
     """
     )
 
-    result = django_testdir.runpytest_subprocess("--pdb")
+    result = django_pytester.runpytest_subprocess("--pdb")
     result.stdout.fnmatch_lines(["*= 1 passed*"])
     assert result.ret == 0
