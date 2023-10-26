@@ -64,7 +64,7 @@ _report_header = []
 
 
 @pytest.hookimpl()
-def pytest_addoption(parser) -> None:
+def pytest_addoption(parser: pytest.Parser) -> None:
     group = parser.getgroup("django")
     group.addoption(
         "--reuse-db",
@@ -259,8 +259,8 @@ def _get_boolean_value(
 
 @pytest.hookimpl()
 def pytest_load_initial_conftests(
-    early_config,
-    parser,
+    early_config: pytest.Config,
+    parser: pytest.Parser,
     args: List[str],
 ) -> None:
     # Register the marks
@@ -411,7 +411,7 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
 
 
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request) -> None:
+def django_test_environment(request: pytest.FixtureRequest) -> None:
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -459,7 +459,7 @@ def django_db_blocker() -> "Optional[_DatabaseBlocker]":
 
 
 @pytest.fixture(autouse=True)
-def _django_db_marker(request) -> None:
+def _django_db_marker(request: pytest.FixtureRequest) -> None:
     """Implement the django_db marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("django_db")
     if marker:
@@ -468,7 +468,7 @@ def _django_db_marker(request) -> None:
 
 @pytest.fixture(autouse=True, scope="class")
 def _django_setup_unittest(
-    request,
+    request: pytest.FixtureRequest,
     django_db_blocker: "_DatabaseBlocker",
 ) -> Generator[None, None, None]:
     """Setup a django unittest, internal to pytest-django."""
@@ -521,7 +521,7 @@ def mailoutbox(
 
 @pytest.fixture(scope="function")
 def django_mail_patch_dns(
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     django_mail_dnsname: str,
 ) -> None:
     from django.core import mail
@@ -535,7 +535,7 @@ def django_mail_dnsname() -> str:
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _django_set_urlconf(request) -> None:
+def _django_set_urlconf(request: pytest.FixtureRequest) -> None:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("urls")
     if marker:
@@ -628,30 +628,27 @@ def _fail_for_invalid_template_variable():
             else:
                 return msg
 
-    # TODO: use pytest.MonkeyPatch once pytest<6.2 is not supported anymore
-    NOT_SET = object()
-    changed = False
-    previous_value = NOT_SET
-    if (
-        os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
-        and django_settings_is_configured()
-    ):
-        from django.conf import settings as dj_settings
+    with pytest.MonkeyPatch.context() as mp:
+        if (
+            os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true"
+            and django_settings_is_configured()
+        ):
+            from django.conf import settings as dj_settings
 
-        if dj_settings.TEMPLATES:
-            previous_value = dj_settings.TEMPLATES[0]["OPTIONS"].get("string_if_invalid", NOT_SET)
-            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = InvalidVarException()
-            changed = True
-    yield
-    if changed:
-        if previous_value is NOT_SET:
-            del dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"]
-        else:
-            dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = previous_value
+            if dj_settings.TEMPLATES:
+                mp.setitem(
+                    dj_settings.TEMPLATES[0]["OPTIONS"],
+                    "string_if_invalid",
+                    InvalidVarException(),
+                )
+        yield
 
 
 @pytest.fixture(autouse=True)
-def _template_string_if_invalid_marker(monkeypatch, request) -> None:
+def _template_string_if_invalid_marker(
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+) -> None:
     """Apply the @pytest.mark.ignore_template_errors marker,
      internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)

@@ -1,14 +1,16 @@
 import pytest
 
+from .helpers import DjangoPytester
+
 from pytest_django_test.db_helpers import (
     db_exists, drop_database, mark_database, mark_exists,
     skip_if_sqlite_in_memory,
 )
 
 
-def test_db_reuse_simple(django_testdir) -> None:
+def test_db_reuse_simple(django_pytester: DjangoPytester) -> None:
     "A test for all backends to check that `--reuse-db` works."
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -20,15 +22,15 @@ def test_db_reuse_simple(django_testdir) -> None:
     """
     )
 
-    result = django_testdir.runpytest_subprocess("-v", "--reuse-db")
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
     assert result.ret == 0
     result.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
 
 
-def test_db_order(django_testdir) -> None:
+def test_db_order(django_pytester: DjangoPytester) -> None:
     """Test order in which tests are being executed."""
 
-    django_testdir.create_test_module('''
+    django_pytester.create_test_module('''
         import pytest
         from unittest import TestCase
         from django.test import SimpleTestCase
@@ -85,7 +87,7 @@ def test_db_order(django_testdir) -> None:
             def test_run_last_test_case(self):
                 pass
     ''')
-    result = django_testdir.runpytest_subprocess('-q', '--collect-only')
+    result = django_pytester.runpytest_subprocess('-q', '--collect-only')
     assert result.ret == 0
     result.stdout.fnmatch_lines([
         "*test_run_first_fixture*",
@@ -104,13 +106,13 @@ def test_db_order(django_testdir) -> None:
     ], consecutive=True)
 
 
-def test_db_reuse(django_testdir) -> None:
+def test_db_reuse(django_pytester: DjangoPytester) -> None:
     """
     Test the re-use db functionality.
     """
     skip_if_sqlite_in_memory()
 
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -129,7 +131,7 @@ def test_db_reuse(django_testdir) -> None:
 
     # Do not pass in --create-db to make sure it is created when it
     # does not exist
-    result_first = django_testdir.runpytest_subprocess("-v", "--reuse-db")
+    result_first = django_pytester.runpytest_subprocess("-v", "--reuse-db")
     assert result_first.ret == 0
 
     result_first.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
@@ -138,14 +140,14 @@ def test_db_reuse(django_testdir) -> None:
     mark_database()
     assert mark_exists()
 
-    result_second = django_testdir.runpytest_subprocess("-v", "--reuse-db")
+    result_second = django_pytester.runpytest_subprocess("-v", "--reuse-db")
     assert result_second.ret == 0
     result_second.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
 
     # Make sure the database has not been re-created
     assert mark_exists()
 
-    result_third = django_testdir.runpytest_subprocess(
+    result_third = django_pytester.runpytest_subprocess(
         "-v", "--reuse-db", "--create-db"
     )
     assert result_third.ret == 0
@@ -166,9 +168,9 @@ class TestSqlite:
         }
     }
 
-    def test_sqlite_test_name_used(self, django_testdir) -> None:
+    def test_sqlite_test_name_used(self, django_pytester: DjangoPytester) -> None:
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -184,12 +186,12 @@ class TestSqlite:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-v")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*test_a*PASSED*"])
 
 
-def test_xdist_with_reuse(django_testdir) -> None:
+def test_xdist_with_reuse(django_pytester: DjangoPytester) -> None:
     pytest.importorskip("xdist")
     skip_if_sqlite_in_memory()
 
@@ -198,7 +200,7 @@ def test_xdist_with_reuse(django_testdir) -> None:
     assert not db_exists("gw0")
     assert not db_exists("gw1")
 
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -233,7 +235,7 @@ def test_xdist_with_reuse(django_testdir) -> None:
     """
     )
 
-    result = django_testdir.runpytest_subprocess("-vv", "-n2", "-s", "--reuse-db")
+    result = django_pytester.runpytest_subprocess("-vv", "-n2", "-s", "--reuse-db")
     assert result.ret == 0
     result.stdout.fnmatch_lines(["*PASSED*test_a*"])
     result.stdout.fnmatch_lines(["*PASSED*test_b*"])
@@ -243,14 +245,14 @@ def test_xdist_with_reuse(django_testdir) -> None:
     assert db_exists("gw0")
     assert db_exists("gw1")
 
-    result = django_testdir.runpytest_subprocess("-vv", "-n2", "-s", "--reuse-db")
+    result = django_pytester.runpytest_subprocess("-vv", "-n2", "-s", "--reuse-db")
     assert result.ret == 0
     result.stdout.fnmatch_lines(["*PASSED*test_a*"])
     result.stdout.fnmatch_lines(["*PASSED*test_b*"])
     result.stdout.fnmatch_lines(["*PASSED*test_c*"])
     result.stdout.fnmatch_lines(["*PASSED*test_d*"])
 
-    result = django_testdir.runpytest_subprocess(
+    result = django_pytester.runpytest_subprocess(
         "-vv", "-n2", "-s", "--reuse-db", "--create-db"
     )
     assert result.ret == 0
@@ -273,10 +275,10 @@ class TestSqliteWithXdist:
         }
     }
 
-    def test_sqlite_in_memory_used(self, django_testdir) -> None:
+    def test_sqlite_in_memory_used(self, django_pytester: DjangoPytester) -> None:
         pytest.importorskip("xdist")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -291,7 +293,7 @@ class TestSqliteWithXdist:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-n1")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
@@ -310,10 +312,10 @@ class TestSqliteWithMultipleDbsAndXdist:
         }
     }
 
-    def test_sqlite_database_renamed(self, django_testdir) -> None:
+    def test_sqlite_database_renamed(self, django_pytester: DjangoPytester) -> None:
         pytest.importorskip("xdist")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -341,7 +343,7 @@ class TestSqliteWithMultipleDbsAndXdist:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-n1")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
@@ -356,11 +358,15 @@ class TestSqliteWithTox:
         }
     }
 
-    def test_db_with_tox_suffix(self, django_testdir, monkeypatch) -> None:
+    def test_db_with_tox_suffix(
+        self,
+        django_pytester: DjangoPytester,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         "A test to check that Tox DB suffix works when running in parallel."
         monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -376,15 +382,19 @@ class TestSqliteWithTox:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
 
-    def test_db_with_empty_tox_suffix(self, django_testdir, monkeypatch) -> None:
+    def test_db_with_empty_tox_suffix(
+        self,
+        django_pytester: DjangoPytester,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         "A test to check that Tox DB suffix is not used when suffix would be empty."
         monkeypatch.setenv("TOX_PARALLEL_ENV", "")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -400,7 +410,7 @@ class TestSqliteWithTox:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*test_inner*PASSED*"])
 
@@ -415,12 +425,16 @@ class TestSqliteWithToxAndXdist:
         }
     }
 
-    def test_db_with_tox_suffix(self, django_testdir, monkeypatch) -> None:
+    def test_db_with_tox_suffix(
+        self,
+        django_pytester: DjangoPytester,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         "A test to check that both Tox and xdist suffixes work together."
         pytest.importorskip("xdist")
         monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -436,7 +450,7 @@ class TestSqliteWithToxAndXdist:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-n1")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*PASSED*test_inner*"])
 
@@ -451,10 +465,10 @@ class TestSqliteInMemoryWithXdist:
         }
     }
 
-    def test_sqlite_in_memory_used(self, django_testdir) -> None:
+    def test_sqlite_in_memory_used(self, django_pytester: DjangoPytester) -> None:
         pytest.importorskip("xdist")
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             import pytest
             from django.db import connections
@@ -469,7 +483,7 @@ class TestSqliteInMemoryWithXdist:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-n1")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-n1")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*PASSED*test_a*"])
 
@@ -477,8 +491,8 @@ class TestSqliteInMemoryWithXdist:
 class TestMigrations:
     """Tests for Django Migrations."""
 
-    def test_no_migrations(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_no_migrations(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             import pytest
 
@@ -489,23 +503,23 @@ class TestMigrations:
         """
         )
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             raise Exception("This should not get imported.")
             """,
             "migrations/0001_initial.py",
         )
 
-        result = django_testdir.runpytest_subprocess(
+        result = django_pytester.runpytest_subprocess(
             "--nomigrations", "--tb=short", "-vv", "-s",
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()
         result.stdout.fnmatch_lines(["*= 1 passed*"])
 
-    def test_migrations_run(self, django_testdir) -> None:
-        testdir = django_testdir
-        testdir.create_test_module(
+    def test_migrations_run(self, django_pytester: DjangoPytester) -> None:
+        pytester = django_pytester
+        pytester.create_test_module(
             """
             import pytest
 
@@ -516,7 +530,7 @@ class TestMigrations:
             """
         )
 
-        testdir.create_app_file(
+        pytester.create_app_file(
             """
             from django.db import migrations, models
 
@@ -556,11 +570,11 @@ class TestMigrations:
             """,
             "migrations/0001_initial.py",
         )
-        result = testdir.runpytest_subprocess("--tb=short", "-v", "-s")
+        result = pytester.runpytest_subprocess("--tb=short", "-v", "-s")
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*mark_migrations_run*"])
 
-        result = testdir.runpytest_subprocess(
+        result = pytester.runpytest_subprocess(
             "--no-migrations", "--migrations", "--tb=short", "-v", "-s"
         )
         assert result.ret == 0

@@ -13,14 +13,18 @@ import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
-from django.test.client import Client, RequestFactory
+from django.test.client import (
+    AsyncClient, AsyncRequestFactory, Client, RequestFactory,
+)
 from django.utils.encoding import force_str
+
+from .helpers import DjangoPytester
 
 from pytest_django_test.app.models import Item
 
 
 @contextmanager
-def nonverbose_config(config) -> Generator[None, None, None]:
+def nonverbose_config(config: pytest.Config) -> Generator[None, None, None]:
     """Ensure that pytest's config.option.verbose is <= 0."""
     if config.option.verbose <= 0:
         yield
@@ -31,13 +35,11 @@ def nonverbose_config(config) -> Generator[None, None, None]:
         config.option.verbose = saved
 
 
-def test_client(client) -> None:
+def test_client(client: Client) -> None:
     assert isinstance(client, Client)
 
 
-def test_async_client(async_client) -> None:
-    from django.test.client import AsyncClient
-
+def test_async_client(async_client: AsyncClient) -> None:
     assert isinstance(async_client, AsyncClient)
 
 
@@ -83,14 +85,15 @@ def test_rf(rf) -> None:
     assert isinstance(rf, RequestFactory)
 
 
-def test_async_rf(async_rf) -> None:
-    from django.test.client import AsyncRequestFactory
-
+def test_async_rf(async_rf: AsyncRequestFactory) -> None:
     assert isinstance(async_rf, AsyncRequestFactory)
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_db(request, django_assert_num_queries) -> None:
+def test_django_assert_num_queries_db(
+    request: pytest.FixtureRequest,
+    django_assert_num_queries,
+) -> None:
     with nonverbose_config(request.config):
         with django_assert_num_queries(3):
             Item.objects.create(name="foo")
@@ -108,7 +111,10 @@ def test_django_assert_num_queries_db(request, django_assert_num_queries) -> Non
 
 
 @pytest.mark.django_db
-def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries) -> None:
+def test_django_assert_max_num_queries_db(
+    request: pytest.FixtureRequest,
+    django_assert_max_num_queries,
+) -> None:
     with nonverbose_config(request.config):
         with django_assert_max_num_queries(2):
             Item.objects.create(name="1-foo")
@@ -130,7 +136,7 @@ def test_django_assert_max_num_queries_db(request, django_assert_max_num_queries
 
 @pytest.mark.django_db(transaction=True)
 def test_django_assert_num_queries_transactional_db(
-    request, transactional_db: None, django_assert_num_queries
+    request: pytest.FixtureRequest, transactional_db: None, django_assert_num_queries
 ) -> None:
     with nonverbose_config(request.config):
         with transaction.atomic():
@@ -144,8 +150,8 @@ def test_django_assert_num_queries_transactional_db(
                     Item.objects.create(name="quux")
 
 
-def test_django_assert_num_queries_output(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_django_assert_num_queries_output(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
         import pytest
@@ -157,13 +163,13 @@ def test_django_assert_num_queries_output(django_testdir) -> None:
                 ContentType.objects.count()
     """
     )
-    result = django_testdir.runpytest_subprocess("--tb=short")
+    result = django_pytester.runpytest_subprocess("--tb=short")
     result.stdout.fnmatch_lines(["*Expected to perform 1 queries but 2 were done*"])
     assert result.ret == 1
 
 
-def test_django_assert_num_queries_output_verbose(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_django_assert_num_queries_output_verbose(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
         import pytest
@@ -175,7 +181,7 @@ def test_django_assert_num_queries_output_verbose(django_testdir) -> None:
                 ContentType.objects.count()
     """
     )
-    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result = django_pytester.runpytest_subprocess("--tb=short", "-v")
     result.stdout.fnmatch_lines(
         ["*Expected to perform 11 queries but 2 were done*", "*Queries:*", "*========*"]
     )
@@ -198,8 +204,8 @@ def test_django_assert_num_queries_db_connection(django_assert_num_queries) -> N
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_output_info(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.contrib.contenttypes.models import ContentType
         import pytest
@@ -215,7 +221,7 @@ def test_django_assert_num_queries_output_info(django_testdir) -> None:
                 ContentType.objects.first()  # additional wrong query
     """
     )
-    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result = django_pytester.runpytest_subprocess("--tb=short", "-v")
     result.stdout.fnmatch_lines(
         [
             "*Expected to perform 2 queries but 3 were done*",
@@ -349,8 +355,8 @@ class TestSettings:
         settings.FOOBAR = "abc123"
         assert sorted(result) == [("FOOBAR", "abc123", True)]
 
-    def test_modification_signal(self, django_testdir) -> None:
-        django_testdir.create_test_module(
+    def test_modification_signal(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             import pytest
 
@@ -383,7 +389,7 @@ class TestSettings:
          """
         )
 
-        result = django_testdir.runpytest_subprocess("--tb=short", "-v", "-s")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-v", "-s")
 
         # test_set
         result.stdout.fnmatch_lines(
@@ -495,12 +501,16 @@ class TestLiveServer:
         STATIC_URL = '/static/'
         """
     )
-    def test_serve_static_with_staticfiles_app(self, django_testdir, settings) -> None:
+    def test_serve_static_with_staticfiles_app(
+        self,
+        django_pytester: DjangoPytester,
+        settings,
+    ) -> None:
         """
         LiveServer always serves statics with ``django.contrib.staticfiles``
         handler.
         """
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
             from urllib.request import urlopen
 
@@ -515,7 +525,7 @@ class TestLiveServer:
                     assert force_str(response_data) == 'bla\\n'
             """
         )
-        result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+        result = django_pytester.runpytest_subprocess("--tb=short", "-v")
         result.stdout.fnmatch_lines(["*test_a*PASSED*"])
         assert result.ret == 0
 
@@ -527,7 +537,7 @@ class TestLiveServer:
         with pytest.raises(HTTPError):
             urlopen(live_server + "/static/a_file.txt").read()
 
-    def test_specified_port_django_111(self, django_testdir) -> None:
+    def test_specified_port_django_111(self, django_pytester: DjangoPytester) -> None:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             sock.bind(("", 0))
@@ -535,7 +545,7 @@ class TestLiveServer:
         finally:
             sock.close()
 
-        django_testdir.create_test_module(
+        django_pytester.create_test_module(
             """
         def test_with_live_server(live_server):
             assert live_server.port == %d
@@ -543,7 +553,7 @@ class TestLiveServer:
             % port
         )
 
-        django_testdir.runpytest_subprocess(f"--liveserver=localhost:{port}")
+        django_pytester.runpytest_subprocess(f"--liveserver=localhost:{port}")
 
 
 @pytest.mark.parametrize("username_field", ("email", "identifier"))
@@ -560,8 +570,8 @@ class TestLiveServer:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_custom_user_model(django_testdir, username_field) -> None:
-    django_testdir.create_app_file(
+def test_custom_user_model(django_pytester: DjangoPytester, username_field) -> None:
+    django_pytester.create_app_file(
         f"""
         from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
         from django.db import models
@@ -599,7 +609,7 @@ def test_custom_user_model(django_testdir, username_field) -> None:
         """,
         "models.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         """
         from django.urls import path
 
@@ -609,7 +619,7 @@ def test_custom_user_model(django_testdir, username_field) -> None:
         """,
         "urls.py",
     )
-    django_testdir.create_app_file(
+    django_pytester.create_app_file(
         """
         from django.http import HttpResponse
         from django.template import Template
@@ -622,7 +632,7 @@ def test_custom_user_model(django_testdir, username_field) -> None:
         """,
         "views.py",
     )
-    django_testdir.makepyfile(
+    django_pytester.makepyfile(
         """
         from django.utils.encoding import force_str
         from tpkg.app.models import MyCustomUser
@@ -633,8 +643,8 @@ def test_custom_user_model(django_testdir, username_field) -> None:
         """
     )
 
-    django_testdir.create_app_file("", "migrations/__init__.py")
-    django_testdir.create_app_file(
+    django_pytester.create_app_file("", "migrations/__init__.py")
+    django_pytester.create_app_file(
         """
 from django.db import models, migrations
 import django.utils.timezone
@@ -673,7 +683,7 @@ class Migration(migrations.Migration):
         "migrations/0002_custom_user_model.py",
     )
 
-    result = django_testdir.runpytest_subprocess("-s")
+    result = django_pytester.runpytest_subprocess("-s")
     result.stdout.fnmatch_lines(["* 1 passed*"])
     assert result.ret == 0
 
@@ -731,8 +741,8 @@ def test_mail_message_uses_mocked_DNS_NAME(mailoutbox) -> None:
     assert message["Message-ID"].endswith("@fake-tests.example.com>")
 
 
-def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_mail_message_uses_django_mail_dnsname_fixture(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.core import mail
         import pytest
@@ -749,13 +759,13 @@ def test_mail_message_uses_django_mail_dnsname_fixture(django_testdir) -> None:
             assert message['Message-ID'].endswith('@from.django_mail_dnsname>')
     """
     )
-    result = django_testdir.runpytest_subprocess("--tb=short", "-v")
+    result = django_pytester.runpytest_subprocess("--tb=short", "-v")
     result.stdout.fnmatch_lines(["*test_mailbox_inner*PASSED*"])
     assert result.ret == 0
 
 
-def test_mail_message_dns_patching_can_be_skipped(django_testdir) -> None:
-    django_testdir.create_test_module(
+def test_mail_message_dns_patching_can_be_skipped(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.core import mail
         import pytest
@@ -782,7 +792,7 @@ def test_mail_message_dns_patching_can_be_skipped(django_testdir) -> None:
             assert mocked_make_msgid.called[0][1]['domain'] is mail.DNS_NAME
     """
     )
-    result = django_testdir.runpytest_subprocess("--tb=short", "-vv", "-s")
+    result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-s")
     result.stdout.fnmatch_lines(
         ["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"]
     )

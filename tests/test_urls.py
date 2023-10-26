@@ -16,8 +16,8 @@ def test_urls_client(client) -> None:
     assert force_str(response.content) == "Overridden urlconf works!"
 
 
-def test_urls_cache_is_cleared(testdir) -> None:
-    testdir.makepyfile(
+def test_urls_cache_is_cleared(pytester: pytest.Pytester) -> None:
+    pytester.makepyfile(
         myurls="""
         from django.urls import path
 
@@ -28,7 +28,7 @@ def test_urls_cache_is_cleared(testdir) -> None:
     """
     )
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         from django.urls import reverse, NoReverseMatch
         import pytest
@@ -45,12 +45,12 @@ def test_urls_cache_is_cleared(testdir) -> None:
     """
     )
 
-    result = testdir.runpytest_subprocess()
+    result = pytester.runpytest_subprocess()
     assert result.ret == 0
 
 
-def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir) -> None:
-    testdir.makepyfile(
+def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(pytester: pytest.Pytester) -> None:
+    pytester.makepyfile(
         myurls="""
         from django.urls import path
 
@@ -61,7 +61,7 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir) -> None:
     """
     )
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         myurls2="""
         from django.urls import path
 
@@ -72,7 +72,7 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir) -> None:
     """
     )
 
-    testdir.makepyfile(
+    pytester.makepyfile(
         """
         from django.urls import reverse, NoReverseMatch
         import pytest
@@ -90,5 +90,5 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(testdir) -> None:
     """
     )
 
-    result = testdir.runpytest_subprocess()
+    result = pytester.runpytest_subprocess()
     assert result.ret == 0

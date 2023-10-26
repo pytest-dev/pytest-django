@@ -1,11 +1,14 @@
 import copy
 import pathlib
 import shutil
+from pathlib import Path
 from textwrap import dedent
-from typing import Optional
+from typing import Optional, cast
 
 import pytest
 from django.conf import settings
+
+from .helpers import DjangoPytester
 
 
 pytest_plugins = "pytester"
@@ -13,9 +16,9 @@ pytest_plugins = "pytester"
 REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 
-def pytest_configure(config) -> None:
+def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
-        "markers", "django_project: options for the django_testdir fixture"
+        "markers", "django_project: options for the django_pytester fixture"
     )
 
 
@@ -32,13 +35,17 @@ def _marker_apifun(
 
 
 @pytest.fixture
-def testdir(testdir, monkeypatch):
+def pytester(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> pytest.Pytester:
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
-    return testdir
+    return pytester
 
 
 @pytest.fixture(scope="function")
-def django_testdir(request, testdir, monkeypatch):
+def django_pytester(
+    request: pytest.FixtureRequest,
+    pytester: pytest.Pytester,
+    monkeypatch: pytest.MonkeyPatch,
+) -> DjangoPytester:
     from pytest_django_test.db_helpers import (
         DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME, TEST_DB_NAME,
     )
@@ -106,41 +113,40 @@ def django_testdir(request, testdir, monkeypatch):
     )
 
     if options["project_root"]:
-        project_root = testdir.mkdir(options["project_root"])
+        project_root = pytester.mkdir(options["project_root"])
     else:
-        project_root = testdir.tmpdir
+        project_root = pytester.path
 
-    tpkg_path = project_root.mkdir("tpkg")
+    tpkg_path = project_root / "tpkg"
+    tpkg_path.mkdir()
 
     if options["create_manage_py"]:
-        project_root.ensure("manage.py")
+        project_root.joinpath("manage.py").touch()
 
-    tpkg_path.ensure("__init__.py")
+    tpkg_path.joinpath("__init__.py").touch()
 
     app_source = REPOSITORY_ROOT / "../pytest_django_test/app"
-    test_app_path = tpkg_path.join("app")
+    test_app_path = tpkg_path / "app"
 
     # Copy the test app to make it available in the new test run
     shutil.copytree(str(app_source), str(test_app_path))
-    tpkg_path.join("the_settings.py").write(test_settings)
+    tpkg_path.joinpath("the_settings.py").write_text(test_settings)
 
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
 
-    def create_test_module(test_code: str, filename: str = "test_the_test.py"):
-        r = tpkg_path.join(filename)
-        r.write(dedent(test_code), ensure=True)
+    def create_test_module(test_code: str, filename: str = "test_the_test.py") -> Path:
+        r = tpkg_path.joinpath(filename)
+        r.parent.mkdir(parents=True, exist_ok=True)
+        r.write_text(dedent(test_code))
         return r
 
-    def create_app_file(code: str, filename: str):
-        r = test_app_path.join(filename)
-        r.write(dedent(code), ensure=True)
+    def create_app_file(code: str, filename: str) -> Path:
+        r = test_app_path.joinpath(filename)
+        r.parent.mkdir(parents=True, exist_ok=True)
+        r.write_text(dedent(code))
         return r
 
-    testdir.create_test_module = create_test_module
-    testdir.create_app_file = create_app_file
-    testdir.project_root = project_root
-
-    testdir.makeini(
+    pytester.makeini(
         """
         [pytest]
         addopts = --strict-markers
@@ -148,14 +154,19 @@ def django_testdir(request, testdir, monkeypatch):
     """
     )
 
-    return testdir
+    django_pytester_ = cast(DjangoPytester, pytester)
+    django_pytester_.create_test_module = create_test_module  # type: ignore[method-assign]
+    django_pytester_.create_app_file = create_app_file  # type: ignore[method-assign]
+    django_pytester_.project_root = project_root
+
+    return django_pytester_
 
 
 @pytest.fixture
-def django_testdir_initial(django_testdir):
-    """A django_testdir fixture which provides initial_data."""
-    django_testdir.project_root.join("tpkg/app/migrations").remove()
-    django_testdir.makefile(
+def django_pytester_initial(django_pytester: DjangoPytester) -> pytest.Pytester:
+    """A django_pytester fixture which provides initial_data."""
+    shutil.rmtree(django_pytester.project_root.joinpath("tpkg/app/migrations"))
+    django_pytester.makefile(
         ".json",
         initial_data="""
         [{
@@ -165,4 +176,4 @@ def django_testdir_initial(django_testdir):
         }]""",
     )
 
-    return django_testdir
+    return django_pytester

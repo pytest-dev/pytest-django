@@ -58,7 +58,7 @@ def django_db_modify_db_settings_tox_suffix() -> None:
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings_xdist_suffix(request) -> None:
+def django_db_modify_db_settings_xdist_suffix(request: pytest.FixtureRequest) -> None:
     skip_if_no_django()
 
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
@@ -83,23 +83,23 @@ def django_db_modify_db_settings(
 
 
 @pytest.fixture(scope="session")
-def django_db_use_migrations(request) -> bool:
+def django_db_use_migrations(request: pytest.FixtureRequest) -> bool:
     return not request.config.getvalue("nomigrations")
 
 
 @pytest.fixture(scope="session")
-def django_db_keepdb(request) -> bool:
+def django_db_keepdb(request: pytest.FixtureRequest) -> bool:
     return request.config.getvalue("reuse_db")
 
 
 @pytest.fixture(scope="session")
-def django_db_createdb(request) -> bool:
+def django_db_createdb(request: pytest.FixtureRequest) -> bool:
     return request.config.getvalue("create_db")
 
 
 @pytest.fixture(scope="session")
 def django_db_setup(
-    request,
+    request: pytest.FixtureRequest,
     django_test_environment: None,
     django_db_blocker,
     django_db_use_migrations: bool,
@@ -142,7 +142,7 @@ def django_db_setup(
 
 @pytest.fixture()
 def _django_db_helper(
-    request,
+    request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker,
 ) -> None:
@@ -518,7 +518,7 @@ def settings():
 
 
 @pytest.fixture(scope="session")
-def live_server(request):
+def live_server(request: pytest.FixtureRequest):
     """Run a live Django server in the background during tests
 
     The address the server is started from is taken from the
@@ -549,7 +549,7 @@ def live_server(request):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _live_server_helper(request) -> None:
+def _live_server_helper(request: pytest.FixtureRequest) -> None:
     """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
