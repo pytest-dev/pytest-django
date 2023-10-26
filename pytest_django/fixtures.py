@@ -2,7 +2,10 @@
 import os
 from contextlib import contextmanager
 from functools import partial
-from typing import Any, Generator, Iterable, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING, Any, Generator, Iterable, List, Literal, Optional, Tuple,
+    Union,
+)
 
 import pytest
 
@@ -11,16 +14,14 @@ from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
 
-TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from typing import Literal
-
     import django
 
-    _DjangoDbDatabases = Optional[Union["Literal['__all__']", Iterable[str]]]
-    _DjangoDbAvailableApps = Optional[List[str]]
-    # transaction, reset_sequences, databases, serialized_rollback, available_apps
-    _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
+
+_DjangoDbDatabases = Optional[Union[Literal['__all__'], Iterable[str]]]
+_DjangoDbAvailableApps = Optional[List[str]]
+# transaction, reset_sequences, databases, serialized_rollback, available_apps
+_DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 
 
 __all__ = [
@@ -239,7 +240,7 @@ def _django_db_helper(
     request.addfinalizer(test_case._post_teardown)
 
 
-def validate_django_db(marker) -> "_DjangoDb":
+def validate_django_db(marker) -> _DjangoDb:
     """Validate the django_db marker.
 
     It checks the signature and creates the ``transaction``,
@@ -254,10 +255,10 @@ def validate_django_db(marker) -> "_DjangoDb":
     def apifun(
         transaction: bool = False,
         reset_sequences: bool = False,
-        databases: "_DjangoDbDatabases" = None,
+        databases: _DjangoDbDatabases = None,
         serialized_rollback: bool = False,
-        available_apps: "_DjangoDbAvailableApps" = None,
-    ) -> "_DjangoDb":
+        available_apps: _DjangoDbAvailableApps = None,
+    ) -> _DjangoDb:
         return transaction, reset_sequences, databases, serialized_rollback, available_apps
 
     return apifun(*marker.args, **marker.kwargs)
