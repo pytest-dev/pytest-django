@@ -491,14 +491,14 @@ def _django_setup_unittest(
         self._testcase(result=self)
 
     try:
-        TestCaseFunction.runtest = non_debugging_runtest  # type: ignore[assignment]
+        TestCaseFunction.runtest = non_debugging_runtest  # type: ignore[method-assign]
 
         request.getfixturevalue("django_db_setup")
 
         with django_db_blocker.unblock():
             yield
     finally:
-        TestCaseFunction.runtest = original_runtest  # type: ignore[assignment]
+        TestCaseFunction.runtest = original_runtest  # type: ignore[method-assign]
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -521,7 +521,7 @@ def mailoutbox(
 
     from django.core import mail
 
-    return mail.outbox
+    return mail.outbox  # type: ignore[no-any-return]
 
 
 @pytest.fixture(scope="function")
@@ -589,7 +589,7 @@ def _fail_for_invalid_template_variable():
             return key == "%s"
 
         @staticmethod
-        def _get_origin():
+        def _get_origin() -> Optional[str]:
             stack = inspect.stack()
 
             # Try to use topmost `self.origin` first (Django 1.9+, and with
@@ -598,10 +598,11 @@ def _fail_for_invalid_template_variable():
                 func = f[3]
                 if func == "render":
                     frame = f[0]
+                    origin: Optional[str]
                     try:
                         origin = frame.f_locals["self"].origin
                     except (AttributeError, KeyError):
-                        continue
+                        origin = None
                     if origin is not None:
                         return origin
 
@@ -620,7 +621,9 @@ def _fail_for_invalid_template_variable():
             # ``django.template.base.Template``
             template = f_locals["self"]
             if isinstance(template, Template):
-                return template.name
+                name: str = template.name
+                return name
+            return None
 
         def __mod__(self, var: str) -> str:
             origin = self._get_origin()
@@ -704,8 +707,8 @@ class _DatabaseBlocker:
     This is the object returned by django_db_blocker.
     """
 
-    def __init__(self):
-        self._history = []
+    def __init__(self) -> None:
+        self._history = []  # type: ignore[var-annotated]
         self._real_ensure_connection = None
 
     @property

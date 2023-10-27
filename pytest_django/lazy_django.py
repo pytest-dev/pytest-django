@@ -25,7 +25,7 @@ def django_settings_is_configured() -> bool:
 
     if not ret and "django.conf" in sys.modules:
         django_conf: Any = sys.modules["django.conf"]
-        return django_conf.settings.configured
+        ret = django_conf.settings.configured
 
     return ret
 
@@ -33,4 +33,5 @@ def django_settings_is_configured() -> bool:
 def get_django_version() -> Tuple[int, int, int, str, int]:
     import django
 
-    return django.VERSION
+    version: Tuple[int, int, int, str, int] = django.VERSION
+    return version

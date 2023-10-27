@@ -89,12 +89,14 @@ def django_db_use_migrations(request: pytest.FixtureRequest) -> bool:
 
 @pytest.fixture(scope="session")
 def django_db_keepdb(request: pytest.FixtureRequest) -> bool:
-    return request.config.getvalue("reuse_db")
+    reuse_db: bool = request.config.getvalue("reuse_db")
+    return reuse_db
 
 
 @pytest.fixture(scope="session")
 def django_db_createdb(request: pytest.FixtureRequest) -> bool:
-    return request.config.getvalue("create_db")
+    create_db: bool = request.config.getvalue("create_db")
+    return create_db
 
 
 @pytest.fixture(scope="session")
@@ -407,7 +409,8 @@ def django_user_model(db: None):
 @pytest.fixture()
 def django_username_field(django_user_model) -> str:
     """The fieldname for the username used with Django's user model."""
-    return django_user_model.USERNAME_FIELD
+    field: str = django_user_model.USERNAME_FIELD
+    return field
 
 
 @pytest.fixture()

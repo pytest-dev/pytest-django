@@ -8,3 +8,21 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "pytest_django/_version.py"
+
+[tool.mypy]
+strict = true
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+disallow_subclassing_any = false
+files = [
+    "pytest_django",
+    "pytest_django_test",
+    "tests",
+]
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "configurations.*",
+    "psycopg2cffi.*",
+]
+ignore_missing_imports = true

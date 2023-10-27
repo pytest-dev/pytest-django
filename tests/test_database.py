@@ -8,10 +8,11 @@ from pytest_django_test.app.models import Item, SecondItem
 
 def db_supports_reset_sequences() -> bool:
     """Return if the current db engine supports `reset_sequences`."""
-    return (
+    ret: bool = (
         connection.features.supports_transactions
         and connection.features.supports_sequence_reset
     )
+    return ret
 
 
 def test_noaccess() -> None:
@@ -57,13 +58,13 @@ class TestDatabaseFixtures:
     ])
     def all_dbs(self, request: pytest.FixtureRequest) -> None:
         if request.param == "django_db_reset_sequences":
-            return request.getfixturevalue("django_db_reset_sequences")
+            request.getfixturevalue("django_db_reset_sequences")
         elif request.param == "transactional_db":
-            return request.getfixturevalue("transactional_db")
+            request.getfixturevalue("transactional_db")
         elif request.param == "db":
-            return request.getfixturevalue("db")
+            request.getfixturevalue("db")
         elif request.param == "django_db_serialized_rollback":
-            return request.getfixturevalue("django_db_serialized_rollback")
+            request.getfixturevalue("django_db_serialized_rollback")
         else:
             assert False  # pragma: no cover
 
