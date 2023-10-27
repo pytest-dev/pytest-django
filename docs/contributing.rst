@@ -163,7 +163,7 @@ but please don't include them in your pull requests.
 
 After this short initial setup you're ready to run tests::
 
-    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=pytest_django_test.settings_postgres
+    $ COVERAGE_PROCESS_START=`pwd`/pyproject.toml COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=pytest_django_test.settings_postgres
 
 You should repeat the above step for sqlite and mysql before the next step.
 This step will create a lot of ``.coverage`` files with additional suffixes for
