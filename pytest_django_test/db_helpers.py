@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import subprocess
+from typing import Mapping, Optional
 
 import pytest
 from django.conf import settings
@@ -10,8 +11,8 @@ from django.utils.encoding import force_str
 # Construct names for the "inner" database used in runpytest tests
 _settings = settings.DATABASES["default"]
 
-DB_NAME = _settings["NAME"]
-TEST_DB_NAME = _settings["TEST"]["NAME"]
+DB_NAME: str = _settings["NAME"]
+TEST_DB_NAME: str = _settings["TEST"]["NAME"]
 
 if _settings["ENGINE"] == "django.db.backends.sqlite3" and TEST_DB_NAME is None:
     TEST_DB_NAME = ":memory:"
@@ -31,18 +32,19 @@ else:
     SECOND_TEST_DB_NAME = TEST_DB_NAME + '_second' if DB_NAME is not None else None
 
 
-def get_db_engine():
-    return _settings["ENGINE"].split(".")[-1]
+def get_db_engine() -> str:
+    db_engine: str = _settings["ENGINE"].split(".")[-1]
+    return db_engine
 
 
 class CmdResult:
-    def __init__(self, status_code, std_out, std_err):
+    def __init__(self, status_code: int, std_out: bytes, std_err: bytes) -> None:
         self.status_code = status_code
         self.std_out = std_out
         self.std_err = std_err
 
 
-def run_cmd(*args, env=None):
+def run_cmd(*args: str, env: Optional[Mapping[str, str]] = None) -> CmdResult:
     r = subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
@@ -54,7 +56,7 @@ def run_cmd(*args, env=None):
     return CmdResult(ret, stdoutdata, stderrdata)
 
 
-def run_psql(*args):
+def run_psql(*args: str) -> CmdResult:
     env = {}
     user = _settings.get("USER")
     if user:  # pragma: no branch
@@ -68,7 +70,7 @@ def run_psql(*args):
     return run_cmd("psql", *args, env=env)
 
 
-def run_mysql(*args):
+def run_mysql(*args: str) -> CmdResult:
     user = _settings.get("USER")
     if user:  # pragma: no branch
         args = ("-u", user, *args)
@@ -82,7 +84,7 @@ def run_mysql(*args):
     return run_cmd("mysql", *args)
 
 
-def skip_if_sqlite_in_memory():
+def skip_if_sqlite_in_memory() -> None:
     if (
         _settings["ENGINE"] == "django.db.backends.sqlite3"
         and _settings["TEST"]["NAME"] is None
@@ -90,14 +92,14 @@ def skip_if_sqlite_in_memory():
         pytest.skip("Do not test db reuse since database does not support it")
 
 
-def _get_db_name(db_suffix=None):
+def _get_db_name(db_suffix: Optional[str] = None) -> str:
     name = TEST_DB_NAME
     if db_suffix:
         name = f"{name}_{db_suffix}"
     return name
 
 
-def drop_database(db_suffix=None):
+def drop_database(db_suffix: Optional[str] = None) -> None:
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
@@ -119,7 +121,7 @@ def drop_database(db_suffix=None):
         os.unlink(name)
 
 
-def db_exists(db_suffix=None):
+def db_exists(db_suffix: Optional[str] = None) -> bool:
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
@@ -137,7 +139,7 @@ def db_exists(db_suffix=None):
     return os.path.exists(name)
 
 
-def mark_database():
+def mark_database() -> None:
     db_engine = get_db_engine()
 
     if db_engine == "postgresql":
@@ -162,7 +164,7 @@ def mark_database():
         conn.close()
 
 
-def mark_exists():
+def mark_exists() -> bool:
     db_engine = get_db_engine()
 
     if db_engine == "postgresql":

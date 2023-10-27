@@ -81,7 +81,7 @@ def test_admin_user_no_db_marker(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
-def test_rf(rf) -> None:
+def test_rf(rf: RequestFactory) -> None:
     assert isinstance(rf, RequestFactory)
 
 
@@ -336,7 +336,7 @@ class TestSettings:
     def test_signals(self, settings) -> None:
         result = []
 
-        def assert_signal(signal, sender, setting, value, enter):
+        def assert_signal(signal, sender, setting, value, enter) -> None:
             result.append((setting, value, enter))
 
         from django.test.signals import setting_changed
@@ -463,17 +463,19 @@ class TestLiveServer:
         assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
-    def item(self) -> None:
+    def item(self) -> Item:
         # This has not requested database access explicitly, but the
         # live_server fixture auto-uses the transactional_db fixture.
-        Item.objects.create(name="foo")
+        item: Item = Item.objects.create(name="foo")
+        return item
 
-    def test_item(self, item, live_server) -> None:
+    def test_item(self, item: Item, live_server) -> None:
         pass
 
     @pytest.fixture
     def item_db(self, db: None) -> Item:
-        return Item.objects.create(name="foo")
+        item: Item = Item.objects.create(name="foo")
+        return item
 
     def test_item_db(self, item_db: Item, live_server) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
@@ -481,7 +483,8 @@ class TestLiveServer:
 
     @pytest.fixture
     def item_transactional_db(self, transactional_db: None) -> Item:
-        return Item.objects.create(name="foo")
+        item: Item = Item.objects.create(name="foo")
+        return item
 
     def test_item_transactional_db(self, item_transactional_db: Item, live_server) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
@@ -570,7 +573,7 @@ class TestLiveServer:
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
-def test_custom_user_model(django_pytester: DjangoPytester, username_field) -> None:
+def test_custom_user_model(django_pytester: DjangoPytester, username_field: str) -> None:
     django_pytester.create_app_file(
         f"""
         from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
