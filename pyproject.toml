@@ -9,6 +9,16 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "pytest_django/_version.py"
 
+[tool.pytest.ini_options]
+addopts = [
+    # Error on using unregistered marker.
+    "--strict-markers",
+    # Show extra test summary info for everything.
+    "-ra",
+]
+DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
+testpaths = ["tests"]
+
 [tool.mypy]
 strict = true
 disallow_incomplete_defs = false
