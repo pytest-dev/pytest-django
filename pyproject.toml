@@ -36,3 +36,19 @@ module = [
     "psycopg2cffi.*",
 ]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+parallel = true
+source = ["${PYTESTDJANGO_COVERAGE_SRC}."]
+branch = true
+[tool.coverage.report]
+include = [
+    "pytest_django/*",
+    "pytest_django_test/*",
+    "tests/*",
+]
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]
