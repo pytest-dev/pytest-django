@@ -377,6 +377,48 @@ def pytest_report_header(config: pytest.Config) -> Optional[List[str]]:
     return None
 
 
+# Convert Django test tags on test classes to pytest marks.
+def pytest_collectstart(collector: pytest.Collector) -> None:
+    if "django" not in sys.modules:
+        return
+
+    if not isinstance(collector, pytest.Class):
+        return
+
+    tags = getattr(collector.obj, "tags", ())
+    if not tags:
+        return
+
+    from django.test import TransactionTestCase
+
+    if not issubclass(collector.obj, TransactionTestCase):
+        return
+
+    for tag in tags:
+        collector.add_marker(tag)
+
+
+# Convert Django test tags on test methods to pytest marks.
+def pytest_itemcollected(item: pytest.Item) -> None:
+    if "django" not in sys.modules:
+        return
+
+    if not isinstance(item, pytest.Function):
+        return
+
+    tags = getattr(item.obj, "tags", ())
+    if not tags:
+        return
+
+    from django.test import TransactionTestCase
+
+    if not issubclass(item.cls, TransactionTestCase):
+        return
+
+    for tag in tags:
+        item.add_marker(tag)
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
     # If Django is not configured we don't need to bother
