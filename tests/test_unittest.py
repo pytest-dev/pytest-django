@@ -1,5 +1,5 @@
 import pytest
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from .helpers import DjangoPytester
 
@@ -55,6 +55,41 @@ class TestFixturesWithSetup(TestCase):
 
     def tearDown(self) -> None:
         assert Item.objects.count() == 3
+
+
+@tag("tag1", "tag2")
+class TestDjangoTagsToPytestMarkers(TestCase):
+    """Django test tags are converted to Pytest markers, at the class & method
+    levels."""
+
+    @pytest.fixture(autouse=True)
+    def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
+        self.markers = {m.name for m in request.node.iter_markers()}
+
+    @tag("tag3", "tag4")  # type: ignore[misc]
+    def test_1(self) -> None:
+        assert self.markers == {"tag1", "tag2", "tag3", "tag4"}
+
+    def test_2(self) -> None:
+        assert self.markers == {"tag1", "tag2"}
+
+    @tag("tag5")  # type: ignore[misc]
+    def test_3(self) -> None:
+        assert self.markers == {"tag1", "tag2", "tag5"}
+
+
+@tag("tag1")
+class TestNonDjangoClassWithTags:
+    """Django test tags are only converted to Pytest markers if actually
+    Django tests. Use pytest markers directly for pytest tests."""
+
+    @pytest.fixture(autouse=True)
+    def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
+        self.markers = {m.name for m in request.node.iter_markers()}
+
+    @tag("tag2")  # type: ignore[misc]
+    def test_1(self) -> None:
+        assert not self.markers
 
 
 def test_sole_test(django_pytester: DjangoPytester) -> None:
