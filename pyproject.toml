@@ -17,7 +17,7 @@ authors = [
 maintainers = [
     { name = "Andreas Pelme", email = "andreas@pelme.se" },
 ]
-license = {text = "BSD-3-Clause"}
+license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Framework :: Django",
