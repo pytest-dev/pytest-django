@@ -123,9 +123,7 @@ def test_django_project_scan_disabled_invalid_settings(
     assert result.ret != 0
 
     result.stderr.fnmatch_lines(["*ImportError*DOES_NOT_EXIST*"])
-    result.stderr.fnmatch_lines(
-        ["*pytest-django did not search for " "Django projects*"]
-    )
+    result.stderr.fnmatch_lines(["*pytest-django did not search for " "Django projects*"])
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)

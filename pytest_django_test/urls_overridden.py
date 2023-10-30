@@ -3,5 +3,5 @@ from django.urls import path
 
 
 urlpatterns = [
-    path("overridden_url/", lambda r: HttpResponse("Overridden urlconf works!"))
+    path("overridden_url/", lambda r: HttpResponse("Overridden urlconf works!")),
 ]

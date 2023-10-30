@@ -13,8 +13,7 @@ from pytest_django_test.app.models import Item, SecondItem
 def db_supports_reset_sequences() -> bool:
     """Return if the current db engine supports `reset_sequences`."""
     ret: bool = (
-        connection.features.supports_transactions
-        and connection.features.supports_sequence_reset
+        connection.features.supports_transactions and connection.features.supports_sequence_reset
     )
     return ret
 
@@ -54,12 +53,14 @@ def non_zero_sequences_counter(db: None) -> None:
 class TestDatabaseFixtures:
     """Tests for the different database fixtures."""
 
-    @pytest.fixture(params=[
-        "db",
-        "transactional_db",
-        "django_db_reset_sequences",
-        "django_db_serialized_rollback",
-    ])
+    @pytest.fixture(
+        params=[
+            "db",
+            "transactional_db",
+            "django_db_reset_sequences",
+            "django_db_serialized_rollback",
+        ]
+    )
     def all_dbs(self, request: pytest.FixtureRequest) -> None:
         if request.param == "django_db_reset_sequences":
             request.getfixturevalue("django_db_reset_sequences")
@@ -70,7 +71,7 @@ class TestDatabaseFixtures:
         elif request.param == "django_db_serialized_rollback":
             request.getfixturevalue("django_db_serialized_rollback")
         else:
-            raise AssertionError()   # pragma: no cover
+            raise AssertionError()  # pragma: no cover
 
     def test_access(self, all_dbs: None) -> None:
         Item.objects.create(name="spam")
@@ -92,7 +93,8 @@ class TestDatabaseFixtures:
         assert not connection.in_atomic_block
 
     def test_transactions_enabled_via_reset_seq(
-        self, django_db_reset_sequences: None,
+        self,
+        django_db_reset_sequences: None,
     ) -> None:
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
@@ -100,9 +102,11 @@ class TestDatabaseFixtures:
         assert not connection.in_atomic_block
 
     def test_django_db_reset_sequences_fixture(
-        self, db: None, django_pytester: DjangoPytester, non_zero_sequences_counter: None,
+        self,
+        db: None,
+        django_pytester: DjangoPytester,
+        non_zero_sequences_counter: None,
     ) -> None:
-
         if not db_supports_reset_sequences():
             pytest.skip(
                 "transactions and reset_sequences must be supported "
@@ -124,9 +128,7 @@ class TestDatabaseFixtures:
         )
 
         result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
-        result.stdout.fnmatch_lines(
-            ["*test_django_db_reset_sequences_requested PASSED*"]
-        )
+        result.stdout.fnmatch_lines(["*test_django_db_reset_sequences_requested PASSED*"])
 
     def test_serialized_rollback(self, db: None, django_pytester: DjangoPytester) -> None:
         django_pytester.create_app_file(
@@ -246,7 +248,7 @@ class TestDatabaseFixturesAllOrder:
 
     # The test works when transactions are not supported, but it interacts
     # badly with other tests.
-    @pytest.mark.skipif('not connection.features.supports_transactions')
+    @pytest.mark.skipif("not connection.features.supports_transactions")
     def test_serialized_rollback(
         self,
         fixture_with_serialized_rollback: None,
@@ -303,40 +305,40 @@ class TestDatabaseMarker:
         marker = request.node.get_closest_marker("django_db")
         assert marker.kwargs["reset_sequences"]
 
-    @pytest.mark.django_db(databases=['default', 'replica', 'second'])
+    @pytest.mark.django_db(databases=["default", "replica", "second"])
     def test_databases(self, request: pytest.FixtureRequest) -> None:
         marker = request.node.get_closest_marker("django_db")
-        assert marker.kwargs["databases"] == ['default', 'replica', 'second']
+        assert marker.kwargs["databases"] == ["default", "replica", "second"]
 
-    @pytest.mark.django_db(databases=['second'])
+    @pytest.mark.django_db(databases=["second"])
     def test_second_database(self, request: pytest.FixtureRequest) -> None:
         SecondItem.objects.create(name="spam")
 
-    @pytest.mark.django_db(databases=['default'])
+    @pytest.mark.django_db(databases=["default"])
     def test_not_allowed_database(self, request: pytest.FixtureRequest) -> None:
-        with pytest.raises(AssertionError, match='not allowed'):
+        with pytest.raises(AssertionError, match="not allowed"):
             SecondItem.objects.count()
-        with pytest.raises(AssertionError, match='not allowed'):
+        with pytest.raises(AssertionError, match="not allowed"):
             SecondItem.objects.create(name="spam")
 
-    @pytest.mark.django_db(databases=['replica'])
+    @pytest.mark.django_db(databases=["replica"])
     def test_replica_database(self, request: pytest.FixtureRequest) -> None:
-        Item.objects.using('replica').count()
+        Item.objects.using("replica").count()
 
-    @pytest.mark.django_db(databases=['replica'])
+    @pytest.mark.django_db(databases=["replica"])
     def test_replica_database_not_allowed(self, request: pytest.FixtureRequest) -> None:
-        with pytest.raises(AssertionError, match='not allowed'):
+        with pytest.raises(AssertionError, match="not allowed"):
             Item.objects.count()
 
-    @pytest.mark.django_db(transaction=True, databases=['default', 'replica'])
+    @pytest.mark.django_db(transaction=True, databases=["default", "replica"])
     def test_replica_mirrors_default_database(self, request: pytest.FixtureRequest) -> None:
-        Item.objects.create(name='spam')
-        Item.objects.using('replica').create(name='spam')
+        Item.objects.create(name="spam")
+        Item.objects.using("replica").create(name="spam")
 
         assert Item.objects.count() == 2
-        assert Item.objects.using('replica').count() == 2
+        assert Item.objects.using("replica").count() == 2
 
-    @pytest.mark.django_db(databases='__all__')
+    @pytest.mark.django_db(databases="__all__")
     def test_all_databases(self, request: pytest.FixtureRequest) -> None:
         Item.objects.count()
         Item.objects.create(name="spam")
@@ -350,7 +352,7 @@ class TestDatabaseMarker:
 
     # The test works when transactions are not supported, but it interacts
     # badly with other tests.
-    @pytest.mark.skipif('not connection.features.supports_transactions')
+    @pytest.mark.skipif("not connection.features.supports_transactions")
     @pytest.mark.django_db(serialized_rollback=True)
     def test_serialized_rollback_enabled(self, request: pytest.FixtureRequest):
         marker = request.node.get_closest_marker("django_db")
@@ -361,10 +363,10 @@ class TestDatabaseMarker:
         marker = request.node.get_closest_marker("django_db")
         assert not marker.kwargs
 
-    @pytest.mark.django_db(available_apps=['pytest_django_test.app'])
+    @pytest.mark.django_db(available_apps=["pytest_django_test.app"])
     def test_available_apps_enabled(self, request: pytest.FixtureRequest) -> None:
         marker = request.node.get_closest_marker("django_db")
-        assert marker.kwargs["available_apps"] == ['pytest_django_test.app']
+        assert marker.kwargs["available_apps"] == ["pytest_django_test.app"]
 
     @pytest.mark.django_db
     def test_available_apps_default(self, request: pytest.FixtureRequest) -> None:
@@ -374,7 +376,7 @@ class TestDatabaseMarker:
         for app in settings.INSTALLED_APPS:
             assert apps.is_installed(app)
 
-    @pytest.mark.django_db(available_apps=['pytest_django_test.app'])
+    @pytest.mark.django_db(available_apps=["pytest_django_test.app"])
     def test_available_apps_limited(self, request: pytest.FixtureRequest) -> None:
         from django.apps import apps
         from django.conf import settings

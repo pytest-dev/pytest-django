@@ -41,11 +41,13 @@ def test_dc_env(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     """
     )
     result = pytester.runpytest_subprocess()
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_env (from env), "
-        "configuration: MySettings (from env)",
-        "* 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_env (from env), "
+            "configuration: MySettings (from env)",
+            "* 1 passed*",
+        ]
+    )
     assert result.ret == 0
 
 
@@ -73,11 +75,13 @@ def test_dc_env_overrides_ini(pytester: pytest.Pytester, monkeypatch: pytest.Mon
     """
     )
     result = pytester.runpytest_subprocess()
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_env (from env), "
-        "configuration: MySettings (from env)",
-        "* 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_env (from env), "
+            "configuration: MySettings (from env)",
+            "* 1 passed*",
+        ]
+    )
     assert result.ret == 0
 
 
@@ -104,11 +108,13 @@ def test_dc_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     """
     )
     result = pytester.runpytest_subprocess()
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_ini (from ini), "
-        "configuration: MySettings (from ini)",
-        "* 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_ini (from ini), "
+            "configuration: MySettings (from ini)",
+            "* 1 passed*",
+        ]
+    )
     assert result.ret == 0
 
 
@@ -136,9 +142,11 @@ def test_dc_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
     """
     )
     result = pytester.runpytest_subprocess("--ds=tpkg.settings_opt", "--dc=MySettings")
-    result.stdout.fnmatch_lines([
-        'django: version: *, settings: tpkg.settings_opt (from option),'
-        ' configuration: MySettings (from option)',
-        "* 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_opt (from option),"
+            " configuration: MySettings (from option)",
+            "* 1 passed*",
+        ]
+    )
     assert result.ret == 0

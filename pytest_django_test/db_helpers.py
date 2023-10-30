@@ -30,8 +30,8 @@ else:
         # An explicit test db name was given, is that as the base name
         TEST_DB_NAME = f"{TEST_DB_NAME}_inner"
 
-    SECOND_DB_NAME = DB_NAME + '_second' if DB_NAME is not None else None
-    SECOND_TEST_DB_NAME = TEST_DB_NAME + '_second' if DB_NAME is not None else None
+    SECOND_DB_NAME = DB_NAME + "_second" if DB_NAME is not None else None
+    SECOND_TEST_DB_NAME = TEST_DB_NAME + "_second" if DB_NAME is not None else None
 
 
 def get_db_engine() -> str:
@@ -87,10 +87,7 @@ def run_mysql(*args: str) -> CmdResult:
 
 
 def skip_if_sqlite_in_memory() -> None:
-    if (
-        _settings["ENGINE"] == "django.db.backends.sqlite3"
-        and _settings["TEST"]["NAME"] is None
-    ):
+    if _settings["ENGINE"] == "django.db.backends.sqlite3" and _settings["TEST"]["NAME"] is None:
         pytest.skip("Do not test db reuse since database does not support it")
 
 
@@ -107,9 +104,7 @@ def drop_database(db_suffix: str | None = None) -> None:
 
     if db_engine == "postgresql":
         r = run_psql("postgres", "-c", f"DROP DATABASE {name}")
-        assert "DROP DATABASE" in force_str(
-            r.std_out
-        ) or "does not exist" in force_str(r.std_err)
+        assert "DROP DATABASE" in force_str(r.std_out) or "does not exist" in force_str(r.std_err)
         return
 
     if db_engine == "mysql":
@@ -136,8 +131,7 @@ def db_exists(db_suffix: str | None = None) -> bool:
         return r.status_code == 0
 
     assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
-    assert TEST_DB_NAME != ":memory:", (
-        "sqlite in-memory database cannot be checked for existence!")
+    assert TEST_DB_NAME != ":memory:", "sqlite in-memory database cannot be checked for existence!"
     return os.path.exists(name)
 
 
@@ -155,8 +149,7 @@ def mark_database() -> None:
         return
 
     assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
-    assert TEST_DB_NAME != ":memory:", (
-        "sqlite in-memory database cannot be marked!")
+    assert TEST_DB_NAME != ":memory:", "sqlite in-memory database cannot be marked!"
 
     conn = sqlite3.connect(TEST_DB_NAME)
     try:
@@ -180,8 +173,7 @@ def mark_exists() -> bool:
         return r.status_code == 0
 
     assert db_engine == "sqlite3", f"{db_engine} cannot be tested properly!"
-    assert TEST_DB_NAME != ":memory:", (
-        "sqlite in-memory database cannot be checked for mark!")
+    assert TEST_DB_NAME != ":memory:", "sqlite in-memory database cannot be checked for mark!"
 
     conn = sqlite3.connect(TEST_DB_NAME)
     try:

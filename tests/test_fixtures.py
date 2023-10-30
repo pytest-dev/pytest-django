@@ -57,7 +57,7 @@ def test_admin_client_no_db_marker(admin_client: Client) -> None:
 # For test below.
 @pytest.fixture
 def existing_admin_user(django_user_model):
-    return django_user_model._default_manager.create_superuser('admin', None, None)
+    return django_user_model._default_manager.create_superuser("admin", None, None)
 
 
 def test_admin_client_existing_user(
@@ -102,8 +102,7 @@ def test_django_assert_num_queries_db(
             with django_assert_num_queries(2) as captured:
                 Item.objects.create(name="quux")
         assert excinfo.value.args == (
-            "Expected to perform 2 queries but 1 was done "
-            "(add -v option to show queries)",
+            "Expected to perform 2 queries but 1 was done " "(add -v option to show queries)",
         )
         assert len(captured.captured_queries) == 1
 
@@ -718,9 +717,7 @@ class Test_django_db_blocker:
 
 
 def test_mail(mailoutbox) -> None:
-    assert (
-        mailoutbox is mail.outbox
-    )  # check that mail.outbox and fixture value is same object
+    assert mailoutbox is mail.outbox  # check that mail.outbox and fixture value is same object
     assert len(mailoutbox) == 0
     mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
     assert len(mailoutbox) == 1
@@ -794,7 +791,5 @@ def test_mail_message_dns_patching_can_be_skipped(django_pytester: DjangoPyteste
     """
     )
     result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-s")
-    result.stdout.fnmatch_lines(
-        ["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"]
-    )
+    result.stdout.fnmatch_lines(["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"])
     assert result.ret == 0

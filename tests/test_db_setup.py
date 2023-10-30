@@ -37,7 +37,8 @@ def test_db_reuse_simple(django_pytester: DjangoPytester) -> None:
 def test_db_order(django_pytester: DjangoPytester) -> None:
     """Test order in which tests are being executed."""
 
-    django_pytester.create_test_module('''
+    django_pytester.create_test_module(
+        """
         import pytest
         from unittest import TestCase
         from django.test import SimpleTestCase
@@ -93,24 +94,28 @@ def test_db_order(django_pytester: DjangoPytester) -> None:
         class MyTestCase(TestCase):
             def test_run_last_test_case(self):
                 pass
-    ''')
-    result = django_pytester.runpytest_subprocess('-q', '--collect-only')
+    """
+    )
+    result = django_pytester.runpytest_subprocess("-q", "--collect-only")
     assert result.ret == 0
-    result.stdout.fnmatch_lines([
-        "*test_run_first_fixture*",
-        "*test_run_first_fixture_class*",
-        "*test_run_first_django_test_case*",
-        "*test_run_first_decorator*",
-        "*test_run_first_serialized_rollback_decorator*",
-        "*test_run_second_decorator*",
-        "*test_run_second_fixture*",
-        "*test_run_second_reset_sequences_fixture*",
-        "*test_run_second_transaction_test_case*",
-        "*test_run_second_fixture_class*",
-        "*test_run_second_reset_sequences_decorator*",
-        "*test_run_last_simple_test_case*",
-        "*test_run_last_test_case*",
-    ], consecutive=True)
+    result.stdout.fnmatch_lines(
+        [
+            "*test_run_first_fixture*",
+            "*test_run_first_fixture_class*",
+            "*test_run_first_django_test_case*",
+            "*test_run_first_decorator*",
+            "*test_run_first_serialized_rollback_decorator*",
+            "*test_run_second_decorator*",
+            "*test_run_second_fixture*",
+            "*test_run_second_reset_sequences_fixture*",
+            "*test_run_second_transaction_test_case*",
+            "*test_run_second_fixture_class*",
+            "*test_run_second_reset_sequences_decorator*",
+            "*test_run_last_simple_test_case*",
+            "*test_run_last_test_case*",
+        ],
+        consecutive=True,
+    )
 
 
 def test_db_reuse(django_pytester: DjangoPytester) -> None:
@@ -154,9 +159,7 @@ def test_db_reuse(django_pytester: DjangoPytester) -> None:
     # Make sure the database has not been re-created
     assert mark_exists()
 
-    result_third = django_pytester.runpytest_subprocess(
-        "-v", "--reuse-db", "--create-db"
-    )
+    result_third = django_pytester.runpytest_subprocess("-v", "--reuse-db", "--create-db")
     assert result_third.ret == 0
     result_third.stdout.fnmatch_lines(["*test_db_can_be_accessed PASSED*"])
 
@@ -166,7 +169,6 @@ def test_db_reuse(django_pytester: DjangoPytester) -> None:
 
 
 class TestSqlite:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -176,7 +178,6 @@ class TestSqlite:
     }
 
     def test_sqlite_test_name_used(self, django_pytester: DjangoPytester) -> None:
-
         django_pytester.create_test_module(
             """
             import pytest
@@ -259,9 +260,7 @@ def test_xdist_with_reuse(django_pytester: DjangoPytester) -> None:
     result.stdout.fnmatch_lines(["*PASSED*test_c*"])
     result.stdout.fnmatch_lines(["*PASSED*test_d*"])
 
-    result = django_pytester.runpytest_subprocess(
-        "-vv", "-n2", "-s", "--reuse-db", "--create-db"
-    )
+    result = django_pytester.runpytest_subprocess("-vv", "-n2", "-s", "--reuse-db", "--create-db")
     assert result.ret == 0
     result.stdout.fnmatch_lines(["*PASSED*test_a*"])
     result.stdout.fnmatch_lines(["*PASSED*test_b*"])
@@ -274,7 +273,6 @@ def test_xdist_with_reuse(django_pytester: DjangoPytester) -> None:
 
 
 class TestSqliteWithXdist:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -306,7 +304,6 @@ class TestSqliteWithXdist:
 
 
 class TestSqliteWithMultipleDbsAndXdist:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -316,7 +313,7 @@ class TestSqliteWithMultipleDbsAndXdist:
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db_name",
             "TEST": {"NAME": "test_custom_db_name"},
-        }
+        },
     }
 
     def test_sqlite_database_renamed(self, django_pytester: DjangoPytester) -> None:
@@ -356,7 +353,6 @@ class TestSqliteWithMultipleDbsAndXdist:
 
 
 class TestSqliteWithTox:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -423,7 +419,6 @@ class TestSqliteWithTox:
 
 
 class TestSqliteWithToxAndXdist:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -463,7 +458,6 @@ class TestSqliteWithToxAndXdist:
 
 
 class TestSqliteInMemoryWithXdist:
-
     db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -518,7 +512,10 @@ class TestMigrations:
         )
 
         result = django_pytester.runpytest_subprocess(
-            "--nomigrations", "--tb=short", "-vv", "-s",
+            "--nomigrations",
+            "--tb=short",
+            "-vv",
+            "-s",
         )
         assert result.ret == 0
         assert "Operations to perform:" not in result.stdout.str()

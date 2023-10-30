@@ -112,7 +112,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Enable Django migrations on test setup",
     )
     parser.addini(
-        CONFIGURATION_ENV, "django-configurations class to use by pytest-django."
+        CONFIGURATION_ENV,
+        "django-configurations class to use by pytest-django.",
     )
     group.addoption(
         "--liveserver",
@@ -120,7 +121,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Address and port for the live_server fixture.",
     )
     parser.addini(
-        SETTINGS_MODULE_ENV, "Django settings module to use by pytest-django."
+        SETTINGS_MODULE_ENV,
+        "Django settings module to use by pytest-django.",
     )
 
     parser.addini(
@@ -131,8 +133,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
     parser.addini(
         "django_debug_mode",
-        "How to set the Django DEBUG setting (default `False`). "
-        "Use `keep` to not override.",
+        "How to set the Django DEBUG setting (default `False`). " "Use `keep` to not override.",
         default="False",
     )
     group.addoption(
@@ -308,9 +309,7 @@ def pytest_load_initial_conftests(
 
     if (
         options.itv
-        or _get_boolean_value(
-            os.environ.get(INVALID_TEMPLATE_VARS_ENV), INVALID_TEMPLATE_VARS_ENV
-        )
+        or _get_boolean_value(os.environ.get(INVALID_TEMPLATE_VARS_ENV), INVALID_TEMPLATE_VARS_ENV)
         or early_config.getini(INVALID_TEMPLATE_VARS_ENV)
     ):
         os.environ[INVALID_TEMPLATE_VARS_ENV] = "true"
@@ -370,6 +369,7 @@ def pytest_report_header(config: pytest.Config) -> list[str] | None:
 
     if "django" in sys.modules:
         import django
+
         report_header.insert(0, f"version: {django.get_version()}")
 
     if report_header:
@@ -534,6 +534,7 @@ def _django_setup_unittest(
     # Before pytest 5.4: https://github.com/pytest-dev/pytest/issues/5991
     # After pytest 5.4: https://github.com/pytest-dev/pytest-django/issues/824
     from _pytest.unittest import TestCaseFunction
+
     original_runtest = TestCaseFunction.runtest
 
     def non_debugging_runtest(self) -> None:
@@ -707,7 +708,7 @@ def _template_string_if_invalid_marker(
     request: pytest.FixtureRequest,
 ) -> None:
     """Apply the @pytest.mark.ignore_template_errors marker,
-     internal to pytest-django."""
+    internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)
     if os.environ.get(INVALID_TEMPLATE_VARS_ENV, "false") == "true":
         if marker and django_settings_is_configured():
