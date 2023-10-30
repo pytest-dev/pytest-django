@@ -1,18 +1,7 @@
 .PHONY: docs test clean isort
 
-VENV:=build/venv
-
-export DJANGO_SETTINGS_MODULE?=pytest_django_test.settings_sqlite_file
-
-test: $(VENV)/bin/pytest
-	$(VENV)/bin/pytest
-
-$(VENV)/bin/python $(VENV)/bin/pip:
-	virtualenv $(VENV)
-
-$(VENV)/bin/pytest: $(VENV)/bin/python requirements.txt
-	$(VENV)/bin/pip install -Ur requirements.txt
-	touch $@
+test:
+	tox -e py311-dj42-sqlite_file
 
 docs:
 	tox -e docs
