@@ -1,6 +1,6 @@
 """Tests which check the various ways you can set DJANGO_SETTINGS_MODULE
 
-If these tests fail you probably forgot to run "python setup.py develop".
+If these tests fail you probably forgot to run "pip install -e .".
 """
 
 import pytest

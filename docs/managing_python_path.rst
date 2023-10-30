@@ -19,9 +19,9 @@ looking for the project's ``manage.py`` file and adding its directory to the
 Python path.
 
 Looking for the ``manage.py`` file uses the same algorithm as pytest uses to
-find ``pytest.ini``, ``tox.ini`` and ``setup.cfg``: Each test root directories
-parents will be searched for ``manage.py`` files, and it will stop when the
-first file is found.
+find ``pyproject.toml``, ``pytest.ini``, ``tox.ini`` and ``setup.cfg``: Each
+test root directories parents will be searched for ``manage.py`` files, and it
+will stop when the first file is found.
 
 If you have a custom project setup, have none or multiple ``manage.py`` files
 in your project, the automatic detection may not be correct. See
@@ -47,16 +47,19 @@ Managing your project with virtualenv, pip and editable mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The easiest way to have your code available on the Python path when using
-virtualenv and pip is to have a setup.py file and install your project in
-editable mode when developing.
+virtualenv and pip is to install your project in editable mode when developing.
 
-If you don't already have a setup.py file, creating a setup.py file with this
-content will get you started::
+If you don't already have a pyproject.toml file, creating a pyproject.toml file
+with this content will get you started::
 
-    import setuptools
-    setuptools.setup(name='myproj', version='1.0')
+    # pyproject.toml
+    [build-system]
+    requires = [
+        "setuptools>=61.0.0",
+    ]
+    build-backend = "setuptools.build_meta"
 
-This ``setup.py`` file is not sufficient to distribute your package to PyPI or
+This ``pyproject.toml`` file is not sufficient to distribute your package to PyPI or
 more general packaging, but it should help you get started. Please refer to the
 `Python Packaging User Guide
 <https://python-packaging-user-guide.readthedocs.io/en/latest/tutorial.html#creating-your-own-project>`_
@@ -71,7 +74,7 @@ add this directly to your project's requirements.txt file like this::
 
     # requirements.txt
     -e .
-    django>=1.11
+    django
     pytest-django
 
 
@@ -80,8 +83,6 @@ Using pytest's ``pythonpath`` option
 
 You can explicitly add paths to the Python search path using pytest's
 :pytest-confval:`pythonpath` option.
-This option is available since pytest 7; for older versions you can use the
-`pytest-pythonpath <https://pypi.python.org/pypi/pytest-pythonpath>`_ plugin.
 
 Example: project with src layout
 ````````````````````````````````
