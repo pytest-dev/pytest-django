@@ -154,7 +154,7 @@ coverage measurements (using pytest-cov plugin) are not reliable.
 
 If you want to measure coverage you'll need to create .pth file as described in
 `subprocess section of coverage documentation`_. If you're using
-``setup.py develop`` you should uninstall pytest_django (using pip)
+editable mode you should uninstall pytest_django (using pip)
 for the time of measuring coverage.
 
 You'll also need mysql and postgres databases. There are predefined settings
