@@ -108,7 +108,7 @@ def django_db_setup(
     django_db_keepdb: bool,
     django_db_createdb: bool,
     django_db_modify_db_settings: None,
-) -> None:
+) -> Generator[None, None, None]:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
 
@@ -127,7 +127,9 @@ def django_db_setup(
             **setup_databases_args
         )
 
-    def teardown_database() -> None:
+    yield
+
+    if not django_db_keepdb:
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
@@ -138,19 +140,17 @@ def django_db_setup(
                     )
                 )
 
-    if not django_db_keepdb:
-        request.addfinalizer(teardown_database)
-
 
 @pytest.fixture()
 def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker,
-) -> None:
+) -> Generator[None, None, None]:
     from django import VERSION
 
     if is_django_unittest(request):
+        yield
         return
 
     marker = request.node.get_closest_marker("django_db")
@@ -183,7 +183,6 @@ def _django_db_helper(
     )
 
     django_db_blocker.unblock()
-    request.addfinalizer(django_db_blocker.restore)
 
     import django.db
     import django.test
@@ -233,13 +232,20 @@ def _django_db_helper(
                 super(django.test.TestCase, cls).tearDownClass()
 
     PytestDjangoTestCase.setUpClass()
-    if VERSION >= (4, 0):
-        request.addfinalizer(PytestDjangoTestCase.doClassCleanups)
-    request.addfinalizer(PytestDjangoTestCase.tearDownClass)
 
     test_case = PytestDjangoTestCase(methodName="__init__")
     test_case._pre_setup()
-    request.addfinalizer(test_case._post_teardown)
+
+    yield
+
+    test_case._post_teardown()
+
+    PytestDjangoTestCase.tearDownClass()
+
+    if VERSION >= (4, 0):
+        PytestDjangoTestCase.doClassCleanups()
+
+    django_db_blocker.restore()
 
 
 def validate_django_db(marker) -> _DjangoDb:
@@ -547,12 +553,12 @@ def live_server(request: pytest.FixtureRequest):
     ) or "localhost"
 
     server = live_server_helper.LiveServer(addr)
-    request.addfinalizer(server.stop)
-    return server
+    yield server
+    server.stop()
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _live_server_helper(request: pytest.FixtureRequest) -> None:
+def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
@@ -568,13 +574,15 @@ def _live_server_helper(request: pytest.FixtureRequest) -> None:
     It will also override settings only for the duration of the test.
     """
     if "live_server" not in request.fixturenames:
+        yield
         return
 
     request.getfixturevalue("transactional_db")
 
     live_server = request.getfixturevalue("live_server")
     live_server._live_server_modified_settings.enable()
-    request.addfinalizer(live_server._live_server_modified_settings.disable)
+    yield
+    live_server._live_server_modified_settings.disable()
 
 
 @contextmanager

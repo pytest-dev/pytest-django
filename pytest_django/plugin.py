@@ -463,7 +463,7 @@ def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
 
 
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request: pytest.FixtureRequest) -> None:
+def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """
     Ensure that Django is loaded and has its testing environment setup.
 
@@ -487,7 +487,11 @@ def django_test_environment(request: pytest.FixtureRequest) -> None:
             debug = _get_boolean_value(debug_ini, "django_debug_mode", False)
 
         setup_test_environment(debug=debug)
-        request.addfinalizer(teardown_test_environment)
+        yield
+        teardown_test_environment()
+
+    else:
+        yield
 
 
 @pytest.fixture(scope="session")
@@ -587,7 +591,7 @@ def django_mail_dnsname() -> str:
 
 
 @pytest.fixture(autouse=True, scope="function")
-def _django_set_urlconf(request: pytest.FixtureRequest) -> None:
+def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker = request.node.get_closest_marker("urls")
     if marker:
@@ -601,14 +605,14 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> None:
         clear_url_caches()
         set_urlconf(None)
 
-        def restore() -> None:
-            django.conf.settings.ROOT_URLCONF = original_urlconf
-            # Copy the pattern from
-            # https://github.com/django/django/blob/main/django/test/signals.py#L152
-            clear_url_caches()
-            set_urlconf(None)
+    yield
 
-        request.addfinalizer(restore)
+    if marker:
+        django.conf.settings.ROOT_URLCONF = original_urlconf
+        # Copy the pattern from
+        # https://github.com/django/django/blob/main/django/test/signals.py#L152
+        clear_url_caches()
+        set_urlconf(None)
 
 
 @pytest.fixture(autouse=True, scope="session")
