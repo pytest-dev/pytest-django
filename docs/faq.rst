@@ -13,6 +13,15 @@ If this for some reason fails for you, you have to manage your Python paths
 explicitly. See the documentation on :ref:`managing_the_python_path_explicitly`
 for more information.
 
+.. _faq-test-tags:
+
+Are Django test tags supported?
+-------------------------------
+
+Yes, Django :ref:`test tagging <django:topics-tagging-tests>` is supported.
+The Django test tags are automatically converted to :ref:`Pytest markers
+<pytest:mark examples>`.
+
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
