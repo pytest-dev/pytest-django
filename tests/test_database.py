@@ -1,3 +1,5 @@
+from typing import Generator
+
 import pytest
 from django.db import connection, transaction
 
@@ -188,9 +190,10 @@ class TestDatabaseFixtures:
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, request: pytest.FixtureRequest, all_dbs: None) -> None:
+    def fin(self, request: pytest.FixtureRequest, all_dbs: None) -> Generator[None, None, None]:
         # This finalizer must be able to access the database
-        request.addfinalizer(lambda: Item.objects.create(name="spam"))
+        yield
+        Item.objects.create(name="spam")
 
     def test_fin(self, fin: None) -> None:
         # Check finalizer has db access (teardown will fail if not)
