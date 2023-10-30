@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import copy
 import pathlib
 import shutil
 from pathlib import Path
 from textwrap import dedent
-from typing import Optional, cast
+from typing import cast
 
 import pytest
 from django.conf import settings
@@ -25,7 +27,7 @@ def pytest_configure(config: pytest.Config) -> None:
 def _marker_apifun(
     extra_settings: str = "",
     create_manage_py: bool = False,
-    project_root: Optional[str] = None,
+    project_root: str | None = None,
 ):
     return {
         "extra_settings": extra_settings,
@@ -40,14 +42,17 @@ def pytester(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> pyte
     return pytester
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_pytester(
     request: pytest.FixtureRequest,
     pytester: pytest.Pytester,
     monkeypatch: pytest.MonkeyPatch,
 ) -> DjangoPytester:
     from pytest_django_test.db_helpers import (
-        DB_NAME, SECOND_DB_NAME, SECOND_TEST_DB_NAME, TEST_DB_NAME,
+        DB_NAME,
+        SECOND_DB_NAME,
+        SECOND_TEST_DB_NAME,
+        TEST_DB_NAME,
     )
 
     marker = request.node.get_closest_marker("django_project")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Generator
 
 import pytest
@@ -68,7 +70,7 @@ class TestDatabaseFixtures:
         elif request.param == "django_db_serialized_rollback":
             request.getfixturevalue("django_db_serialized_rollback")
         else:
-            assert False  # pragma: no cover
+            raise AssertionError()   # pragma: no cover
 
     def test_access(self, all_dbs: None) -> None:
         Item.objects.create(name="spam")

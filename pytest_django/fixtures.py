@@ -1,9 +1,19 @@
 """All pytest-django fixtures"""
+from __future__ import annotations
+
 import os
 from contextlib import contextmanager
 from functools import partial
 from typing import (
-    TYPE_CHECKING, Any, Generator, Iterable, List, Literal, Optional, Tuple,
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Generator,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Tuple,
     Union,
 )
 
@@ -133,7 +143,7 @@ def django_db_setup(
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 request.node.warn(
                     pytest.PytestWarning(
                         f"Error when trying to teardown test databases: {exc!r}"
@@ -314,7 +324,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 # ############### User visible fixtures ################
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def db(_django_db_helper: None) -> None:
     """Require a django test database.
 
@@ -331,7 +341,7 @@ def db(_django_db_helper: None) -> None:
     # The `_django_db_helper` fixture checks if `db` is requested.
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def transactional_db(_django_db_helper: None) -> None:
     """Require a django test database with transaction support.
 
@@ -347,7 +357,7 @@ def transactional_db(_django_db_helper: None) -> None:
     # The `_django_db_helper` fixture checks if `transactional_db` is requested.
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_db_reset_sequences(
     _django_db_helper: None,
     transactional_db: None,
@@ -363,7 +373,7 @@ def django_db_reset_sequences(
     # is requested.
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_db_serialized_rollback(
     _django_db_helper: None,
     db: None,
@@ -385,7 +395,7 @@ def django_db_serialized_rollback(
 
 
 @pytest.fixture()
-def client() -> "django.test.client.Client":
+def client() -> django.test.client.Client:
     """A Django test client instance."""
     skip_if_no_django()
 
@@ -395,7 +405,7 @@ def client() -> "django.test.client.Client":
 
 
 @pytest.fixture()
-def async_client() -> "django.test.client.AsyncClient":
+def async_client() -> django.test.client.AsyncClient:
     """A Django test async client instance."""
     skip_if_no_django()
 
@@ -454,7 +464,7 @@ def admin_user(
 def admin_client(
     db: None,
     admin_user,
-) -> "django.test.client.Client":
+) -> django.test.client.Client:
     """A Django test client logged in as an admin user."""
     from django.test.client import Client
 
@@ -464,7 +474,7 @@ def admin_client(
 
 
 @pytest.fixture()
-def rf() -> "django.test.client.RequestFactory":
+def rf() -> django.test.client.RequestFactory:
     """RequestFactory instance"""
     skip_if_no_django()
 
@@ -474,7 +484,7 @@ def rf() -> "django.test.client.RequestFactory":
 
 
 @pytest.fixture()
-def async_rf() -> "django.test.client.AsyncRequestFactory":
+def async_rf() -> django.test.client.AsyncRequestFactory:
     """AsyncRequestFactory instance"""
     skip_if_no_django()
 
@@ -484,7 +494,7 @@ def async_rf() -> "django.test.client.AsyncRequestFactory":
 
 
 class SettingsWrapper:
-    _to_restore: List[Any] = []
+    _to_restore: ClassVar[list[Any]] = []
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
@@ -557,7 +567,7 @@ def live_server(request: pytest.FixtureRequest):
     server.stop()
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(autouse=True)
 def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Helper to make live_server work, internal to pytest-django.
 
@@ -592,7 +602,7 @@ def _assert_num_queries(
     exact: bool = True,
     connection=None,
     info=None,
-) -> Generator["django.test.utils.CaptureQueriesContext", None, None]:
+) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.test.utils import CaptureQueriesContext
 
     if connection is None:
@@ -624,17 +634,17 @@ def _assert_num_queries(
             pytest.fail(msg)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_assert_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_assert_max_num_queries(pytestconfig):
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def django_capture_on_commit_callbacks():
     from django.test import TestCase
 

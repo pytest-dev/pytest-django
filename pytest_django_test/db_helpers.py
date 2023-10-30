@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import os
 import sqlite3
 import subprocess
-from typing import Mapping, Optional
+from typing import Mapping
 
 import pytest
 from django.conf import settings
@@ -44,7 +46,7 @@ class CmdResult:
         self.std_err = std_err
 
 
-def run_cmd(*args: str, env: Optional[Mapping[str, str]] = None) -> CmdResult:
+def run_cmd(*args: str, env: Mapping[str, str] | None = None) -> CmdResult:
     r = subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
@@ -92,14 +94,14 @@ def skip_if_sqlite_in_memory() -> None:
         pytest.skip("Do not test db reuse since database does not support it")
 
 
-def _get_db_name(db_suffix: Optional[str] = None) -> str:
+def _get_db_name(db_suffix: str | None = None) -> str:
     name = TEST_DB_NAME
     if db_suffix:
         name = f"{name}_{db_suffix}"
     return name
 
 
-def drop_database(db_suffix: Optional[str] = None) -> None:
+def drop_database(db_suffix: str | None = None) -> None:
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 
@@ -121,7 +123,7 @@ def drop_database(db_suffix: Optional[str] = None) -> None:
         os.unlink(name)
 
 
-def db_exists(db_suffix: Optional[str] = None) -> bool:
+def db_exists(db_suffix: str | None = None) -> bool:
     name = _get_db_name(db_suffix)
     db_engine = get_db_engine()
 

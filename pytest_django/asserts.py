@@ -1,14 +1,12 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
-from functools import wraps
-from typing import (
-    TYPE_CHECKING, Any, Callable, Optional, Sequence, Set, Type, Union,
-)
+from __future__ import annotations
 
-from django.test import (
-    LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
-)
+from functools import wraps
+from typing import TYPE_CHECKING, Any, Callable, Sequence
+
+from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
 
 
 test_case = TestCase("run")
@@ -25,7 +23,7 @@ def _wrapper(name: str):
 
 
 __all__ = []
-assertions_names: Set[str] = set()
+assertions_names: set[str] = set()
 assertions_names.update(
     {attr for attr in vars(TestCase) if attr.startswith("assert")},
     {attr for attr in vars(SimpleTestCase) if attr.startswith("assert")},
@@ -35,7 +33,7 @@ assertions_names.update(
 
 for assert_func in assertions_names:
     globals()[assert_func] = _wrapper(assert_func)
-    __all__.append(assert_func)
+    __all__.append(assert_func)  # noqa: PYI056
 
 
 if TYPE_CHECKING:
@@ -61,7 +59,7 @@ if TYPE_CHECKING:
     def assertContains(
         response: HttpResponseBase,
         text: object,
-        count: Optional[int] = ...,
+        count: int | None = ...,
         status_code: int = ...,
         msg_prefix: str = ...,
         html: bool = False,
@@ -80,8 +78,8 @@ if TYPE_CHECKING:
     def assertFormError(
         response: HttpResponseBase,
         form: str,
-        field: Optional[str],
-        errors: Union[str, Sequence[str]],
+        field: str | None,
+        errors: str | Sequence[str],
         msg_prefix: str = ...,
     ) -> None:
         ...
@@ -89,30 +87,30 @@ if TYPE_CHECKING:
     def assertFormsetError(
         response: HttpResponseBase,
         formset: str,
-        form_index: Optional[int],
-        field: Optional[str],
-        errors: Union[str, Sequence[str]],
+        form_index: int | None,
+        field: str | None,
+        errors: str | Sequence[str],
         msg_prefix: str = ...,
     ) -> None:
         ...
 
     def assertTemplateUsed(
-        response: Optional[Union[HttpResponseBase, str]] = ...,
-        template_name: Optional[str] = ...,
+        response: HttpResponseBase | str | None = ...,
+        template_name: str | None = ...,
         msg_prefix: str = ...,
-        count: Optional[int] = ...,
+        count: int | None = ...,
     ):
         ...
 
     def assertTemplateNotUsed(
-        response: Optional[Union[HttpResponseBase, str]] = ...,
-        template_name: Optional[str] = ...,
+        response: HttpResponseBase | str | None = ...,
+        template_name: str | None = ...,
         msg_prefix: str = ...,
     ):
         ...
 
     def assertRaisesMessage(
-        expected_exception: Type[Exception],
+        expected_exception: type[Exception],
         expected_message: str,
         *args,
         **kwargs
@@ -140,21 +138,21 @@ if TYPE_CHECKING:
     def assertHTMLEqual(
         html1: str,
         html2: str,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
     def assertHTMLNotEqual(
         html1: str,
         html2: str,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
     def assertInHTML(
         needle: str,
         haystack: str,
-        count: Optional[int] = ...,
+        count: int | None = ...,
         msg_prefix: str = ...,
     ) -> None:
         ...
@@ -162,28 +160,28 @@ if TYPE_CHECKING:
     def assertJSONEqual(
         raw: str,
         expected_data: Any,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
     def assertJSONNotEqual(
         raw: str,
         expected_data: Any,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
     def assertXMLEqual(
         xml1: str,
         xml2: str,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
     def assertXMLNotEqual(
         xml1: str,
         xml2: str,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
@@ -193,7 +191,7 @@ if TYPE_CHECKING:
         values,
         transform=...,
         ordered: bool = ...,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
@@ -202,7 +200,7 @@ if TYPE_CHECKING:
         values,
         transform=...,
         ordered: bool = ...,
-        msg: Optional[str] = ...,
+        msg: str | None = ...,
     ) -> None:
         ...
 
