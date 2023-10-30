@@ -5,6 +5,6 @@ except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
 
-__all__ = (
+__all__ = [
     "__version__",
-)
+]

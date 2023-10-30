@@ -19,17 +19,20 @@ def _get_actual_assertions_names() -> list[str]:
 
     from django.test import TestCase as DjangoTestCase
 
-    obj = DjangoTestCase('run')
+    obj = DjangoTestCase("run")
 
     def is_assert(func) -> bool:
-        return func.startswith('assert') and '_' not in func
+        return func.startswith("assert") and "_" not in func
 
-    base_methods = [name for name, member in
-                    inspect.getmembers(DefaultTestCase)
-                    if is_assert(name)]
+    base_methods = [
+        name for name, member in inspect.getmembers(DefaultTestCase) if is_assert(name)
+    ]
 
-    return [name for name, member in inspect.getmembers(obj)
-            if is_assert(name) and name not in base_methods]
+    return [
+        name
+        for name, member in inspect.getmembers(obj)
+        if is_assert(name) and name not in base_methods
+    ]
 
 
 def test_django_asserts_available() -> None:
@@ -47,11 +50,11 @@ def test_sanity() -> None:
 
     from pytest_django.asserts import assertContains, assertNumQueries
 
-    response = HttpResponse('My response')
+    response = HttpResponse("My response")
 
-    assertContains(response, 'My response')
+    assertContains(response, "My response")
     with pytest.raises(AssertionError):
-        assertContains(response, 'Not my response')
+        assertContains(response, "Not my response")
 
     assertNumQueries(0, lambda: 1 + 1)
     with assertNumQueries(0):

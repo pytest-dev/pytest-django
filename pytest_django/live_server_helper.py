@@ -45,7 +45,7 @@ class LiveServer:
         self.thread = LiveServerThread(host, **liveserver_kwargs)
 
         self._live_server_modified_settings = modify_settings(
-            ALLOWED_HOSTS={"append": host}
+            ALLOWED_HOSTS={"append": host},
         )
         # `_live_server_modified_settings` is enabled and disabled by
         # `_live_server_helper`.

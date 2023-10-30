@@ -20,7 +20,8 @@ REPOSITORY_ROOT = pathlib.Path(__file__).parent
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
-        "markers", "django_project: options for the django_pytester fixture"
+        "markers",
+        "django_project: options for the django_pytester fixture",
     )
 
 
@@ -68,9 +69,8 @@ def django_pytester(
         db_settings["second"]["NAME"] = SECOND_DB_NAME
         db_settings["second"].setdefault("TEST", {})["NAME"] = SECOND_TEST_DB_NAME
 
-    test_settings = (
-        dedent(
-            """
+    test_settings = dedent(
+        """
         import django
 
         # Pypy compatibility
@@ -109,13 +109,11 @@ def django_pytester(
         ]
 
         %(extra_settings)s
-    """
-        )
-        % {
-            "db_settings": repr(db_settings),
-            "extra_settings": dedent(options["extra_settings"]),
-        }
-    )
+        """
+    ) % {
+        "db_settings": repr(db_settings),
+        "extra_settings": dedent(options["extra_settings"]),
+    }
 
     if options["project_root"]:
         project_root = pytester.mkdir(options["project_root"])

@@ -290,9 +290,7 @@ class TestrunnerVerbosity:
         """Verbose output with '-v'."""
         result = pytester.runpytest_subprocess("-s", "-v")
         result.stdout.fnmatch_lines_random(["tpkg/test_the_test.py:*", "*PASSED*"])
-        result.stderr.fnmatch_lines(
-            ["*Destroying test database for alias 'default'*"]
-        )
+        result.stderr.fnmatch_lines(["*Destroying test database for alias 'default'*"])
 
     def test_more_verbose_with_vv(self, pytester: pytest.Pytester) -> None:
         """More verbose output with '-v -v'."""
@@ -317,10 +315,7 @@ class TestrunnerVerbosity:
         result = pytester.runpytest_subprocess("-s", "-v", "-v", "--create-db")
         result.stdout.fnmatch_lines(["tpkg/test_the_test.py:*", "*PASSED*"])
         result.stderr.fnmatch_lines(["*Creating test database for alias*"])
-        assert (
-            "*Destroying test database for alias 'default' ('*')...*"
-            not in result.stderr.str()
-        )
+        assert "*Destroying test database for alias 'default' ('*')...*" not in result.stderr.str()
 
 
 @pytest.mark.django_db

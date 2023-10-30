@@ -37,10 +37,12 @@ def test_ds_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     """
     )
     result = pytester.runpytest_subprocess()
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_ini (from ini)",
-        "*= 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_ini (from ini)",
+            "*= 1 passed*",
+        ]
+    )
     assert result.ret == 0
 
 
@@ -58,10 +60,12 @@ def test_ds_env(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     """
     )
     result = pytester.runpytest_subprocess()
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_env (from env)",
-        "*= 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_env (from env)",
+            "*= 1 passed*",
+        ]
+    )
 
 
 def test_ds_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -84,10 +88,12 @@ def test_ds_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
     """
     )
     result = pytester.runpytest_subprocess("--ds=tpkg.settings_opt")
-    result.stdout.fnmatch_lines([
-        "django: version: *, settings: tpkg.settings_opt (from option)",
-        "*= 1 passed*",
-    ])
+    result.stdout.fnmatch_lines(
+        [
+            "django: version: *, settings: tpkg.settings_opt (from option)",
+            "*= 1 passed*",
+        ]
+    )
 
 
 def test_ds_env_override_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -322,17 +328,19 @@ def test_debug_false_by_default(
     assert r.ret == 0
 
 
-@pytest.mark.parametrize('django_debug_mode', [False, True])
+@pytest.mark.parametrize("django_debug_mode", [False, True])
 def test_django_debug_mode_true_false(
     pytester: pytest.Pytester,
     monkeypatch: pytest.MonkeyPatch,
     django_debug_mode: bool,
 ) -> None:
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
-    pytester.makeini(f"""
+    pytester.makeini(
+        f"""
        [pytest]
        django_debug_mode = {django_debug_mode}
-    """)
+    """
+    )
     pytester.makeconftest(
         """
         from django.conf import settings
@@ -345,20 +353,23 @@ def test_django_debug_mode_true_false(
                                    'NAME': ':memory:'}},
                                INSTALLED_APPS=['django.contrib.auth',
                                                'django.contrib.contenttypes',])
-    """ % (not django_debug_mode)
+    """
+        % (not django_debug_mode)
     )
 
-    pytester.makepyfile(f"""
+    pytester.makepyfile(
+        f"""
         from django.conf import settings
         def test_debug_is_false():
             assert settings.DEBUG is {django_debug_mode}
-    """)
+    """
+    )
 
     r = pytester.runpytest_subprocess()
     assert r.ret == 0
 
 
-@pytest.mark.parametrize('settings_debug', [False, True])
+@pytest.mark.parametrize("settings_debug", [False, True])
 def test_django_debug_mode_keep(
     pytester: pytest.Pytester,
     monkeypatch: pytest.MonkeyPatch,
@@ -383,7 +394,8 @@ def test_django_debug_mode_keep(
                                    'NAME': ':memory:'}},
                                INSTALLED_APPS=['django.contrib.auth',
                                                'django.contrib.contenttypes',])
-    """ % settings_debug
+    """
+        % settings_debug
     )
 
     pytester.makepyfile(

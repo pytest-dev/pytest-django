@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     import django
 
 
-_DjangoDbDatabases = Optional[Union[Literal['__all__'], Iterable[str]]]
+_DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
 _DjangoDbAvailableApps = Optional[List[str]]
 # transaction, reset_sequences, databases, serialized_rollback, available_apps
 _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
@@ -134,7 +134,7 @@ def django_db_setup(
         db_cfg = setup_databases(
             verbosity=request.config.option.verbose,
             interactive=False,
-            **setup_databases_args
+            **setup_databases_args,
         )
 
     yield
@@ -145,9 +145,7 @@ def django_db_setup(
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
             except Exception as exc:  # noqa: BLE001
                 request.node.warn(
-                    pytest.PytestWarning(
-                        f"Error when trying to teardown test databases: {exc!r}"
-                    )
+                    pytest.PytestWarning(f"Error when trying to teardown test databases: {exc!r}")
                 )
 
 
@@ -181,13 +179,12 @@ def _django_db_helper(
             available_apps,
         ) = False, False, None, False, None
 
-    transactional = transactional or reset_sequences or (
-        "transactional_db" in request.fixturenames
-        or "live_server" in request.fixturenames
+    transactional = (
+        transactional
+        or reset_sequences
+        or ("transactional_db" in request.fixturenames or "live_server" in request.fixturenames)
     )
-    reset_sequences = reset_sequences or (
-        "django_db_reset_sequences" in request.fixturenames
-    )
+    reset_sequences = reset_sequences or ("django_db_reset_sequences" in request.fixturenames)
     serialized_rollback = serialized_rollback or (
         "django_db_serialized_rollback" in request.fixturenames
     )
@@ -229,6 +226,7 @@ def _django_db_helper(
         # functionality to these methods, in which case skipping them completely
         # would not be desirable. Let's cross that bridge when we get there...
         if not transactional:
+
             @classmethod
             def setUpClass(cls) -> None:
                 super(django.test.TestCase, cls).setUpClass()
@@ -558,9 +556,11 @@ def live_server(request: pytest.FixtureRequest):
     """
     skip_if_no_django()
 
-    addr = request.config.getvalue("liveserver") or os.getenv(
-        "DJANGO_LIVE_TEST_SERVER_ADDRESS"
-    ) or "localhost"
+    addr = (
+        request.config.getvalue("liveserver")
+        or os.getenv("DJANGO_LIVE_TEST_SERVER_ADDRESS")
+        or "localhost"
+    )
 
     server = live_server_helper.LiveServer(addr)
     yield server

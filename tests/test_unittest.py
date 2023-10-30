@@ -40,7 +40,7 @@ class TestSetup(TestCase):
 
 
 class TestFixturesWithSetup(TestCase):
-    fixtures = ("items", )
+    fixtures = ("items",)
 
     def setUp(self) -> None:
         assert Item.objects.count() == 1
@@ -263,9 +263,7 @@ class TestUnittestMethods:
         )
 
         result = django_pytester.runpytest_subprocess("-v")
-        result.stdout.fnmatch_lines(
-            ["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"]
-        )
+        result.stdout.fnmatch_lines(["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"])
         assert result.ret == 0
 
     def test_setUpClass_skip(self, django_pytester: DjangoPytester) -> None:
@@ -435,9 +433,7 @@ class TestUnittestMethods:
         )
 
         result = django_pytester.runpytest_subprocess("-q", "-s")
-        result.stdout.fnmatch_lines(
-            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"]
-        )
+        result.stdout.fnmatch_lines(["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"])
         assert result.ret == 0
 
 
