@@ -4,18 +4,40 @@ Changelog
 Pending
 -------
 
-Improvements
-^^^^^^^^^^^^
+Compatibility
+^^^^^^^^^^^^^
 
 * Official Django 4.1 & 4.2 support.
 
 * Official Python 3.11 support.
 
-* Drop support for Python version 3.6.
+* Drop support for Python version 3.5, 3.6 & 3.7.
 
 * Drop official support for Django 4.0.
 
-* Add precise `pytest_django.asserts.assertQuerySetEqual` typing.
+* Drop support for pytest < 7.
+
+Improvements
+^^^^^^^^^^^^
+
+* Add support for setting :py:attr:`available_apps
+  <django.test.TransactionTestCase.available_apps>` in the :func:`django_db
+  <pytest.mark.django_db>` marker.
+
+* Convert Django :ref:`test tags <django:topics-tagging-tests>` to :ref:`Pytest
+  markers <pytest:mark examples>`.
+
+* Show Django's version in the pytest ``django`` report header.
+
+* Add precise ``pytest_django.asserts.assertQuerySetEqual`` typing.
+
+Bugfixes
+^^^^^^^^
+
+* Fix bug where the effect of :func:`@pytest.mark.ignore_template_errors
+  <pytest.mark.ignore_template_errors>` was not reset when using
+  ``--fail-on-template-vars``.
+
 
 v4.5.2 (2021-12-07)
 -------------------
