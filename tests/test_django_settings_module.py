@@ -322,7 +322,7 @@ def test_debug_false_by_default(
     assert r.ret == 0
 
 
-@pytest.mark.parametrize('django_debug_mode', (False, True))
+@pytest.mark.parametrize('django_debug_mode', [False, True])
 def test_django_debug_mode_true_false(
     pytester: pytest.Pytester,
     monkeypatch: pytest.MonkeyPatch,
@@ -358,7 +358,7 @@ def test_django_debug_mode_true_false(
     assert r.ret == 0
 
 
-@pytest.mark.parametrize('settings_debug', (False, True))
+@pytest.mark.parametrize('settings_debug', [False, True])
 def test_django_debug_mode_keep(
     pytester: pytest.Pytester,
     monkeypatch: pytest.MonkeyPatch,

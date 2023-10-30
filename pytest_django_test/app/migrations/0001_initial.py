@@ -1,4 +1,6 @@
-from typing import List, Tuple
+from __future__ import annotations
+
+from typing import ClassVar
 
 from django.db import migrations, models
 
@@ -7,9 +9,9 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies: List[Tuple[str, str]] = []
+    dependencies: tuple[tuple[str, str], ...] = ()
 
-    operations = [
+    operations: ClassVar = [
         migrations.CreateModel(
             name="Item",
             fields=[

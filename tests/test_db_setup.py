@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from typing import ClassVar
+
 import pytest
 
 from .helpers import DjangoPytester
 
 from pytest_django_test.db_helpers import (
-    db_exists, drop_database, mark_database, mark_exists,
+    db_exists,
+    drop_database,
+    mark_database,
+    mark_exists,
     skip_if_sqlite_in_memory,
 )
 
@@ -160,7 +167,7 @@ def test_db_reuse(django_pytester: DjangoPytester) -> None:
 
 class TestSqlite:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db_name",
@@ -268,7 +275,7 @@ def test_xdist_with_reuse(django_pytester: DjangoPytester) -> None:
 
 class TestSqliteWithXdist:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "/tmp/should-not-be-used",
@@ -300,7 +307,7 @@ class TestSqliteWithXdist:
 
 class TestSqliteWithMultipleDbsAndXdist:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "/tmp/should-not-be-used",
@@ -350,7 +357,7 @@ class TestSqliteWithMultipleDbsAndXdist:
 
 class TestSqliteWithTox:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db_name",
@@ -417,7 +424,7 @@ class TestSqliteWithTox:
 
 class TestSqliteWithToxAndXdist:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db_name",
@@ -457,7 +464,7 @@ class TestSqliteWithToxAndXdist:
 
 class TestSqliteInMemoryWithXdist:
 
-    db_settings = {
+    db_settings: ClassVar = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": ":memory:",

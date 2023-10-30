@@ -7,7 +7,7 @@ from pytest_django_test.app.models import Item
 
 
 class TestFixtures(TestCase):
-    fixtures = ["items"]
+    fixtures = ("items",)
 
     def test_fixtures(self) -> None:
         assert Item.objects.count() == 1
@@ -26,10 +26,10 @@ class TestSetup(TestCase):
         Item.objects.create(name="Some item again")
 
     def test_count(self) -> None:
-        self.assertEqual(Item.objects.count(), 2)
+        self.assertEqual(Item.objects.count(), 2)  # noqa: PT009
         assert Item.objects.count() == 2
         Item.objects.create(name="Foo")
-        self.assertEqual(Item.objects.count(), 3)
+        self.assertEqual(Item.objects.count(), 3)  # noqa: PT009
 
     def test_count_again(self) -> None:
         self.test_count()
@@ -40,7 +40,7 @@ class TestSetup(TestCase):
 
 
 class TestFixturesWithSetup(TestCase):
-    fixtures = ["items"]
+    fixtures = ("items", )
 
     def setUp(self) -> None:
         assert Item.objects.count() == 1

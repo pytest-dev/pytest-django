@@ -1,6 +1,7 @@
+import datetime
 import os
 import sys
-import datetime
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,7 +28,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pytest-django'
-copyright = f'{datetime.date.today().year}, Andreas Pelme and contributors'
+copyright = f'{datetime.datetime.now(tz=datetime.timezone.utc).year}, Andreas Pelme and contributors'
 
 exclude_patterns = ['_build']
 

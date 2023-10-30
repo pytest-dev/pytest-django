@@ -1,4 +1,6 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 
 class LiveServer:
@@ -13,7 +15,7 @@ class LiveServer:
         from django.test.testcases import LiveServerThread
         from django.test.utils import modify_settings
 
-        liveserver_kwargs: Dict[str, Any] = {}
+        liveserver_kwargs: dict[str, Any] = {}
 
         connections_override = {}
         for conn in connections.all():

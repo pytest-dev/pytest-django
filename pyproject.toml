@@ -54,15 +54,46 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
-[tool.isort]
-forced_separate = [
+[tool.ruff]
+target-version = "py38"
+line-length = 99
+extend-exclude = [
+    "pytest_django/_version.py",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "DTZ",   # flake8-datetimez
+    "FA",    # flake8-future-annotations
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "PGH",   # pygrep-hooks
+    "PIE",   # flake8-pie
+    "PL",    # pylint
+    "PT",    # flake8-pytest-style
+    "PYI",   # flake8-pyi
+    "RUF",   # Ruff-specific rules
+    "SLOT",  # flake8-slots
+    "T10",   # flake8-debugger
+    "UP",    # pyupgrade
+    "YTT",   # flake8-2020
+]
+ignore = [
+    "PLR0913",  # Too many arguments in function definition
+    "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
+    "PT001",    # Use `@pytest.fixture()` over `@pytest.fixture`
+    "PT004",    # Fixture `fixture_with_db` does not return anything, add leading underscore
+    "PT023",    # Use `@pytest.mark.django_db()` over `@pytest.mark.django_db`
+]
+
+[tool.ruff.isort]
+forced-separate = [
     "tests",
     "pytest_django",
     "pytest_django_test",
 ]
-combine_as_imports = true
-include_trailing_comma = true
-line_length = 79
-multi_line_output = 5
-lines_after_imports = 2
-extend_skip = ["pytest_django/_version.py"]
+combine-as-imports = true
+split-on-trailing-comma = false
+lines-after-imports = 2

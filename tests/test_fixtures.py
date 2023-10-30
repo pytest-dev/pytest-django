@@ -13,9 +13,7 @@ import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
-from django.test.client import (
-    AsyncClient, AsyncRequestFactory, Client, RequestFactory,
-)
+from django.test.client import AsyncClient, AsyncRequestFactory, Client, RequestFactory
 from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
@@ -120,7 +118,7 @@ def test_django_assert_max_num_queries_db(
             Item.objects.create(name="1-foo")
             Item.objects.create(name="2-bar")
 
-        with pytest.raises(pytest.fail.Exception) as excinfo:
+        with pytest.raises(pytest.fail.Exception) as excinfo:  # noqa: PT012
             with django_assert_max_num_queries(2) as captured:
                 Item.objects.create(name="1-foo")
                 Item.objects.create(name="2-bar")
@@ -559,7 +557,7 @@ class TestLiveServer:
         django_pytester.runpytest_subprocess(f"--liveserver=localhost:{port}")
 
 
-@pytest.mark.parametrize("username_field", ("email", "identifier"))
+@pytest.mark.parametrize("username_field", ["email", "identifier"])
 @pytest.mark.django_project(
     extra_settings="""
     AUTH_USER_MODEL = 'app.MyCustomUser'
@@ -682,7 +680,7 @@ class Migration(migrations.Migration):
             bases=None,
         ),
     ]
-        """,  # noqa: E501
+        """,
         "migrations/0002_custom_user_model.py",
     )
 

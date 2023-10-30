@@ -1,9 +1,11 @@
 """
 Helpers to load Django lazily when Django settings can't be configured.
 """
+from __future__ import annotations
+
 import os
 import sys
-from typing import Any, Tuple
+from typing import Any
 
 import pytest
 
@@ -30,8 +32,8 @@ def django_settings_is_configured() -> bool:
     return ret
 
 
-def get_django_version() -> Tuple[int, int, int, str, int]:
+def get_django_version() -> tuple[int, int, int, str, int]:
     import django
 
-    version: Tuple[int, int, int, str, int] = django.VERSION
+    version: tuple[int, int, int, str, int] = django.VERSION
     return version
