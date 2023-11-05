@@ -9,6 +9,8 @@ Compatibility
 
 * Official Django 5.0 support.
 
+* Official Python 3.12 support.
+
 v4.6.0 (2023-10-30)
 -------------------
 
