@@ -66,7 +66,7 @@ jobs:
       matrix:
         include:
         - name: linting,docs
-          python: '3.11'
+          python: '3.12'
           allow_failure: false
 
         - name: py312-dj50-postgres-xdist-coverage
@@ -142,7 +142,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
