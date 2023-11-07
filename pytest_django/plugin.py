@@ -220,7 +220,7 @@ def _add_django_project_to_path(args) -> str:
     return PROJECT_NOT_FOUND
 
 
-def _setup_django() -> None:
+def _setup_django(config: pytest.Config) -> None:
     if "django" not in sys.modules:
         return
 
@@ -235,7 +235,8 @@ def _setup_django() -> None:
     if not django.apps.apps.ready:
         django.setup()
 
-    _blocking_manager.block()
+    blocking_manager = config.stash[blocking_manager_key]
+    blocking_manager.block()
 
 
 def _get_boolean_value(
@@ -354,14 +355,16 @@ def pytest_load_initial_conftests(
         with _handle_import_error(_django_project_scan_outcome):
             dj_settings.DATABASES  # noqa: B018
 
-    _setup_django()
+    early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
+
+    _setup_django(early_config)
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_configure() -> None:
+def pytest_configure(config: pytest.Config) -> None:
     # Allow Django settings to be configured in a user pytest_configure call,
     # but make sure we call django.setup()
-    _setup_django()
+    _setup_django(config)
 
 
 @pytest.hookimpl()
@@ -478,7 +481,7 @@ def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, N
         we need to follow this model.
     """
     if django_settings_is_configured():
-        _setup_django()
+        _setup_django(request.config)
         from django.test.utils import setup_test_environment, teardown_test_environment
 
         debug_ini = request.config.getini("django_debug_mode")
@@ -496,7 +499,7 @@ def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, N
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker() -> DjangoDbBlocker | None:
+def django_db_blocker(request: pytest.FixtureRequest) -> DjangoDbBlocker | None:
     """Wrapper around Django's database access.
 
     This object can be used to re-enable database access.  This fixture is used
@@ -512,7 +515,8 @@ def django_db_blocker() -> DjangoDbBlocker | None:
     if not django_settings_is_configured():
         return None
 
-    return _blocking_manager
+    blocking_manager = request.config.stash[blocking_manager_key]
+    return blocking_manager
 
 
 @pytest.fixture(autouse=True)
@@ -813,7 +817,8 @@ class DjangoDbBlocker:
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
 
-_blocking_manager = DjangoDbBlocker(_ispytest=True)
+# On Config.stash.
+blocking_manager_key = pytest.StashKey[DjangoDbBlocker]()
 
 
 def validate_urls(marker) -> list[str]:
