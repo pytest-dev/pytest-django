@@ -216,8 +216,7 @@ def test_django_settings_configure(
         import pytest
 
         from django.conf import settings
-        from django.test.client import RequestFactory
-        from django.test import TestCase
+        from django.test import RequestFactory, TestCase
         from django.contrib.auth.models import User
 
         def test_access_to_setting():
