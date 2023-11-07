@@ -1,5 +1,5 @@
 import pytest
-from django.test import TestCase, tag
+from django.test import SimpleTestCase, TestCase, tag
 
 from .helpers import DjangoPytester
 
@@ -58,7 +58,7 @@ class TestFixturesWithSetup(TestCase):
 
 
 @tag("tag1", "tag2")
-class TestDjangoTagsToPytestMarkers(TestCase):
+class TestDjangoTagsToPytestMarkers(SimpleTestCase):
     """Django test tags are converted to Pytest markers, at the class & method
     levels."""
 

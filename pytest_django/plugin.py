@@ -378,6 +378,8 @@ def pytest_report_header(config: pytest.Config) -> list[str] | None:
 
 
 # Convert Django test tags on test classes to pytest marks.
+# Unlike the Django test runner, we only check tags on Django
+# test classes, to keep the plugin's effect contained.
 def pytest_collectstart(collector: pytest.Collector) -> None:
     if "django" not in sys.modules:
         return
@@ -389,9 +391,9 @@ def pytest_collectstart(collector: pytest.Collector) -> None:
     if not tags:
         return
 
-    from django.test import TransactionTestCase
+    from django.test import SimpleTestCase
 
-    if not issubclass(collector.obj, TransactionTestCase):
+    if not issubclass(collector.obj, SimpleTestCase):
         return
 
     for tag in tags:
@@ -410,9 +412,9 @@ def pytest_itemcollected(item: pytest.Item) -> None:
     if not tags:
         return
 
-    from django.test import TransactionTestCase
+    from django.test import SimpleTestCase
 
-    if not issubclass(item.cls, TransactionTestCase):
+    if not issubclass(item.cls, SimpleTestCase):
         return
 
     for tag in tags:
