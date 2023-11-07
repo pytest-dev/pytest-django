@@ -598,11 +598,11 @@ def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None,
 
 @contextmanager
 def _assert_num_queries(
-    config,
+    config: pytest.Config,
     num: int,
     exact: bool = True,
     connection=None,
-    info=None,
+    info: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.test.utils import CaptureQueriesContext
 
@@ -636,12 +636,12 @@ def _assert_num_queries(
 
 
 @pytest.fixture()
-def django_assert_num_queries(pytestconfig):
+def django_assert_num_queries(pytestconfig: pytest.Config):
     return partial(_assert_num_queries, pytestconfig)
 
 
 @pytest.fixture()
-def django_assert_max_num_queries(pytestconfig):
+def django_assert_max_num_queries(pytestconfig: pytest.Config):
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
