@@ -5,6 +5,10 @@ except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
 
+from .plugin import DjangoDbBlocker
+
+
 __all__ = [
     "__version__",
+    "DjangoDbBlocker",
 ]
