@@ -10,6 +10,7 @@ import inspect
 import os
 import pathlib
 import sys
+import types
 from functools import reduce
 from typing import TYPE_CHECKING, ContextManager, Generator, List, NoReturn
 
@@ -495,7 +496,7 @@ def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, N
 
 
 @pytest.fixture(scope="session")
-def django_db_blocker() -> _DatabaseBlocker | None:
+def django_db_blocker() -> DjangoDbBlocker | None:
     """Wrapper around Django's database access.
 
     This object can be used to re-enable database access.  This fixture is used
@@ -525,7 +526,7 @@ def _django_db_marker(request: pytest.FixtureRequest) -> None:
 @pytest.fixture(autouse=True, scope="class")
 def _django_setup_unittest(
     request: pytest.FixtureRequest,
-    django_db_blocker: _DatabaseBlocker,
+    django_db_blocker: DjangoDbBlocker,
 ) -> Generator[None, None, None]:
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
@@ -743,23 +744,34 @@ def _django_clear_site_cache() -> None:
 
 
 class _DatabaseBlockerContextManager:
-    def __init__(self, db_blocker) -> None:
+    def __init__(self, db_blocker: DjangoDbBlocker) -> None:
         self._db_blocker = db_blocker
 
     def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> None:
         self._db_blocker.restore()
 
 
-class _DatabaseBlocker:
+class DjangoDbBlocker:
     """Manager for django.db.backends.base.base.BaseDatabaseWrapper.
 
     This is the object returned by django_db_blocker.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, _ispytest: bool = False) -> None:
+        if not _ispytest:  # pragma: no cover
+            raise TypeError(
+                "The DjangoDbBlocker constructor is private. "
+                "use the django_db_blocker fixture instead."
+            )
+
         self._history = []  # type: ignore[var-annotated]
         self._real_ensure_connection = None
 
@@ -801,7 +813,7 @@ class _DatabaseBlocker:
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
 
-_blocking_manager = _DatabaseBlocker()
+_blocking_manager = DjangoDbBlocker(_ispytest=True)
 
 
 def validate_urls(marker) -> list[str]:

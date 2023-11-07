@@ -295,19 +295,21 @@ access for the specified block::
 
 You can also manage the access manually via these methods:
 
-.. py:method:: django_db_blocker.unblock()
+.. py:class:: pytest_django.DjangoDbBlocker
 
-  Enable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore`.
+    .. py:method:: django_db_blocker.unblock()
 
-.. py:method:: django_db_blocker.block()
+    Enable database access. Should be followed by a call to
+    :func:`~django_db_blocker.restore` or used as a context manager.
 
-  Disable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore`.
+    .. py:method:: django_db_blocker.block()
 
-.. py:method:: django_db_blocker.restore()
+    Disable database access. Should be followed by a call to
+    :func:`~django_db_blocker.restore` or used as a context manager.
 
-  Restore the previous state of the database blocking.
+    .. py:method:: django_db_blocker.restore()
+
+    Restore the previous state of the database blocking.
 
 Examples
 ########

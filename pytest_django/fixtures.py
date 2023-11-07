@@ -28,6 +28,8 @@ if TYPE_CHECKING:
     import django
     import django.test
 
+    from . import DjangoDbBlocker
+
 
 _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
 _DjangoDbAvailableApps = Optional[List[str]]
@@ -114,7 +116,7 @@ def django_db_createdb(request: pytest.FixtureRequest) -> bool:
 def django_db_setup(
     request: pytest.FixtureRequest,
     django_test_environment: None,
-    django_db_blocker,
+    django_db_blocker: DjangoDbBlocker,
     django_db_use_migrations: bool,
     django_db_keepdb: bool,
     django_db_createdb: bool,
@@ -154,7 +156,7 @@ def django_db_setup(
 def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
-    django_db_blocker,
+    django_db_blocker: DjangoDbBlocker,
 ) -> Generator[None, None, None]:
     from django import VERSION
 
