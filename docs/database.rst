@@ -305,7 +305,7 @@ You can also manage the access manually via these methods:
   Disable database access. Should be followed by a call to
   :func:`~django_db_blocker.restore`.
 
-.. py:function:: django_db_blocker.restore()
+.. py:method:: django_db_blocker.restore()
 
   Restore the previous state of the database blocking.
 
