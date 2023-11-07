@@ -26,6 +26,7 @@ from .lazy_django import skip_if_no_django
 
 if TYPE_CHECKING:
     import django
+    import django.test
 
 
 _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
@@ -393,21 +394,21 @@ def django_db_serialized_rollback(
 
 
 @pytest.fixture()
-def client() -> django.test.client.Client:
+def client() -> django.test.Client:
     """A Django test client instance."""
     skip_if_no_django()
 
-    from django.test.client import Client
+    from django.test import Client
 
     return Client()
 
 
 @pytest.fixture()
-def async_client() -> django.test.client.AsyncClient:
+def async_client() -> django.test.AsyncClient:
     """A Django test async client instance."""
     skip_if_no_django()
 
-    from django.test.client import AsyncClient
+    from django.test import AsyncClient
 
     return AsyncClient()
 
@@ -462,9 +463,9 @@ def admin_user(
 def admin_client(
     db: None,
     admin_user,
-) -> django.test.client.Client:
+) -> django.test.Client:
     """A Django test client logged in as an admin user."""
-    from django.test.client import Client
+    from django.test import Client
 
     client = Client()
     client.force_login(admin_user)
@@ -472,21 +473,21 @@ def admin_client(
 
 
 @pytest.fixture()
-def rf() -> django.test.client.RequestFactory:
+def rf() -> django.test.RequestFactory:
     """RequestFactory instance"""
     skip_if_no_django()
 
-    from django.test.client import RequestFactory
+    from django.test import RequestFactory
 
     return RequestFactory()
 
 
 @pytest.fixture()
-def async_rf() -> django.test.client.AsyncRequestFactory:
+def async_rf() -> django.test.AsyncRequestFactory:
     """AsyncRequestFactory instance"""
     skip_if_no_django()
 
-    from django.test.client import AsyncRequestFactory
+    from django.test import AsyncRequestFactory
 
     return AsyncRequestFactory()
 

@@ -13,7 +13,7 @@ import pytest
 from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
-from django.test.client import AsyncClient, AsyncRequestFactory, Client, RequestFactory
+from django.test import AsyncClient, AsyncRequestFactory, Client, RequestFactory
 from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
