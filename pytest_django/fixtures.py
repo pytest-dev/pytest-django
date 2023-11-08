@@ -601,12 +601,25 @@ def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None,
     live_server._live_server_modified_settings.disable()
 
 
+class DjangoAssertNumQueries(Protocol):
+    """The type of the `django_assert_num_queries` and
+    `django_assert_max_num_queries` fixtures."""
+
+    def __call__(
+        self,
+        num: int,
+        connection: Any | None = ...,
+        info: str | None = ...,
+    ) -> django.test.utils.CaptureQueriesContext:
+        pass  # pragma: no cover
+
+
 @contextmanager
 def _assert_num_queries(
     config: pytest.Config,
     num: int,
     exact: bool = True,
-    connection=None,
+    connection: Any | None = None,
     info: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.test.utils import CaptureQueriesContext
@@ -641,12 +654,12 @@ def _assert_num_queries(
 
 
 @pytest.fixture()
-def django_assert_num_queries(pytestconfig: pytest.Config):
+def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     return partial(_assert_num_queries, pytestconfig)
 
 
 @pytest.fixture()
-def django_assert_max_num_queries(pytestconfig: pytest.Config):
+def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 

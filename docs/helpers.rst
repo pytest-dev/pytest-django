@@ -447,6 +447,15 @@ Example usage::
 
         assert 'foo' in captured.captured_queries[0]['sql']
 
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumQueries
+
+    def test_num_queries(
+        django_assert_num_queries: DjangoAssertNumQueries,
+    ):
+        ...
+
 
 .. fixture:: django_assert_max_num_queries
 
@@ -469,6 +478,15 @@ Example usage::
         with django_assert_max_num_queries(2):
             Item.objects.create('foo')
             Item.objects.create('bar')
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumQueries
+
+    def test_max_num_queries(
+        django_assert_max_num_queries: DjangoAssertNumQueries,
+    ):
+        ...
 
 
 .. fixture:: django_capture_on_commit_callbacks

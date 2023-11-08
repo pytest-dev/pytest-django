@@ -18,7 +18,7 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
-from pytest_django import DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
+from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
 from pytest_django_test.app.models import Item
 
 
@@ -91,7 +91,7 @@ def test_async_rf(async_rf: AsyncRequestFactory) -> None:
 @pytest.mark.django_db
 def test_django_assert_num_queries_db(
     request: pytest.FixtureRequest,
-    django_assert_num_queries,
+    django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
         with django_assert_num_queries(3):
@@ -111,7 +111,7 @@ def test_django_assert_num_queries_db(
 @pytest.mark.django_db
 def test_django_assert_max_num_queries_db(
     request: pytest.FixtureRequest,
-    django_assert_max_num_queries,
+    django_assert_max_num_queries: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
         with django_assert_max_num_queries(2):
@@ -134,7 +134,9 @@ def test_django_assert_max_num_queries_db(
 
 @pytest.mark.django_db(transaction=True)
 def test_django_assert_num_queries_transactional_db(
-    request: pytest.FixtureRequest, transactional_db: None, django_assert_num_queries
+    request: pytest.FixtureRequest,
+    transactional_db: None,
+    django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
         with transaction.atomic():
@@ -187,7 +189,9 @@ def test_django_assert_num_queries_output_verbose(django_pytester: DjangoPyteste
 
 
 @pytest.mark.django_db
-def test_django_assert_num_queries_db_connection(django_assert_num_queries) -> None:
+def test_django_assert_num_queries_db_connection(
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
     from django.db import connection
 
     with django_assert_num_queries(1, connection=connection):
