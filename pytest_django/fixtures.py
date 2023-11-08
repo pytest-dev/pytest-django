@@ -7,12 +7,15 @@ from functools import partial
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
+    ContextManager,
     Generator,
     Iterable,
     List,
     Literal,
     Optional,
+    Protocol,
     Tuple,
     Union,
 )
@@ -647,8 +650,20 @@ def django_assert_max_num_queries(pytestconfig: pytest.Config):
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
+class DjangoCaptureOnCommitCallbacks(Protocol):
+    """The type of the `django_capture_on_commit_callbacks` fixture."""
+
+    def __call__(
+        self,
+        *,
+        using: str = ...,
+        execute: bool = ...,
+    ) -> ContextManager[list[Callable[[], Any]]]:
+        pass  # pragma: no cover
+
+
 @pytest.fixture()
-def django_capture_on_commit_callbacks():
+def django_capture_on_commit_callbacks() -> DjangoCaptureOnCommitCallbacks:
     from django.test import TestCase
 
-    return TestCase.captureOnCommitCallbacks
+    return TestCase.captureOnCommitCallbacks  # type: ignore[no-any-return]

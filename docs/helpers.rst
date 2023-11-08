@@ -514,6 +514,14 @@ Example usage::
         assert mailoutbox[0].subject == 'Contact Form'
         assert mailoutbox[0].body == 'I like your site'
 
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoCaptureOnCommitCallbacks
+
+    def test_on_commit(
+        django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+    ):
+        ...
 
 .. fixture:: mailoutbox
 
