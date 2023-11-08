@@ -18,6 +18,7 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
+from pytest_django import DjangoDbBlocker
 from pytest_django_test.app.models import Item
 
 
@@ -690,7 +691,7 @@ class Migration(migrations.Migration):
 
 class Test_django_db_blocker:
     @pytest.mark.django_db
-    def test_block_manually(self, django_db_blocker) -> None:
+    def test_block_manually(self, django_db_blocker: DjangoDbBlocker) -> None:
         try:
             django_db_blocker.block()
             with pytest.raises(RuntimeError):
@@ -699,19 +700,19 @@ class Test_django_db_blocker:
             django_db_blocker.restore()
 
     @pytest.mark.django_db
-    def test_block_with_block(self, django_db_blocker) -> None:
+    def test_block_with_block(self, django_db_blocker: DjangoDbBlocker) -> None:
         with django_db_blocker.block():
             with pytest.raises(RuntimeError):
                 Item.objects.exists()
 
-    def test_unblock_manually(self, django_db_blocker) -> None:
+    def test_unblock_manually(self, django_db_blocker: DjangoDbBlocker) -> None:
         try:
             django_db_blocker.unblock()
             Item.objects.exists()
         finally:
             django_db_blocker.restore()
 
-    def test_unblock_with_block(self, django_db_blocker) -> None:
+    def test_unblock_with_block(self, django_db_blocker: DjangoDbBlocker) -> None:
         with django_db_blocker.unblock():
             Item.objects.exists()
 
