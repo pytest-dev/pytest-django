@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Pending
--------
+v4.7.0 (2023-11-08)
+-------------------
 
 Compatibility
 ^^^^^^^^^^^^^
@@ -10,6 +10,26 @@ Compatibility
 * Official Django 5.0 support.
 
 * Official Python 3.12 support.
+
+Improvements
+^^^^^^^^^^^^
+
+* The Django test tags from the previous release now works on any
+  :class:`~django.test.SimpleTestCase` (i.e. any Django test framework test
+  class), not just :class:`~django.test.TransactionTestCase` classes.
+
+* Some improvements for those of us who like to type their tests:
+
+  - Add ``pytest_django.DjangoAssertNumQueries`` for typing
+    :fixture:`django_assert_num_queries` and
+    :fixture:`django_assert_max_num_queries`.
+
+  - Add ``pytest_django.DjangoCaptureOnCommitCallbacks`` for typing
+    :fixture:`django_capture_on_commit_callbacks`.
+
+  - Add ``pytest_django.DjangoDbBlocker`` for typing
+    :fixture:`django_db_blocker`.
+
 
 v4.6.0 (2023-10-30)
 -------------------
