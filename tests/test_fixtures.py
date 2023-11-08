@@ -18,7 +18,7 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
-from pytest_django import DjangoDbBlocker
+from pytest_django import DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
 from pytest_django_test.app.models import Item
 
 
@@ -232,7 +232,9 @@ def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) 
 
 
 @pytest.mark.django_db
-def test_django_capture_on_commit_callbacks(django_capture_on_commit_callbacks) -> None:
+def test_django_capture_on_commit_callbacks(
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
     if not connection.features.supports_transactions:
         pytest.skip("transactions required for this test")
 
@@ -255,7 +257,9 @@ def test_django_capture_on_commit_callbacks(django_capture_on_commit_callbacks) 
 
 
 @pytest.mark.django_db(databases=["default", "second"])
-def test_django_capture_on_commit_callbacks_multidb(django_capture_on_commit_callbacks) -> None:
+def test_django_capture_on_commit_callbacks_multidb(
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
     if not connection.features.supports_transactions:
         pytest.skip("transactions required for this test")
 
@@ -282,7 +286,7 @@ def test_django_capture_on_commit_callbacks_multidb(django_capture_on_commit_cal
 
 @pytest.mark.django_db(transaction=True)
 def test_django_capture_on_commit_callbacks_transactional(
-    django_capture_on_commit_callbacks,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
     if not connection.features.supports_transactions:
         pytest.skip("transactions required for this test")
