@@ -8,7 +8,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    ClassVar,
     ContextManager,
     Generator,
     Iterable,
@@ -498,7 +497,9 @@ def async_rf() -> django.test.AsyncRequestFactory:
 
 
 class SettingsWrapper:
-    _to_restore: ClassVar[list[Any]] = []
+    def __init__(self) -> None:
+        self._to_restore: list[django.test.override_settings]
+        object.__setattr__(self, "_to_restore", [])
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
