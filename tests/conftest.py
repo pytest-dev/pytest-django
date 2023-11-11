@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import pathlib
 import shutil
 from pathlib import Path
@@ -134,6 +135,11 @@ def django_pytester(
     # Copy the test app to make it available in the new test run
     shutil.copytree(str(app_source), str(test_app_path))
     tpkg_path.joinpath("the_settings.py").write_text(test_settings)
+
+    # For suprocess tests, pytest's `pythonpath` setting doesn't currently
+    # work, only the envvar does.
+    pythonpath = os.pathsep.join(filter(None, [str(REPOSITORY_ROOT), os.getenv("PYTHONPATH", "")]))
+    monkeypatch.setenv("PYTHONPATH", pythonpath)
 
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
 
