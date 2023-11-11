@@ -15,7 +15,7 @@ from .helpers import DjangoPytester
 
 pytest_plugins = "pytester"
 
-REPOSITORY_ROOT = pathlib.Path(__file__).parent
+REPOSITORY_ROOT = pathlib.Path(__file__).parent.parent
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -128,7 +128,7 @@ def django_pytester(
 
     tpkg_path.joinpath("__init__.py").touch()
 
-    app_source = REPOSITORY_ROOT / "../pytest_django_test/app"
+    app_source = REPOSITORY_ROOT / "pytest_django_test/app"
     test_app_path = tpkg_path / "app"
 
     # Copy the test app to make it available in the new test run
