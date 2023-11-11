@@ -72,6 +72,7 @@ addopts = [
     # Show extra test summary info for everything.
     "-ra",
 ]
+pythonpath = ["."]
 DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
 testpaths = ["tests"]
 markers = ["tag1", "tag2", "tag3", "tag4", "tag5"]
