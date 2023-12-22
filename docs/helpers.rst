@@ -311,7 +311,7 @@ Example
 ::
 
     def test_new_user(django_user_model):
-        django_user_model.objects.create(username="someone", password="something")
+        django_user_model.objects.create_user(username="someone", password="something")
 
 .. fixture:: django_username_field
 
