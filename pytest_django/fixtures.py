@@ -298,7 +298,7 @@ def _disable_migrations() -> None:
 
     settings.MIGRATION_MODULES = DisableMigrations()
     # MIGRATE setting added in Django 3.1
-    # https://docs.djangoproject.com/en/dev/ref/settings/#std-setting-TEST_MIGRATE
+    # https://docs.djangoproject.com/en/dev/ref/settings/#migrate
     settings.MIGRATE = False
 
     class MigrateSilentCommand(migrate.Command):
