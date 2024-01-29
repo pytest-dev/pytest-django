@@ -470,8 +470,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 @pytest.fixture(autouse=True, scope="session")
 def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, None, None]:
-    """
-    Ensure that Django is loaded and has its testing environment setup.
+    """Setup Django's test environment for the testing session.
 
     XXX It is a little dodgy that this is an autouse fixture.  Perhaps
         an email fixture should be requested in order to be able to
@@ -481,7 +480,6 @@ def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, N
         we need to follow this model.
     """
     if django_settings_is_configured():
-        _setup_django(request.config)
         from django.test.utils import setup_test_environment, teardown_test_environment
 
         debug_ini = request.config.getini("django_debug_mode")
