@@ -362,8 +362,15 @@ def pytest_load_initial_conftests(
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: pytest.Config) -> None:
-    # Allow Django settings to be configured in a user pytest_configure call,
-    # but make sure we call django.setup()
+    if config.getoption("version", 0) > 0 or config.getoption("help", False):
+        return
+
+    # Normally Django is set up in `pytest_load_initial_conftests`, but we also
+    # allow users to not set DJANGO_SETTINGS_MODULE/`--ds` and instead
+    # configure the Django settings in a `pytest_configure` hookimpl using e.g.
+    # `settings.configure(...)`. In this case, the `_setup_django` call in
+    # `pytest_load_initial_conftests` only partially initializes Django, and
+    # it's fully initialized here.
     _setup_django(config)
 
 

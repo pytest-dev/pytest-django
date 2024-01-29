@@ -145,6 +145,37 @@ def test_django_project_found_invalid_settings_version(
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
+def test_django_project_late_settings_version(
+    django_pytester: DjangoPytester,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Late configuration should not cause an error with --help or --version."""
+    monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
+    django_pytester.makepyfile(
+        t="WAT = 1",
+    )
+    django_pytester.makeconftest(
+        """
+        import os
+
+        def pytest_configure():
+            os.environ.setdefault('DJANGO_SETTINGS_MODULE', 't')
+            from django.conf import settings
+            settings.WAT
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("django_project_root", "--version", "--version")
+    assert result.ret == 0
+
+    result.stdout.fnmatch_lines(["*This is pytest version*"])
+
+    result = django_pytester.runpytest_subprocess("django_project_root", "--help")
+    assert result.ret == 0
+    result.stdout.fnmatch_lines(["*usage:*"])
+
+
+@pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
 def test_runs_without_error_on_long_args(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
