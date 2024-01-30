@@ -6,10 +6,22 @@ from __future__ import annotations
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Sequence
 
+from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
 
 
-test_case = TestCase("run")
+USE_CONTRIB_MESSAGES = VERSION >= (5, 0)
+
+if USE_CONTRIB_MESSAGES:
+    from django.contrib.messages import Message
+    from django.contrib.messages.test import MessagesTestMixin
+
+    class MessagesTestCase(MessagesTestMixin, TestCase):
+        pass
+
+    test_case = MessagesTestCase("run")
+else:
+    test_case = TestCase("run")
 
 
 def _wrapper(name: str):
@@ -30,6 +42,11 @@ assertions_names.update(
     {attr for attr in vars(LiveServerTestCase) if attr.startswith("assert")},
     {attr for attr in vars(TransactionTestCase) if attr.startswith("assert")},
 )
+
+if USE_CONTRIB_MESSAGES:
+    assertions_names.update(
+        {attr for attr in vars(MessagesTestMixin) if attr.startswith("assert")},
+    )
 
 for assert_func in assertions_names:
     globals()[assert_func] = _wrapper(assert_func)
@@ -211,6 +228,15 @@ if TYPE_CHECKING:
         using: str = ...,
         **kwargs,
     ):
+        ...
+
+    # Added in Django 5.0.
+    def assertMessages(
+        response: HttpResponseBase,
+        expected_messages: Sequence[Message],
+        *args,
+        ordered: bool = ...,
+    ) -> None:
         ...
 
     # Fallback in case Django adds new asserts.
