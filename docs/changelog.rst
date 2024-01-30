@@ -7,8 +7,8 @@ v4.8.0 (2024-01-30)
 Improvements
 ^^^^^^^^^^^^
 
-* Add `pytest.asserts.assertMessages()` to mimic the behaviour of the
-  ``django.contrib.messages.test.MessagesTestMixin.assertMessages`` function
+* Added ``pytest_django.asserts.assertMessages()`` to mimic the behaviour of the
+  :meth:`~django.contrib.messages.test.MessagesTestMixin.assertMessages` method
   for Django versions >= 5.0.
 
 Bugfixes
