@@ -230,15 +230,14 @@ if TYPE_CHECKING:
     ):
         ...
 
-    if USE_CONTRIB_MESSAGES:
-
-        def assertMessages(
-            response: HttpResponseBase,
-            expected_messages: Sequence[Message],
-            *args,
-            ordered: bool = ...,
-        ) -> None:
-            ...
+    # Added in Django 5.0.
+    def assertMessages(
+        response: HttpResponseBase,
+        expected_messages: Sequence[Message],
+        *args,
+        ordered: bool = ...,
+    ) -> None:
+        ...
 
     # Fallback in case Django adds new asserts.
     def __getattr__(name: str) -> Callable[..., Any]:
