@@ -1,14 +1,21 @@
 Changelog
 =========
 
-Pending
--------
+v4.8.0 (2024-01-30)
+-------------------
 
 Improvements
 ^^^^^^^^^^^^
 
-* Added `pytest.asserts.assertMessages()` to mimic the behaviour of the
-  `django.contrib.messages.test.MessagesTestMixin` function for Django versions >= 5.0.
+* Add `pytest.asserts.assertMessages()` to mimic the behaviour of the
+  ``django.contrib.messages.test.MessagesTestMixin.assertMessages`` function
+  for Django versions >= 5.0.
+
+Bugfixes
+^^^^^^^^
+
+* Fix `--help`/`--version` crash in a partially configured app.
+
 
 v4.7.0 (2023-11-08)
 -------------------
