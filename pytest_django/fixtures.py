@@ -44,6 +44,7 @@ __all__ = [
     "db",
     "transactional_db",
     "django_db_reset_sequences",
+    "django_db_all_databases",
     "django_db_serialized_rollback",
     "admin_user",
     "django_user_model",
@@ -190,6 +191,7 @@ def _django_db_helper(
         or ("transactional_db" in request.fixturenames or "live_server" in request.fixturenames)
     )
     reset_sequences = reset_sequences or ("django_db_reset_sequences" in request.fixturenames)
+    databases = databases or ("__all__" if "django_db_all_databases" in request.fixturenames else None)
     serialized_rollback = serialized_rollback or (
         "django_db_serialized_rollback" in request.fixturenames
     )
@@ -395,6 +397,10 @@ def django_db_serialized_rollback(
     """
     # The `_django_db_helper` fixture checks if `django_db_serialized_rollback`
     # is requested.
+
+
+def django_db_all_databases(_django_db_helper: None):
+    """TODO: write a docstring"""
 
 
 @pytest.fixture()
