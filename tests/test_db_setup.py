@@ -583,3 +583,36 @@ class TestMigrations:
         )
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*mark_migrations_run*"])
+
+    def test_migrations_not_run_for_simple_test_case(
+        self, django_pytester: DjangoPytester
+    ) -> None:
+        pytester = django_pytester
+        pytester.create_test_module(
+            """
+            from django.test import SimpleTestCase
+
+            class MyTest(SimpleTestCase):
+                def test_something_without_db(self):
+                    assert 1 == 1
+            """
+        )
+
+        pytester.create_app_file(
+            """
+            from django.db import migrations, models
+
+            def mark_migrations_run(apps, schema_editor):
+                print("mark_migrations_run")
+
+            class Migration(migrations.Migration):
+                atomic = False
+                dependencies = []
+                operations = [migrations.RunPython(mark_migrations_run)]
+            """,
+            "migrations/0001_initial.py",
+        )
+        result = pytester.runpytest_subprocess("--tb=short", "-v", "-s")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(["*test_something_without_db PASSED*"])
+        result.stdout.no_fnmatch_line("*mark_migrations_run*")
