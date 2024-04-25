@@ -150,6 +150,50 @@ def test_invalid_template_variable_marker_cleanup(django_pytester: DjangoPyteste
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )
+    TEMPLATES[0]["OPTIONS"]["string_if_invalid"] = "Something clever"
+    """
+)
+def test_invalid_template_variable_behaves_normally_when_ignored(
+    django_pytester: DjangoPytester
+) -> None:
+    django_pytester.create_app_file(
+        "<div>{{ invalid_var }}</div>", "templates/invalid_template_base.html"
+    )
+    django_pytester.create_app_file(
+        "{% include 'invalid_template_base.html' %}", "templates/invalid_template.html"
+    )
+    django_pytester.create_test_module(
+        """
+        from django.template.loader import render_to_string
+
+        import pytest
+
+        @pytest.mark.ignore_template_errors
+        def test_ignore(client):
+            assert render_to_string('invalid_template.html') == "<div>Something clever</div>"
+
+        def test_for_invalid_template(client):
+            render_to_string('invalid_template.html')
+
+        """
+    )
+    result = django_pytester.runpytest_subprocess("-s", "--fail-on-template-vars")
+
+    origin = "'*/tpkg/app/templates/invalid_template_base.html'"
+    result.stdout.fnmatch_lines_random(
+        [
+            "tpkg/test_the_test.py .F*",
+            f"E * Failed: Undefined template variable 'invalid_var' in {origin}",
+        ]
+    )
+
+
+@pytest.mark.django_project(
+    extra_settings="""
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )

@@ -644,8 +644,9 @@ def _fail_for_invalid_template_variable():
     class InvalidVarException:
         """Custom handler for invalid strings in templates."""
 
-        def __init__(self) -> None:
+        def __init__(self, *, origin_value: str = "") -> None:
             self.fail = True
+            self.origin_value = origin_value
 
         def __contains__(self, key: str) -> bool:
             return key == "%s"
@@ -696,7 +697,7 @@ def _fail_for_invalid_template_variable():
             if self.fail:
                 pytest.fail(msg)
             else:
-                return msg
+                return self.origin_value
 
     with pytest.MonkeyPatch.context() as mp:
         if (
@@ -709,7 +710,11 @@ def _fail_for_invalid_template_variable():
                 mp.setitem(
                     dj_settings.TEMPLATES[0]["OPTIONS"],
                     "string_if_invalid",
-                    InvalidVarException(),
+                    InvalidVarException(
+                        origin_value=dj_settings.TEMPLATES[0]["OPTIONS"].get(
+                            "string_if_invalid", ""
+                        )
+                    ),
                 )
         yield
 
