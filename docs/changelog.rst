@@ -59,7 +59,7 @@ Compatibility
 
 * Drop support for Python version 3.5, 3.6 & 3.7.
 
-* Drop official support for Django 4.0.
+* Drop official support for Django 4.0 and 2.2
 
 * Drop support for pytest < 7.
 
