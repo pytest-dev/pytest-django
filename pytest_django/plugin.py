@@ -644,7 +644,7 @@ def _fail_for_invalid_template_variable():
     class InvalidVarException:
         """Custom handler for invalid strings in templates."""
 
-        def __init__(self, *, origin_value: str = "") -> None:
+        def __init__(self, *, origin_value: str) -> None:
             self.fail = True
             self.origin_value = origin_value
 
