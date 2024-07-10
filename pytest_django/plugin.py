@@ -688,6 +688,13 @@ def _fail_for_invalid_template_variable():
                 return name
             return None
 
+        def __bool__(self) -> bool:
+            for frame_info in inspect.stack():
+                if frame_info.function == "resolve" and frame_info.filename.endswith("base.py"):
+                    # To go through this guard: https://github.com/django/django/blob/5.0.7/django/template/base.py#L716
+                    return True
+            return bool(self.origin_value)
+
         def __mod__(self, var: str) -> str:
             origin = self._get_origin()
             if origin:
