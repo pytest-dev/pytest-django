@@ -94,22 +94,26 @@ def django_db_modify_db_settings_parallel_suffix(
 def django_db_modify_db_settings(
     django_db_modify_db_settings_parallel_suffix: None,
 ) -> None:
+    """Modify db settings just before the databases are configured."""
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
 def django_db_use_migrations(request: pytest.FixtureRequest) -> bool:
+    """Return whether to use migrations to create the test databases."""
     return not request.config.getvalue("nomigrations")
 
 
 @pytest.fixture(scope="session")
 def django_db_keepdb(request: pytest.FixtureRequest) -> bool:
+    """Return whether to re-use an existing database and to keep it after the test run."""
     reuse_db: bool = request.config.getvalue("reuse_db")
     return reuse_db
 
 
 @pytest.fixture(scope="session")
 def django_db_createdb(request: pytest.FixtureRequest) -> bool:
+    """Return whether the database is to be re-created before running any tests."""
     create_db: bool = request.config.getvalue("create_db")
     return create_db
 
@@ -656,11 +660,13 @@ def _assert_num_queries(
 
 @pytest.fixture()
 def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
+    """Allows to check for an expected number of DB queries."""
     return partial(_assert_num_queries, pytestconfig)
 
 
 @pytest.fixture()
 def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
+    """Allows to check for an expected maximum number of DB queries."""
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
@@ -678,6 +684,7 @@ class DjangoCaptureOnCommitCallbacks(Protocol):
 
 @pytest.fixture()
 def django_capture_on_commit_callbacks() -> DjangoCaptureOnCommitCallbacks:
+    """Captures transaction.on_commit() callbacks for the given database connection."""
     from django.test import TestCase
 
     return TestCase.captureOnCommitCallbacks  # type: ignore[no-any-return]

@@ -578,6 +578,7 @@ def mailoutbox(
     django_mail_patch_dns: None,
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
+    """A clean email outbox to which Django-generated emails are sent."""
     if not django_settings_is_configured():
         return None
 
@@ -591,6 +592,7 @@ def django_mail_patch_dns(
     monkeypatch: pytest.MonkeyPatch,
     django_mail_dnsname: str,
 ) -> None:
+    """Patch the server dns name used in email messages."""
     from django.core import mail
 
     monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
@@ -598,6 +600,7 @@ def django_mail_patch_dns(
 
 @pytest.fixture()
 def django_mail_dnsname() -> str:
+    """Return server dns name for using in email messages."""
     return "fake-tests.example.com"
 
 
