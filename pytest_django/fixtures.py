@@ -94,22 +94,26 @@ def django_db_modify_db_settings_parallel_suffix(
 def django_db_modify_db_settings(
     django_db_modify_db_settings_parallel_suffix: None,
 ) -> None:
+    """Modify db settings just before the databases are configured."""
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
 def django_db_use_migrations(request: pytest.FixtureRequest) -> bool:
+    """Return whether to use migrations to create the test databases."""
     return not request.config.getvalue("nomigrations")
 
 
 @pytest.fixture(scope="session")
 def django_db_keepdb(request: pytest.FixtureRequest) -> bool:
+    """Return whether to re-use an existing database and to keep it after the test run."""
     reuse_db: bool = request.config.getvalue("reuse_db")
     return reuse_db
 
 
 @pytest.fixture(scope="session")
 def django_db_createdb(request: pytest.FixtureRequest) -> bool:
+    """Return whether the database is to be re-created before running any tests."""
     create_db: bool = request.config.getvalue("create_db")
     return create_db
 
