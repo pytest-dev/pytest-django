@@ -656,11 +656,13 @@ def _assert_num_queries(
 
 @pytest.fixture()
 def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
+    """Allows to check for an expected number of DB queries."""
     return partial(_assert_num_queries, pytestconfig)
 
 
 @pytest.fixture()
 def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
+    """Allows to check for an expected maximum number of DB queries."""
     return partial(_assert_num_queries, pytestconfig, exact=False)
 
 
@@ -678,6 +680,7 @@ class DjangoCaptureOnCommitCallbacks(Protocol):
 
 @pytest.fixture()
 def django_capture_on_commit_callbacks() -> DjangoCaptureOnCommitCallbacks:
+    """Captures transaction.on_commit() callbacks for the given database connection."""
     from django.test import TestCase
 
     return TestCase.captureOnCommitCallbacks  # type: ignore[no-any-return]
