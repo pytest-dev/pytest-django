@@ -194,6 +194,50 @@ def test_invalid_template_variable_behaves_normally_when_ignored(
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )
+    """
+)
+def test_invalid_template_variable_object_does_not_exists_behaves_like_an_empty_string(
+    django_pytester: DjangoPytester
+) -> None:
+    django_pytester.create_app_file(
+        "<div>{% if object_exists %}This should not appear{% endif %}</div>",
+        "templates/invalid_template_base.html",
+    )
+    django_pytester.create_app_file(
+        "{% include 'invalid_template_base.html' %}", "templates/invalid_template.html"
+    )
+    django_pytester.create_test_module(
+        """
+        from django.core.exceptions import ObjectDoesNotExist
+        from django.template.loader import render_to_string
+
+        import pytest
+
+        def fake_one_to_one_relation_missing():
+            raise ObjectDoesNotExist()
+
+        def test_ignore(client):
+            assert render_to_string(
+                'invalid_template.html',
+                {"object_exists": fake_one_to_one_relation_missing},
+            ) == "<div></div>"
+        """
+    )
+    result = django_pytester.runpytest_subprocess("-s", "--fail-on-template-vars")
+
+    result.stdout.fnmatch_lines_random(
+        [
+            "tpkg/test_the_test.py .",
+        ]
+    )
+
+
+@pytest.mark.django_project(
+    extra_settings="""
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
     ROOT_URLCONF = 'tpkg.app.urls'
     """
 )
