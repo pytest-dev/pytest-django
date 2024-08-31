@@ -54,6 +54,7 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
+    from django import forms
     from django.http.response import HttpResponseBase
 
     def assertRedirects(
@@ -93,17 +94,15 @@ if TYPE_CHECKING:
         ...
 
     def assertFormError(
-        response: HttpResponseBase,
-        form: str,
+        form: forms.BaseForm,
         field: str | None,
         errors: str | Sequence[str],
         msg_prefix: str = ...,
     ) -> None:
         ...
 
-    def assertFormsetError(
-        response: HttpResponseBase,
-        formset: str,
+    def assertFormSetError(
+        formset: forms.BaseFormSet,
         form_index: int | None,
         field: str | None,
         errors: str | Sequence[str],
