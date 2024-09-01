@@ -101,7 +101,7 @@ if TYPE_CHECKING:
     ) -> None:
         ...
 
-    def assertFormsetError(
+    def assertFormSetError(
         formset: forms.BaseFormSet,
         form_index: int | None,
         field: str | None,
