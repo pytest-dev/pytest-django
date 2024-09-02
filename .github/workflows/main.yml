@@ -67,7 +67,11 @@ jobs:
           python: '3.12'
           allow_failure: false
 
-        - name: py312-dj50-postgres-xdist-coverage
+        - name: py312-dj51-postgres-xdist-coverage
+          python: '3.12'
+          allow_failure: false
+
+        - name: py312-dj42-postgres-xdist-coverage
           python: '3.12'
           allow_failure: false
 
@@ -79,15 +83,15 @@ jobs:
           python: '3.11'
           allow_failure: false
 
-        - name: py310-dj41-postgres-xdist-coverage
+        - name: py310-dj51-postgres-xdist-coverage
           python: '3.10'
           allow_failure: false
 
-        - name: py310-dj32-postgres-xdist-coverage
+        - name: py310-dj42-postgres-xdist-coverage
           python: '3.10'
           allow_failure: false
 
-        - name: py311-dj41-mysql_innodb-coverage
+        - name: py311-dj51-mysql_innodb-coverage
           python: '3.11'
           allow_failure: false
 
@@ -95,32 +99,32 @@ jobs:
           python: '3.10'
           allow_failure: false
 
-        - name: py39-dj32-mysql_innodb-xdist-coverage
+        - name: py39-dj42-mysql_innodb-xdist-coverage
           python: '3.9'
           allow_failure: false
 
-        - name: py38-dj41-sqlite-xdist-coverage
+        - name: py312-dj51-sqlite-xdist-coverage
+          python: '3.12'
+          allow_failure: false
+
+        - name: py38-dj42-sqlite-xdist-coverage
           python: '3.8'
           allow_failure: false
 
-        - name: py38-dj32-sqlite-xdist-coverage
-          python: '3.8'
-          allow_failure: false
-
-        - name: py310-djmain-sqlite-coverage
-          python: '3.10'
+        - name: py311-djmain-sqlite-coverage
+          python: '3.11'
           allow_failure: true
 
-        - name: py38-dj32-mysql_myisam-coverage
-          python: '3.8'
+        - name: py311-dj42-mysql_myisam-coverage
+          python: '3.11'
           allow_failure: false
 
         # Explicitly test min pytest.
-        - name: py38-dj32-sqlite-pytestmin-coverage
+        - name: py38-dj42-sqlite-pytestmin-coverage
           python: '3.8'
           allow_failure: false
 
         # pypy3: not included with coverage reports (much slower then).
-        - name: pypy3-dj32-postgres
+        - name: pypy3-dj42-postgres
           python: 'pypy3.9'
           allow_failure: false
