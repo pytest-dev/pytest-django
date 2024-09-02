@@ -157,7 +157,7 @@ project by specifying a fixture with the same name and scope in ``conftest.py``.
 .. admonition:: Use the pytest-django source code
 
     The default implementation of these fixtures can be found in
-    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py>`_.
+    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/main/pytest_django/fixtures.py>`_.
 
     The code is relatively short and straightforward and can provide a
     starting point when you need to customize database setup in your own

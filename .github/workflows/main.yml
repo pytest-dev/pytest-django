@@ -3,12 +3,12 @@ name: main
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - "*"
   pull_request:
     branches:
-      - master
+      - main
 
 env:
   PYTEST_ADDOPTS: "--color=yes"
