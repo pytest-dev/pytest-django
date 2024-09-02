@@ -1,0 +1,43 @@
+name: deploy
+
+on:
+  push:
+    tags:
+      - "*"
+
+# Set permissions at the job level.
+permissions: {}
+
+jobs:
+  package:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and Check Package
+        uses: hynek/build-and-inspect-python-package@2dbbf2b252d3a3c7cec7a810e3ed5983bd17b13a  # v2.8.0
+
+  deploy:
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
+    needs: [package]
+    runs-on: ubuntu-22.04
+    environment: deploy
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # For trusted publishing.
+      id-token: write
+
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v4
+        with:
+          name: Packages
+          path: dist
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@8a08d616893759ef8e1aa1f2785787c0b97e20d6 # v1.10.0
