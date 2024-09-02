@@ -617,7 +617,7 @@ def django_mail_dnsname() -> str:
 @pytest.fixture(autouse=True)
 def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
-    marker = request.node.get_closest_marker("urls")
+    marker: pytest.Mark | None = request.node.get_closest_marker("urls")
     if marker:
         skip_if_no_django()
         import django.conf
@@ -836,7 +836,7 @@ class DjangoDbBlocker:
 blocking_manager_key = pytest.StashKey[DjangoDbBlocker]()
 
 
-def validate_urls(marker) -> list[str]:
+def validate_urls(marker: pytest.Mark) -> list[str]:
     """Validate the urls marker.
 
     It checks the signature and creates the `urls` attribute on the

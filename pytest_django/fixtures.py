@@ -266,7 +266,7 @@ def _django_db_helper(
     django_db_blocker.restore()
 
 
-def validate_django_db(marker) -> _DjangoDb:
+def validate_django_db(marker: pytest.Mark) -> _DjangoDb:
     """Validate the django_db marker.
 
     It checks the signature and creates the ``transaction``,
