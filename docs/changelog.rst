@@ -1,6 +1,35 @@
 Changelog
 =========
 
+v4.9.0 (2024-09-02)
+-------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Added official support for Django 5.1.
+* Dropped support for Django 3.2 and 4.1.
+
+Improvements
+^^^^^^^^^^^^
+
+* Respect the ``string_if_invalid`` template setting when
+  ``--fail-on-template-vars`` is active and
+  :func:`@pytest.mark.ignore_template_errors <pytest.mark.ignore_template_errors>`
+  is used.
+
+* Avoid running database migrations for :class:`~django.test.SimpleTestCase`
+  unittest tests.
+
+* Added docstrings to public fixtures.
+
+Bugfixes
+^^^^^^^^
+
+* Fix type hints for ``pytest_django.asserts.assertFormError()`` and
+  ``pytest_django.asserts.assertForSetError()``.
+
+
 v4.8.0 (2024-01-30)
 -------------------
 
