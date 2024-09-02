@@ -3,6 +3,7 @@
 Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
+
 import socket
 from contextlib import contextmanager
 from typing import Generator

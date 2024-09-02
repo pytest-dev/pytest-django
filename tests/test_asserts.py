@@ -1,6 +1,7 @@
 """
 Tests the dynamic loading of all Django assertion cases.
 """
+
 from __future__ import annotations
 
 import inspect

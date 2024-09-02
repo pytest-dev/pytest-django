@@ -1,6 +1,7 @@
 """
 Helpers to load Django lazily when Django settings can't be configured.
 """
+
 from __future__ import annotations
 
 import os

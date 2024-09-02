@@ -377,24 +377,30 @@ def test_django_debug_mode_keep(
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     pytester.makeini(
         """
-       [pytest]
-       django_debug_mode = keep
-    """
+        [pytest]
+        django_debug_mode = keep
+        """
     )
     pytester.makeconftest(
-        """
+        f"""
         from django.conf import settings
 
         def pytest_configure():
-            settings.configure(SECRET_KEY='set from pytest_configure',
-                               DEBUG=%s,
-                               DATABASES={'default': {
-                                   'ENGINE': 'django.db.backends.sqlite3',
-                                   'NAME': ':memory:'}},
-                               INSTALLED_APPS=['django.contrib.auth',
-                                               'django.contrib.contenttypes',])
-    """
-        % settings_debug
+            settings.configure(
+                SECRET_KEY='set from pytest_configure',
+                DEBUG={settings_debug},
+                DATABASES={{
+                    'default': {{
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:',
+                    }},
+                }},
+                INSTALLED_APPS=[
+                    'django.contrib.auth',
+                    'django.contrib.contenttypes',
+                ],
+            )
+        """
     )
 
     pytester.makepyfile(
@@ -402,7 +408,7 @@ def test_django_debug_mode_keep(
         from django.conf import settings
         def test_debug_is_false():
             assert settings.DEBUG is {settings_debug}
-    """
+        """
     )
 
     r = pytester.runpytest_subprocess()
@@ -414,7 +420,7 @@ def test_django_debug_mode_keep(
     INSTALLED_APPS = [
         'tpkg.app.apps.TestApp',
     ]
-"""
+    """
 )
 def test_django_setup_sequence(django_pytester) -> None:
     django_pytester.create_app_file(
