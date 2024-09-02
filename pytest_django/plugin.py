@@ -686,7 +686,6 @@ def _fail_for_invalid_template_variable():
             frameinfo = reduce(
                 lambda x, y: y if y.function == "render" and "base.py" in y.filename else x, stack
             )
-            # finding only the frame locals in all frame members
             # ``django.template.base.Template``
             template = frameinfo.frame.f_locals["self"]
             if isinstance(template, Template):
