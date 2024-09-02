@@ -3,15 +3,6 @@ from os import environ
 from .settings_base import *  # noqa: F403
 
 
-# PyPy compatibility
-try:
-    from psycopg2cffi import compat
-
-    compat.register()
-except ImportError:
-    pass
-
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",

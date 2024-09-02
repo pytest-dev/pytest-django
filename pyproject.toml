@@ -90,7 +90,6 @@ files = [
 module = [
     "django.*",
     "configurations.*",
-    "psycopg2cffi.*",
 ]
 ignore_missing_imports = true
 
