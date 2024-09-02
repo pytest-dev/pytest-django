@@ -670,13 +670,11 @@ def _fail_for_invalid_template_variable():
 
             # Try to use topmost `self.origin` first (Django 1.9+, and with
             # TEMPLATE_DEBUG)..
-            for f in stack[2:]:
-                func = f[3]
-                if func == "render":
-                    frame = f[0]
+            for frame_info in stack[2:]:
+                if frame_info.function == "render":
                     origin: str | None
                     try:
-                        origin = frame.f_locals["self"].origin
+                        origin = frame_info.frame.f_locals["self"].origin
                     except (AttributeError, KeyError):
                         origin = None
                     if origin is not None:
@@ -686,16 +684,10 @@ def _fail_for_invalid_template_variable():
 
             # finding the ``render`` needle in the stack
             frameinfo = reduce(
-                lambda x, y: y[3] == "render" and "base.py" in y[1] and y or x, stack
+                lambda x, y: y if y.function == "render" and "base.py" in y.filename else x, stack
             )
-            # assert 0, stack
-            frame = frameinfo[0]
-            # finding only the frame locals in all frame members
-            f_locals = reduce(
-                lambda x, y: y[0] == "f_locals" and y or x, inspect.getmembers(frame)
-            )[1]
             # ``django.template.base.Template``
-            template = f_locals["self"]
+            template = frameinfo.frame.f_locals["self"]
             if isinstance(template, Template):
                 name: str = template.name
                 return name
