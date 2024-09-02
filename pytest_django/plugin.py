@@ -553,12 +553,21 @@ def _django_setup_unittest(
     def non_debugging_runtest(self) -> None:
         self._testcase(result=self)
 
+    from django.test import SimpleTestCase
+
+    assert issubclass(request.cls, SimpleTestCase)  # Guarded by 'is_django_unittest'
     try:
         TestCaseFunction.runtest = non_debugging_runtest  # type: ignore[method-assign]
 
-        request.getfixturevalue("django_db_setup")
+        # Don't set up the DB if the unittest does not require DB.
+        # The `databases` propery seems like the best indicator for that.
+        if request.cls.databases:
+            request.getfixturevalue("django_db_setup")
+            db_unblock = django_db_blocker.unblock()
+        else:
+            db_unblock = contextlib.nullcontext()
 
-        with django_db_blocker.unblock():
+        with db_unblock:
             yield
     finally:
         TestCaseFunction.runtest = original_runtest  # type: ignore[method-assign]
