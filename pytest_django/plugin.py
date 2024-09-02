@@ -640,7 +640,7 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None,
 
 
 @pytest.fixture(autouse=True, scope="session")
-def _fail_for_invalid_template_variable():
+def _fail_for_invalid_template_variable() -> Generator[None, None, None]:
     """Fixture that fails for invalid variables in templates.
 
     This fixture will fail each test that uses django template rendering
