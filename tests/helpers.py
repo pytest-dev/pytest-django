@@ -10,8 +10,7 @@ class DjangoPytester(pytest.Pytester):  # type: ignore[misc]
         self,
         test_code: str,
         filename: str = ...,
-    ) -> Path:
-        ...
+    ) -> Path: ...
 
     def create_app_file(self, code: str, filename: str) -> Path:  # type: ignore[empty-body]
         ...

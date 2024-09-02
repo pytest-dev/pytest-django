@@ -144,7 +144,7 @@ ignore = [
     "PT023",    # Use `@pytest.mark.django_db()` over `@pytest.mark.django_db`
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 forced-separate = [
     "tests",
     "pytest_django",

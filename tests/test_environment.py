@@ -154,7 +154,7 @@ def test_invalid_template_variable_marker_cleanup(django_pytester: DjangoPyteste
     """
 )
 def test_invalid_template_variable_behaves_normally_when_ignored(
-    django_pytester: DjangoPytester
+    django_pytester: DjangoPytester,
 ) -> None:
     django_pytester.create_app_file(
         "<div>{{ invalid_var }}</div>", "templates/invalid_template_base.html"
