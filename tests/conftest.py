@@ -74,14 +74,6 @@ def django_pytester(
         """
         import django
 
-        # Pypy compatibility
-        try:
-            from psycopg2cffi import compat
-        except ImportError:
-            pass
-        else:
-            compat.register()
-
         DATABASES = %(db_settings)s
         DATABASE_ROUTERS = ['pytest_django_test.db_router.DbRouter']
 

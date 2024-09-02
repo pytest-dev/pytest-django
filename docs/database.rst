@@ -325,16 +325,12 @@ Put this into ``conftest.py``::
     import pytest
     from django.db import connections
 
-    import psycopg2
-    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+    import psycopg
 
 
     def run_sql(sql):
-        conn = psycopg2.connect(database='postgres')
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cur = conn.cursor()
-        cur.execute(sql)
-        conn.close()
+        with psycopg.connect(database='postgres') as conn:
+            conn.execute(sql)
 
 
     @pytest.fixture(scope='session')
@@ -505,7 +501,7 @@ Put this in ``conftest.py``::
 
 .. warning::
     This snippet shows ``cursor().executescript()`` which is `sqlite` specific, for
-    other database engines this method might differ. For instance, psycopg2 uses
+    other database engines this method might differ. For instance, psycopg uses
     ``cursor().execute()``.
 
 
