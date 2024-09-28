@@ -845,6 +845,11 @@ class DjangoDbBlocker:
         return _DatabaseBlockerContextManager(self)
 
     def restore(self) -> None:
+        """Undo a previous call to block() or unblock().
+
+        Consider using block() and unblock() as context managers instead of
+        manually calling restore().
+        """
         self._dj_db_wrapper.ensure_connection = self._history.pop()
 
 
