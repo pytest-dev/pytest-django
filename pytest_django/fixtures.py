@@ -165,8 +165,6 @@ def _django_db_helper(
     django_db_setup: None,
     django_db_blocker: DjangoDbBlocker,
 ) -> Generator[None, None, None]:
-    from django import VERSION
-
     if is_django_unittest(request):
         yield
         return
@@ -240,13 +238,9 @@ def _django_db_helper(
             @classmethod
             def setUpClass(cls) -> None:
                 super(django.test.TestCase, cls).setUpClass()
-                if VERSION < (4, 1):
-                    django.db.transaction.Atomic._ensure_durability = False
 
             @classmethod
             def tearDownClass(cls) -> None:
-                if VERSION < (4, 1):
-                    django.db.transaction.Atomic._ensure_durability = True
                 super(django.test.TestCase, cls).tearDownClass()
 
     PytestDjangoTestCase.setUpClass()
@@ -260,8 +254,7 @@ def _django_db_helper(
 
     PytestDjangoTestCase.tearDownClass()
 
-    if VERSION >= (4, 0):
-        PytestDjangoTestCase.doClassCleanups()
+    PytestDjangoTestCase.doClassCleanups()
 
     django_db_blocker.restore()
 
