@@ -513,17 +513,26 @@ def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, N
 
 @pytest.fixture(scope="session")
 def django_db_blocker(request: pytest.FixtureRequest) -> DjangoDbBlocker | None:
-    """Wrapper around Django's database access.
+    """Block or unblock database access.
 
-    This object can be used to re-enable database access.  This fixture is used
-    internally in pytest-django to build the other fixtures and can be used for
-    special database handling.
+    This is an advanced feature for implementing database fixtures.
 
-    The object is a context manager and provides the methods
-    .unblock()/.block() and .restore() to temporarily enable database access.
+    By default, pytest-django blocks access the the database. In tests which
+    request access to the database, the access is automatically unblocked.
 
-    This is an advanced feature that is meant to be used to implement database
-    fixtures.
+    In a test or fixture context where database access is blocked, you can
+    temporarily unblock access as follows::
+
+        with django_db_blocker.unblock():
+            ...
+
+    In a test or fixture context where database access is not blocked, you can
+    temporarily block access as follows::
+
+        with django_db_blocker.block():
+            ...
+
+    This fixture is also used internally by pytest-django.
     """
     if not django_settings_is_configured():
         return None
@@ -805,8 +814,8 @@ class DjangoDbBlocker:
     def _dj_db_wrapper(self) -> django.db.backends.base.base.BaseDatabaseWrapper:
         from django.db.backends.base.base import BaseDatabaseWrapper
 
-        # The first time the _dj_db_wrapper is accessed, we will save a
-        # reference to the real implementation.
+        # The first time the _dj_db_wrapper is accessed, save a reference to the
+        # real implementation.
         if self._real_ensure_connection is None:
             self._real_ensure_connection = BaseDatabaseWrapper.ensure_connection
 
