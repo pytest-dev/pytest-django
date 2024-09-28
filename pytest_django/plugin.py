@@ -476,6 +476,13 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     items.sort(key=get_order_number)
 
 
+def pytest_unconfigure(config: pytest.Config) -> None:
+    if blocking_manager_key not in config.stash:
+        return
+    blocking_manager = config.stash[blocking_manager_key]
+    blocking_manager.unblock()
+
+
 @pytest.fixture(autouse=True, scope="session")
 def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Setup Django's test environment for the testing session.
