@@ -1,7 +1,7 @@
 .PHONY: docs test clean fix
 
 test:
-	tox -e py311-dj42-sqlite_file
+	tox -e py-dj42-sqlite_file
 
 docs:
 	tox -e docs
