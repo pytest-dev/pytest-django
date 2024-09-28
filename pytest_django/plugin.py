@@ -477,10 +477,13 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 
 def pytest_unconfigure(config: pytest.Config) -> None:
-    if blocking_manager_key not in config.stash:
-        return
-    blocking_manager = config.stash[blocking_manager_key]
-    blocking_manager.unblock()
+    # Undo the block() in _setup_django(), if it happenned.
+    # It's also possible the user forgot to call restore().
+    # We can warn about it, but let's just clean it up.
+    if blocking_manager_key in config.stash:
+        blocking_manager = config.stash[blocking_manager_key]
+        while blocking_manager.is_active:
+            blocking_manager.restore()
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -851,6 +854,11 @@ class DjangoDbBlocker:
         manually calling restore().
         """
         self._dj_db_wrapper.ensure_connection = self._history.pop()
+
+    @property
+    def is_active(self) -> bool:
+        """Whether a block() or unblock() is currently active."""
+        return bool(self._history)
 
 
 # On Config.stash.
