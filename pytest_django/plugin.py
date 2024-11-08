@@ -20,6 +20,10 @@ import pytest
 from .django_compat import is_django_unittest
 from .fixtures import (
     _django_db_helper,  # noqa: F401
+    _django_db_helper_class,  # noqa: F401
+    _django_db_helper_module,  # noqa: F401
+    _django_db_helper_package,  # noqa: F401
+    _django_db_helper_session,  # noqa: F401
     _live_server_helper,  # noqa: F401
     admin_client,  # noqa: F401
     admin_user,  # noqa: F401
@@ -27,6 +31,10 @@ from .fixtures import (
     async_rf,  # noqa: F401
     client,  # noqa: F401
     db,  # noqa: F401
+    db_class,  # noqa: F401
+    db_module,  # noqa: F401
+    db_package,  # noqa: F401
+    db_session,  # noqa: F401
     django_assert_max_num_queries,  # noqa: F401
     django_assert_num_queries,  # noqa: F401
     django_capture_on_commit_callbacks,  # noqa: F401

@@ -43,6 +43,10 @@ _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 __all__ = [
     "django_db_setup",
     "db",
+    "db_class",
+    "db_module",
+    "db_package",
+    "db_session",
     "transactional_db",
     "django_db_reset_sequences",
     "django_db_serialized_rollback",
@@ -159,8 +163,7 @@ def django_db_setup(
                 )
 
 
-@pytest.fixture()
-def _django_db_helper(
+def _base_django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker: DjangoDbBlocker,
@@ -256,6 +259,14 @@ def _django_db_helper(
         PytestDjangoTestCase.doClassCleanups()
 
 
+# Per-scope db helpers.
+_django_db_helper = pytest.fixture(_base_django_db_helper, scope="function")
+_django_db_helper_class = pytest.fixture(_base_django_db_helper, scope="class")
+_django_db_helper_module = pytest.fixture(_base_django_db_helper, scope="module")
+_django_db_helper_package = pytest.fixture(_base_django_db_helper, scope="package")
+_django_db_helper_session = pytest.fixture(_base_django_db_helper, scope="session")
+
+
 def validate_django_db(marker: pytest.Mark) -> _DjangoDb:
     """Validate the django_db marker.
 
@@ -320,23 +331,55 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 # ############### User visible fixtures ################
-
-
 @pytest.fixture()
 def db(_django_db_helper: None) -> None:
-    """Require a django test database.
-
-    This database will be setup with the default fixtures and will have
-    the transaction management disabled. At the end of the test the outer
-    transaction that wraps the test itself will be rolled back to undo any
-    changes to the database (in case the backend supports transactions).
-    This is more limited than the ``transactional_db`` fixture but
-    faster.
-
-    If both ``db`` and ``transactional_db`` are requested,
-    ``transactional_db`` takes precedence.
-    """
     # The `_django_db_helper` fixture checks if `db` is requested.
+    pass  # pragma: no cover
+
+
+@pytest.fixture(scope="class")
+def db_class(_django_db_helper_class: None) -> None:
+    # The `_django_db_helper` fixture checks if `db` is requested.
+    pass  # pragma: no cover
+
+
+@pytest.fixture(scope="module")
+def db_module(_django_db_helper_module: None) -> None:
+    # The `_django_db_helper` fixture checks if `db` is requested.
+    pass  # pragma: no cover
+
+
+@pytest.fixture(scope="package")
+def db_package(_django_db_helper_package: None) -> None:
+    # The `_django_db_helper` fixture checks if `db` is requested.
+    pass  # pragma: no cover
+
+
+@pytest.fixture(scope="session")
+def db_session(_django_db_helper_session: None) -> None:
+    # The `_django_db_helper` fixture checks if `db` is requested.
+    pass  # pragma: no cover
+
+
+# Dynamically add help text to scoped db fixtures.
+_db_fixture_help = """Require a django test database for use by tests
+and {}-scoped fixtures.
+
+This database will be setup with the default fixtures and will have
+the transaction management disabled. At the end of the test the outer
+transaction that wraps the test itself will be rolled back to undo any
+changes to the database (in case the backend supports transactions).
+This is more limited than the ``transactional_db`` fixture but
+faster.
+
+If both ``db`` and ``transactional_db`` are requested,
+``transactional_db`` takes precedence.
+"""
+db.__doc__ = _db_fixture_help.format("function")
+db_class.__doc__ = _db_fixture_help.format("class")
+db_module.__doc__ = _db_fixture_help.format("module")
+db_package.__doc__ = _db_fixture_help.format("package")
+db_session.__doc__ = _db_fixture_help.format("session")
 
 
 @pytest.fixture()
