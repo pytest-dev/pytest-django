@@ -302,18 +302,20 @@ def _disable_migrations() -> None:
     migrate.Command = MigrateSilentCommand
 
 
-def _get_serialized_aliases(tests: list) -> set:
+def _get_serialized_aliases(tests: list[pytest.Item]) -> set[str]:
     """
     Get a set of `serialized_aliases` to be used with `setup_databases`.
 
-    The `serialized_aliases` argument of the `setup_databases` function determines what subset of aliases test
-    databases should have their state serialized to allow usage of the `serialized_rollback` feature. If it's not
-    provided, it defaults to aliases.
+    The `serialized_aliases` argument of the `setup_databases` function
+    determines what subset of aliases test databases should have their state
+    serialized to allow usage of the `serialized_rollback` feature. If it's
+    not provided, it defaults to aliases.
 
-    Django 5 removed the `SERIALIZE` test setting, as it can be inferred from the databases with the
-    `serialized_rollback` option enabled. Django's default test runner, `DiscoverRunner`, uses logic similar to this to
-    build the `serialized_aliases` set and pass it to `setup_databases`, as implemented in
-    `django.test.runner.DiscoverRunner.run_tests`.
+    Django 5 removed the `SERIALIZE` test setting, as it can be inferred from
+    the databases with the `serialized_rollback` option enabled. Django's
+    default test runner, `DiscoverRunner`, uses logic similar to this to build
+    the `serialized_aliases` set and pass it to `setup_databases`, as
+    implemented in `django.test.runner.DiscoverRunner.run_tests`.
     """
     from django.db import connections
 
@@ -321,12 +323,19 @@ def _get_serialized_aliases(tests: list) -> set:
     for test in tests:
         if not (marker := test.get_closest_marker("django_db")):
             continue
-        (_, _, test_databases, serialized_rollback, _) = validate_django_db(marker)
+        validated_marker = validate_django_db(marker)
+        (_, _, test_databases, serialized_rollback, _) = validated_marker
+
         if test_databases == "__all__":
             test_databases = connections
         if test_databases:
-            databases.update((alias, serialized_rollback or databases.get(alias, False)) for alias in test_databases)
-    serialized_aliases = {alias for alias, serialize in databases.items() if serialize}
+            databases.update(
+                (alias, serialized_rollback or databases.get(alias, False))
+                for alias in test_databases
+            )
+    serialized_aliases = {
+        alias for alias, serialize in databases.items() if serialize
+    }
     return serialized_aliases
 
 
