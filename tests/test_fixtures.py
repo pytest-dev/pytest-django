@@ -207,6 +207,21 @@ def test_django_assert_num_queries_db_connection(
 
 
 @pytest.mark.django_db
+def test_django_assert_num_queries_db_using(
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
+    with django_assert_num_queries(1, using="default"):
+        Item.objects.create(name="foo")
+
+    with django_assert_num_queries(1, using=None):
+        Item.objects.create(name="foo")
+
+    with pytest.raises(AttributeError):
+        with django_assert_num_queries(1, using=False):
+            pass
+
+
+@pytest.mark.django_db
 def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
