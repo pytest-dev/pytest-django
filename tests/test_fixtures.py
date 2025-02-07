@@ -15,6 +15,7 @@ from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
 from django.test import AsyncClient, AsyncRequestFactory, Client, RequestFactory
+from django.utils.connection import ConnectionDoesNotExist
 from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
@@ -220,7 +221,7 @@ def test_django_assert_num_queries_db_using(
         with django_assert_num_queries(1, using=True):
             pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ConnectionDoesNotExist):
         with django_assert_num_queries(1, using="bad_db_name"):
             pass
 
