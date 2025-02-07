@@ -606,6 +606,7 @@ class DjangoAssertNumQueries(Protocol):
         num: int,
         connection: Any | None = ...,
         info: str | None = ...,
+        using: str | None = ...,
     ) -> django.test.utils.CaptureQueriesContext:
         pass  # pragma: no cover
 
@@ -617,6 +618,7 @@ def _assert_num_queries(
     exact: bool = True,
     connection: Any | None = None,
     info: str | None = None,
+    using: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.test.utils import CaptureQueriesContext
 
@@ -624,6 +626,10 @@ def _assert_num_queries(
         from django.db import connection as conn
     else:
         conn = connection
+
+    if using:
+        from django.db import connections
+        conn = connections[using]
 
     verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
