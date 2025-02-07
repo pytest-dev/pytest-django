@@ -629,6 +629,7 @@ def _assert_num_queries(
 
     if using:
         from django.db import connections
+
         conn = connections[using]
 
     verbose = config.getoption("verbose") > 0
