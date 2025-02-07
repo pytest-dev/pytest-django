@@ -103,17 +103,21 @@ jobs:
           python: '3.9'
           allow_failure: false
 
+        - name: py312-djmain-sqlite-coverage
+          python: '3.12'
+          allow_failure: true
+
         - name: py312-dj51-sqlite-xdist-coverage
           python: '3.12'
+          allow_failure: false
+
+        - name: py311-dj42-sqlite-xdist-coverage
+          python: '3.11'
           allow_failure: false
 
         - name: py38-dj42-sqlite-xdist-coverage
           python: '3.8'
           allow_failure: false
-
-        - name: py311-djmain-sqlite-coverage
-          python: '3.11'
-          allow_failure: true
 
         - name: py311-dj42-mysql_myisam-coverage
           python: '3.11'
