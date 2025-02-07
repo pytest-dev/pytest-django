@@ -217,7 +217,7 @@ def test_django_assert_num_queries_db_using(
         Item.objects.create(name="foo")
 
     with pytest.raises(AttributeError):
-        with django_assert_num_queries(1, using=False):
+        with django_assert_num_queries(1, using=True):
             pass
 
 
