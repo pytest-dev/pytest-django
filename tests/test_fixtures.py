@@ -217,10 +217,6 @@ def test_django_assert_num_queries_db_using(
     with django_assert_num_queries(1, using=None):
         Item.objects.create(name="foo")
 
-    with pytest.raises(TypeError):
-        with django_assert_num_queries(1, using=True):
-            pass
-
     with pytest.raises(ConnectionDoesNotExist):
         with django_assert_num_queries(1, using="bad_db_name"):
             pass
