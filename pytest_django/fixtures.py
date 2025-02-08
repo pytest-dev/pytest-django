@@ -19,6 +19,7 @@ from typing import (
     Tuple,
     Union,
 )
+import warnings
 
 import pytest
 
@@ -628,6 +629,8 @@ def _assert_num_queries(
         conn = connection
 
     if using:
+        if connection:
+            warings.warn("connection arg will be ignored")
         from django.db import connections
 
         conn = connections[using]
