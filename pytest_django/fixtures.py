@@ -630,7 +630,7 @@ def _assert_num_queries(
 
     if using:
         if connection:
-            warings.warn("connection arg will be ignored")
+            warnings.warn("connection arg will be ignored")
         from django.db import connections
 
         conn = connections[using]
