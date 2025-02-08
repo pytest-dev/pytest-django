@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from contextlib import contextmanager
 from functools import partial
 from typing import (
@@ -19,7 +20,6 @@ from typing import (
     Tuple,
     Union,
 )
-import warnings
 
 import pytest
 
@@ -630,7 +630,7 @@ def _assert_num_queries(
 
     if using:
         if connection:
-            warnings.warn("connection arg will be ignored")
+            warnings.warn("connection arg will be ignored", stacklevel=1)
         from django.db import connections
 
         conn = connections[using]
