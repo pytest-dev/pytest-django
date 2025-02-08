@@ -211,7 +211,12 @@ def test_django_assert_num_queries_db_connection(
 def test_django_assert_num_queries_db_using(
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
+    from django.db import connection
+
     with django_assert_num_queries(1, using="default"):
+        Item.objects.create(name="foo")
+
+    with django_assert_num_queries(1, using="default", connection=connection):
         Item.objects.create(name="foo")
 
     with django_assert_num_queries(1, using=None):
