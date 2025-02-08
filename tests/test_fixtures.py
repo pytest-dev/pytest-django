@@ -199,10 +199,6 @@ def test_django_assert_num_queries_db_connection(
     with django_assert_num_queries(1, connection=connection):
         Item.objects.create(name="foo")
 
-    with pytest.warns(UserWarning, "connection argument is ignored"):
-        with django_assert_num_queries(1, connection=connection):
-            Item.objects.create(name="foo")
-
     with django_assert_num_queries(1, connection=None):
         Item.objects.create(name="foo")
 
@@ -222,6 +218,10 @@ def test_django_assert_num_queries_db_using(
 
     with django_assert_num_queries(1, using="default", connection=connection):
         Item.objects.create(name="foo")
+
+    with pytest.warns(UserWarning, "connection argument is ignored"):
+        with django_assert_num_queries(1, connection=connection, using="default"):
+            Item.objects.create(name="foo")
 
     with django_assert_num_queries(1, using=None):
         Item.objects.create(name="foo")
