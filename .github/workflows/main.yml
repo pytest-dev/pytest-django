@@ -132,3 +132,17 @@ jobs:
         - name: pypy3-dj42-postgres
           python: 'pypy3.9'
           allow_failure: false
+
+  check:  # This job does nothing and is only used for the branch protection
+    if: always()
+
+    needs:
+    - test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@223e4bb7a751b91f43eda76992bcfbf23b8b0302
+      with:
+        jobs: ${{ toJSON(needs) }}
