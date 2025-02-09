@@ -468,7 +468,7 @@ If you use type annotations, you can annotate the fixture like this::
   :param num: expected maximum number of queries
   :param connection: optional database connection
   :param str info: optional info message to display on failure
-  :param str using: optional database connection name
+  :param str using: optional database alias
 
 This fixture allows to check for an expected maximum number of DB queries.
 
