@@ -463,7 +463,7 @@ If you use type annotations, you can annotate the fixture like this::
 ``django_assert_max_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: django_assert_max_num_queries(num, connection=None, info=None, using=None)
+.. py:function:: django_assert_max_num_queries(num, connection=None, info=None, *, using=None)
 
   :param num: expected maximum number of queries
   :param connection: optional database connection
