@@ -104,7 +104,7 @@ def test_django_assert_num_queries_db(
             with django_assert_num_queries(2) as captured:
                 Item.objects.create(name="quux")
         assert excinfo.value.args == (
-            "Expected to perform 2 queries but 1 was done " "(add -v option to show queries)",
+            "Expected to perform 2 queries but 1 was done (add -v option to show queries)",
         )
         assert len(captured.captured_queries) == 1
 
@@ -556,11 +556,10 @@ class TestLiveServer:
             sock.close()
 
         django_pytester.create_test_module(
+            f"""
+            def test_with_live_server(live_server):
+                assert live_server.port == {port}
             """
-        def test_with_live_server(live_server):
-            assert live_server.port == %d
-        """
-            % port
         )
 
         django_pytester.runpytest_subprocess(f"--liveserver=localhost:{port}")

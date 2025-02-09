@@ -10,8 +10,8 @@ from .plugin import DjangoDbBlocker
 
 
 __all__ = [
-    "__version__",
     "DjangoAssertNumQueries",
     "DjangoCaptureOnCommitCallbacks",
     "DjangoDbBlocker",
+    "__version__",
 ]
