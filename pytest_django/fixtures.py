@@ -623,20 +623,19 @@ def _assert_num_queries(
     *,
     using: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
-    from django.test.utils import CaptureQueriesContext
+    from django.db import connections
+    from django.db import connection as default_conn
 
-    if connection is None:
-        from django.db import connection as conn
-    else:
+    if connection and using:
+        raise ValueError('The "connection" and "using" parameter cannot be used together')
+
+    if connection is not None:
         conn = connection
-
-    if using:
-        if connection:
-            warnings.warn("connection arg will be ignored", stacklevel=1)
-        from django.db import connections
-
+    elif using is not None:
         conn = connections[using]
-
+    else:
+        conn = default_conn
+    
     verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
         yield context
