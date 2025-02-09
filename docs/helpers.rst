@@ -423,7 +423,7 @@ Example
 ``django_assert_num_queries``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:function:: django_assert_num_queries(num, connection=None, info=None, using=None)
+.. py:function:: django_assert_num_queries(num, connection=None, info=None, *, using=None)
 
   :param num: expected number of queries
   :param connection: optional database connection
