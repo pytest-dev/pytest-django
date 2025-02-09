@@ -607,6 +607,7 @@ class DjangoAssertNumQueries(Protocol):
         num: int,
         connection: Any | None = ...,
         info: str | None = ...,
+        *,
         using: str | None = ...,
     ) -> django.test.utils.CaptureQueriesContext:
         pass  # pragma: no cover
