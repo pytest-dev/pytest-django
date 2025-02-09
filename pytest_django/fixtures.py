@@ -620,6 +620,7 @@ def _assert_num_queries(
     exact: bool = True,
     connection: Any | None = None,
     info: str | None = None,
+    *,
     using: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.test.utils import CaptureQueriesContext
