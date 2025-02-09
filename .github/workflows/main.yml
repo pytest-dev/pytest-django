@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     continue-on-error: ${{ matrix.allow_failure }}
     timeout-minutes: 15
     permissions:
@@ -139,7 +139,7 @@ jobs:
     needs:
     - test
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed
