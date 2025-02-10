@@ -602,22 +602,22 @@ class CaptureAllConnectionsQueriesContext:
     Context manager that captures all queries executed by Django ORM across all Databases in settings.DATABASES.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         from django.db import connections
 
         self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
 
-    def __iter__(self):
+    def __iter__(self) -> None:
         return iter(self.captured_queries)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> dict[str, Any]:
         return self.captured_queries[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.captured_queries)
 
     @property
-    def captured_queries(self):
+    def captured_queries(self) -> dict[str, Any]:
         queries = []
         for context in self.contexts.values():
             queries.extend(context.captured_queries)
@@ -695,7 +695,7 @@ def _assert_num_queries_all_db(
 def _assert_num_queries_context(
     *,
     config: pytest.Config,
-    context: CaptureQueriesContext | CaptureAllConnectionsQueriesContext,
+    context: django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext,
     num: int,
     exact: bool = True,
     info: str | None = None,
