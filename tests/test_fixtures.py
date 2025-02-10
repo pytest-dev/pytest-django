@@ -20,7 +20,7 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
-from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
+from pytest_django import DjangoAssertNumQueries, DjangoAssertNumAllConnectionsQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
 from pytest_django_test.app.models import Item
 
 
@@ -260,7 +260,9 @@ def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) 
 
 
 @pytest.mark.django_db(databases=["default", "replica", "second"])
-def test_django_assert_num_queries_all_connections(django_assert_num_queries_all_connections) -> None:
+def test_django_assert_num_queries_all_connections(
+    django_assert_num_queries_all_connections: DjangoAssertNumAllConnectionsQueries
+) -> None:
     with django_assert_num_queries_all_connections(3):
         Item.objects.count()
         Item.objects.using("replica").count()
@@ -269,7 +271,7 @@ def test_django_assert_num_queries_all_connections(django_assert_num_queries_all
 
 @pytest.mark.django_db(databases=["default", "replica", "second"])
 def test_django_assert_max_num_queries_all_connections(
-    request: pytest.FixtureRequest,
+    request: pytest.FixtureRequest: DjangoAssertNumAllConnectionsQueries,
     django_assert_max_num_queries_all_connections: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
