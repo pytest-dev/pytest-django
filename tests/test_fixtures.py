@@ -273,12 +273,12 @@ def test_django_assert_max_num_queries_all_connections(
     django_assert_max_num_queries_all_connections: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
-        with django_assert_max_num_queries(2):
+        with django_assert_max_num_queries_all_connections(2):
             Item.objects.create(name="1-foo")
             Item.objects.using("second").create(name="2-bar")
 
         with pytest.raises(pytest.fail.Exception) as excinfo:  # noqa: PT012
-            with django_assert_max_num_queries(2) as captured:
+            with django_assert_max_num_queries_all_connections(2) as captured:
                 Item.objects.create(name="1-foo")
                 Item.objects.create(name="2-bar")
                 Item.objects.using("second").create(name="3-quux")

@@ -610,7 +610,7 @@ class CaptureAllConnectionsQueriesContext:
 
         self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
 
-    def __iter__(self) -> None:
+    def __iter__(self) -> Iterable[dict[str, Any]]:
         return iter(self.captured_queries)
 
     def __getitem__(self, index: int) -> dict[str, Any]:
@@ -620,7 +620,7 @@ class CaptureAllConnectionsQueriesContext:
         return len(self.captured_queries)
 
     @property
-    def captured_queries(self) -> dict[str, Any]:
+    def captured_queries(self) -> list[dict[str, Any]]:
         queries = []
         for context in self.contexts.values():
             queries.extend(context.captured_queries)
