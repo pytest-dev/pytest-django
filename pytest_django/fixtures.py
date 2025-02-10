@@ -38,6 +38,7 @@ _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
 _DjangoDbAvailableApps = Optional[List[str]]
 # transaction, reset_sequences, databases, serialized_rollback, available_apps
 _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
+_QueriesContext = TypeVar("T", CaptureQueriesContext, CaptureAllConnectionsQueriesContext)
 
 
 __all__ = [
@@ -648,7 +649,7 @@ class DjangoAssertNumQueries(Protocol):
         *,
         using: str | None = ...,
     ) -> django.test.utils.CaptureQueriesContext:
-        pass  # pragma: no cover
+        ...
 
 
 class DjangoAssertNumAllConnectionsQueries(Protocol):
@@ -660,7 +661,7 @@ class DjangoAssertNumAllConnectionsQueries(Protocol):
         num: int,
         info: str | None = ...,
     ) -> CaptureAllConnectionsQueriesContext:
-        pass  # pragma: no cover
+        ...
 
 
 @contextmanager
@@ -710,13 +711,11 @@ def _assert_num_queries_all_db(
 def _assert_num_queries_context(
     *,
     config: pytest.Config,
-    context: django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext,
+    context: _QueriesContext,
     num: int,
     exact: bool = True,
     info: str | None = None,
-) -> Generator[
-    django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext, None, None
-]:
+) -> Generator[_QueriesContext]:
     verbose = config.getoption("verbose") > 0
     with context:
         yield context
