@@ -635,7 +635,7 @@ def _assert_num_queries(
         conn = connections[using]
     else:
         conn = default_conn
-    
+
     verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
         yield context
