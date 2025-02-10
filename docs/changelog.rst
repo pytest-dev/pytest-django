@@ -1,13 +1,16 @@
 Changelog
 =========
 
-v4.10.0 (Not released yet)
---------------------------
+v4.10.0 (2025-02-10)
+--------------------
 
 Compatibility
 ^^^^^^^^^^^^^
 
 * Added official support for Python 3.13.
+
+Improvements
+^^^^^^^^^^^^
 
 * Added ``using`` argument to :fixture:`django_assert_num_queries` and
   :fixture:`django_assert_max_num_queries` to easily specify the database
