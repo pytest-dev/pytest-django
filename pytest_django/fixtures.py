@@ -50,6 +50,8 @@ __all__ = [
     "db",
     "django_assert_max_num_queries",
     "django_assert_num_queries",
+    "django_assert_max_num_queries_all_connections",
+    "django_assert_num_queries_all_connections",
     "django_capture_on_commit_callbacks",
     "django_db_reset_sequences",
     "django_db_serialized_rollback",
