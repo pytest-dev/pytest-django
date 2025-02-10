@@ -622,9 +622,9 @@ def _assert_num_queries(
     *,
     using: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
+    from django.test.utils import CaptureQueriesContext
     from django.db import connection as default_conn
     from django.db import connections
-    from django.test.utils import CaptureQueriesContext
 
     if connection and using:
         raise ValueError('The "connection" and "using" parameter cannot be used together')
