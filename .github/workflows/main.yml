@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: ci-main-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   PYTEST_ADDOPTS: "--color=yes"
