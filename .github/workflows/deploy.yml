@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
@@ -24,7 +24,7 @@ jobs:
   deploy:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
     needs: [package]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     environment: deploy
     timeout-minutes: 15
     permissions:

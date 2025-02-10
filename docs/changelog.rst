@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v4.10.0 (Not released yet)
+--------------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Added official support for Python 3.13.
+
+Bugfixes
+^^^^^^^^
+
+* Fixed lock/unlock of db breaks if pytest is executed twice in the same process.
+
+
 v4.9.0 (2024-09-02)
 -------------------
 

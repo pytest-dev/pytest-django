@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     continue-on-error: ${{ matrix.allow_failure }}
     timeout-minutes: 15
     permissions:
@@ -64,11 +64,11 @@ jobs:
       matrix:
         include:
         - name: linting,docs
-          python: '3.12'
+          python: '3.13'
           allow_failure: false
 
-        - name: py312-dj51-postgres-xdist-coverage
-          python: '3.12'
+        - name: py313-dj51-postgres-xdist-coverage
+          python: '3.13'
           allow_failure: false
 
         - name: py312-dj42-postgres-xdist-coverage
@@ -103,8 +103,8 @@ jobs:
           python: '3.9'
           allow_failure: false
 
-        - name: py312-djmain-sqlite-coverage
-          python: '3.12'
+        - name: py313-djmain-sqlite-coverage
+          python: '3.13'
           allow_failure: true
 
         - name: py312-dj51-sqlite-xdist-coverage
@@ -139,7 +139,7 @@ jobs:
     needs:
     - test
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed

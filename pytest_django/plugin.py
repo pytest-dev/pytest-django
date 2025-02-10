@@ -129,13 +129,13 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
     parser.addini(
         "django_find_project",
-        "Automatically find and add a Django project to the " "Python path.",
+        "Automatically find and add a Django project to the Python path.",
         type="bool",
         default=True,
     )
     parser.addini(
         "django_debug_mode",
-        "How to set the Django DEBUG setting (default `False`). " "Use `keep` to not override.",
+        "How to set the Django DEBUG setting (default `False`). Use `keep` to not override.",
         default="False",
     )
     group.addoption(
