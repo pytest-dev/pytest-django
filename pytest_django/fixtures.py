@@ -703,7 +703,7 @@ def _assert_num_queries(
         conn = default_conn
 
     with CaptureQueriesContext(conn) as context:
-        yield _assert_num_queries_context(
+        yield from _assert_num_queries_context(
             config=config, context=context, num=num, exact=exact, info=info
         )
 
@@ -718,7 +718,7 @@ def _assert_num_queries_all_db(
     """A recreation of pytest-django's assert_num_queries that works with all databases in settings.Databases."""
 
     with CaptureAllConnectionsQueriesContext() as context:
-        yield _assert_num_queries_context(
+        yield from _assert_num_queries_context(
             config=config, context=context, num=num, exact=exact, info=info
         )
 
