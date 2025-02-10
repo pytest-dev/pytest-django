@@ -13,6 +13,7 @@ from typing import (
     Dict,
     Generator,
     Iterable,
+    Iterator,
     List,
     Literal,
     Optional,
@@ -701,7 +702,7 @@ def _assert_num_queries(
         conn = default_conn
 
     with CaptureQueriesContext(conn) as context:
-        yield from _assert_num_queries_context(
+        yield _assert_num_queries_context(
             config=config, context=context, num=num, exact=exact, info=info
         )
 
@@ -716,7 +717,7 @@ def _assert_num_queries_all_db(
     """A recreation of pytest-django's assert_num_queries that works with all databases in settings.Databases."""
 
     with CaptureAllConnectionsQueriesContext() as context:
-        yield from _assert_num_queries_context(
+        yield _assert_num_queries_context(
             config=config, context=context, num=num, exact=exact, info=info
         )
 
@@ -728,7 +729,7 @@ def _assert_num_queries_context(
     num: int,
     exact: bool = True,
     info: str | None = None,
-) -> ContextManager[_QueriesContext]:
+) -> Iterator[_QueriesContext]:
     verbose = config.getoption("verbose") > 0
     with context:
         yield context
