@@ -606,6 +606,7 @@ class CaptureAllConnectionsQueriesContext:
 
     def __init__(self) -> None:
         from django.db import connections
+        from django.test.utils import CaptureQueriesContext
 
         self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
 
