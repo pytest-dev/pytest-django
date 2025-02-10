@@ -6,8 +6,8 @@ except ImportError:  # pragma: no cover
 
 
 from .fixtures import (
-    DjangoAssertNumAllConnectionsQueries, 
-    DjangoAssertNumQueries, 
+    DjangoAssertNumAllConnectionsQueries,
+    DjangoAssertNumQueries,
     DjangoCaptureOnCommitCallbacks,
 )
 from .plugin import DjangoDbBlocker
