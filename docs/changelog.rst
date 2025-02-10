@@ -8,6 +8,7 @@ Compatibility
 ^^^^^^^^^^^^^
 
 * Added official support for Python 3.13.
+* Adds ``using`` argument to assert_num_query
 
 Bugfixes
 ^^^^^^^^
