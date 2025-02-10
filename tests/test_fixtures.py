@@ -266,7 +266,7 @@ def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) 
 
 @pytest.mark.django_db(databases=["default", "replica", "second"])
 def test_django_assert_num_queries_all_connections(
-    django_assert_num_queries_all_connections: DjangoAssertNumAllConnectionsQueries
+    django_assert_num_queries_all_connections: DjangoAssertNumAllConnectionsQueries,
 ) -> None:
     with django_assert_num_queries_all_connections(3):
         Item.objects.count()
