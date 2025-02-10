@@ -597,6 +597,41 @@ def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None,
     live_server._live_server_modified_settings.disable()
 
 
+class CaptureAllConnectionsQueriesContext:
+    """
+    Context manager that captures all queries executed by Django ORM across all Databases in settings.DATABASES.
+    """
+
+    def __init__(self):
+        from django.db import connections
+        self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
+
+    def __iter__(self):
+        return iter(self.captured_queries)
+
+    def __getitem__(self, index):
+        return self.captured_queries[index]
+
+    def __len__(self):
+        return len(self.captured_queries)
+
+    @property
+    def captured_queries(self):
+        queries = []
+        for context in self.contexts.values():
+            queries.extend(context.captured_queries)
+        return queries
+
+    def __enter__(self):
+        for context in self.contexts.values():
+            context.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        for context in self.contexts.values():
+            context.__exit__(exc_type, exc_val, exc_tb)
+
+
 class DjangoAssertNumQueries(Protocol):
     """The type of the `django_assert_num_queries` and
     `django_assert_max_num_queries` fixtures."""
@@ -624,7 +659,6 @@ def _assert_num_queries(
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.db import connection as default_conn, connections
     from django.test.utils import CaptureQueriesContext
-
     if connection and using:
         raise ValueError('The "connection" and "using" parameter cannot be used together')
 
@@ -635,9 +669,33 @@ def _assert_num_queries(
     else:
         conn = default_conn
 
-    verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
-        yield context
+        yield _assert_num_queries_context(config=config, context=context, num=num, exact=exact, info=info)
+
+
+@contextmanager
+def _assert_num_queries_all_db(
+    config,
+    num: int,
+    exact: bool = True,
+    info: str | None = None,
+) -> Generator[CaptureAllConnectionsQueriesContext, None, None]:
+    """A recreation of pytest-django's assert_num_queries that works with all databases in settings.Databases."""
+
+    with CaptureAllConnectionsQueriesContext() as context:
+        yield _assert_num_queries_context(config=config, context=context, num=num, exact=exact, info=info)
+
+
+def _assert_num_queries_context(
+    *,
+    config: pytest.Config,
+    context: CaptureQueriesContext | CaptureAllConnectionsQueriesContext,
+    num: int,
+    exact: bool = True,
+    info: str | None = None,
+) -> Generator[django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext, None, None]:
+    verbose = config.getoption("verbose") > 0
+    with context:
         num_performed = len(context)
         if exact:
             failed = num != num_performed
@@ -657,6 +715,7 @@ def _assert_num_queries(
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)
+            yield context
 
 
 @pytest.fixture()
@@ -669,6 +728,18 @@ def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQue
 def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     """Allows to check for an expected maximum number of DB queries."""
     return partial(_assert_num_queries, pytestconfig, exact=False)
+
+
+@pytest.fixture(scope="function")
+def django_assert_num_queries_all_connections(pytestconfig):
+    """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is equal to the given number."""
+    return partial(_assert_num_queries_all_db, pytestconfig)
+
+
+@pytest.fixture(scope="function")
+def django_assert_max_num_queries_all_connections(pytestconfig):
+    """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is less than or equal to the given number."""
+    return partial(_assert_num_queries_all_db, pytestconfig, exact=False)
 
 
 class DjangoCaptureOnCommitCallbacks(Protocol):
