@@ -16,10 +16,10 @@ from typing import (
     Literal,
     Optional,
     Protocol,
-    TypeVar,
     Tuple,
-    runtime_checkable,
+    TypeVar,
     Union,
+    runtime_checkable,
 )
 
 import pytest
@@ -73,7 +73,7 @@ class QueryCaptureContextProtocol(Protocol):
     def captured_queries(self) -> List[Dict[str, Any]]:
         ...
 
-    def __enter__(self) -> "QueryCaptureContextProtocol":
+    def __enter__(self) -> QueryCaptureContextProtocol:
         ...
 
     def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
