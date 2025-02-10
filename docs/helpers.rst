@@ -494,7 +494,7 @@ If you use type annotations, you can annotate the fixture like this::
 .. fixture:: django_assert_num_queries_all_connections
 
 ``django_assert_num_queries_all_connections``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:function:: django_assert_num_queries_all_connections(num, info=None)
 
@@ -532,7 +532,7 @@ If you use type annotations, you can annotate the fixture like this::
 .. fixture:: django_assert_max_num_queries_all_connections
 
 ``django_assert_max_num_queries_all_connections``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:function:: django_assert_max_num_queries_all_connections(num, info=None)
 
