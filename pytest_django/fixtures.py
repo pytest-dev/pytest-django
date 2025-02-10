@@ -70,14 +70,11 @@ __all__ = [
 @runtime_checkable
 class QueryCaptureContextProtocol(Protocol):
     @property
-    def captured_queries(self) -> List[Dict[str, Any]]:
-        ...
+    def captured_queries(self) -> List[Dict[str, Any]]: ...
 
-    def __enter__(self) -> QueryCaptureContextProtocol:
-        ...
+    def __enter__(self) -> QueryCaptureContextProtocol: ...
 
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        ...
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None: ...
 
 
 _QueriesContext = TypeVar("_QueriesContext", bound=QueryCaptureContextProtocol)
@@ -665,8 +662,7 @@ class DjangoAssertNumQueries(Protocol):
         info: str | None = ...,
         *,
         using: str | None = ...,
-    ) -> ContextManager[django.test.utils.CaptureQueriesContext]:
-        ...
+    ) -> ContextManager[django.test.utils.CaptureQueriesContext]: ...
 
 
 class DjangoAssertNumAllConnectionsQueries(Protocol):
@@ -677,8 +673,7 @@ class DjangoAssertNumAllConnectionsQueries(Protocol):
         self,
         num: int,
         info: str | None = ...,
-    ) -> ContextManager[CaptureAllConnectionsQueriesContext]:
-        ...
+    ) -> ContextManager[CaptureAllConnectionsQueriesContext]: ...
 
 
 @contextmanager
