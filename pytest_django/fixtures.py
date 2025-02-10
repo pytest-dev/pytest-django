@@ -664,7 +664,7 @@ class DjangoAssertNumQueries(Protocol):
         info: str | None = ...,
         *,
         using: str | None = ...,
-    ) -> django.test.utils.CaptureQueriesContext:
+    ) -> ContextManager[django.test.utils.CaptureQueriesContext]:
         ...
 
 
@@ -676,7 +676,7 @@ class DjangoAssertNumAllConnectionsQueries(Protocol):
         self,
         num: int,
         info: str | None = ...,
-    ) -> CaptureAllConnectionsQueriesContext:
+    ) -> ContextManager[CaptureAllConnectionsQueriesContext]:
         ...
 
 
