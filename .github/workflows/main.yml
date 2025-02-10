@@ -11,7 +11,6 @@ on:
 concurrency:
   group: ci-main-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-  # Test cancel
 
 env:
   PYTEST_ADDOPTS: "--color=yes"
