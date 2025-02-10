@@ -704,6 +704,7 @@ def _assert_num_queries_context(
 ]:
     verbose = config.getoption("verbose") > 0
     with context:
+        yield context
         num_performed = len(context)
         if exact:
             failed = num != num_performed
@@ -723,7 +724,6 @@ def _assert_num_queries_context(
             else:
                 msg += " (add -v option to show queries)"
             pytest.fail(msg)
-            yield context
 
 
 @pytest.fixture()
