@@ -271,8 +271,8 @@ def test_django_assert_num_queries_all_connections(
 
 @pytest.mark.django_db(databases=["default", "replica", "second"])
 def test_django_assert_max_num_queries_all_connections(
-    request: pytest.FixtureRequest: DjangoAssertNumAllConnectionsQueries,
-    django_assert_max_num_queries_all_connections: DjangoAssertNumQueries,
+    request: pytest.FixtureRequest,
+    django_assert_max_num_queries_all_connections: DjangoAssertNumAllConnectionsQueries,
 ) -> None:
     with nonverbose_config(request.config):
         with django_assert_max_num_queries_all_connections(2):
