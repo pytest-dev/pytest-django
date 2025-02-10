@@ -20,7 +20,12 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
-from pytest_django import DjangoAssertNumQueries, DjangoAssertNumAllConnectionsQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
+from pytest_django import (
+    DjangoAssertNumAllConnectionsQueries, 
+    DjangoAssertNumQueries, 
+    DjangoCaptureOnCommitCallbacks, 
+    DjangoDbBlocker,
+)
 from pytest_django_test.app.models import Item
 
 
