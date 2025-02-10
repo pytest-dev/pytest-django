@@ -259,6 +259,38 @@ def test_django_assert_num_queries_output_info(django_pytester: DjangoPytester) 
     assert result.ret == 1
 
 
+@pytest.mark.django_db(databases=["default", "replica", "second"])
+def test_django_assert_num_queries_all_connections() -> None:
+    with django_assert_num_queries_all_connections(3):
+        Item.objects.count()
+        Item.objects.using("replica").count()
+        Item.objects.using("second").count()
+
+
+@pytest.mark.django_db(databases=["default", "replica", "second"])
+def test_django_assert_max_num_queries_all_connections(
+    request: pytest.FixtureRequest,
+    django_assert_max_num_queries_all_connections: DjangoAssertNumQueries,
+) -> None:
+    with nonverbose_config(request.config):
+        with django_assert_max_num_queries(2):
+            Item.objects.create(name="1-foo")
+            Item.objects.using("second").create(name="2-bar")
+
+        with pytest.raises(pytest.fail.Exception) as excinfo:  # noqa: PT012
+            with django_assert_max_num_queries(2) as captured:
+                Item.objects.create(name="1-foo")
+                Item.objects.create(name="2-bar")
+                Item.objects.using("second").create(name="3-quux")
+
+        assert excinfo.value.args == (
+            "Expected to perform 2 queries or less but 3 were done "
+            "(add -v option to show queries)",
+        )
+        assert len(captured.captured_queries) == 3
+        assert "1-foo" in captured.captured_queries[0]["sql"]
+
+
 @pytest.mark.django_db
 def test_django_capture_on_commit_callbacks(
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
