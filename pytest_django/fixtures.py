@@ -604,6 +604,7 @@ class CaptureAllConnectionsQueriesContext:
 
     def __init__(self):
         from django.db import connections
+
         self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
 
     def __iter__(self):
@@ -659,6 +660,7 @@ def _assert_num_queries(
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
     from django.db import connection as default_conn, connections
     from django.test.utils import CaptureQueriesContext
+
     if connection and using:
         raise ValueError('The "connection" and "using" parameter cannot be used together')
 
@@ -670,7 +672,9 @@ def _assert_num_queries(
         conn = default_conn
 
     with CaptureQueriesContext(conn) as context:
-        yield _assert_num_queries_context(config=config, context=context, num=num, exact=exact, info=info)
+        yield _assert_num_queries_context(
+            config=config, context=context, num=num, exact=exact, info=info
+        )
 
 
 @contextmanager
@@ -683,7 +687,9 @@ def _assert_num_queries_all_db(
     """A recreation of pytest-django's assert_num_queries that works with all databases in settings.Databases."""
 
     with CaptureAllConnectionsQueriesContext() as context:
-        yield _assert_num_queries_context(config=config, context=context, num=num, exact=exact, info=info)
+        yield _assert_num_queries_context(
+            config=config, context=context, num=num, exact=exact, info=info
+        )
 
 
 def _assert_num_queries_context(
@@ -693,7 +699,9 @@ def _assert_num_queries_context(
     num: int,
     exact: bool = True,
     info: str | None = None,
-) -> Generator[django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext, None, None]:
+) -> Generator[
+    django.test.utils.CaptureQueriesContext | CaptureAllConnectionsQueriesContext, None, None
+]:
     verbose = config.getoption("verbose") > 0
     with context:
         num_performed = len(context)
