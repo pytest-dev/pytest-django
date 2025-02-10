@@ -8,7 +8,9 @@ Compatibility
 ^^^^^^^^^^^^^
 
 * Added official support for Python 3.13.
-* Adds ``using`` argument to assert_num_query
+
+* Adds ``using`` argument to ``pytest_django.fixtures.django_assert_num_queries`` 
+  and `pytest_django.fixtures.django_assert_max_num_queries``
 
 Bugfixes
 ^^^^^^^^
