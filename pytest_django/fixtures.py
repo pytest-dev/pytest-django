@@ -651,6 +651,18 @@ class DjangoAssertNumQueries(Protocol):
         pass  # pragma: no cover
 
 
+class DjangoAssertNumAllConnectionsQueries(Protocol):
+    """The type of the `django_assert_num_queries_all_connections` and
+    `django_assert_max_num_queries_all_connections` fixtures."""
+
+    def __call__(
+        self,
+        num: int,
+        info: str | None = ...,
+    ) -> CaptureAllConnectionsQueriesContext:
+        pass  # pragma: no cover
+
+
 @contextmanager
 def _assert_num_queries(
     config: pytest.Config,
@@ -742,13 +754,13 @@ def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNu
 
 
 @pytest.fixture(scope="function")
-def django_assert_num_queries_all_connections(pytestconfig):
+def django_assert_num_queries_all_connections(pytestconfig: pytest.Config) -> DjangoAssertNumAllConnectionsQueries:
     """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is equal to the given number."""
     return partial(_assert_num_queries_all_db, pytestconfig)
 
 
 @pytest.fixture(scope="function")
-def django_assert_max_num_queries_all_connections(pytestconfig):
+def django_assert_max_num_queries_all_connections(pytestconfig: pytest.Config) -> DjangoAssertNumAllConnectionsQueries:
     """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is less than or equal to the given number."""
     return partial(_assert_num_queries_all_db, pytestconfig, exact=False)
 
