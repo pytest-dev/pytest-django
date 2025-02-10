@@ -491,6 +491,75 @@ If you use type annotations, you can annotate the fixture like this::
         ...
 
 
+.. fixture:: django_assert_num_queries_all_connections
+
+``django_assert_num_queries_all_connections``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_assert_num_queries_all_connections(num, info=None)
+
+  :param num: expected number of queries
+
+This fixture allows to check for an expected number of DB queries on all 
+your database connections.
+
+If the assertion failed, the executed queries can be shown by using
+the verbose command line option.
+
+It wraps ``django.test.utils.CaptureQueriesContext`` and yields the wrapped
+``DjangoAssertNumAllConnectionsQueries`` instance.
+
+Example usage::
+
+    def test_queries(django_assert_num_queries_all_connections):
+        with django_assert_num_queries_all_connections(3) as captured:
+            Item.objects.using("default").create('foo')
+            Item.objects.using("logs").create('bar')
+            Item.objects.using("finance").create('baz')
+
+        assert 'foo' in captured.captured_queries[0]['sql']
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumAllConnectionsQueries
+
+    def test_num_queries(
+        django_assert_num_queries: DjangoAssertNumAllConnectionsQueries,
+    ):
+        ...
+
+
+.. fixture:: django_assert_max_num_queries_all_connections
+
+``django_assert_max_num_queries_all_connections``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_assert_max_num_queries_all_connections(num, info=None)
+
+  :param num: expected maximum number of queries
+
+This fixture allows to check for an expected maximum number of DB queries on all 
+your database connections.
+
+It is a specialized version of :fixture:`django_assert_num_queries_all_connections`.
+
+Example usage::
+
+    def test_max_queries(django_assert_max_num_queries_all_connections):
+        with django_assert_max_num_queries_all_connections(2):
+            Item.objects.using("logs").create('foo')
+            Item.objects.using("finance").create('bar')
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumAllConnectionsQueries
+
+    def test_max_num_queries(
+        django_assert_max_num_queries_all_connections: DjangoAssertNumAllConnectionsQueries,
+    ):
+        ...
+
+
 .. fixture:: django_capture_on_commit_callbacks
 
 ``django_capture_on_commit_callbacks``

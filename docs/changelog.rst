@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v4.11.0 (Not released yet)
+--------------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Added fixtures :fixture:`django_assert_num_queries_all_connections` and
+  :fixture:`django_assert_max_num_queries_all_connections` to check all 
+  your database connections at once.
+
+Bugfixes
+^^^^^^^^
+
+
 v4.10.0 (2025-02-10)
 --------------------
 
