@@ -606,6 +606,8 @@ class DjangoAssertNumQueries(Protocol):
         num: int,
         connection: Any | None = ...,
         info: str | None = ...,
+        *,
+        using: str | None = ...,
     ) -> django.test.utils.CaptureQueriesContext:
         pass  # pragma: no cover
 
@@ -617,13 +619,21 @@ def _assert_num_queries(
     exact: bool = True,
     connection: Any | None = None,
     info: str | None = None,
+    *,
+    using: str | None = None,
 ) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
+    from django.db import connection as default_conn, connections
     from django.test.utils import CaptureQueriesContext
 
-    if connection is None:
-        from django.db import connection as conn
-    else:
+    if connection and using:
+        raise ValueError('The "connection" and "using" parameter cannot be used together')
+
+    if connection is not None:
         conn = connection
+    elif using is not None:
+        conn = connections[using]
+    else:
+        conn = default_conn
 
     verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:

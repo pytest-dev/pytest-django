@@ -15,6 +15,7 @@ from django.conf import settings as real_settings
 from django.core import mail
 from django.db import connection, transaction
 from django.test import AsyncClient, AsyncRequestFactory, Client, RequestFactory
+from django.utils.connection import ConnectionDoesNotExist
 from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
@@ -203,6 +204,28 @@ def test_django_assert_num_queries_db_connection(
 
     with pytest.raises(AttributeError):
         with django_assert_num_queries(1, connection=False):
+            pass
+
+
+@pytest.mark.django_db
+def test_django_assert_num_queries_db_using(
+    django_assert_num_queries: DjangoAssertNumQueries,
+) -> None:
+    from django.db import connection
+
+    with django_assert_num_queries(1, using="default"):
+        Item.objects.create(name="foo")
+
+    error_message = 'The "connection" and "using" parameter cannot be used together'
+    with pytest.raises(ValueError, match=error_message):
+        with django_assert_num_queries(1, connection=connection, using="default"):
+            Item.objects.create(name="foo")
+
+    with django_assert_num_queries(1, using=None):
+        Item.objects.create(name="foo")
+
+    with pytest.raises(ConnectionDoesNotExist):
+        with django_assert_num_queries(1, using="bad_db_name"):
             pass
 
 

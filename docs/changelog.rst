@@ -9,6 +9,10 @@ Compatibility
 
 * Added official support for Python 3.13.
 
+* Added ``using`` argument to :fixture:`django_assert_num_queries` and
+  :fixture:`django_assert_max_num_queries` to easily specify the database
+  alias to use.
+
 Bugfixes
 ^^^^^^^^
 
