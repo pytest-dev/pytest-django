@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ci-main-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   PYTEST_ADDOPTS: "--color=yes"
 
