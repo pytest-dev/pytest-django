@@ -5,11 +5,16 @@ except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
 
-from .fixtures import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks
+from .fixtures import (
+    DjangoAssertNumAllConnectionsQueries,
+    DjangoAssertNumQueries,
+    DjangoCaptureOnCommitCallbacks,
+)
 from .plugin import DjangoDbBlocker
 
 
 __all__ = [
+    "DjangoAssertNumAllConnectionsQueries",
     "DjangoAssertNumQueries",
     "DjangoCaptureOnCommitCallbacks",
     "DjangoDbBlocker",
