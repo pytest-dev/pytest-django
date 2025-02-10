@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sized
 from contextlib import contextmanager
 from functools import partial
 from typing import (
@@ -70,7 +71,7 @@ __all__ = [
 
 
 @runtime_checkable
-class QueryCaptureContextProtocol(Protocol):
+class QueryCaptureContextProtocol(Protocol, Sized):
     @property
     def captured_queries(self) -> List[Dict[str, Any]]: ...
 
