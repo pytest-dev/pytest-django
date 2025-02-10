@@ -17,6 +17,7 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    runtime_checkable,
     Union,
 )
 
@@ -38,7 +39,6 @@ _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
 _DjangoDbAvailableApps = Optional[List[str]]
 # transaction, reset_sequences, databases, serialized_rollback, available_apps
 _DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
-_QueriesContext = TypeVar("T", CaptureQueriesContext, CaptureAllConnectionsQueriesContext)
 
 
 __all__ = [
@@ -64,6 +64,22 @@ __all__ = [
     "settings",
     "transactional_db",
 ]
+
+
+@runtime_checkable
+class QueryCaptureContextProtocol(Protocol):
+    @property
+    def captured_queries(self) -> List[Dict[str, Any]]:
+        ...
+
+    def __enter__(self) -> "QueryCaptureContextProtocol":
+        ...
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        ...
+
+
+_QueriesContext = TypeVar("_QueriesContext", bound=QueryCaptureContextProtocol)
 
 
 @pytest.fixture(scope="session")
@@ -715,7 +731,7 @@ def _assert_num_queries_context(
     num: int,
     exact: bool = True,
     info: str | None = None,
-) -> Generator[_QueriesContext]:
+) -> ContextManager[_QueriesContext]:
     verbose = config.getoption("verbose") > 0
     with context:
         yield context
