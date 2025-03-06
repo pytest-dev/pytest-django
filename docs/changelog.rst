@@ -1,6 +1,15 @@
 Changelog
 =========
 
+v4.11.0 (Not released yet)
+--------------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Added official support for Django 5.2.
+
+
 v4.10.0 (2025-02-10)
 --------------------
 
