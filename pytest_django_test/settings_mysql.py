@@ -11,7 +11,6 @@ DATABASES = {
         "PASSWORD": environ.get("TEST_DB_PASSWORD", ""),
         "HOST": environ.get("TEST_DB_HOST", "localhost"),
         "OPTIONS": {
-            "init_command": "SET default_storage_engine=MyISAM",
             "charset": "utf8mb4",
         },
         "TEST": {
@@ -26,7 +25,6 @@ DATABASES = {
         "PASSWORD": environ.get("TEST_DB_PASSWORD", ""),
         "HOST": environ.get("TEST_DB_HOST", "localhost"),
         "OPTIONS": {
-            "init_command": "SET default_storage_engine=MyISAM",
             "charset": "utf8mb4",
         },
         "TEST": {
@@ -42,7 +40,6 @@ DATABASES = {
         "PASSWORD": environ.get("TEST_DB_PASSWORD", ""),
         "HOST": environ.get("TEST_DB_HOST", "localhost"),
         "OPTIONS": {
-            "init_command": "SET default_storage_engine=MyISAM",
             "charset": "utf8mb4",
         },
         "TEST": {
