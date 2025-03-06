@@ -71,6 +71,10 @@ jobs:
           python: '3.13'
           allow_failure: false
 
+        - name: py313-dj52-postgres-xdist-coverage
+          python: '3.13'
+          allow_failure: false
+
         - name: py313-dj51-postgres-xdist-coverage
           python: '3.13'
           allow_failure: false
@@ -85,6 +89,10 @@ jobs:
 
         - name: py311-dj42-postgres-xdist-coverage
           python: '3.11'
+          allow_failure: false
+
+        - name: py310-dj52-postgres-xdist-coverage
+          python: '3.10'
           allow_failure: false
 
         - name: py310-dj51-postgres-xdist-coverage
@@ -108,6 +116,10 @@ jobs:
           allow_failure: false
 
         - name: py313-djmain-sqlite-coverage
+          python: '3.13'
+          allow_failure: true
+
+        - name: py313-dj52-sqlite-coverage
           python: '3.13'
           allow_failure: true
 
