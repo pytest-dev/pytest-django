@@ -7,12 +7,11 @@ v4.11.0 (Not released yet)
 Compatibility
 ^^^^^^^^^^^^^
 
+* Added official support for Django 5.2 (`PR #1179 <https://github.com/pytest-dev/pytest-django/pull/1179>`__).
+* Dropped testing on MySQL’s MyISAM storage engine (`PR #1180 <https://github.com/pytest-dev/pytest-django/pull/1180>`__).
 * Added fixtures :fixture:`django_assert_num_queries_all_connections` and
   :fixture:`django_assert_max_num_queries_all_connections` to check all 
   your database connections at once.
-
-Bugfixes
-^^^^^^^^
 
 
 v4.10.0 (2025-02-10)
