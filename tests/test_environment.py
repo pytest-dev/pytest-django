@@ -395,3 +395,4 @@ def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
             pass
         """
     )
+    django_pytester.run(["manage.py", "test"])
