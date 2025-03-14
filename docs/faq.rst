@@ -79,8 +79,8 @@ How can I use ``manage.py test`` with pytest-django?
 ----------------------------------------------------
 
 pytest-django is designed to work with the ``pytest`` command, but if you
-really need integration with ``manage.py test``, you can add the path to 
-this class in your Django settings:
+really need integration with ``manage.py test``, you can add this class path 
+in your Django settings:
 
 .. code-block:: python
 
