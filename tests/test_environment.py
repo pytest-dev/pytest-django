@@ -386,7 +386,7 @@ def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> Non
     create_manage_py=True,
     extra_settings="""
     TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
-    """
+    """,
 )
 def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
@@ -399,4 +399,4 @@ def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
-    assert "1 passed" in '\n'.join(result.outlines)
+    assert "1 passed" in "\n".join(result.outlines)

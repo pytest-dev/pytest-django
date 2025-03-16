@@ -126,7 +126,7 @@ def django_pytester(
                 execute_from_command_line(sys.argv)
                 """
             )
-        )   
+        )
 
     tpkg_path.joinpath("__init__.py").touch()
 
