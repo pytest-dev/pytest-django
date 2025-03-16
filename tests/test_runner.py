@@ -1,6 +1,7 @@
+import pytest
+
 from pytest_django.runner import PytestTestRunner
 from unittest.mock import Mock, call
-import pytest
 
 
 @pytest.mark.parametrize("kwargs, expected", [
