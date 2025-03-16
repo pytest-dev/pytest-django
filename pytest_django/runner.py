@@ -22,9 +22,9 @@ class PytestTestRunner:
         argv = []
         if self.verbosity == 0:
             argv.append("--quiet")
-        if self.verbosity == 2:
+        elif self.verbosity == 2:
             argv.append("--verbose")
-        if self.verbosity == 3:
+        elif self.verbosity == 3:
             argv.append("-vv")
         if self.failfast:
             argv.append("--exitfirst")
