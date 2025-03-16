@@ -117,7 +117,16 @@ def django_pytester(
     tpkg_path.mkdir()
 
     if options["create_manage_py"]:
-        project_root.joinpath("manage.py").touch()
+        project_root.joinpath("manage.py").write_text(
+            dedent(
+                """
+                #!/usr/bin/env python
+                import sys
+                from django.core.management import execute_from_command_line
+                execute_from_command_line(sys.argv)
+                """
+            )
+        )   
 
     tpkg_path.joinpath("__init__.py").touch()
 

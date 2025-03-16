@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 from django.contrib.sites import models as site_models
@@ -381,6 +382,8 @@ def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> Non
 
 
 @pytest.mark.django_project(
+    project_root="django_project_root",
+    create_manage_py=True,
     extra_settings="""
     TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
     """
@@ -395,4 +398,5 @@ def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
             pass
         """
     )
-    django_pytester.run(*["manage.py", "test"])
+    result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
+    assert "1 passed" in '\n'.join(result.outlines)
