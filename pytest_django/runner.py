@@ -1,9 +1,8 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
-    from typing import Any
 
 
 class PytestTestRunner:
