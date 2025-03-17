@@ -24,5 +24,5 @@ def test_runner_run_tests(monkeypatch, kwargs, expected):
     pytest_mock = Mock()
     monkeypatch.setattr("pytest.main", pytest_mock)
     runner = PytestTestRunner(**kwargs)
-    runner.run_tests("tests")
+    runner.run_tests(["tests"])
     assert pytest_mock.call_args == expected

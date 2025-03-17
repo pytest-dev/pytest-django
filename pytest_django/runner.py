@@ -1,8 +1,5 @@
-from typing import TYPE_CHECKING, Any
-
-
-if TYPE_CHECKING:
-    from argparse import ArgumentParser
+from argparse import ArgumentParser
+from typing import Any, Iterable
 
 
 class PytestTestRunner:
@@ -21,7 +18,7 @@ class PytestTestRunner:
             "--keepdb", action="store_true", help="Preserves the test DB between runs."
         )
 
-    def run_tests(self, *test_labels: str, **kwargs: Any) -> int:
+    def run_tests(self, test_labels: Iterable[str], **kwargs: Any) -> int:
         """Run pytest and return the exitcode.
 
         It translates some of Django"s test command option to pytest"s.

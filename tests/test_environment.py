@@ -400,3 +400,21 @@ def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
     )
     result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
     assert "1 passed" in "\n".join(result.outlines)
+
+
+@pytest.mark.django_project(
+    project_root="django_project_root",
+    create_manage_py=True,
+)
+def test_manage_test_runner_without(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest
+
+        @pytest.mark.django_db
+        def test_inner_testrunner():
+            pass
+        """
+    )
+    result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
+    assert "Found 0 test(s)." in "\n".join(result.outlines)
