@@ -28,10 +28,9 @@ class PytestTestRunner:
         argv = []
         if self.verbosity == 0:
             argv.append("--quiet")
-        elif self.verbosity == 2:
-            argv.append("--verbose")
-        elif self.verbosity == 3:
-            argv.append("-vv")
+        elif self.verbosity >= 2:
+            verbosity = "v" * (self.verbosity - 1)
+            argv.append(f"-{verbosity}")
         if self.failfast:
             argv.append("--exitfirst")
         if self.keepdb:
