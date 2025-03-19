@@ -12,7 +12,7 @@ from pytest_django.runner import PytestTestRunner
             ({}, call(["tests"])),
             ({"verbosity": 0}, call(["--quiet", "tests"])),
             ({"verbosity": 1}, call(["tests"])),
-            ({"verbosity": 2}, call(["--verbose", "tests"])),
+            ({"verbosity": 2}, call(["-v", "tests"])),
             ({"verbosity": 3}, call(["-vv", "tests"])),
             ({"verbosity": 4}, call(["tests"])),
             ({"failfast": True}, call(["--exitfirst", "tests"])),
