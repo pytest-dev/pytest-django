@@ -14,7 +14,7 @@ from pytest_django.runner import PytestTestRunner
             ({"verbosity": 1}, call(["tests"])),
             ({"verbosity": 2}, call(["-v", "tests"])),
             ({"verbosity": 3}, call(["-vv", "tests"])),
-            ({"verbosity": 4}, call(["tests"])),
+            ({"verbosity": 4}, call(["-vvv", "tests"])),
             ({"failfast": True}, call(["--exitfirst", "tests"])),
             ({"keepdb": True}, call(["--reuse-db", "tests"])),
         ],
