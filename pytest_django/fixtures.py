@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from functools import partial
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ContextManager,
@@ -16,6 +17,7 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Sequence,
     Tuple,
     Union,
 )
@@ -119,6 +121,56 @@ def django_db_createdb(request: pytest.FixtureRequest) -> bool:
     return create_db
 
 
+def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
+    """Get the database aliases that need to be setup for a test, and whether
+    they need to be serialized."""
+    from django.db import DEFAULT_DB_ALIAS, connections
+    from django.test import TransactionTestCase
+
+    test_cls = getattr(test, "cls", None)
+    if test_cls and issubclass(test_cls, TransactionTestCase):
+        serialized_rollback = getattr(test, "serialized_rollback", False)
+        databases = getattr(test, "databases", None)
+    else:
+        fixtures = getattr(test, "fixturenames", ())
+        marker_db = test.get_closest_marker("django_db")
+        if marker_db:
+            (
+                transaction,
+                reset_sequences,
+                databases,
+                serialized_rollback,
+                available_apps,
+            ) = validate_django_db(marker_db)
+        elif "db" in fixtures or "transactional_db" in fixtures or "live_server" in fixtures:
+            serialized_rollback = "django_db_serialized_rollback" in fixtures
+            databases = None
+        else:
+            return (), False
+    if databases is None:
+        return (DEFAULT_DB_ALIAS,), serialized_rollback
+    elif databases == "__all__":
+        return connections, serialized_rollback
+    else:
+        return databases, serialized_rollback
+
+
+def _get_databases_for_setup(
+    items: Sequence[pytest.Item],
+) -> tuple[AbstractSet[str], AbstractSet[str]]:
+    """Get the database aliases that need to be setup, and the subset that needs
+    to be serialized."""
+    # Code derived from django.test.utils.DiscoverRunner.get_databases().
+    aliases: set[str] = set()
+    serialized_aliases: set[str] = set()
+    for test in items:
+        databases, serialized_rollback = _get_databases_for_test(test)
+        aliases.update(databases)
+        if serialized_rollback:
+            serialized_aliases.update(databases)
+    return aliases, serialized_aliases
+
+
 @pytest.fixture(scope="session")
 def django_db_setup(
     request: pytest.FixtureRequest,
@@ -140,10 +192,14 @@ def django_db_setup(
     if django_db_keepdb and not django_db_createdb:
         setup_databases_args["keepdb"] = True
 
+    aliases, serialized_aliases = _get_databases_for_setup(request.session.items)
+
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
             verbosity=request.config.option.verbose,
             interactive=False,
+            aliases=aliases,
+            serialized_aliases=serialized_aliases,
             **setup_databases_args,
         )
 
