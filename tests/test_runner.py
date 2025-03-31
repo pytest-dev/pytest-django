@@ -6,7 +6,7 @@ from pytest_django.runner import TestRunner
 
 
 @pytest.mark.parametrize(
-    *(
+    (
         "kwargs, expected",
         [
             ({}, call(["tests"])),
