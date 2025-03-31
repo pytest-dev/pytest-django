@@ -32,7 +32,7 @@ def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.runpytest_subprocess("-s")
-    assert "1 passed" in "\n".join(result.outlines)
+    assert "1 passed" in "\n".join([*result.outlines, *result.errlines])
 
 
 @pytest.mark.parametrize("subject", ["subject1", "subject2"])
