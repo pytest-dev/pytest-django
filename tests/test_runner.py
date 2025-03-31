@@ -2,7 +2,7 @@ from unittest.mock import Mock, call
 
 import pytest
 
-from pytest_django.runner import PytestTestRunner
+from pytest_django.runner import TestRunner
 
 
 @pytest.mark.parametrize(
@@ -23,6 +23,6 @@ from pytest_django.runner import PytestTestRunner
 def test_runner_run_tests(monkeypatch, kwargs, expected):
     pytest_mock = Mock()
     monkeypatch.setattr("pytest.main", pytest_mock)
-    runner = PytestTestRunner(**kwargs)
+    runner = TestRunner(**kwargs)
     runner.run_tests(["tests"])
     assert pytest_mock.call_args == expected
