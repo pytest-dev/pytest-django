@@ -16,7 +16,7 @@ from pytest_django.runner import TestRunner
         ({"verbosity": 4}, call(["-vvv", "tests"])),
         ({"failfast": True}, call(["--exitfirst", "tests"])),
         ({"keepdb": True}, call(["--reuse-db", "tests"])),
-    ]
+    ],
 )
 def test_runner_run_tests(monkeypatch, kwargs, expected):
     pytest_mock = Mock()
