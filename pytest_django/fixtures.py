@@ -256,6 +256,17 @@ def _django_db_helper(
         PytestDjangoTestCase.doClassCleanups()
 
 
+def _django_db_signature(
+    transaction: bool = False,
+    reset_sequences: bool = False,
+    databases: _DjangoDbDatabases = None,
+    serialized_rollback: bool = False,
+    available_apps: _DjangoDbAvailableApps = None,
+) -> _DjangoDb:
+    """The signature of the django_db marker. Used by validate_django_db."""
+    return transaction, reset_sequences, databases, serialized_rollback, available_apps
+
+
 def validate_django_db(marker: pytest.Mark) -> _DjangoDb:
     """Validate the django_db marker.
 
@@ -267,17 +278,7 @@ def validate_django_db(marker: pytest.Mark) -> _DjangoDb:
     Sequence reset, serialized_rollback, and available_apps are only allowed
     when combined with transaction.
     """
-
-    def apifun(
-        transaction: bool = False,
-        reset_sequences: bool = False,
-        databases: _DjangoDbDatabases = None,
-        serialized_rollback: bool = False,
-        available_apps: _DjangoDbAvailableApps = None,
-    ) -> _DjangoDb:
-        return transaction, reset_sequences, databases, serialized_rollback, available_apps
-
-    return apifun(*marker.args, **marker.kwargs)
+    return _django_db_signature(*marker.args, **marker.kwargs)
 
 
 def _disable_migrations() -> None:
