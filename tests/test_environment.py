@@ -18,6 +18,23 @@ from pytest_django_test.app.models import Item
 # to do it.
 
 
+@pytest.mark.django_project(
+    project_root="django_project_root",
+    extra_settings="""
+    EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+    """,
+)
+def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        def test_bad_mail():
+            pass
+        """
+    )
+    result = django_pytester.runpytest_subprocess("-s")
+    assert "1 passed" in "\n".join(result.outlines)
+
+
 @pytest.mark.parametrize("subject", ["subject1", "subject2"])
 def test_autoclear_mailbox(subject: str) -> None:
     assert len(mail.outbox) == 0
