@@ -385,7 +385,7 @@ def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> Non
     project_root="django_project_root",
     create_manage_py=True,
     extra_settings="""
-    TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
+    TEST_RUNNER = 'pytest_django.runner.TestRunner'
     """,
 )
 def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
