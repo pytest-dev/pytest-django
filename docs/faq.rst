@@ -84,7 +84,7 @@ in your Django settings:
 
 .. code-block:: python
 
-    TEST_RUNNER = 'pytest_django.runner.PytestTestRunner'
+    TEST_RUNNER = 'pytest_django.runner.TestRunner'
 
 Usage:
 
