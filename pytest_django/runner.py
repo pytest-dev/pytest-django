@@ -20,11 +20,6 @@ class TestRunner:
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
         parser.add_argument(
-            "--failfast",
-            action="store_true",
-            help="Stops the test suite after the first failure.",
-        )
-        parser.add_argument(
             "--keepdb", action="store_true", help="Preserves the test DB between runs."
         )
 
