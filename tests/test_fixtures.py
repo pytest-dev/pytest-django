@@ -857,11 +857,16 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
 
     django_pytester.create_test_module(
         """
-        def test_bad_mail(settings, mailoutbox):
+        def test_with_fixture(settings, mailoutbox):
             assert mailoutbox is None
             assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
+
+        def test_without_fixture():
+            from django.core import mail
+            assert not hasattr(mail, "outbox")
         """
     )
-    result = django_pytester.runpytest_subprocess()
-    assert result.ret == 0
-    assert expected_warning_message in "\n".join(result.outlines)
+    result = django_pytester.runpytest_subprocess("-q")
+    output = "\n".join(result.outlines)
+    assert "2 passed, 2 warnings" in output
+    assert expected_warning_message in output
