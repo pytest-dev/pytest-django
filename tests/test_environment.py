@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 from django.contrib.sites import models as site_models
@@ -308,7 +309,6 @@ class TestrunnerVerbosity:
 
     @pytest.fixture
     def pytester(self, django_pytester: DjangoPytester) -> pytest.Pytester:
-        print("pytester")
         django_pytester.create_test_module(
             """
             import pytest
@@ -379,3 +379,42 @@ def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> Non
     settings.SITE_ID = site.id
     assert Site.objects.get_current() == site
     assert len(site_models.SITE_CACHE) == 1
+
+
+@pytest.mark.django_project(
+    project_root="django_project_root",
+    create_manage_py=True,
+    extra_settings="""
+    TEST_RUNNER = 'pytest_django.runner.TestRunner'
+    """,
+)
+def test_manage_test_runner(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest
+
+        @pytest.mark.django_db
+        def test_inner_testrunner():
+            pass
+        """
+    )
+    result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
+    assert "1 passed" in "\n".join(result.outlines)
+
+
+@pytest.mark.django_project(
+    project_root="django_project_root",
+    create_manage_py=True,
+)
+def test_manage_test_runner_without(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest
+
+        @pytest.mark.django_db
+        def test_inner_testrunner():
+            pass
+        """
+    )
+    result = django_pytester.run(*[sys.executable, "django_project_root/manage.py", "test"])
+    assert "Found 0 test(s)." in "\n".join(result.outlines)
