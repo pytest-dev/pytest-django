@@ -22,13 +22,19 @@ from pytest_django_test.app.models import Item
     create_manage_py=True,
     extra_settings="""
     EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-
-    import unittest.mock
-    unittest.mock.patch("django.test.utils.setup_test_environment", lambda *a, **k: None).start()
-    unittest.mock.patch("django.test.utils.teardown_test_environment", lambda *a, **k: None).start()
     """,
 )
 def test_mail_auto_fixture(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest
+
+        @pytest.fixture(autouse=True, scope="session")
+        def django_test_environment(request):
+            yield
+        """, filename="conftest.py"
+    )
+
     django_pytester.create_test_module(
         """
         def test_bad_mail(settings, mailoutbox):
