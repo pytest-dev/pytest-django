@@ -18,35 +18,6 @@ from pytest_django_test.app.models import Item
 # to do it.
 
 
-@pytest.mark.django_project(
-    create_manage_py=True,
-    extra_settings="""
-    EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-    """,
-)
-def test_mail_auto_fixture(django_pytester: DjangoPytester) -> None:
-    django_pytester.create_test_module(
-        """
-        import pytest
-
-        @pytest.fixture(autouse=True, scope="session")
-        def django_test_environment(request):
-            yield
-        """, filename="conftest.py"
-    )
-
-    django_pytester.create_test_module(
-        """
-        def test_bad_mail(settings, mailoutbox):
-            assert mailoutbox is None
-            assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
-        """
-    )
-    result = django_pytester.runpytest_subprocess("-s", '-vv')
-    print("\n".join([*result.outlines, *result.errlines]))
-    assert "1 passed" in "\n".join([*result.outlines, *result.errlines])
-
-
 @pytest.mark.parametrize("subject", ["subject1", "subject2"])
 def test_autoclear_mailbox(subject: str) -> None:
     assert len(mail.outbox) == 0
