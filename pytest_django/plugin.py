@@ -599,8 +599,6 @@ def _dj_autoclear_mailbox() -> None:
 
     from django.core import mail
 
-    # import ipdb; print('\a'); ipdb.sset_trace()
-    # del mail.outbox[:]
     if hasattr(mail, "outbox"):
         mail.outbox.clear()
 
@@ -616,7 +614,8 @@ def mailoutbox(
 
     from django.core import mail
 
-    return mail.outbox  # type: ignore[no-any-return]
+    if hasattr(mail, "outbox"):
+        return mail.outbox  # type: ignore[no-any-return]
 
 
 @pytest.fixture()

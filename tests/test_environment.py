@@ -19,21 +19,24 @@ from pytest_django_test.app.models import Item
 
 
 @pytest.mark.django_project(
+    create_manage_py=True,
     extra_settings="""
     EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
     import unittest.mock
-    unittest.mock.patch("pytest_django.lazy_django.django_settings_is_configured", lambda: False).start()
+    unittest.mock.patch("django.test.utils.setup_test_environment", lambda *a, **k: None).start()
+    unittest.mock.patch("django.test.utils.teardown_test_environment", lambda *a, **k: None).start()
     """,
 )
 def test_mail_auto_fixture(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
-        def test_bad_mail():
-            pass
+        def test_bad_mail(settings, mailoutbox):
+            assert mailoutbox is None
+            assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
         """
     )
-    result = django_pytester.runpytest_subprocess("-s")
+    result = django_pytester.runpytest_subprocess("-s", '-vv')
     print("\n".join([*result.outlines, *result.errlines]))
     assert "1 passed" in "\n".join([*result.outlines, *result.errlines])
 
