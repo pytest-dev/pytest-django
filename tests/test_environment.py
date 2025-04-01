@@ -21,26 +21,8 @@ from pytest_django_test.app.models import Item
 @pytest.mark.django_project(
     extra_settings="""
     EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-    import unittest.mock
-    from types import SimpleNamespace
 
-    def setup_test_environment(*a, **k):
-        if hasattr(_TestState, "saved_data"):
-            # Executing this function twice would overwrite the saved values.
-            raise RuntimeError(
-                "setup_test_environment() was already called and can't be called "
-                "again without first calling teardown_test_environment()."
-            )
-
-        saved_data = SimpleNamespace()
-        _TestState.saved_data = saved_data
-        saved_data.allowed_hosts = []
-        saved_data.debug = False
-        saved_data.email_backend = None
-        saved_data.template_render = None
-
-    unittest.mock.patch("django.test.utils.setup_test_environment", setup_test_environment).start()
-    from django.test.utils import _TestState
+    unittest.mock.patch("pytest_django.lazy_django.django_settings_is_configured", lambda: False).start()
     """,
 )
 def test_mail_auto_fixture(django_pytester: DjangoPytester) -> None:
@@ -50,7 +32,7 @@ def test_mail_auto_fixture(django_pytester: DjangoPytester) -> None:
             pass
         """
     )
-    result = django_pytester.runpytest_subprocess("-s", "-vv")
+    result = django_pytester.runpytest_subprocess("-s")
     print("\n".join([*result.outlines, *result.errlines]))
     assert "1 passed" in "\n".join([*result.outlines, *result.errlines])
 
