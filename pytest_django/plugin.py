@@ -593,7 +593,7 @@ def _django_setup_unittest(
 
 
 @pytest.fixture(autouse=True)
-def _dj_autoclear_mailbox() -> None:
+def _dj_autoclear_mailbox(request: pytest.FixtureRequest) -> None:
     if not django_settings_is_configured():
         return
 
@@ -601,6 +601,10 @@ def _dj_autoclear_mailbox() -> None:
 
     if hasattr(mail, "outbox"):
         mail.outbox.clear()
+    else:
+        request.node.warn(
+            pytest.PytestWarning("Error when trying to clear mailbox, possible misconfiguration")
+        )
 
 
 @pytest.fixture()
