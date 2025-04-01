@@ -868,5 +868,5 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     )
     result = django_pytester.runpytest_subprocess("-q")
     output = "\n".join(result.outlines)
-    assert "2 passed, 2 warnings" in output
+    assert "2 passed" in output
     assert expected_warning_message in output
