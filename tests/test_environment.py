@@ -22,6 +22,7 @@ from pytest_django_test.app.models import Item
     extra_settings="""
     EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
+    import unittest.mock
     unittest.mock.patch("pytest_django.lazy_django.django_settings_is_configured", lambda: False).start()
     """,
 )
