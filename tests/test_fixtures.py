@@ -837,7 +837,7 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     """
     django_test_environment fixture can be overridden by user, and that would break mailoutbox fixture.
 
-    Normally settings.EMAIL_BACKEND is set to "django.core.mail.backends.locmem.EmailBackend" by django, 
+    Normally settings.EMAIL_BACKEND is set to "django.core.mail.backends.locmem.EmailBackend" by django,
     along with mail.outbox = []. If this function doesn't run for whatever reason, the mailoutbox fixture will not work properly.
     """
     django_pytester.create_test_module(
@@ -847,7 +847,8 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
         @pytest.fixture(autouse=True, scope="session")
         def django_test_environment(request):
             yield
-        """, filename="conftest.py"
+        """,
+        filename="conftest.py",
     )
 
     django_pytester.create_test_module(

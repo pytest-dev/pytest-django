@@ -616,6 +616,7 @@ def mailoutbox(
 
     if hasattr(mail, "outbox"):
         return mail.outbox  # type: ignore[no-any-return]
+    return None
 
 
 @pytest.fixture()
