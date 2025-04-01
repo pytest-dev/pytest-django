@@ -1,14 +1,25 @@
 Changelog
 =========
 
-v4.11.0 (Not released yet)
---------------------------
+v4.11.0 (2025-04-01)
+--------------------
 
 Compatibility
 ^^^^^^^^^^^^^
 
 * Added official support for Django 5.2 (`PR #1179 <https://github.com/pytest-dev/pytest-django/pull/1179>`__).
 * Dropped testing on MySQL’s MyISAM storage engine (`PR #1180 <https://github.com/pytest-dev/pytest-django/pull/1180>`__).
+
+Bugfixes
+^^^^^^^^
+
+* Stopped setting up and serializing databases on test session setup when not needed (the database is not requested / ``serialized_rollback`` is not used).
+  On test databases with large amounts of pre-seeded data, this may remove a delay of a few seconds when running ``pytest --reuse-db``.
+
+  The determination of which databases to setup is done by static inspection of the test suite.
+  Using pytest's dynamic features to request db access, such as :meth:`request.getfixturevalue("db") <pytest.FixtureRequest.getfixturevalue>`, may throw off this analysis.
+  If you start seeing ``DatabaseOperationForbidden`` or "unable to open database" errors, this is likely the cause.
+  To fix this, decorate at least one test with the :func:`django_db <pytest.mark.django_db>` marker with appropriate ``databases`` and ``serialized_rollback`` settings.
 
 v4.10.0 (2025-02-10)
 --------------------
