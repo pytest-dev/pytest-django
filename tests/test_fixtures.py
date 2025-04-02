@@ -841,9 +841,6 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     along with mail.outbox = []. If this function doesn't run for whatever reason, the
     mailoutbox fixture will not work properly.
     """
-    expected_warning_message = (
-        "PytestWarning: Error when trying to clear mailbox, possible misconfiguration"
-    )
     django_pytester.create_test_module(
         """
         import pytest
@@ -869,7 +866,6 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     result = django_pytester.runpytest_subprocess("-q")
     output = "\n".join(result.outlines)
     assert "2 passed" in output
-    assert expected_warning_message in output
 
 
 @pytest.mark.django_project(has_settings=False)
@@ -877,10 +873,10 @@ def test_no_settings(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
         def test_skipped_settings(settings):
-            pass
+            assert False
 
-        def test_mailoutbox(mailoutbox):
-            assert mailoutbox is None
+        def test_skipped_mailoutbox(mailoutbox):
+            assert False
 
         def test_mail():
             from django.core import mail
@@ -890,5 +886,5 @@ def test_no_settings(django_pytester: DjangoPytester) -> None:
     result = django_pytester.runpytest_subprocess("-v")
     output = "\n".join(result.outlines)
     assert "::test_skipped_settings SKIPPED" in output
-    assert "::test_mailoutbox PASSED" in output
+    assert "::test_skipped_mailoutbox SKIPPED" in output
     assert "::test_mail PASSED" in output
