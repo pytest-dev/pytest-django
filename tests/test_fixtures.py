@@ -863,9 +863,8 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
             assert not hasattr(mail, "outbox")
         """
     )
-    result = django_pytester.runpytest_subprocess("-q")
-    output = "\n".join(result.outlines)
-    assert "2 passed" in output
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(passed=2)
 
 
 @pytest.mark.django_project(has_settings=False)
@@ -883,8 +882,5 @@ def test_no_settings(django_pytester: DjangoPytester) -> None:
             assert not hasattr(mail, "outbox")
         """
     )
-    result = django_pytester.runpytest_subprocess("-v")
-    output = "\n".join(result.outlines)
-    assert "::test_skipped_settings SKIPPED" in output
-    assert "::test_skipped_mailoutbox SKIPPED" in output
-    assert "::test_mail PASSED" in output
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(passed=1, skipped=2)
