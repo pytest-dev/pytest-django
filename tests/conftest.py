@@ -137,7 +137,8 @@ def django_pytester(
 
     # Copy the test app to make it available in the new test run
     shutil.copytree(str(app_source), str(test_app_path))
-    tpkg_path.joinpath("the_settings.py").write_text(test_settings)
+    if options["has_settings"]:
+        tpkg_path.joinpath("the_settings.py").write_text(test_settings)
 
     # For suprocess tests, pytest's `pythonpath` setting doesn't currently
     # work, only the envvar does.
