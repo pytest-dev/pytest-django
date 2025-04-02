@@ -30,11 +30,13 @@ def _marker_apifun(
     extra_settings: str = "",
     create_manage_py: bool = False,
     project_root: str | None = None,
+    has_settings: bool = True,
 ):
     return {
         "extra_settings": extra_settings,
         "create_manage_py": create_manage_py,
         "project_root": project_root,
+        "has_settings": has_settings,
     }
 
 
@@ -142,7 +144,10 @@ def django_pytester(
     pythonpath = os.pathsep.join(filter(None, [str(REPOSITORY_ROOT), os.getenv("PYTHONPATH", "")]))
     monkeypatch.setenv("PYTHONPATH", pythonpath)
 
-    monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
+    if options["has_settings"]:
+        monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
+    else:
+        monkeypatch.delenv("DJANGO_SETTINGS_MODULE", raising=False)
 
     def create_test_module(test_code: str, filename: str = "test_the_test.py") -> Path:
         r = tpkg_path.joinpath(filename)
