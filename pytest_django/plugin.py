@@ -593,7 +593,7 @@ def _django_setup_unittest(
 
 
 @pytest.fixture(autouse=True)
-def _dj_autoclear_mailbox(request: pytest.FixtureRequest) -> None:
+def _dj_autoclear_mailbox() -> None:
     if not django_settings_is_configured():
         return
 
