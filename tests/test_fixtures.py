@@ -867,7 +867,7 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     result.assert_outcomes(passed=2)
 
 
-@pytest.mark.django_project(has_settings=False)
+@pytest.mark.django_project(create_settings=False)
 def test_no_settings(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """

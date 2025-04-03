@@ -30,13 +30,13 @@ def _marker_apifun(
     extra_settings: str = "",
     create_manage_py: bool = False,
     project_root: str | None = None,
-    has_settings: bool = True,
+    create_settings: bool = True,
 ):
     return {
         "extra_settings": extra_settings,
         "create_manage_py": create_manage_py,
         "project_root": project_root,
-        "has_settings": has_settings,
+        "create_settings": create_settings,
     }
 
 
@@ -137,7 +137,7 @@ def django_pytester(
 
     # Copy the test app to make it available in the new test run
     shutil.copytree(str(app_source), str(test_app_path))
-    if options["has_settings"]:
+    if options["create_settings"]:
         tpkg_path.joinpath("the_settings.py").write_text(test_settings)
 
     # For suprocess tests, pytest's `pythonpath` setting doesn't currently
@@ -145,7 +145,7 @@ def django_pytester(
     pythonpath = os.pathsep.join(filter(None, [str(REPOSITORY_ROOT), os.getenv("PYTHONPATH", "")]))
     monkeypatch.setenv("PYTHONPATH", pythonpath)
 
-    if options["has_settings"]:
+    if options["create_settings"]:
         monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.the_settings")
     else:
         monkeypatch.delenv("DJANGO_SETTINGS_MODULE", raising=False)
