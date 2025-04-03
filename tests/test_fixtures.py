@@ -855,7 +855,7 @@ def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> Non
     django_pytester.create_test_module(
         """
         def test_with_fixture(settings, mailoutbox):
-            assert mailoutbox is None
+            assert mailoutbox == []
             assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
 
         def test_without_fixture():
