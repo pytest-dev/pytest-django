@@ -432,6 +432,28 @@ def test_unittest_interaction(django_pytester: DjangoPytester) -> None:
     )
 
 
+def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
+    """Test that Django TestCase multi-db support works."""
+
+    django_pytester.create_test_module(
+        """
+        import pytest
+        from django.test import TestCase
+        from .app.models import Item, SecondItem
+
+        class TestCase(TestCase):
+            databases = ["default", "second"]
+
+            def test_db_access(self):
+                Item.objects.count() == 0
+                SecondItem.objects.count() == 0
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=1)
+
+
 class Test_database_blocking:
     def test_db_access_in_conftest(self, django_pytester: DjangoPytester) -> None:
         """Make sure database access in conftest module is prohibited."""

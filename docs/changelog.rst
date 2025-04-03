@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v4.11.1 (TBD)
+-------------
+
+Bugfixes
+^^^^^^^^
+
+* Fixed a regression in v4.11.0 for Django ``TestCase`` tests using the ``databases`` class variable (`#1188 <https://github.com/pytest-dev/pytest-django/issues/1188>`__).
+
 v4.11.0 (2025-04-01)
 --------------------
 
