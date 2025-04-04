@@ -149,8 +149,8 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
 
     test_cls = getattr(test, "cls", None)
     if test_cls and issubclass(test_cls, TransactionTestCase):
-        serialized_rollback = getattr(test, "serialized_rollback", False)
-        databases = getattr(test, "databases", None)
+        serialized_rollback = getattr(test_cls, "serialized_rollback", False)
+        databases = getattr(test_cls, "databases", None)
     else:
         fixtures = getattr(test, "fixturenames", ())
         marker_db = test.get_closest_marker("django_db")
