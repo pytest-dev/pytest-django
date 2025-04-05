@@ -584,9 +584,15 @@ class SettingsWrapper:
 
 
 @pytest.fixture()
-def settings():
+def settings(request):
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
+
+    # Order the `settings` fixture after DB.
+    # We don't want overridden settings to be in effect during
+    # DB setup/teardown/post_migrate.
+    if 'transactional_db' in request.fixturenames:
+        request.getfixturevalue('transactional_db')
 
     wrapper = SettingsWrapper()
     yield wrapper
