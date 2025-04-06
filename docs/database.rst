@@ -368,11 +368,11 @@ Put this into ``conftest.py``::
     def django_db_setup(requests):
         from django.conf import settings
 
-        settings.DATABASES['default'] = {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': 'db.example.com',
-            'NAME': 'external_db',
-        }
+        # Do NOT override the whole `settings.DATABASES['default'] = {..}`
+        # as this could lead to errors.
+        settings.DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+        settings.DATABASES['default']['HOST'] = 'db.example.com'
+        settings.DATABASES['default']['NAME'] = 'external_db'
 
         yield request.getfixturevalue("django_db_setup")
 
