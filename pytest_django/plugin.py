@@ -376,6 +376,7 @@ def pytest_configure(config: pytest.Config) -> None:
 
     if config.option.verbose > 0:
         from .asserts import test_case
+
         test_case.maxDiff = None
 
 
