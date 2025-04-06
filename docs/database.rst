@@ -365,7 +365,7 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup():
+    def django_db_setup(requests):
         from django.conf import settings
 
         settings.DATABASES['default'] = {
@@ -373,6 +373,8 @@ Put this into ``conftest.py``::
             'HOST': 'db.example.com',
             'NAME': 'external_db',
         }
+
+        yield request.getfixturevalue("django_db_setup")
 
 
 Populate the database with initial test data
