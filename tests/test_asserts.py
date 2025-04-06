@@ -88,7 +88,7 @@ def test_assert_diff(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.runpytest_subprocess()
-    assert "[truncated]... != 'a'" in "\n".join([*results.stdout, *results.stderr])
+    assert "[truncated]... != 'a'" in "\n".join([*result.stdout, *result.stderr])
     result.assert_outcomes(passed=1, errored=1)
 
 
@@ -105,5 +105,5 @@ def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.runpytest_subprocess("-v")
-    assert "a" * 10_000 in "\n".join([*results.stdout, *results.stderr])
+    assert "a" * 10_000 in "\n".join([*result.stdout, *result.stderr])
     result.assert_outcomes(passed=1, errored=1)
