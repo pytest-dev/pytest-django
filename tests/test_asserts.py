@@ -8,10 +8,10 @@ import inspect
 
 import pytest
 
+from .helpers import DjangoPytester
+
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
-
-from .helpers import DjangoPytester
 
 
 def _get_actual_assertions_names() -> list[str]:
