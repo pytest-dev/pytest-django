@@ -11,6 +11,8 @@ import pytest
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
 
+from .helpers import DjangoPytester
+
 
 def _get_actual_assertions_names() -> list[str]:
     """
@@ -82,7 +84,7 @@ def test_assert_diff(django_pytester: DjangoPytester) -> None:
             assert pytest_django.asserts.test_case.maxDiff is not None
 
         def test_assert():
-            pytest_django.asserts.assertEquals("a"* 10_000, "a")
+            pytest_django.asserts.assertXMLEqual("a" * 10_000, "a")
         """
     )
     result = django_pytester.runpytest_subprocess()
@@ -99,7 +101,7 @@ def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
             assert pytest_django.asserts.test_case.maxDiff is None
 
         def test_assert():
-            pytest_django.asserts.assertEquals("a" * 10_000, "a")
+            pytest_django.asserts.assertXMLEqual("a" * 10_000, "a")
         """
     )
     result = django_pytester.runpytest_subprocess("-v")
