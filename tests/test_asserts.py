@@ -71,3 +71,29 @@ def test_sanity() -> None:
         pass
 
     assert assertContains.__doc__
+
+
+def test_assert_diff(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest_django.asserts
+
+        def test_assert(settings, mailoutbox):
+            pytest_django.asserts.assertEquals("a"* 10_000, "a")
+        """
+    )
+    result = django_pytester.runpytest_subprocess()
+    assert "[truncated]... != 'a'" in "\n".join([*results.stdout, *results.stderr])
+
+
+def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import pytest_django.asserts
+
+        def test_assert(settings, mailoutbox):
+            pytest_django.asserts.assertEquals("a" * 10_000, "a")
+        """
+    )
+    result = django_pytester.runpytest_subprocess("-v")
+    assert "a" * 10_000 in "\n".join([*results.stdout, *results.stderr])
