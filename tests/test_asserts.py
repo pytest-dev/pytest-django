@@ -78,13 +78,16 @@ def test_assert_diff(django_pytester: DjangoPytester) -> None:
         """
         import pytest_django.asserts
 
-        def test_assert(settings, mailoutbox):
+        def test_test_case():
+            assert pytest_django.asserts.test_case.maxDiff is not None
+
+        def test_assert():
             pytest_django.asserts.assertEquals("a"* 10_000, "a")
         """
     )
     result = django_pytester.runpytest_subprocess()
     assert "[truncated]... != 'a'" in "\n".join([*results.stdout, *results.stderr])
-    result.assert_outcomes(errored=1)
+    result.assert_outcomes(passed=1, errored=1)
 
 
 def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
@@ -92,10 +95,13 @@ def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
         """
         import pytest_django.asserts
 
-        def test_assert(settings, mailoutbox):
+        def test_test_case():
+            assert pytest_django.asserts.test_case.maxDiff is None
+
+        def test_assert():
             pytest_django.asserts.assertEquals("a" * 10_000, "a")
         """
     )
     result = django_pytester.runpytest_subprocess("-v")
     assert "a" * 10_000 in "\n".join([*results.stdout, *results.stderr])
-    result.assert_outcomes(errored=1)
+    result.assert_outcomes(passed=1, errored=1)
