@@ -75,6 +75,7 @@ def test_sanity() -> None:
     assert assertContains.__doc__
 
 
+@pytest.mark.django_project(create_manage_py=True)
 def test_assert_diff(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
@@ -92,6 +93,7 @@ def test_assert_diff(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1, errors=1)
 
 
+@pytest.mark.django_project(create_manage_py=True)
 def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
