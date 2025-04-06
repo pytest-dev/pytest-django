@@ -334,7 +334,7 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup():
+    def django_db_setup(requests):
         from django.conf import settings
 
         settings.DATABASES['default']['NAME'] = 'the_copied_db'
@@ -342,7 +342,7 @@ Put this into ``conftest.py``::
         run_sql('DROP DATABASE IF EXISTS the_copied_db')
         run_sql('CREATE DATABASE the_copied_db TEMPLATE the_source_db')
 
-        yield
+        yield request.getfixturevalue("django_db_setup")
 
         for connection in connections.all():
             connection.close()
