@@ -604,7 +604,8 @@ def _dj_autoclear_mailbox() -> None:
 
     from django.core import mail
 
-    del mail.outbox[:]
+    if hasattr(mail, "outbox"):
+        mail.outbox.clear()
 
 
 @pytest.fixture()
@@ -613,12 +614,13 @@ def mailoutbox(
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
     """A clean email outbox to which Django-generated emails are sent."""
-    if not django_settings_is_configured():
-        return None
+    skip_if_no_django()
 
     from django.core import mail
 
-    return mail.outbox  # type: ignore[no-any-return]
+    if hasattr(mail, "outbox"):
+        return mail.outbox  # type: ignore[no-any-return]
+    return []
 
 
 @pytest.fixture()
