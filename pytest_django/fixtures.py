@@ -264,7 +264,6 @@ def django_testcase_class(
     _serialized_rollback = serialized_rollback
     _databases = databases
     _available_apps = available_apps
-    _verbose = request.config.option.verbose > 0
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         reset_sequences = _reset_sequences
@@ -273,8 +272,6 @@ def django_testcase_class(
             databases = _databases
         if _available_apps is not None:
             available_apps = _available_apps
-        if _verbose:
-            maxDiff = None
 
         # For non-transactional tests, skip executing `django.test.TestCase`'s
         # `setUpClass`/`tearDownClass`, only execute the super class ones.
