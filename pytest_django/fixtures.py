@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sized
 from contextlib import contextmanager
 from functools import partial
 from typing import (
@@ -11,15 +12,19 @@ from typing import (
     Any,
     Callable,
     ContextManager,
+    Dict,
     Generator,
     Iterable,
+    Iterator,
     List,
     Literal,
     Optional,
     Protocol,
     Sequence,
     Tuple,
+    TypeVar,
     Union,
+    runtime_checkable,
 )
 
 import pytest
@@ -51,7 +56,9 @@ __all__ = [
     "client",
     "db",
     "django_assert_max_num_queries",
+    "django_assert_max_num_queries_all_connections",
     "django_assert_num_queries",
+    "django_assert_num_queries_all_connections",
     "django_capture_on_commit_callbacks",
     "django_db_reset_sequences",
     "django_db_serialized_rollback",
@@ -63,6 +70,19 @@ __all__ = [
     "settings",
     "transactional_db",
 ]
+
+
+@runtime_checkable
+class QueryCaptureContextProtocol(Protocol, Sized):
+    @property
+    def captured_queries(self) -> List[Dict[str, Any]]: ...
+
+    def __enter__(self) -> QueryCaptureContextProtocol: ...
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None: ...
+
+
+_QueriesContext = TypeVar("_QueriesContext", bound=QueryCaptureContextProtocol)
 
 
 @pytest.fixture(scope="session")
@@ -654,6 +674,43 @@ def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None,
     live_server._live_server_modified_settings.disable()
 
 
+class CaptureAllConnectionsQueriesContext:
+    """
+    Context manager that captures all queries executed by Django ORM across all Databases in settings.DATABASES.
+    """
+
+    def __init__(self) -> None:
+        from django.db import connections
+        from django.test.utils import CaptureQueriesContext
+
+        self.contexts = {alias: CaptureQueriesContext(connections[alias]) for alias in connections}
+
+    def __iter__(self) -> Iterable[dict[str, Any]]:
+        return iter(self.captured_queries)
+
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        return self.captured_queries[index]
+
+    def __len__(self) -> int:
+        return len(self.captured_queries)
+
+    @property
+    def captured_queries(self) -> list[dict[str, Any]]:
+        queries = []
+        for context in self.contexts.values():
+            queries.extend(context.captured_queries)
+        return queries
+
+    def __enter__(self):
+        for context in self.contexts.values():
+            context.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        for context in self.contexts.values():
+            context.__exit__(exc_type, exc_val, exc_tb)
+
+
 class DjangoAssertNumQueries(Protocol):
     """The type of the `django_assert_num_queries` and
     `django_assert_max_num_queries` fixtures."""
@@ -665,8 +722,18 @@ class DjangoAssertNumQueries(Protocol):
         info: str | None = ...,
         *,
         using: str | None = ...,
-    ) -> django.test.utils.CaptureQueriesContext:
-        pass  # pragma: no cover
+    ) -> ContextManager[django.test.utils.CaptureQueriesContext]: ...
+
+
+class DjangoAssertNumAllConnectionsQueries(Protocol):
+    """The type of the `django_assert_num_queries_all_connections` and
+    `django_assert_max_num_queries_all_connections` fixtures."""
+
+    def __call__(
+        self,
+        num: int,
+        info: str | None = ...,
+    ) -> ContextManager[CaptureAllConnectionsQueriesContext]: ...
 
 
 @contextmanager
@@ -692,8 +759,37 @@ def _assert_num_queries(
     else:
         conn = default_conn
 
-    verbose = config.getoption("verbose") > 0
     with CaptureQueriesContext(conn) as context:
+        yield from _assert_num_queries_context(
+            config=config, context=context, num=num, exact=exact, info=info
+        )
+
+
+@contextmanager
+def _assert_num_queries_all_db(
+    config,
+    num: int,
+    exact: bool = True,
+    info: str | None = None,
+) -> Generator[CaptureAllConnectionsQueriesContext, None, None]:
+    """A recreation of pytest-django's assert_num_queries that works with all databases in settings.Databases."""
+
+    with CaptureAllConnectionsQueriesContext() as context:
+        yield from _assert_num_queries_context(
+            config=config, context=context, num=num, exact=exact, info=info
+        )
+
+
+def _assert_num_queries_context(
+    *,
+    config: pytest.Config,
+    context: _QueriesContext,
+    num: int,
+    exact: bool = True,
+    info: str | None = None,
+) -> Iterator[_QueriesContext]:
+    verbose = config.getoption("verbose") > 0
+    with context:
         yield context
         num_performed = len(context)
         if exact:
@@ -726,6 +822,22 @@ def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQue
 def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     """Allows to check for an expected maximum number of DB queries."""
     return partial(_assert_num_queries, pytestconfig, exact=False)
+
+
+@pytest.fixture(scope="function")
+def django_assert_num_queries_all_connections(
+    pytestconfig: pytest.Config,
+) -> DjangoAssertNumAllConnectionsQueries:
+    """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is equal to the given number."""
+    return partial(_assert_num_queries_all_db, pytestconfig)
+
+
+@pytest.fixture(scope="function")
+def django_assert_max_num_queries_all_connections(
+    pytestconfig: pytest.Config,
+) -> DjangoAssertNumAllConnectionsQueries:
+    """Asserts that the number of queries executed by Django ORM across all connections in settings.DATABASES is less than or equal to the given number."""
+    return partial(_assert_num_queries_all_db, pytestconfig, exact=False)
 
 
 class DjangoCaptureOnCommitCallbacks(Protocol):
