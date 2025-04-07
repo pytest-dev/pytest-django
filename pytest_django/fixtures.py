@@ -21,7 +21,7 @@ from typing import (
     Tuple,
     Union,
 )
-
+   
 import pytest
 
 from . import live_server_helper
@@ -220,7 +220,7 @@ def django_db_setup(
 @pytest.fixture()
 def django_testcase_class(
     request: pytest.FixtureRequest,
-):
+) -> Generator[None, None, type[django.test.TestCase | django.test.TransactionTestCase]]:
     if is_django_unittest(request):
         yield
         return
@@ -264,6 +264,7 @@ def django_testcase_class(
     _serialized_rollback = serialized_rollback
     _databases = databases
     _available_apps = available_apps
+    _verbose = request.config.option.verbose > 0
 
     class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
         reset_sequences = _reset_sequences
@@ -272,6 +273,8 @@ def django_testcase_class(
             databases = _databases
         if _available_apps is not None:
             available_apps = _available_apps
+        if _verbose:
+            maxDiff = None
 
         # For non-transactional tests, skip executing `django.test.TestCase`'s
         # `setUpClass`/`tearDownClass`, only execute the super class ones.
@@ -304,27 +307,25 @@ def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker: DjangoDbBlocker,
-    django_testcase_class,
+    django_testcase_class: type[django.test.TestCase | django.test.TransactionTestCase],
 ) -> Generator[None, None, None]:
     if is_django_unittest(request):
         yield
         return
 
     with django_db_blocker.unblock():
-        PytestDjangoTestCase = django_testcase_class
+        django_testcase_class.setUpClass()
 
-        PytestDjangoTestCase.setUpClass()
-
-        test_case = PytestDjangoTestCase(methodName="__init__")
+        test_case = django_testcase_class(methodName="__init__")
         test_case._pre_setup()
 
         yield test_case
 
         test_case._post_teardown()
 
-        PytestDjangoTestCase.tearDownClass()
+        django_testcase_class.tearDownClass()
 
-        PytestDjangoTestCase.doClassCleanups()
+        django_testcase_class.doClassCleanups()
 
 
 def _django_db_signature(
@@ -395,7 +396,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture()
-def django_testcase(_django_db_helper: None) -> None:
+def django_testcase(_django_db_helper: None) -> Generator[None, None, django.test.TestCase | django.test.TransactionTestCase | None]:
     yield _django_db_helper
 
 

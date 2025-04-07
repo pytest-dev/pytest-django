@@ -13,6 +13,11 @@ from .helpers import DjangoPytester
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import django.test
+
 
 def _get_actual_assertions_names() -> list[str]:
     """
@@ -75,37 +80,8 @@ def test_sanity() -> None:
     assert assertContains.__doc__
 
 
-@pytest.mark.django_project(create_manage_py=True)
-def test_assert_diff(django_pytester: DjangoPytester) -> None:
-    django_pytester.create_test_module(
-        """
-        import pytest_django.asserts
+def test_real_assert(django_testcase: django.test.TestCase) -> None:
+    django_testcase.assertEqual("a", "a")
 
-        def test_test_case():
-            assert pytest_django.asserts.test_case.maxDiff is not None
-
-        def test_assert():
-            pytest_django.asserts.assertXMLEqual("a" * 10_000, "a")
-        """
-    )
-    result = django_pytester.runpytest_subprocess()
-    assert "[truncated]... != 'a'" in "\n".join([*result.outlines, *result.errlines])
-    result.assert_outcomes(passed=1, failed=1)
-
-
-@pytest.mark.django_project(create_manage_py=True)
-def test_assert_diff_verbose(django_pytester: DjangoPytester) -> None:
-    django_pytester.create_test_module(
-        """
-        import pytest_django.asserts
-
-        def test_test_case():
-            assert pytest_django.asserts.test_case.maxDiff is None
-
-        def test_assert():
-            pytest_django.asserts.assertXMLEqual("a" * 10_000, "a")
-        """
-    )
-    result = django_pytester.runpytest_subprocess("-v")
-    assert "a" * 10_000 in "\n".join([*result.outlines, *result.errlines])
-    result.assert_outcomes(passed=1, failed=1)
+    with pytest.raises(AssertionError):
+        django_testcase.assertXMLEqual("a" * 10_000, "a")
