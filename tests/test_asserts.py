@@ -5,7 +5,6 @@ Tests the dynamic loading of all Django assertion cases.
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING
 
 import django.test
 import pytest
@@ -14,10 +13,6 @@ from .helpers import DjangoPytester
 
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
-
-
-if TYPE_CHECKING:
-    import django.test
 
 
 def _get_actual_assertions_names() -> list[str]:
@@ -81,7 +76,7 @@ def test_sanity() -> None:
     assert assertContains.__doc__
 
 
-def test_real_assert(django_testcase: django.test.TestCase) -> None:
+def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
     django_testcase.assertEqual("a", "a")  # noqa: PT009
 
     with pytest.raises(AssertionError):
@@ -89,7 +84,7 @@ def test_real_assert(django_testcase: django.test.TestCase) -> None:
 
 
 class TestDjangoAssert(django.test.TestCase):
-    def test_real_assert(django_testcase: django.test.TestCase) -> None:
+    def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
         django_testcase.assertEqual("a", "a")  # noqa: PT009
 
         with pytest.raises(AssertionError):
@@ -97,7 +92,7 @@ class TestDjangoAssert(django.test.TestCase):
 
 
 class TestInternalDjangoAssert:
-    def test_real_assert(self, django_testcase: django.test.TestCase) -> None:
+    def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
         django_testcase.assertEqual("a", "a")  # noqa: PT009
         assert not hasattr(self, "assertEqual")
 
@@ -112,10 +107,13 @@ def test_unittest_assert(django_pytester: DjangoPytester) -> None:
         import unittest
 
         class TestUnittestAssert(unittest.TestCase):
-            def test_real_assert(self, django_testcase: unittest.TestCase) -> None:
+            def test_fixture_assert(self, django_testcase: unittest.TestCase) -> None:
                 assert False
+
+            def test_normal_assert(self) -> None:
+                self.assertEqual("a", "a")
         """
     )
     result = django_pytester.runpytest_subprocess()
-    result.assert_outcomes(failed=1)
+    result.assert_outcomes(failed=1, passed=1)
     assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
