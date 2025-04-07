@@ -41,7 +41,6 @@ from .fixtures import (
     django_db_setup,  # noqa: F401
     django_db_use_migrations,  # noqa: F401
     django_testcase,  # noqa: F401
-    django_testcase_class,  # noqa: F401
     django_user_model,  # noqa: F401
     django_username_field,  # noqa: F401
     live_server,  # noqa: F401

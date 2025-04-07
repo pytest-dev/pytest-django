@@ -57,7 +57,6 @@ __all__ = [
     "django_db_serialized_rollback",
     "django_db_setup",
     "django_testcase",
-    "django_testcase_class",
     "django_user_model",
     "django_username_field",
     "live_server",
@@ -393,7 +392,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture()
-def django_testcase(_django_db_helper: None) -> django.test.TestCase | None:
+def django_testcase(_django_db_helper: django.test.TestCase | None) -> django.test.TestCase | None:
     return _django_db_helper
 
 
