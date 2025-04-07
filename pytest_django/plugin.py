@@ -374,11 +374,6 @@ def pytest_configure(config: pytest.Config) -> None:
     # it's fully initialized here.
     _setup_django(config)
 
-    if config.option.verbose > 0:
-        from .asserts import test_case
-
-        test_case.maxDiff = None
-
 
 @pytest.hookimpl()
 def pytest_report_header(config: pytest.Config) -> list[str] | None:
