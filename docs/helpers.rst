@@ -412,4 +412,201 @@ created in data migrations, you should add the
   * ``db``
   * ``transactional_db``
 
-  In addition, using ``live_server`` or ``django_db_reset_sequences``
+  In addition, using ``live_server`` or ``django_db_reset_sequences`` will also
+  trigger transactional database access, and ``django_db_serialized_rollback``
+  regular database access, if not specified.
+
+.. fixture:: settings
+
+``settings``
+~~~~~~~~~~~~
+
+This fixture will provide a handle on the Django settings module, and
+automatically revert any changes made to the settings (modifications, additions
+and deletions).
+
+Example
+"""""""
+
+::
+
+    def test_with_specific_settings(settings):
+        settings.USE_TZ = True
+        assert settings.USE_TZ
+
+
+.. fixture:: django_assert_num_queries
+
+``django_assert_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_assert_num_queries(num, connection=None, info=None, *, using=None)
+
+  :param num: expected number of queries
+  :param connection: optional database connection
+  :param str info: optional info message to display on failure
+  :param str using: optional database alias
+
+This fixture allows to check for an expected number of DB queries.
+
+If the assertion failed, the executed queries can be shown by using
+the verbose command line option.
+
+It wraps ``django.test.utils.CaptureQueriesContext`` and yields the wrapped
+``CaptureQueriesContext`` instance.
+
+Example usage::
+
+    def test_queries(django_assert_num_queries):
+        with django_assert_num_queries(3) as captured:
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+            Item.objects.create('baz')
+
+        assert 'foo' in captured.captured_queries[0]['sql']
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumQueries
+
+    def test_num_queries(
+        django_assert_num_queries: DjangoAssertNumQueries,
+    ):
+        ...
+
+
+.. fixture:: django_assert_max_num_queries
+
+``django_assert_max_num_queries``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_assert_max_num_queries(num, connection=None, info=None, *, using=None)
+
+  :param num: expected maximum number of queries
+  :param connection: optional database connection
+  :param str info: optional info message to display on failure
+  :param str using: optional database alias
+
+This fixture allows to check for an expected maximum number of DB queries.
+
+It is a specialized version of :fixture:`django_assert_num_queries`.
+
+Example usage::
+
+    def test_max_queries(django_assert_max_num_queries):
+        with django_assert_max_num_queries(2):
+            Item.objects.create('foo')
+            Item.objects.create('bar')
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoAssertNumQueries
+
+    def test_max_num_queries(
+        django_assert_max_num_queries: DjangoAssertNumQueries,
+    ):
+        ...
+
+
+.. fixture:: django_capture_on_commit_callbacks
+
+``django_capture_on_commit_callbacks``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: django_capture_on_commit_callbacks(*, using=DEFAULT_DB_ALIAS, execute=False)
+
+  :param using:
+    The alias of the database connection to capture callbacks for.
+  :param execute:
+    If True, all the callbacks will be called as the context manager exits, if
+    no exception occurred. This emulates a commit after the wrapped block of
+    code.
+
+.. versionadded:: 4.4
+
+Returns a context manager that captures
+:func:`transaction.on_commit() <django.db.transaction.on_commit>` callbacks for
+the given database connection. It returns a list that contains, on exit of the
+context, the captured callback functions. From this list you can make assertions
+on the callbacks or call them to invoke their side effects, emulating a commit.
+
+Avoid this fixture in tests using ``transaction=True``; you are not likely to
+get useful results.
+
+This fixture is based on Django's :meth:`django.test.TestCase.captureOnCommitCallbacks`
+helper.
+
+Example usage::
+
+    def test_on_commit(client, mailoutbox, django_capture_on_commit_callbacks):
+        with django_capture_on_commit_callbacks(execute=True) as callbacks:
+            response = client.post(
+                '/contact/',
+                {'message': 'I like your site'},
+            )
+
+        assert response.status_code == 200
+        assert len(callbacks) == 1
+        assert len(mailoutbox) == 1
+        assert mailoutbox[0].subject == 'Contact Form'
+        assert mailoutbox[0].body == 'I like your site'
+
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import DjangoCaptureOnCommitCallbacks
+
+    def test_on_commit(
+        django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+    ):
+        ...
+
+.. fixture:: mailoutbox
+
+``mailoutbox``
+~~~~~~~~~~~~~~
+
+A clean email outbox to which Django-generated emails are sent.
+
+Example
+"""""""
+
+::
+
+    from django.core import mail
+
+    def test_mail(mailoutbox):
+        mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
+        assert len(mailoutbox) == 1
+        m = mailoutbox[0]
+        assert m.subject == 'subject'
+        assert m.body == 'body'
+        assert m.from_email == 'from@example.com'
+        assert list(m.to) == ['to@example.com']
+
+
+This uses the ``django_mail_patch_dns`` fixture, which patches
+``DNS_NAME`` used by :mod:`django.core.mail` with the value from
+the ``django_mail_dnsname`` fixture, which defaults to
+"fake-tests.example.com".
+
+
+Automatic cleanup
+-----------------
+
+pytest-django provides some functionality to assure a clean and consistent environment
+during tests.
+
+Clearing of site cache
+~~~~~~~~~~~~~~~~~~~~~~
+
+If ``django.contrib.sites`` is in your INSTALLED_APPS, Site cache will
+be cleared for each test to avoid hitting the cache and causing the wrong Site
+object to be returned by ``Site.objects.get_current()``.
+
+
+Clearing of mail.outbox
+~~~~~~~~~~~~~~~~~~~~~~~
+
+``mail.outbox`` will be cleared for each pytest, to give each new test an empty
+mailbox to work with. However, it's more "pytestic" to use the ``mailoutbox`` fixture described above
+than to access ``mail.outbox``.
