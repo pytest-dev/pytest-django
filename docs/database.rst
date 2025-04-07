@@ -267,6 +267,22 @@ tests.
 
 This fixture is by default requested from :fixture:`django_db_setup`.
 
+
+django_testcase
+"""""""""""""""
+
+.. fixture:: django_testcase
+
+Provides access to Django's test case instance.
+
+:fixture:`django_testcase` can be used to access Django's `custom assertion methods <https://docs.djangoproject.com/en/dev/topics/testing/tools/#assertions/>`_ that are useful for testing web applications::
+
+   def test_add(django_testcase):
+       django_testcase.assertEqual(1 + 1, 2)
+       django_testcase.assertXMLEqual(..., ...)
+       django_testcase.assertJSONEqual(..., ...)
+
+
 django_db_blocker
 """""""""""""""""
 
