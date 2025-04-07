@@ -44,6 +44,8 @@ from .fixtures import (
     django_username_field,  # noqa: F401
     live_server,  # noqa: F401
     rf,  # noqa: F401
+    django_testcase,  # noqa: F401
+    django_testcase_class,  # noqa: F401
     settings,  # noqa: F401
     transactional_db,  # noqa: F401
     validate_django_db,

@@ -60,6 +60,8 @@ __all__ = [
     "django_username_field",
     "live_server",
     "rf",
+    "django_testcase",
+    "django_testcase_class",
     "settings",
     "transactional_db",
 ]
@@ -216,7 +218,7 @@ def django_db_setup(
 
 
 @pytest.fixture()
-def pytest_django_testcase_class(
+def django_testcase_class(
     request: pytest.FixtureRequest,
 ):
     if is_django_unittest(request):
@@ -294,7 +296,7 @@ def pytest_django_testcase_class(
             def tearDownClass(cls) -> None:
                 super(django.test.TestCase, cls).tearDownClass()
 
-    return PytestDjangoTestCase
+    yield PytestDjangoTestCase
 
 
 @pytest.fixture()
@@ -302,16 +304,14 @@ def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker: DjangoDbBlocker,
-    pytest_django_testcase_class,
+    django_testcase_class,
 ) -> Generator[None, None, None]:
     if is_django_unittest(request):
         yield
         return
 
     with django_db_blocker.unblock():
-        import django.db
-
-        PytestDjangoTestCase = pytest_django_testcase_class
+        PytestDjangoTestCase = django_testcase_class
 
         PytestDjangoTestCase.setUpClass()
 
@@ -395,7 +395,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture()
-def pytest_django_testcase(_django_db_helper: None) -> None:
+def django_testcase(_django_db_helper: None) -> None:
     yield _django_db_helper
 
 
