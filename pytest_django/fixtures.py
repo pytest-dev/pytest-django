@@ -21,7 +21,7 @@ from typing import (
     Tuple,
     Union,
 )
-   
+
 import pytest
 
 from . import live_server_helper
@@ -56,12 +56,12 @@ __all__ = [
     "django_db_reset_sequences",
     "django_db_serialized_rollback",
     "django_db_setup",
+    "django_testcase",
+    "django_testcase_class",
     "django_user_model",
     "django_username_field",
     "live_server",
     "rf",
-    "django_testcase",
-    "django_testcase_class",
     "settings",
     "transactional_db",
 ]
@@ -220,7 +220,7 @@ def django_db_setup(
 @pytest.fixture()
 def django_testcase_class(
     request: pytest.FixtureRequest,
-) -> Generator[None, None, type[django.test.TestCase | django.test.TransactionTestCase]]:
+) -> Generator[None, None, type[django.test.TestCase]]:
     if is_django_unittest(request):
         yield
         return
@@ -300,6 +300,7 @@ def django_testcase_class(
                 super(django.test.TestCase, cls).tearDownClass()
 
     yield PytestDjangoTestCase
+    return
 
 
 @pytest.fixture()
@@ -307,7 +308,7 @@ def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
     django_db_blocker: DjangoDbBlocker,
-    django_testcase_class: type[django.test.TestCase | django.test.TransactionTestCase],
+    django_testcase_class: type[django.test.TestCase],
 ) -> Generator[None, None, None]:
     if is_django_unittest(request):
         yield
@@ -396,8 +397,8 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture()
-def django_testcase(_django_db_helper: None) -> Generator[None, None, django.test.TestCase | django.test.TransactionTestCase | None]:
-    yield _django_db_helper
+def django_testcase(_django_db_helper: None) -> None:
+    return _django_db_helper
 
 
 @pytest.fixture()

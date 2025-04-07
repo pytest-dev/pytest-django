@@ -5,15 +5,13 @@ Tests the dynamic loading of all Django assertion cases.
 from __future__ import annotations
 
 import inspect
+from typing import TYPE_CHECKING
 
 import pytest
-
-from .helpers import DjangoPytester
 
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
 
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import django.test
@@ -81,7 +79,7 @@ def test_sanity() -> None:
 
 
 def test_real_assert(django_testcase: django.test.TestCase) -> None:
-    django_testcase.assertEqual("a", "a")
+    django_testcase.assertEqual("a", "a")  # noqa: PT009
 
     with pytest.raises(AssertionError):
         django_testcase.assertXMLEqual("a" * 10_000, "a")
