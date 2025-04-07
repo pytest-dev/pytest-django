@@ -273,9 +273,10 @@ django_testcase
 
 .. fixture:: django_testcase
 
-Provides access to Django's test case instance.
+The ``django_testcase`` fixture provides access to Django's custom assertion 
+methods in your pytest-style tests.
 
-:fixture:`django_testcase` can be used to access Django's `custom assertion methods <https://docs.djangoproject.com/en/dev/topics/testing/tools/#assertions/>`_ that are useful for testing web applications::
+Example usage::
 
    def test_add(django_testcase):
        django_testcase.assertEqual(1 + 1, 2)
