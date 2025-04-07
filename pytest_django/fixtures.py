@@ -220,9 +220,9 @@ def django_db_setup(
 @pytest.fixture()
 def django_testcase_class(
     request: pytest.FixtureRequest,
-) -> Generator[None, None, type[django.test.TestCase]]:
+) -> Generator[type[django.test.TestCase] | None, None, None]:
     if is_django_unittest(request):
-        yield
+        yield None
         return
 
     import django.test
@@ -300,7 +300,6 @@ def django_testcase_class(
                 super(django.test.TestCase, cls).tearDownClass()
 
     yield PytestDjangoTestCase
-    return
 
 
 @pytest.fixture()
@@ -397,7 +396,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 @pytest.fixture()
-def django_testcase(_django_db_helper: None) -> None:
+def django_testcase(_django_db_helper: None) -> django.test.TestCase | None:
     return _django_db_helper
 
 
