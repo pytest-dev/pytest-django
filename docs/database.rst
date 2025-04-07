@@ -334,7 +334,7 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup(requests):
+    def django_db_setup(request):
         from django.conf import settings
 
         settings.DATABASES['default']['NAME'] = 'the_copied_db'
@@ -365,7 +365,7 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup(requests):
+    def django_db_setup(request):
         from django.conf import settings
 
         # Do NOT override the whole `settings.DATABASES['default'] = {..}`
