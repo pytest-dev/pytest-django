@@ -57,6 +57,7 @@ __all__ = [
     "django_db_serialized_rollback",
     "django_db_setup",
     "django_testcase",
+    "django_testcase_class",
     "django_user_model",
     "django_username_field",
     "live_server",

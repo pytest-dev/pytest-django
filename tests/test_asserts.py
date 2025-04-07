@@ -7,7 +7,10 @@ from __future__ import annotations
 import inspect
 from typing import TYPE_CHECKING
 
+import django.test
 import pytest
+
+from .helpers import DjangoPytester
 
 import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
@@ -83,3 +86,36 @@ def test_real_assert(django_testcase: django.test.TestCase) -> None:
 
     with pytest.raises(AssertionError):
         django_testcase.assertXMLEqual("a" * 10_000, "a")
+
+
+class TestDjangoAssert(django.test.TestCase):
+    def test_real_assert(django_testcase: django.test.TestCase) -> None:
+        django_testcase.assertEqual("a", "a")  # noqa: PT009
+
+        with pytest.raises(AssertionError):
+            django_testcase.assertXMLEqual("a" * 10_000, "a")
+
+
+class TestInternalDjangoAssert:
+    def test_real_assert(self, django_testcase: django.test.TestCase) -> None:
+        django_testcase.assertEqual("a", "a")  # noqa: PT009
+        assert not hasattr(self, "assertEqual")
+
+        with pytest.raises(AssertionError):
+            django_testcase.assertXMLEqual("a" * 10_000, "a")
+
+
+@pytest.mark.django_project(create_manage_py=True)
+def test_unittest_assert(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import unittest
+
+        class TestUnittestAssert(unittest.TestCase):
+            def test_real_assert(self, django_testcase: unittest.TestCase) -> None:
+                assert False
+        """
+    )
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(failed=1)
+    assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
