@@ -83,15 +83,6 @@ def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
         django_testcase.assertXMLEqual("a" * 10_000, "a")
 
 
-class TestDjangoAssert(django.test.TestCase):
-    def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
-        assert django_testcase == self
-        django_testcase.assertEqual("a", "a")  # noqa: PT009
-
-        with pytest.raises(AssertionError):
-            django_testcase.assertXMLEqual("a" * 10_000, "a")
-
-
 class TestInternalDjangoAssert:
     def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
         assert django_testcase != self
@@ -103,6 +94,27 @@ class TestInternalDjangoAssert:
 
 
 @pytest.mark.django_project(create_manage_py=True)
+def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        import django.test
+
+        class TestDjangoAssert(django.test.TestCase):
+            def test_fixture_assert(self, django_testcase: unittest.TestCase) -> None:
+                assert False, "Cannot use the fixture"
+
+            def test_normal_assert(self) -> None:
+                self.assertEqual("a", "a")
+                with pytest.raises(AssertionError):
+                    self.assertXMLEqual("a" * 10_000, "a")
+        """
+    )
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(failed=1, passed=1)
+    assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
+
+
+@pytest.mark.django_project(create_manage_py=True)
 def test_unittest_assert(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
@@ -110,7 +122,7 @@ def test_unittest_assert(django_pytester: DjangoPytester) -> None:
 
         class TestUnittestAssert(unittest.TestCase):
             def test_fixture_assert(self, django_testcase: unittest.TestCase) -> None:
-                assert False
+                assert False, "Cannot use the fixture"
 
             def test_normal_assert(self) -> None:
                 self.assertEqual("a", "a")
