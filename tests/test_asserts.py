@@ -94,6 +94,7 @@ class TestDjangoAssert(django.test.TestCase):
 
 class TestInternalDjangoAssert:
     def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
+        assert django_test != self
         django_testcase.assertEqual("a", "a")  # noqa: PT009
         assert not hasattr(self, "assertEqual")
 
