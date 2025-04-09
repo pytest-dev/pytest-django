@@ -84,7 +84,7 @@ def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
 
 
 class TestDjangoAssert(django.test.TestCase):
-    def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
+    def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
         django_testcase.assertEqual("a", "a")  # noqa: PT009
 
         with pytest.raises(AssertionError):
