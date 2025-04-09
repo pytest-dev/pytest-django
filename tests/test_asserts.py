@@ -110,7 +110,7 @@ def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.runpytest_subprocess()
-    result.assert_outcomes(failed=1, passed=1)
+    result.assert_outcomes(errors=1, passed=1)
     assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
 
 
