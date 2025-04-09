@@ -97,10 +97,11 @@ class TestInternalDjangoAssert:
 def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
     django_pytester.create_test_module(
         """
+        import pytest
         import django.test
 
         class TestDjangoAssert(django.test.TestCase):
-            def test_fixture_assert(self, django_testcase: unittest.TestCase) -> None:
+            def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
                 assert False, "Cannot use the fixture"
 
             def test_normal_assert(self) -> None:
@@ -110,7 +111,7 @@ def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
         """
     )
     result = django_pytester.runpytest_subprocess()
-    result.assert_outcomes(errors=1, passed=1)
+    result.assert_outcomes(failed=1, passed=1)
     assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
 
 
