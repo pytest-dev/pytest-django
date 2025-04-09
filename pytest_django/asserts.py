@@ -4,6 +4,7 @@ Dynamically load all Django assertion cases and expose them for importing.
 
 from __future__ import annotations
 
+import warnings
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Sequence
 
@@ -30,6 +31,15 @@ def _wrapper(name: str):
 
     @wraps(func)
     def assertion_func(*args, **kwargs):
+        message = (
+            f"Using pytest_django.asserts.{name} is deprecated. "
+            f'Use fixture "django_testcase" and django_testcase.{name} instead.'
+        )
+        warnings.warn(
+            message,
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return func(*args, **kwargs)
 
     return assertion_func
