@@ -37,8 +37,8 @@ documentation <pytest:scoped-marking>` for detail::
            assert me.is_superuser
 
 
-By default ``pytest-django`` will set up the Django databases the
-first time a test needs them.  Once setup, the database is cached to be
+By default ``pytest-django`` will set up Django databases the
+first time a test needs them.  Once setup, a database is cached to be
 used for all subsequent tests and rolls back transactions, to isolate
 tests from each other.  This is the same way the standard Django
 :class:`~django.test.TestCase` uses the database.  However
@@ -67,21 +67,15 @@ Tests requiring multiple databases
 
 .. versionadded:: 4.3
 
-.. caution::
-
-    This support is **experimental** and is subject to change without
-    deprecation. We are still figuring out the best way to expose this
-    functionality. If you are using this successfully or unsuccessfully,
-    `let us know <https://github.com/pytest-dev/pytest-django/issues/924>`_!
-
-``pytest-django`` has experimental support for multi-database configurations.
-Currently ``pytest-django`` does not specifically support Django's
-multi-database support, using the ``databases`` argument to the
-:func:`django_db <pytest.mark.django_db>` mark::
+``pytest-django`` has support for multi-database configurations using the
+``databases`` argument to the :func:`django_db <pytest.mark.django_db>` mark::
 
    @pytest.mark.django_db(databases=['default', 'other'])
    def test_spam():
        assert MyModel.objects.using('other').count() == 0
+
+If you don't specify ``databases``, only the default database is requested.
+To request all databases, you may use the shortcut ``'__all__'``.
 
 For details see :attr:`django.test.TransactionTestCase.databases` and
 :attr:`django.test.TestCase.databases`.

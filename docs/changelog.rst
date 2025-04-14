@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v4.12.0 (Not released yet)
+--------------------------
+
+Improvements
+^^^^^^^^^^^^
+
+* The :ref:`multiple databases <multi-db>` support added in v4.3.0 is no longer considered experimental.
+
 v4.11.1 (2025-04-03)
 --------------------
 
