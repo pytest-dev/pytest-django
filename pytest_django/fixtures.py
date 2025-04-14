@@ -124,7 +124,7 @@ def django_db_createdb(request: pytest.FixtureRequest) -> bool:
 def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
     """Get the database aliases that need to be setup for a test, and whether
     they need to be serialized."""
-    from django.db import DEFAULT_DB_ALIAS, connections
+    from django.db import connections
     from django.test import TransactionTestCase
 
     test_cls = getattr(test, "cls", None)
@@ -147,9 +147,7 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
             databases = None
         else:
             return (), False
-    if databases is None:
-        return (DEFAULT_DB_ALIAS,), serialized_rollback
-    elif databases == "__all__":
+    if databases is None or databases == "__all__":
         return connections, serialized_rollback
     else:
         return databases, serialized_rollback
