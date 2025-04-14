@@ -864,3 +864,62 @@ def test_mail_message_dns_patching_can_be_skipped(django_pytester: DjangoPyteste
     result = django_pytester.runpytest_subprocess("--tb=short", "-vv", "-s")
     result.stdout.fnmatch_lines(["*test_mailbox_inner*", "django_mail_dnsname_mark", "PASSED*"])
     assert result.ret == 0
+
+
+@pytest.mark.django_project(
+    create_manage_py=True,
+    extra_settings="""
+    EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+    """,
+)
+def test_mail_auto_fixture_misconfigured(django_pytester: DjangoPytester) -> None:
+    """
+    django_test_environment fixture can be overridden by user, and that would break mailoutbox fixture.
+
+    Normally settings.EMAIL_BACKEND is set to "django.core.mail.backends.locmem.EmailBackend" by django,
+    along with mail.outbox = []. If this function doesn't run for whatever reason, the
+    mailoutbox fixture will not work properly.
+    """
+    django_pytester.create_test_module(
+        """
+        import pytest
+
+        @pytest.fixture(autouse=True, scope="session")
+        def django_test_environment(request):
+            yield
+        """,
+        filename="conftest.py",
+    )
+
+    django_pytester.create_test_module(
+        """
+        def test_with_fixture(settings, mailoutbox):
+            assert mailoutbox == []
+            assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
+
+        def test_without_fixture():
+            from django.core import mail
+            assert not hasattr(mail, "outbox")
+        """
+    )
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(passed=2)
+
+
+@pytest.mark.django_project(create_settings=False)
+def test_no_settings(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
+        """
+        def test_skipped_settings(settings):
+            assert False
+
+        def test_skipped_mailoutbox(mailoutbox):
+            assert False
+
+        def test_mail():
+            from django.core import mail
+            assert not hasattr(mail, "outbox")
+        """
+    )
+    result = django_pytester.runpytest_subprocess()
+    result.assert_outcomes(passed=1, skipped=2)
