@@ -28,7 +28,9 @@ from .fixtures import (
     client,  # noqa: F401
     db,  # noqa: F401
     django_assert_max_num_queries,  # noqa: F401
+    django_assert_max_num_queries_all_connections,  # noqa: F401
     django_assert_num_queries,  # noqa: F401
+    django_assert_num_queries_all_connections,  # noqa: F401
     django_capture_on_commit_callbacks,  # noqa: F401
     django_db_createdb,  # noqa: F401
     django_db_keepdb,  # noqa: F401
