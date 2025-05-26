@@ -170,7 +170,7 @@ jobs:
           find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
           echo "Files in combined_coverage_data for combining:"
           ls -R combined_coverage_data
-          coverage combine .converge combined_coverage_data/*
+          coverage combine combined_coverage_data/*
           coverage xml
           ls -lsad
 
