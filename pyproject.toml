@@ -103,6 +103,9 @@ include = [
     "pytest_django_test/*",
     "tests/*",
 ]
+exclude = [
+    "pytest_django/_version.py",
+]
 skip_covered = true
 exclude_lines = [
     "pragma: no cover",
