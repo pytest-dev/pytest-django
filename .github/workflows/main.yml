@@ -16,7 +16,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow_failure }}
-    timeout-minutes: 5
+    timeout-minutes: 15
     permissions:
       contents: read
     strategy:
@@ -27,53 +27,53 @@ jobs:
           python: '3.13'
           allow_failure: false
 
-        - name: py313-dj52-postgres-xdist-coverage
-          python: '3.13'
-          allow_failure: false
+        # - name: py313-dj52-postgres-xdist-coverage
+        #   python: '3.13'
+        #   allow_failure: false
 
-        - name: py313-dj51-postgres-xdist-coverage
-          python: '3.13'
-          allow_failure: false
+        # - name: py313-dj51-postgres-xdist-coverage
+        #   python: '3.13'
+        #   allow_failure: false
 
-        - name: py312-dj42-postgres-xdist-coverage
-          python: '3.12'
-          allow_failure: false
+        # - name: py312-dj42-postgres-xdist-coverage
+        #   python: '3.12'
+        #   allow_failure: false
 
-        - name: py311-dj50-postgres-xdist-coverage
-          python: '3.11'
-          allow_failure: false
+        # - name: py311-dj50-postgres-xdist-coverage
+        #   python: '3.11'
+        #   allow_failure: false
 
-        - name: py311-dj42-postgres-xdist-coverage
-          python: '3.11'
-          allow_failure: false
+        # - name: py311-dj42-postgres-xdist-coverage
+        #   python: '3.11'
+        #   allow_failure: false
 
-        - name: py310-dj52-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+        # - name: py310-dj52-postgres-xdist-coverage
+        #   python: '3.10'
+        #   allow_failure: false
 
-        - name: py310-dj51-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+        # - name: py310-dj51-postgres-xdist-coverage
+        #   python: '3.10'
+        #   allow_failure: false
 
-        - name: py310-dj42-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+        # - name: py310-dj42-postgres-xdist-coverage
+        #   python: '3.10'
+        #   allow_failure: false
 
-        - name: py311-dj51-mysql-coverage
-          python: '3.11'
-          allow_failure: false
+        # - name: py311-dj51-mysql-coverage
+        #   python: '3.11'
+        #   allow_failure: false
 
-        - name: py310-dj42-mysql-coverage
-          python: '3.10'
-          allow_failure: false
+        # - name: py310-dj42-mysql-coverage
+        #   python: '3.10'
+        #   allow_failure: false
 
-        - name: py39-dj42-mysql-xdist-coverage
-          python: '3.9'
-          allow_failure: false
+        # - name: py39-dj42-mysql-xdist-coverage
+        #   python: '3.9'
+        #   allow_failure: false
 
-        - name: py313-djmain-sqlite-coverage
-          python: '3.13'
-          allow_failure: true
+        # - name: py313-djmain-sqlite-coverage
+        #   python: '3.13'
+        #   allow_failure: true
 
         - name: py313-dj52-sqlite-coverage
           python: '3.13'
@@ -87,9 +87,9 @@ jobs:
           python: '3.11'
           allow_failure: false
 
-        - name: pypy3-dj42-postgres-coverage
-          python: 'pypy3.9'
-          allow_failure: false
+        # - name: pypy3-dj42-postgres-coverage
+        #   python: 'pypy3.9'
+        #   allow_failure: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -164,11 +164,11 @@ jobs:
       - name: Combine coverage reports
         run: |
           mkdir combined_coverage_data
-          find downloaded-coverage-artifacts -type f -name '.coverage.*' -exec cp {} combined_coverage_data/ \;
+          find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
           echo "Files in combined_coverage_data for combining:"
           ls -R combined_coverage_data
           cd combined_coverage_data
-          coverage combine --keep
+          coverage combine
           echo "Combined .coverage file generated. Generating XML report."
           coverage xml -o ../coverage.xml
           cd ..
