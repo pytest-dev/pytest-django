@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "pytest-django"
 description = "A Django plugin for pytest."
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dynamic = ["version"]
 authors = [
     { name = "Andreas Pelme", email = "andreas@pelme.se" },
@@ -22,7 +22,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Framework :: Django",
     "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
     "Intended Audience :: Developers",
