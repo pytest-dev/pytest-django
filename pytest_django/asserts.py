@@ -5,8 +5,9 @@ Dynamically load all Django assertion cases and expose them for importing.
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable
 
 from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
@@ -167,6 +168,13 @@ if TYPE_CHECKING:
         needle: str,
         haystack: str,
         count: int | None = ...,
+        msg_prefix: str = ...,
+    ) -> None: ...
+
+    # Added in Django 5.1.
+    def assertNotInHTML(
+        needle: str,
+        haystack: str,
         msg_prefix: str = ...,
     ) -> None: ...
 

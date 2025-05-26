@@ -71,6 +71,11 @@ jobs:
           python: '3.13'
           allow_failure: false
 
+        # Explicitly test min pytest.
+        - name: py313-dj52-sqlite-pytestmin-coverage
+          python: '3.13'
+          allow_failure: false
+
         - name: py313-dj52-postgres-xdist-coverage
           python: '3.13'
           allow_failure: false
@@ -129,15 +134,6 @@ jobs:
 
         - name: py311-dj42-sqlite-xdist-coverage
           python: '3.11'
-          allow_failure: false
-
-        - name: py38-dj42-sqlite-xdist-coverage
-          python: '3.8'
-          allow_failure: false
-
-        # Explicitly test min pytest.
-        - name: py38-dj42-sqlite-pytestmin-coverage
-          python: '3.8'
           allow_failure: false
 
         # pypy3: not included with coverage reports (much slower then).

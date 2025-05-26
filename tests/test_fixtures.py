@@ -5,8 +5,8 @@ fixtures are tested in test_database.
 """
 
 import socket
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
