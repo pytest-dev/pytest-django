@@ -138,7 +138,6 @@ ignore = [
     "PLR0913",  # Too many arguments in function definition
     "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
     "PT001",    # Use `@pytest.fixture()` over `@pytest.fixture`
-    "PT023",    # Use `@pytest.mark.django_db()` over `@pytest.mark.django_db`
 ]
 
 [tool.ruff.lint.isort]
