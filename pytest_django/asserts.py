@@ -4,8 +4,9 @@ Dynamically load all Django assertion cases and expose them for importing.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable
 
 from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
