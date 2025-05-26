@@ -32,9 +32,9 @@ pytest-django allows you to test your Django project/applications with the
   <https://pytest-django.readthedocs.io/en/latest/contributing.html>`_
 * Version compatibility:
 
-  * Django: 4.2, 5.0, 5.1, 5.2 and latest main branch (compatible at the time
+  * Django: 4.2, 5.1, 5.2 and latest main branch (compatible at the time
     of each release)
-  * Python: CPython>=3.8 or PyPy 3
+  * Python: CPython>=3.9 or PyPy 3
   * pytest: >=7.0
 
   For compatibility with older versions, use previous pytest-django releases.
