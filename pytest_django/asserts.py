@@ -161,6 +161,13 @@ if TYPE_CHECKING:
         msg_prefix: str = ...,
     ) -> None: ...
 
+    # Added in Django 5.1.
+    def assertNotInHTML(
+        needle: str,
+        haystack: str,
+        msg_prefix: str = ...,
+    ) -> None: ...
+
     def assertJSONEqual(
         raw: str,
         expected_data: Any,

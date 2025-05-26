@@ -59,16 +59,10 @@ dynamically in a hook or fixture.
 
   :type databases: Iterable[str] | str | None
   :param databases:
-    .. caution::
-
-      This argument is **experimental** and is subject to change without
-      deprecation. We are still figuring out the best way to expose this
-      functionality. If you are using this successfully or unsuccessfully,
-      `let us know <https://github.com/pytest-dev/pytest-django/issues/924>`_!
 
     The ``databases`` argument defines which databases in a multi-database
     configuration will be set up and may be used by the test.  Defaults to
-    only the ``default`` database.  The special value ``"__all__"`` may be use
+    only the ``default`` database.  The special value ``"__all__"`` may be used
     to specify all configured databases.
     For details see :attr:`django.test.TransactionTestCase.databases` and
     :attr:`django.test.TestCase.databases`.
