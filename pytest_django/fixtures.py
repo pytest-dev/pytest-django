@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Generator, Iterable, Sequence
 from contextlib import contextmanager
 from functools import partial
 from typing import (
@@ -11,13 +12,10 @@ from typing import (
     Any,
     Callable,
     ContextManager,
-    Generator,
-    Iterable,
     List,
     Literal,
     Optional,
     Protocol,
-    Sequence,
     Tuple,
     Union,
 )

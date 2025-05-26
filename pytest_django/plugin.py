@@ -12,8 +12,9 @@ import os
 import pathlib
 import sys
 import types
+from collections.abc import Generator
 from functools import reduce
-from typing import TYPE_CHECKING, ContextManager, Generator, List, NoReturn
+from typing import TYPE_CHECKING, ContextManager, List, NoReturn
 
 import pytest
 
