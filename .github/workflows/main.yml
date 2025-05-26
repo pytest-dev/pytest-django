@@ -1,6 +1,14 @@
 name: main
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
 
 concurrency:
   group: ci-main-${{ github.ref }}
@@ -122,10 +130,7 @@ jobs:
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
-        run: |
-          ls -lash
-          mv .coverage coverage.${{ matrix.name }}
-          ls -lash
+        run: mv .coverage coverage.${{ matrix.name }}
 
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
@@ -167,13 +172,9 @@ jobs:
           find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
           echo "Files in combined_coverage_data for combining:"
           ls -R combined_coverage_data
-          cd combined_coverage_data
-          coverage combine
-          echo "Combined .coverage file generated. Generating XML report."
-          coverage xml -o ../coverage.xml
-          cd ..
-          echo "Generated coverage.xml in workspace root:"
-          ls -l coverage.xml
+          coverage combine .converge combined_coverage_data/*
+          coverage xml
+          ls -lsad
 
       - name: Report coverage to Codecov
         uses: codecov/codecov-action@v5
