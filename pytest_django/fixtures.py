@@ -4,21 +4,9 @@ from __future__ import annotations
 
 import os
 from collections.abc import Generator, Iterable, Sequence
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from functools import partial
-from typing import (
-    TYPE_CHECKING,
-    AbstractSet,
-    Any,
-    Callable,
-    ContextManager,
-    List,
-    Literal,
-    Optional,
-    Protocol,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Protocol, Union
 
 import pytest
 
@@ -35,9 +23,9 @@ if TYPE_CHECKING:
 
 
 _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
-_DjangoDbAvailableApps = Optional[List[str]]
+_DjangoDbAvailableApps = Optional[list[str]]
 # transaction, reset_sequences, databases, serialized_rollback, available_apps
-_DjangoDb = Tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
+_DjangoDb = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 
 
 __all__ = [
@@ -155,7 +143,7 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
 
 def _get_databases_for_setup(
     items: Sequence[pytest.Item],
-) -> tuple[AbstractSet[str], AbstractSet[str]]:
+) -> tuple[set[str], set[str]]:
     """Get the database aliases that need to be setup, and the subset that needs
     to be serialized."""
     # Code derived from django.test.utils.DiscoverRunner.get_databases().
@@ -734,7 +722,7 @@ class DjangoCaptureOnCommitCallbacks(Protocol):
         *,
         using: str = ...,
         execute: bool = ...,
-    ) -> ContextManager[list[Callable[[], Any]]]:
+    ) -> AbstractContextManager[list[Callable[[], Any]]]:
         pass  # pragma: no cover
 
 

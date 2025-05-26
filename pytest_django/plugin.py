@@ -13,8 +13,9 @@ import pathlib
 import sys
 import types
 from collections.abc import Generator
+from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING, ContextManager, List, NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
@@ -260,7 +261,7 @@ def _get_boolean_value(
         ) from None
 
 
-report_header_key = pytest.StashKey[List[str]]()
+report_header_key = pytest.StashKey[list[str]]()
 
 
 @pytest.hookimpl()
@@ -838,13 +839,13 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it.'
         )
 
-    def unblock(self) -> ContextManager[None]:
+    def unblock(self) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
         return _DatabaseBlockerContextManager(self)
 
-    def block(self) -> ContextManager[None]:
+    def block(self) -> AbstractContextManager[None]:
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper
