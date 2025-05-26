@@ -201,7 +201,7 @@ def django_db_setup(
                 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
@@ -365,7 +365,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 # ############### User visible fixtures ################
 
 
-@pytest.fixture()
+@pytest.fixture
 def db(_django_db_helper: None) -> None:
     """Require a django test database.
 
@@ -382,7 +382,7 @@ def db(_django_db_helper: None) -> None:
     # The `_django_db_helper` fixture checks if `db` is requested.
 
 
-@pytest.fixture()
+@pytest.fixture
 def transactional_db(_django_db_helper: None) -> None:
     """Require a django test database with transaction support.
 
@@ -398,7 +398,7 @@ def transactional_db(_django_db_helper: None) -> None:
     # The `_django_db_helper` fixture checks if `transactional_db` is requested.
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_db_reset_sequences(
     _django_db_helper: None,
     transactional_db: None,
@@ -414,7 +414,7 @@ def django_db_reset_sequences(
     # is requested.
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_db_serialized_rollback(
     _django_db_helper: None,
     db: None,
@@ -435,7 +435,7 @@ def django_db_serialized_rollback(
     # is requested.
 
 
-@pytest.fixture()
+@pytest.fixture
 def client() -> django.test.Client:
     """A Django test client instance."""
     skip_if_no_django()
@@ -445,7 +445,7 @@ def client() -> django.test.Client:
     return Client()
 
 
-@pytest.fixture()
+@pytest.fixture
 def async_client() -> django.test.AsyncClient:
     """A Django test async client instance."""
     skip_if_no_django()
@@ -455,7 +455,7 @@ def async_client() -> django.test.AsyncClient:
     return AsyncClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_user_model(db: None):
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
@@ -463,14 +463,14 @@ def django_user_model(db: None):
     return get_user_model()
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_username_field(django_user_model) -> str:
     """The fieldname for the username used with Django's user model."""
     field: str = django_user_model.USERNAME_FIELD
     return field
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin_user(
     db: None,
     django_user_model,
@@ -501,7 +501,7 @@ def admin_user(
     return user
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin_client(
     db: None,
     admin_user,
@@ -514,7 +514,7 @@ def admin_client(
     return client
 
 
-@pytest.fixture()
+@pytest.fixture
 def rf() -> django.test.RequestFactory:
     """RequestFactory instance"""
     skip_if_no_django()
@@ -524,7 +524,7 @@ def rf() -> django.test.RequestFactory:
     return RequestFactory()
 
 
-@pytest.fixture()
+@pytest.fixture
 def async_rf() -> django.test.AsyncRequestFactory:
     """AsyncRequestFactory instance"""
     skip_if_no_django()
@@ -569,7 +569,7 @@ class SettingsWrapper:
         del self._to_restore[:]
 
 
-@pytest.fixture()
+@pytest.fixture
 def settings():
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
@@ -702,13 +702,13 @@ def _assert_num_queries(
             pytest.fail(msg)
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_assert_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     """Allows to check for an expected number of DB queries."""
     return partial(_assert_num_queries, pytestconfig)
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_assert_max_num_queries(pytestconfig: pytest.Config) -> DjangoAssertNumQueries:
     """Allows to check for an expected maximum number of DB queries."""
     return partial(_assert_num_queries, pytestconfig, exact=False)
@@ -726,7 +726,7 @@ class DjangoCaptureOnCommitCallbacks(Protocol):
         pass  # pragma: no cover
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_capture_on_commit_callbacks() -> DjangoCaptureOnCommitCallbacks:
     """Captures transaction.on_commit() callbacks for the given database connection."""
     from django.test import TestCase
