@@ -93,8 +93,7 @@ jobs:
           python: '3.11'
           allow_failure: false
 
-        # pypy3: not included with coverage reports (much slower then).
-        - name: pypy3-dj42-postgres
+        - name: pypy3-dj42-postgres-coverage
           python: 'pypy3.9'
           allow_failure: false
     steps:
