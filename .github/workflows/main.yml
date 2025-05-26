@@ -130,7 +130,7 @@ jobs:
         if: contains(matrix.name, 'coverage')
         run: |
           ls -lash
-          mv .coverage .coverage.${{ matrix.name }}
+          mv .coverage coverage.${{ matrix.name }}
           ls -lash
 
       - name: Upload temporary coverage artifact
@@ -138,7 +138,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-artifact-${{ matrix.name }}
-          path: .coverage.${{ matrix.name }}
+          path: coverage.${{ matrix.name }}
           retention-days: 1
 
   report-coverage:
