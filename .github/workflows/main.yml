@@ -137,11 +137,13 @@ jobs:
         run: tox -e ${{ matrix.name }}
 
       - name: Prepare coverage file for upload
+        if: contains(matrix.name, 'coverage')
         run: |
           ls -lash
           mv .coverage .coverage.${{ matrix.name }}
 
       - name: Upload temporary coverage artifact
+        if: contains(matrix.name, 'coverage')
         uses: actions/upload-artifact@v4
         with:
           name: coverage-artifact-${{ matrix.name }}
