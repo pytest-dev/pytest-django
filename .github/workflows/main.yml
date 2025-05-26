@@ -128,7 +128,10 @@ jobs:
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
-        run: mv .coverage .coverage.${{ matrix.name }}
+        run: |
+          ls -lash
+          mv .coverage .coverage.${{ matrix.name }}
+          ls -lash
 
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
