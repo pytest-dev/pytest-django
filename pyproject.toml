@@ -97,9 +97,6 @@ ignore_missing_imports = true
 parallel = true
 source = ["${PYTESTDJANGO_COVERAGE_SRC}."]
 branch = true
-# omit = [
-#     "pytest_django/_version.py",
-# ]
 [tool.coverage.report]
 include = [
     "pytest_django/*",
