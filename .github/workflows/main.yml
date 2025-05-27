@@ -179,12 +179,21 @@ jobs:
           coverage html
           coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
 
+      - name: Determine retention days
+        id: determine-retention-days
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ] || [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "retention_days=90" >> $GITHUB_OUTPUT
+          else
+            echo "retention_days=3" >> $GITHUB_OUTPUT
+          fi
+
       - name: Upload combined .coverage file
         uses: actions/upload-artifact@v4
         with:
           name: coverage-file
           path: .coverage
-          retention-days: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 90 || 3 }}
+          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
           include-hidden-files: true
 
       - name: Upload HTML coverage report
@@ -192,7 +201,7 @@ jobs:
         with:
           name: coverage-html-report
           path: htmlcov
-          retention-days: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 90 || 3 }}
+          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
 
       - name: Delete temporary coverage artifacts from run
         uses: geekyeggo/delete-artifact@v5
