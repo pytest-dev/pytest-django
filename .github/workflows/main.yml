@@ -59,26 +59,21 @@ jobs:
             allow_failure: false
             use_factor: True
 
-          # - name: py313-sqlite-coverage
-          #   python: '3.13'
-          #   allow_failure: true
+          - name: py313-postgres-xdist-coverage
+            python: '3.13'
+            allow_failure: false
+            use_factor: True
 
-          # - name: py313-dj52-sqlite-coverage
-          #   python: '3.13'
-          #   allow_failure: true
+          - name: py313-mysql-xdist-coverage
+            python: '3.13'
+            allow_failure: false
+            use_factor: True
 
-          # - name: py312-dj51-sqlite-xdist-coverage
-          #   python: '3.12'
-          #   allow_failure: false
-
-          # - name: py313-mysql-xdist-coverage
-          #   python: '3.13'
-          #   allow_failure: false
-
-          # # pypy3: not included with coverage reports (much slower then).
-          # - name: pypy3-dj42-postgres
-          #   python: 'pypy3.9'
-          #   allow_failure: false
+          # pypy3: not included with coverage reports (much slower then).
+          - name: pypy3-djmain-sqlite
+            python: 'pypy3.9'
+            allow_failure: false
+            use_factor: False
     steps:
       - uses: actions/checkout@v4
         with:
