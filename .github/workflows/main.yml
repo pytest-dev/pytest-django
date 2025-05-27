@@ -159,7 +159,8 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
+          check-latest: true
 
       - name: Install coverage tool
         run: python -m pip install coverage[toml]
@@ -174,11 +175,8 @@ jobs:
         run: |
           mkdir combined_coverage_data
           find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
-          echo "Files in combined_coverage_data for combining:"
-          ls -R combined_coverage_data
           coverage combine combined_coverage_data/*
           coverage xml
-          ls -lsad
 
       - name: Report coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -188,7 +186,7 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-  check:
+  check:  # This job does nothing and is only used for the branch protection
     if: always()
 
     needs:
