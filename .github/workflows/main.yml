@@ -32,26 +32,32 @@ jobs:
           - name: linting,docs
             python: '3.13'
             allow_failure: false
+            use_factor: False
 
           - name: py313-sqlite-xdist-coverage
             python: '3.13'
             allow_failure: false
+            use_factor: True
 
           - name: py312-sqlite-xdist-coverage
             python: '3.12'
             allow_failure: false
+            use_factor: True
 
           - name: py311-sqlite-xdist-coverage
             python: '3.11'
             allow_failure: false
+            use_factor: True
 
           - name: py310-sqlite-xdist-coverage
             python: '3.10'
             allow_failure: false
+            use_factor: True
 
           - name: py39-sqlite-xdist-coverage
             python: '3.9'
             allow_failure: false
+            use_factor: True
 
           # - name: py313-sqlite-coverage
           #   python: '3.13'
@@ -101,13 +107,7 @@ jobs:
           uv tool install tox==4.26.0 --with tox-uv
 
       - name: Run tox
-        shell: bash
-        run: |
-          if [[ ${{ matrix.name }} == *","* ]]; then
-            tox -e ${{ matrix.name }}
-          else
-            tox -f ${{ matrix.name }}
-          fi
+        run: tox ${{ matrix.use_factor && '-f' || '-e' }} ${{ matrix.name }}
 
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
@@ -146,8 +146,8 @@ jobs:
 
       - name: Combine coverage reports
         run: |
-          ls -lash
-          coverage combine
+          ls -lash downloaded-coverage-artifacts
+          coverage combine downloaded-coverage-artifacts
           coverage xml
           coverage html
           coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
