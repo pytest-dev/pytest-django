@@ -178,21 +178,22 @@ jobs:
           coverage combine combined_coverage_data/*
           coverage xml
           coverage html
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
 
       - name: Upload combined .coverage file
         uses: actions/upload-artifact@v4
         with:
-          name: combined-coverage-file
+          name: coverage-file
           path: .coverage
-          retention-days: 1
+          retention-days: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 90 || 3 }}
           include-hidden-files: true
 
       - name: Upload HTML coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: html-coverage-report
+          name: coverage-html-report
           path: htmlcov
-          retention-days: 1
+          retention-days: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 90 || 3 }}
 
       - name: Delete temporary coverage artifacts from run
         uses: geekyeggo/delete-artifact@v5
