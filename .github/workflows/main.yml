@@ -71,7 +71,7 @@ jobs:
 
           # pypy3: not included with coverage reports (much slower then).
           - name: pypy3-djmain-sqlite
-            python: 'pypy3.9'
+            python: 'pypy3.11'
             allow_failure: false
             use_factor: False
     steps:
