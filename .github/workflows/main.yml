@@ -101,7 +101,8 @@ jobs:
           uv tool install tox==4.26.0 --with tox-uv
 
       - name: Run tox
-        run: tox -e ${{ matrix.name }}
+        run: |
+          tox -f ${{ matrix.name }}
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
