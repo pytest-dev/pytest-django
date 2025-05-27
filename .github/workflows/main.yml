@@ -141,13 +141,13 @@ jobs:
       - name: Download all coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          path: downloaded-coverage-artifacts
+          path: .
           pattern: coverage-artifact-*
 
       - name: Combine coverage reports
         run: |
-          ls -lash downloaded-coverage-artifacts
-          coverage combine downloaded-coverage-artifacts
+          ls -lash coverage-artifact-*
+          coverage combine coverage-artifact-*
           coverage xml
           coverage html
           coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
