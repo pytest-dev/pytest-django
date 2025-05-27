@@ -147,7 +147,7 @@ jobs:
       - name: Combine coverage reports
         run: |
           mkdir combined_coverage_data
-          find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
+          find downloaded-coverage-artifacts -type f -name '.coverage.*' -exec cp {} combined_coverage_data/ \;
           coverage combine combined_coverage_data/*
           coverage xml
           coverage html
