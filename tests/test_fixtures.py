@@ -444,6 +444,7 @@ class TestSettings:
 
 class TestLiveServer:
     def test_settings_before(self) -> None:
+        pytest.importorskip("xdist")
         from django.conf import settings
 
         assert (
@@ -460,6 +461,7 @@ class TestLiveServer:
 
     def test_settings_restored(self) -> None:
         """Ensure that settings are restored after test_settings_before."""
+        pytest.importorskip("xdist")
         from django.conf import settings
 
         assert TestLiveServer._test_settings_before_run is True  # type: ignore[attr-defined]
