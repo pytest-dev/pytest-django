@@ -151,7 +151,7 @@ jobs:
     if: always()
     permissions:
       contents: read
-      actions: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -177,6 +177,27 @@ jobs:
           find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
           coverage combine combined_coverage_data/*
           coverage xml
+          coverage html
+
+      - name: Upload combined .coverage file
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-coverage-file
+          path: .coverage
+          retention-days: 1
+          include-hidden-files: true
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-coverage-report
+          path: htmlcov
+          retention-days: 1
+
+      - name: Delete temporary coverage artifacts from run
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: coverage-artifact-*
 
       - name: Report coverage to Codecov
         uses: codecov/codecov-action@v5
