@@ -146,7 +146,6 @@ jobs:
 
       - name: Combine coverage reports
         run: |
-          ls -lash coverage-artifact-*
           coverage combine coverage-artifact-*
           coverage xml
           coverage html
