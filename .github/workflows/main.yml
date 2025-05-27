@@ -32,48 +32,53 @@ jobs:
           - name: linting,docs
             python: '3.13'
             allow_failure: false
-            use_factor: False
+            use_factor: true
 
           - name: py313-sqlite-xdist-coverage
             python: '3.13'
             allow_failure: false
-            use_factor: True
+            use_factor: true
 
           - name: py312-sqlite-xdist-coverage
             python: '3.12'
             allow_failure: false
-            use_factor: True
+            use_factor: true
 
           - name: py311-sqlite-xdist-coverage
             python: '3.11'
             allow_failure: false
-            use_factor: True
+            use_factor: true
 
           - name: py310-sqlite-xdist-coverage
             python: '3.10'
             allow_failure: false
-            use_factor: True
+            use_factor: true
 
           - name: py39-sqlite-xdist-coverage
             python: '3.9'
             allow_failure: false
-            use_factor: True
+            use_factor: true
 
-          - name: py313-postgres-xdist-coverage
+          - name: py313-djmain-postgres-coverage
             python: '3.13'
             allow_failure: false
-            use_factor: True
+            use_factor: false
 
-          - name: py313-mysql-xdist-coverage
+          - name: py313-djmain-mysql-coverage
             python: '3.13'
             allow_failure: false
-            use_factor: True
+            use_factor: false
+
+          - name: py313-djmain-sqlite-pytestmin
+            python: '3.13'
+            allow_failure: false
+            use_factor: false
 
           # pypy3: not included with coverage reports (much slower then).
           - name: pypy3-djmain-sqlite
             python: 'pypy3.11'
             allow_failure: false
-            use_factor: False
+            use_factor: false
     steps:
       - uses: actions/checkout@v4
         with:
