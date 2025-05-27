@@ -101,20 +101,22 @@ jobs:
           uv tool install tox==4.26.0 --with tox-uv
 
       - name: Run tox
+        shell: bash
         run: |
-          tox -f ${{ matrix.name }}
-
-      - name: Prepare coverage file for upload
-        if: contains(matrix.name, 'coverage')
-        run: mv .coverage coverage.${{ matrix.name }}
+          if [[ ${{ matrix.name }} == *","* ]]; then
+            tox -e ${{ matrix.name }}
+          else
+            tox -f ${{ matrix.name }}
+          fi
 
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
         uses: actions/upload-artifact@v4
         with:
           name: coverage-artifact-${{ matrix.name }}
-          path: coverage.${{ matrix.name }}
+          path: .coverage.*
           retention-days: 1
+          include-hidden-files: true
 
   report-coverage:
     name: Report Combined Coverage
