@@ -106,6 +106,12 @@ jobs:
           python -m pip install uv
           uv tool install tox==4.26.0 --with tox-uv
 
+      - name: Debug tox command
+        run: |
+          echo "matrix.use_factor is: ${{ matrix.use_factor }}"
+          echo "Calculated tox command part: ${{ matrix.use_factor && '-f' || '-e' }}"
+          echo "Full tox command: tox ${{ matrix.use_factor && '-f' || '-e' }} ${{ matrix.name }}"
+
       - name: Run tox
         run: tox ${{ matrix.use_factor && '-f' || '-e' }} ${{ matrix.name }}
 
