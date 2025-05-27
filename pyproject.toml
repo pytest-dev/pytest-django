@@ -95,7 +95,7 @@ ignore_missing_imports = true
 
 [tool.coverage.run]
 parallel = true
-source = ["${PYTESTDJANGO_COVERAGE_SRC}."]
+source = ["pytest_django"]
 branch = true
 [tool.coverage.report]
 include = [
