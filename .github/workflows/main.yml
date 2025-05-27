@@ -39,10 +39,27 @@ jobs:
             allow_failure: false
             use_factor: true
 
-          - name: py312-sqlite-xdist-coverage
+          # start:Speeding up tests by running them in parallel.
+          - name: py312-djmain-sqlite-xdist-coverage
             python: '3.12'
             allow_failure: false
-            use_factor: true
+            use_factor: false
+
+          - name: py312-dj52-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
+
+          - name: py312-dj51-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
+
+          - name: py312-dj42-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
+          # end: Speeding up tests by running them in parallel.
 
           - name: py311-sqlite-xdist-coverage
             python: '3.11'
