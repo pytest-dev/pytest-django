@@ -32,7 +32,7 @@ jobs:
           - name: linting,docs
             python: '3.13'
             allow_failure: false
-            use_factor: true
+            use_factor: false 
 
           - name: py313-sqlite-xdist-coverage
             python: '3.13'
