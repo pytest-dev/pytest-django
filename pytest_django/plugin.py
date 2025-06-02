@@ -607,7 +607,7 @@ def _dj_autoclear_mailbox() -> None:
         mail.outbox.clear()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mailoutbox(
     django_mail_patch_dns: None,
     _dj_autoclear_mailbox: None,
@@ -622,7 +622,7 @@ def mailoutbox(
     return []
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_mail_patch_dns(
     monkeypatch: pytest.MonkeyPatch,
     django_mail_dnsname: str,
@@ -633,7 +633,7 @@ def django_mail_patch_dns(
     monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_mail_dnsname() -> str:
     """Return server dns name for using in email messages."""
     return "fake-tests.example.com"
