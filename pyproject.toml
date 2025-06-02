@@ -40,7 +40,7 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
-[project.optional-dependencies]
+[dependency-groups]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
@@ -48,6 +48,23 @@ docs = [
 testing = [
     "Django",
     "django-configurations>=2.0",
+]
+coverage = [
+    "coverage[toml]",
+    "coverage-enable-subprocess",
+]
+postgres = [
+    "psycopg[binary]",
+]
+mysql = [
+    "mysqlclient==2.1.0",
+]
+xdist = [
+    "pytest-xdist",
+]
+linting = [
+    "ruff==0.9.5",
+    "mypy==1.15.0",
 ]
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"
