@@ -25,83 +25,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: linting,docs
-            python: '3.13'
-            allow_failure: false
-
-          # Explicitly test min pytest.
-          - name: py313-dj52-sqlite-pytestmin-coverage
-            python: '3.13'
-            allow_failure: false
-
-          - name: py313-dj52-postgres-xdist-coverage
-            python: '3.13'
-            allow_failure: false
-
-          - name: py313-dj51-postgres-xdist-coverage
-            python: '3.13'
-            allow_failure: false
-
-          - name: py312-dj42-postgres-xdist-coverage
-            python: '3.12'
-            allow_failure: false
-
-          - name: py311-dj50-postgres-xdist-coverage
-            python: '3.11'
-            allow_failure: false
-
-          - name: py311-dj42-postgres-xdist-coverage
-            python: '3.11'
-            allow_failure: false
-
-          - name: py310-dj52-postgres-xdist-coverage
-            python: '3.10'
-            allow_failure: false
-
-          - name: py310-dj51-postgres-xdist-coverage
-            python: '3.10'
-            allow_failure: false
-
-          - name: py310-dj42-postgres-xdist-coverage
-            python: '3.10'
-            allow_failure: false
-
-          - name: py311-dj51-mysql-coverage
-            python: '3.11'
-            allow_failure: false
-
-          - name: py310-dj42-mysql-coverage
-            python: '3.10'
-            allow_failure: false
-
-          - name: py39-dj42-mysql-xdist-coverage
-            python: '3.9'
-            allow_failure: false
-
-          - name: py313-djmain-sqlite-coverage
-            python: '3.13'
-            allow_failure: true
-
-          - name: py313-dj52-sqlite-coverage
-            python: '3.13'
-            allow_failure: true
-
-          - name: py312-dj51-sqlite-xdist-coverage
-            python: '3.12'
-            allow_failure: false
-
-          - name: py311-dj42-sqlite-xdist-coverage
-            python: '3.11'
-            allow_failure: false
-
-          # pypy3: not included with coverage reports (much slower then).
-          - name: pypy3-dj42-postgres
-            python: 'pypy3.9'
-            allow_failure: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,95 +55,97 @@ jobs:
       - name: Run tox
         run: tox -e ${{ matrix.name }}
 
-      - name: Prepare coverage file for upload
+      - name: Report coverage
         if: contains(matrix.name, 'coverage')
-        run: mv .coverage coverage.${{ matrix.name }}
-
-      - name: Upload temporary coverage artifact
-        if: contains(matrix.name, 'coverage')
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-artifact-${{ matrix.name }}
-          path: coverage.${{ matrix.name }}
-          retention-days: 1
-
-  report-coverage:
-    name: Report Combined Coverage
-    runs-on: ubuntu-24.04
-    needs: test
-    if: always()
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install coverage tool
-        run: python -m pip install coverage[toml]
-
-      - name: Download all coverage artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: downloaded-coverage-artifacts
-          pattern: coverage-artifact-*
-
-      - name: Combine coverage reports
-        run: |
-          mkdir combined_coverage_data
-          find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
-          coverage combine combined_coverage_data/*
-          coverage xml
-          coverage html
-          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-
-      - name: Determine retention days
-        id: determine-retention-days
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ] || [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "retention_days=90" >> $GITHUB_OUTPUT
-          else
-            echo "retention_days=3" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload combined .coverage file
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-file
-          path: .coverage
-          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
-          include-hidden-files: true
-
-      - name: Upload HTML coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-html-report
-          path: htmlcov
-          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
-
-      - name: Delete temporary coverage artifacts from run
-        uses: geekyeggo/delete-artifact@v5
-        with:
-          name: coverage-artifact-*
-
-      - name: Report coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
+          fail_ci_if_error: true
           files: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
-          verbose: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: linting,docs
+          python: '3.13'
+          allow_failure: false
+
+        # Explicitly test min pytest.
+        - name: py313-dj52-sqlite-pytestmin-coverage
+          python: '3.13'
+          allow_failure: false
+
+        - name: py313-dj52-postgres-xdist-coverage
+          python: '3.13'
+          allow_failure: false
+
+        - name: py313-dj51-postgres-xdist-coverage
+          python: '3.13'
+          allow_failure: false
+
+        - name: py312-dj42-postgres-xdist-coverage
+          python: '3.12'
+          allow_failure: false
+
+        - name: py311-dj50-postgres-xdist-coverage
+          python: '3.11'
+          allow_failure: false
+
+        - name: py311-dj42-postgres-xdist-coverage
+          python: '3.11'
+          allow_failure: false
+
+        - name: py310-dj52-postgres-xdist-coverage
+          python: '3.10'
+          allow_failure: false
+
+        - name: py310-dj51-postgres-xdist-coverage
+          python: '3.10'
+          allow_failure: false
+
+        - name: py310-dj42-postgres-xdist-coverage
+          python: '3.10'
+          allow_failure: false
+
+        - name: py311-dj51-mysql-coverage
+          python: '3.11'
+          allow_failure: false
+
+        - name: py310-dj42-mysql-coverage
+          python: '3.10'
+          allow_failure: false
+
+        - name: py39-dj42-mysql-xdist-coverage
+          python: '3.9'
+          allow_failure: false
+
+        - name: py313-djmain-sqlite-coverage
+          python: '3.13'
+          allow_failure: true
+
+        - name: py313-dj52-sqlite-coverage
+          python: '3.13'
+          allow_failure: true
+
+        - name: py312-dj51-sqlite-xdist-coverage
+          python: '3.12'
+          allow_failure: false
+
+        - name: py311-dj42-sqlite-xdist-coverage
+          python: '3.11'
+          allow_failure: false
+
+        # pypy3: not included with coverage reports (much slower then).
+        - name: pypy3-dj42-postgres
+          python: 'pypy3.9'
+          allow_failure: false
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()
 
     needs:
-    - report-coverage
+    - test
 
     runs-on: ubuntu-24.04
 
