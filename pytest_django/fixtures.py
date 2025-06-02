@@ -285,7 +285,7 @@ def django_testcase_class(
     yield PytestDjangoTestCase
 
 
-@pytest.fixture()
+@pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,
