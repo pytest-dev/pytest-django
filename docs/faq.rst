@@ -13,12 +13,22 @@ If this for some reason fails for you, you have to manage your Python paths
 explicitly. See the documentation on :ref:`managing_the_python_path_explicitly`
 for more information.
 
+.. _faq-test-tags:
+
+Are Django test tags supported?
+-------------------------------
+
+Yes, Django :ref:`test tagging <django:topics-tagging-tests>` is supported.
+The Django test tags are automatically converted to :ref:`Pytest markers
+<pytest:mark examples>`.
+
 How can I make sure that all my tests run with a specific locale?
 -----------------------------------------------------------------
 
-Create a `pytest fixture <https://pytest.org/en/latest/fixture.html>`_ that is
-automatically run before each test case. To run all tests with the english
-locale, put the following code in your project's `conftest.py`_ file:
+Create a :ref:`pytest fixture <pytest:fixtures>` that is
+automatically run before each test case. To run all tests with the English
+locale, put the following code in your project's
+:ref:`conftest.py <pytest:plugins>` file:
 
 .. code-block:: python
 
@@ -27,8 +37,6 @@ locale, put the following code in your project's `conftest.py`_ file:
     @pytest.fixture(autouse=True)
     def set_default_language():
         activate('en')
-
-.. _conftest.py: http://docs.pytest.org/en/latest/plugins.html
 
 .. _faq-tests-not-being-picked-up:
 
@@ -55,7 +63,7 @@ When debugging test collection problems, the ``--collectonly`` flag and
 ``-rs`` (report skipped tests) can be helpful.
 
 .. _related pytest docs:
-    http://docs.pytest.org/en/latest/example/pythoncollection.html#changing-naming-conventions
+    https://docs.pytest.org/en/stable/example/pythoncollection.html#changing-naming-conventions
 
 Does pytest-django work with the pytest-xdist plugin?
 -----------------------------------------------------
@@ -71,46 +79,12 @@ How can I use ``manage.py test`` with pytest-django?
 ----------------------------------------------------
 
 pytest-django is designed to work with the ``pytest`` command, but if you
-really need integration with ``manage.py test``, you can create a simple
-test runner like this:
+really need integration with ``manage.py test``, you can add this class path 
+in your Django settings:
 
 .. code-block:: python
 
-    class PytestTestRunner(object):
-        """Runs pytest to discover and run tests."""
-
-        def __init__(self, verbosity=1, failfast=False, keepdb=False, **kwargs):
-            self.verbosity = verbosity
-            self.failfast = failfast
-            self.keepdb = keepdb
-
-        def run_tests(self, test_labels):
-            """Run pytest and return the exitcode.
-
-            It translates some of Django's test command option to pytest's.
-            """
-            import pytest
-
-            argv = []
-            if self.verbosity == 0:
-                argv.append('--quiet')
-            if self.verbosity == 2:
-                argv.append('--verbose')
-            if self.verbosity == 3:
-                argv.append('-vv')
-            if self.failfast:
-                argv.append('--exitfirst')
-            if self.keepdb:
-                argv.append('--reuse-db')
-
-            argv.extend(test_labels)
-            return pytest.main(argv)
-
-Add the path to this class in your Django settings:
-
-.. code-block:: python
-
-    TEST_RUNNER = 'my_project.runner.PytestTestRunner'
+    TEST_RUNNER = 'pytest_django.runner.TestRunner'
 
 Usage:
 
@@ -120,7 +94,7 @@ Usage:
 
 **Note**: the pytest-django command line options ``--ds`` and ``--dc`` are not
 compatible with this approach, you need to use the standard Django methods of
-setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environmental
+setting the ``DJANGO_SETTINGS_MODULE``/``DJANGO_CONFIGURATION`` environment
 variables or the ``--settings`` command line option.
 
 How can I give database access to all my tests without the `django_db` marker?
@@ -143,8 +117,11 @@ If you think you've found a bug or something that is wrong in the
 documentation, feel free to `open an issue on the GitHub project`_ for
 pytest-django.
 
-Direct help can be found in the #pylib IRC channel on irc.freenode.org.
+Direct help can be found in the #pytest IRC channel `on irc.libera.chat
+<ircs://irc.libera.chat:6697/#pytest>`_ (using an IRC client, `via webchat
+<https://web.libera.chat/#pytest>`_, or `via Matrix
+<https://matrix.to/#/%23pytest:libera.chat>`_).
 
-.. _pytest tag: http://stackoverflow.com/search?q=pytest
+.. _pytest tag: https://stackoverflow.com/search?q=pytest
 .. _open an issue on the GitHub project:
     https://github.com/pytest-dev/pytest-django/issues/

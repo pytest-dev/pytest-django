@@ -1,5 +1,8 @@
-def test_db_access_with_repr_in_report(django_testdir):
-    django_testdir.create_test_module(
+from .helpers import DjangoPytester
+
+
+def test_db_access_with_repr_in_report(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         import pytest
 
@@ -14,14 +17,16 @@ def test_db_access_with_repr_in_report(django_testdir):
     """
     )
 
-    result = django_testdir.runpytest_subprocess("--tb=auto")
-    result.stdout.fnmatch_lines([
-        "tpkg/test_the_test.py FF",
-        "E   *DoesNotExist: Item matching query does not exist.",
-        "tpkg/test_the_test.py:8: ",
-        'self = *RuntimeError*Database access not allowed*',
-        "E   *DoesNotExist: Item matching query does not exist.",
-        "* 2 failed in *",
-    ])
+    result = django_pytester.runpytest_subprocess("--tb=auto")
+    result.stdout.fnmatch_lines(
+        [
+            "tpkg/test_the_test.py FF",
+            "E   *DoesNotExist: Item matching query does not exist.",
+            "tpkg/test_the_test.py:8: ",
+            "self = *RuntimeError*Database access not allowed*",
+            "E   *DoesNotExist: Item matching query does not exist.",
+            "* 2 failed*",
+        ]
+    )
     assert "INTERNALERROR" not in str(result.stdout) + str(result.stderr)
     assert result.ret == 1

@@ -15,8 +15,11 @@ Community
 The fastest way to get feedback on contributions/bugs is usually to open an
 issue in the `issue tracker`_.
 
-Discussions also happen via IRC in #pylib on irc.freenode.org. You may also
-be interested in following `@andreaspelme`_ on Twitter.
+Discussions also happen via IRC in #pytest `on irc.libera.chat
+<ircs://irc.libera.chat:6697/#pytest>`_ (join using an IRC client, `via webchat
+<https://web.libera.chat/#pytest>`_, or `via Matrix
+<https://matrix.to/#/%23pytest:libera.chat>`_).
+You may also be interested in following `@andreaspelme`_ on Twitter.
 
 *************
 In a nutshell
@@ -137,10 +140,10 @@ writing), running them all will take a long time. All valid configurations can
 be found in `tox.ini`. To test against a few of them, invoke tox with the `-e`
 flag::
 
-    $ tox -e py36-dj111-postgres,py27-dj111-mysql_innodb
+    $ tox -e py39-dj42-postgres,py310-dj52-mysql
 
-This will run the tests on Python 3.6/Django 1.11/PostgeSQL and Python
-2.7/Django 1.11/MySQL.
+This will run the tests on Python 3.9/Django 4.2/PostgeSQL and Python
+3.10/Django 5.2/MySQL.
 
 
 Measuring test coverage
@@ -151,7 +154,7 @@ coverage measurements (using pytest-cov plugin) are not reliable.
 
 If you want to measure coverage you'll need to create .pth file as described in
 `subprocess section of coverage documentation`_. If you're using
-``setup.py develop`` you should uninstall pytest_django (using pip)
+editable mode you should uninstall pytest_django (using pip)
 for the time of measuring coverage.
 
 You'll also need mysql and postgres databases. There are predefined settings
@@ -160,7 +163,7 @@ but please don't include them in your pull requests.
 
 After this short initial setup you're ready to run tests::
 
-    $ COVERAGE_PROCESS_START=`pwd`/.coveragerc COVERAGE_FILE=`pwd`/.coverage PYTHONPATH=`pwd` pytest --ds=pytest_django_test.settings_postgres
+    $ COVERAGE_PROCESS_START=`pwd`/pyproject.toml COVERAGE_FILE=`pwd`/.coverage pytest --ds=pytest_django_test.settings_postgres
 
 You should repeat the above step for sqlite and mysql before the next step.
 This step will create a lot of ``.coverage`` files with additional suffixes for
@@ -178,10 +181,10 @@ Your coverage report is now ready in the ``htmlcov`` directory.
 Continuous integration
 ----------------------
 
-`Travis`_ is used to automatically run all tests against all supported versions
+`GitHub Actions`_ is used to automatically run all tests against all supported versions
 of Python, Django and different database backends.
 
-The `pytest-django Travis`_ page shows the latest test run. Travis will
+The `pytest-django Actions`_ page shows the latest test run. The CI will
 automatically pick up pull requests, test them and report the result directly
 in the pull request.
 
@@ -227,16 +230,16 @@ double cookie points. Seriously. You rock.
 
 .. _fork: https://github.com/pytest-dev/pytest-django
 .. _issue tracker: https://github.com/pytest-dev/pytest-django/issues
-.. _Sphinx: http://sphinx.pocoo.org/
-.. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _GitHub : http://www.github.com
-.. _GitHub help : http://help.github.com
-.. _freenode : http://freenode.net/
+.. _Sphinx: https://www.sphinx-doc.org/
+.. _PEP8: https://www.python.org/dev/peps/pep-0008/
+.. _GitHub : https://www.github.com
+.. _GitHub help : https://help.github.com
+.. _freenode : https://freenode.net/
 .. _@andreaspelme : https://twitter.com/andreaspelme
-.. _pull request : http://help.github.com/send-pull-requests/
-.. _git : http://git-scm.com/
-.. _restructuredText: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _pull request : https://help.github.com/send-pull-requests/
+.. _git : https://git-scm.com/
+.. _restructuredText: https://docutils.sourceforge.io/docs/ref/rst/introduction.html
 .. _django CMS: https://www.django-cms.org/
-.. _Travis: https://travis-ci.org/
-.. _pytest-django Travis: https://travis-ci.org/pytest-dev/pytest-django
-.. _`subprocess section of coverage documentation`: http://nedbatchelder.com/code/coverage/subprocess.html
+.. _GitHub Actions: https://github.com/features/actions
+.. _pytest-django Actions: https://github.com/pytest-dev/pytest-django/actions
+.. _`subprocess section of coverage documentation`: https://coverage.readthedocs.io/en/latest/subprocess.html

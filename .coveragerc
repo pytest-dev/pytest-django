@@ -1,8 +1,0 @@
-[run]
-parallel = 1
-source = ${PYTESTDJANGO_COVERAGE_SRC}.
-branch = 1
-
-[report]
-include = pytest_django/*,pytest_django_test/*,tests/*
-skip_covered = 1

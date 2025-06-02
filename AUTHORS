@@ -1,6 +1,11 @@
 Ben Firshman <ben@firshman.co.uk> created the original version of pytest-django.
 
-This fork is currently maintained by Andreas Pelme <andreas@pelme.se>.
+This project is currently maintained by Ran Benita <ran@unusedvar.com>.
+
+Previous maintainers are:
+
+Andreas Pelme <andreas@pelme.se>
+Daniel Hahler <https://twitter.com/blueyed>
 
 These people have provided bug fixes, new features, improved the documentation
 or just made pytest-django more awesome:
@@ -12,4 +17,7 @@ Floris Bruynooghe <flub@devork.be>
 Rafal Stozek
 Donald Stufft <donald@stufft.io>
 Nicolas Delaby <ticosax@free.fr>
-Daniel Hahler <https://twitter.com/blueyed>
+Hasan Ramezani <hasan.r67@gmail.com>
+Michael Howitz
+Mark Gensler
+Pavel Taufer

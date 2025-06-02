@@ -1,35 +1,51 @@
 """
 Tests the dynamic loading of all Django assertion cases.
 """
+
+from __future__ import annotations
+
 import inspect
 
 import pytest
-import pytest_django
 
+import pytest_django
 from pytest_django.asserts import __all__ as asserts_all
 
 
-def _get_actual_assertions_names():
+def _get_actual_assertions_names() -> list[str]:
     """
     Returns list with names of all assertion helpers in Django.
     """
-    from django.test import TestCase as DjangoTestCase
     from unittest import TestCase as DefaultTestCase
 
-    obj = DjangoTestCase('run')
+    from django import VERSION
+    from django.test import TestCase as DjangoTestCase
 
-    def is_assert(func):
-        return func.startswith('assert') and '_' not in func
+    if VERSION >= (5, 0):
+        from django.contrib.messages.test import MessagesTestMixin
 
-    base_methods = [name for name, member in
-                    inspect.getmembers(DefaultTestCase)
-                    if is_assert(name)]
+        class MessagesTestCase(MessagesTestMixin, DjangoTestCase):
+            pass
 
-    return [name for name, member in inspect.getmembers(obj)
-            if is_assert(name) and name not in base_methods]
+        obj = MessagesTestCase("run")
+    else:
+        obj = DjangoTestCase("run")
+
+    def is_assert(func) -> bool:
+        return func.startswith("assert") and "_" not in func
+
+    base_methods = [
+        name for name, member in inspect.getmembers(DefaultTestCase) if is_assert(name)
+    ]
+
+    return [
+        name
+        for name, member in inspect.getmembers(obj)
+        if is_assert(name) and name not in base_methods
+    ]
 
 
-def test_django_asserts_available():
+def test_django_asserts_available() -> None:
     django_assertions = _get_actual_assertions_names()
     expected_assertions = asserts_all
     assert set(django_assertions) == set(expected_assertions)
@@ -39,15 +55,16 @@ def test_django_asserts_available():
 
 
 @pytest.mark.django_db
-def test_sanity():
+def test_sanity() -> None:
     from django.http import HttpResponse
+
     from pytest_django.asserts import assertContains, assertNumQueries
 
-    response = HttpResponse('My response')
+    response = HttpResponse("My response")
 
-    assertContains(response, 'My response')
+    assertContains(response, "My response")
     with pytest.raises(AssertionError):
-        assertContains(response, 'Not my response')
+        assertContains(response, "Not my response")
 
     assertNumQueries(0, lambda: 1 + 1)
     with assertNumQueries(0):

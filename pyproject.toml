@@ -1,0 +1,152 @@
+[build-system]
+requires = [
+  "setuptools>=61.0.0",
+  "setuptools-scm[toml]>=5.0.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytest-django"
+description = "A Django plugin for pytest."
+readme = "README.rst"
+requires-python = ">=3.9"
+dynamic = ["version"]
+authors = [
+    { name = "Andreas Pelme", email = "andreas@pelme.se" },
+]
+maintainers = [
+    { name = "Andreas Pelme", email = "andreas@pelme.se" },
+]
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "pytest>=7.0.0",
+]
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+]
+testing = [
+    "Django",
+    "django-configurations>=2.0",
+]
+[project.urls]
+Documentation = "https://pytest-django.readthedocs.io/"
+Repository = "https://github.com/pytest-dev/pytest-django"
+Changelog = "https://pytest-django.readthedocs.io/en/latest/changelog.html"
+[project.entry-points.pytest11]
+django = "pytest_django.plugin"
+
+[tool.setuptools]
+packages = ["pytest_django"]
+[tool.setuptools.package-data]
+pytest_django = ["py.typed"]
+
+[tool.setuptools_scm]
+write_to = "pytest_django/_version.py"
+
+[tool.pytest.ini_options]
+addopts = [
+    # Error on using unregistered marker.
+    "--strict-markers",
+    # Show extra test summary info for everything.
+    "-ra",
+]
+pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
+testpaths = ["tests"]
+markers = ["tag1", "tag2", "tag3", "tag4", "tag5"]
+
+[tool.mypy]
+strict = true
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+disallow_subclassing_any = false
+files = [
+    "pytest_django",
+    "pytest_django_test",
+    "tests",
+]
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "configurations.*",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+parallel = true
+source = ["${PYTESTDJANGO_COVERAGE_SRC}."]
+branch = true
+[tool.coverage.report]
+include = [
+    "pytest_django/*",
+    "pytest_django_test/*",
+    "tests/*",
+]
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 99
+extend-exclude = [
+    "pytest_django/_version.py",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "DTZ",   # flake8-datetimez
+    "FA",    # flake8-future-annotations
+    "G",     # flake8-logging-format
+    "I",     # isort
+    "PGH",   # pygrep-hooks
+    "PIE",   # flake8-pie
+    "PL",    # pylint
+    "PT",    # flake8-pytest-style
+    "PYI",   # flake8-pyi
+    "RUF",   # Ruff-specific rules
+    "SLOT",  # flake8-slots
+    "T10",   # flake8-debugger
+    "UP",    # pyupgrade
+    "YTT",   # flake8-2020
+]
+ignore = [
+    "PLR0913",  # Too many arguments in function definition
+    "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
+    "PT001",    # Use `@pytest.fixture()` over `@pytest.fixture`
+    "PT023",    # Use `@pytest.mark.django_db()` over `@pytest.mark.django_db`
+]
+
+[tool.ruff.lint.isort]
+forced-separate = [
+    "tests",
+    "pytest_django",
+    "pytest_django_test",
+]
+combine-as-imports = true
+split-on-trailing-comma = false
+lines-after-imports = 2

@@ -1,68 +1,105 @@
 import pytest
-from django.test import TestCase
-from pkg_resources import parse_version
+from django.test import SimpleTestCase, TestCase, tag
+
+from .helpers import DjangoPytester
 
 from pytest_django_test.app.models import Item
 
 
 class TestFixtures(TestCase):
-    fixtures = ["items"]
+    fixtures = ("items",)
 
-    def test_fixtures(self):
+    def test_fixtures(self) -> None:
         assert Item.objects.count() == 1
         assert Item.objects.get().name == "Fixture item"
 
-    def test_fixtures_again(self):
+    def test_fixtures_again(self) -> None:
         """Ensure fixtures are only loaded once."""
         self.test_fixtures()
 
 
 class TestSetup(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         """setUp should be called after starting a transaction"""
         assert Item.objects.count() == 0
         Item.objects.create(name="Some item")
         Item.objects.create(name="Some item again")
 
-    def test_count(self):
-        self.assertEqual(Item.objects.count(), 2)
+    def test_count(self) -> None:
+        self.assertEqual(Item.objects.count(), 2)  # noqa: PT009
         assert Item.objects.count() == 2
         Item.objects.create(name="Foo")
-        self.assertEqual(Item.objects.count(), 3)
+        self.assertEqual(Item.objects.count(), 3)  # noqa: PT009
 
-    def test_count_again(self):
+    def test_count_again(self) -> None:
         self.test_count()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """tearDown should be called before rolling back the database"""
         assert Item.objects.count() == 3
 
 
 class TestFixturesWithSetup(TestCase):
-    fixtures = ["items"]
+    fixtures = ("items",)
 
-    def setUp(self):
+    def setUp(self) -> None:
         assert Item.objects.count() == 1
         Item.objects.create(name="Some item")
 
-    def test_count(self):
+    def test_count(self) -> None:
         assert Item.objects.count() == 2
         Item.objects.create(name="Some item again")
 
-    def test_count_again(self):
+    def test_count_again(self) -> None:
         self.test_count()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         assert Item.objects.count() == 3
 
 
-def test_sole_test(django_testdir):
-    """
-    Make sure the database are configured when only Django TestCase classes
-    are collected, without the django_db marker.
-    """
+@tag("tag1", "tag2")
+class TestDjangoTagsToPytestMarkers(SimpleTestCase):
+    """Django test tags are converted to Pytest markers, at the class & method
+    levels."""
 
-    django_testdir.create_test_module(
+    @pytest.fixture(autouse=True)
+    def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
+        self.markers = {m.name for m in request.node.iter_markers()}
+
+    @tag("tag3", "tag4")  # type: ignore[misc]
+    def test_1(self) -> None:
+        assert self.markers == {"tag1", "tag2", "tag3", "tag4"}
+
+    def test_2(self) -> None:
+        assert self.markers == {"tag1", "tag2"}
+
+    @tag("tag5")  # type: ignore[misc]
+    def test_3(self) -> None:
+        assert self.markers == {"tag1", "tag2", "tag5"}
+
+
+@tag("tag1")
+class TestNonDjangoClassWithTags:
+    """Django test tags are only converted to Pytest markers if actually
+    Django tests. Use pytest markers directly for pytest tests."""
+
+    @pytest.fixture(autouse=True)
+    def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
+        self.markers = {m.name for m in request.node.iter_markers()}
+
+    @tag("tag2")  # type: ignore[misc]
+    def test_1(self) -> None:
+        assert not self.markers
+
+
+def test_sole_test(django_pytester: DjangoPytester) -> None:
+    """
+    Make sure the database is configured when only Django TestCase classes
+    are collected, without the django_db marker.
+
+    Also ensures that the DB is available after a failure (#824).
+    """
+    django_pytester.create_test_module(
         """
         import os
 
@@ -80,19 +117,34 @@ def test_sole_test(django_testdir):
 
                 # Make sure it is usable
                 assert Item.objects.count() == 0
+
+                assert 0, "trigger_error"
+
+        class TestBar(TestCase):
+            def test_bar(self):
+                assert Item.objects.count() == 0
     """
     )
 
-    result = django_testdir.runpytest_subprocess("-v")
-    result.stdout.fnmatch_lines(["*TestFoo*test_foo PASSED*"])
-    assert result.ret == 0
+    result = django_pytester.runpytest_subprocess("-v")
+    result.stdout.fnmatch_lines(
+        [
+            "*::test_foo FAILED",
+            "*::test_bar PASSED",
+            '>       assert 0, "trigger_error"',
+            "E       AssertionError: trigger_error",
+            "E       assert 0",
+            "*= 1 failed, 1 passed*",
+        ]
+    )
+    assert result.ret == 1
 
 
 class TestUnittestMethods:
     "Test that setup/teardown methods of unittests are being called."
 
-    def test_django(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_django(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -116,7 +168,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         result.stdout.fnmatch_lines(
             [
                 "CALLED: setUpClass",
@@ -128,8 +180,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_not_being_a_classmethod(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_setUpClass_not_being_a_classmethod(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -142,24 +194,16 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         expected_lines = [
             "* ERROR at setup of TestFoo.test_pass *",
+            "E * TypeError: *",
         ]
-        if parse_version(pytest.__version__) < parse_version("4.2"):
-            expected_lines += [
-                "E *Failed: <class 'tpkg.test_the_test.TestFoo'>.setUpClass should be a classmethod",  # noqa:E501
-            ]
-        else:
-            expected_lines += [
-                "E * TypeError: *",
-            ]
-
         result.stdout.fnmatch_lines(expected_lines)
         assert result.ret == 1
 
-    def test_setUpClass_multiple_subclasses(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_setUpClass_multiple_subclasses(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
@@ -184,7 +228,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
+        result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
                 "*TestFoo::test_shared PASSED*",
@@ -196,12 +240,12 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_mixin(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_setUpClass_mixin(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
-            class TheMixin(object):
+            class TheMixin:
                 @classmethod
                 def setUpClass(cls):
                     super(TheMixin, cls).setUpClass()
@@ -218,14 +262,12 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
-        result.stdout.fnmatch_lines(
-            ["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"]
-        )
+        result = django_pytester.runpytest_subprocess("-v")
+        result.stdout.fnmatch_lines(["*TestFoo::test_foo PASSED*", "*TestBar::test_bar PASSED*"])
         assert result.ret == 0
 
-    def test_setUpClass_skip(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_setUpClass_skip(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
             import pytest
@@ -253,7 +295,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v")
+        result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
                 "*TestFoo::test_shared SKIPPED*",
@@ -265,15 +307,15 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_multi_inheritance_setUpClass(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_multi_inheritance_setUpClass(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import TestCase
 
             # Using a mixin is a regression test, see #280 for more details:
             # https://github.com/pytest-dev/pytest-django/issues/280
 
-            class SomeMixin(object):
+            class SomeMixin:
                 pass
 
             class TestA(SomeMixin, TestCase):
@@ -327,12 +369,12 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-vvvv", "-s")
+        result = django_pytester.runpytest_subprocess("-vvvv", "-s")
         assert result.parseoutcomes()["passed"] == 6
         assert result.ret == 0
 
-    def test_unittest(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_unittest(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from unittest import TestCase
 
@@ -356,7 +398,7 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-v", "-s")
+        result = django_pytester.runpytest_subprocess("-v", "-s")
         result.stdout.fnmatch_lines(
             [
                 "CALLED: setUpClass",
@@ -368,8 +410,8 @@ class TestUnittestMethods:
         )
         assert result.ret == 0
 
-    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_testdir):
-        django_testdir.create_test_module(
+    def test_setUpClass_leaf_but_not_in_dunder_dict(self, django_pytester: DjangoPytester) -> None:
+        django_pytester.create_test_module(
             """
             from django.test import testcases
 
@@ -390,17 +432,15 @@ class TestUnittestMethods:
         """
         )
 
-        result = django_testdir.runpytest_subprocess("-q", "-s")
-        result.stdout.fnmatch_lines(
-            ["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed in*"]
-        )
+        result = django_pytester.runpytest_subprocess("-q", "-s")
+        result.stdout.fnmatch_lines(["*FooBarTestCase.setUpClass*", "*test_noop*", "1 passed*"])
         assert result.ret == 0
 
 
 class TestCaseWithDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures("db")
 
-    def test_simple(self):
+    def test_simple(self) -> None:
         # We only want to check setup/teardown does not conflict
         assert 1
 
@@ -408,12 +448,12 @@ class TestCaseWithDbFixture(TestCase):
 class TestCaseWithTrDbFixture(TestCase):
     pytestmark = pytest.mark.usefixtures("transactional_db")
 
-    def test_simple(self):
+    def test_simple(self) -> None:
         # We only want to check setup/teardown does not conflict
         assert 1
 
 
-def test_pdb_enabled(django_testdir):
+def test_pdb_enabled(django_pytester: DjangoPytester) -> None:
     """
     Make sure the database is flushed and tests are isolated when
     using the --pdb option.
@@ -422,7 +462,7 @@ def test_pdb_enabled(django_testdir):
     https://github.com/pytest-dev/pytest-django/issues/405
     """
 
-    django_testdir.create_test_module(
+    django_pytester.create_test_module(
         '''
         import os
 
@@ -454,12 +494,12 @@ def test_pdb_enabled(django_testdir):
     '''
     )
 
-    result = django_testdir.runpytest_subprocess("-v", "--pdb")
+    result = django_pytester.runpytest_subprocess("-v", "--pdb")
     assert result.ret == 0
 
 
-def test_debug_not_used(django_testdir):
-    django_testdir.create_test_module(
+def test_debug_not_used(django_pytester: DjangoPytester) -> None:
+    django_pytester.create_test_module(
         """
         from django.test import TestCase
 
@@ -476,6 +516,6 @@ def test_debug_not_used(django_testdir):
     """
     )
 
-    result = django_testdir.runpytest_subprocess("--pdb")
-    result.stdout.fnmatch_lines(["*= 1 passed in *"])
+    result = django_pytester.runpytest_subprocess("--pdb")
+    result.stdout.fnmatch_lines(["*= 1 passed*"])
     assert result.ret == 0

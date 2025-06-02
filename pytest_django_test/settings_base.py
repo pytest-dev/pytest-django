@@ -1,5 +1,3 @@
-import django
-
 ROOT_URLCONF = "pytest_django_test.urls"
 INSTALLED_APPS = [
     "django.contrib.auth",
@@ -20,9 +18,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
-if django.VERSION < (1, 10):
-    MIDDLEWARE_CLASSES = MIDDLEWARE
-
 
 TEMPLATES = [
     {
@@ -32,3 +27,7 @@ TEMPLATES = [
         "OPTIONS": {},
     }
 ]
+
+DATABASE_ROUTERS = ["pytest_django_test.db_router.DbRouter"]
+
+USE_TZ = True

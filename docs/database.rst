@@ -1,19 +1,17 @@
-Database creation/re-use
-========================
+Database access
+===============
 
 ``pytest-django`` takes a conservative approach to enabling database
 access.  By default your tests will fail if they try to access the
 database.  Only if you explicitly request database access will this be
 allowed.  This encourages you to keep database-needing tests to a
-minimum which is a best practice since next-to-no business logic
-should be requiring the database.  Moreover it makes it very clear
-what code uses the database and catches any mistakes.
+minimum which makes it very clear what code uses the database.
 
 Enabling database access in tests
 ---------------------------------
 
-You can use `pytest marks <https://pytest.org/en/latest/mark.html>`_ to
-tell ``pytest-django`` your test needs database access::
+You can use :ref:`pytest marks <pytest:mark>` to tell ``pytest-django`` your
+test needs database access::
 
    import pytest
 
@@ -24,10 +22,8 @@ tell ``pytest-django`` your test needs database access::
 
 It is also possible to mark all tests in a class or module at once.
 This demonstrates all the ways of marking, even though they overlap.
-Just one of these marks would have been sufficient.  See the `pytest
-documentation
-<https://pytest.org/en/latest/example/markers.html#marking-whole-classes-or-modules>`_
-for detail::
+Just one of these marks would have been sufficient.  See the :ref:`pytest
+documentation <pytest:scoped-marking>` for detail::
 
    import pytest
 
@@ -41,24 +37,22 @@ for detail::
            assert me.is_superuser
 
 
-By default ``pytest-django`` will set up the Django databases the
-first time a test needs them.  Once setup the database is cached for
-used for all subsequent tests and rolls back transactions to isolate
+By default ``pytest-django`` will set up Django databases the
+first time a test needs them.  Once setup, a database is cached to be
+used for all subsequent tests and rolls back transactions, to isolate
 tests from each other.  This is the same way the standard Django
-`TestCase
-<https://docs.djangoproject.com/en/1.9/topics/testing/tools/#testcase>`_
-uses the database.  However ``pytest-django`` also caters for
-transaction test cases and allows you to keep the test databases
-configured across different test runs.
+:class:`~django.test.TestCase` uses the database.  However
+``pytest-django`` also caters for transaction test cases and allows
+you to keep the test databases configured across different test runs.
 
 
 Testing transactions
 --------------------
 
-Django itself has the ``TransactionTestCase`` which allows you to test
-transactions and will flush the database between tests to isolate
-them.  The downside of this is that these tests are much slower to
-set up due to the required flushing of the database.
+Django itself has the :class:`~django.test.TransactionTestCase` which
+allows you to test transactions and will flush the database between
+tests to isolate them.  The downside of this is that these tests are
+much slower to set up due to the required flushing of the database.
 ``pytest-django`` also supports this style of tests, which you can
 select using an argument to the ``django_db`` mark::
 
@@ -66,25 +60,26 @@ select using an argument to the ``django_db`` mark::
    def test_spam():
        pass  # test relying on transactions
 
+.. _`multi-db`:
 
 Tests requiring multiple databases
 ----------------------------------
 
-Currently ``pytest-django`` does not specifically support Django's
-multi-database support.
+.. versionadded:: 4.3
 
-You can however use normal :class:`~django.test.TestCase` instances to use its
-:ref:`django:topics-testing-advanced-multidb` support.
-In particular, if your database is configured for replication, be sure to read
-about :ref:`django:topics-testing-primaryreplica`.
+``pytest-django`` has support for multi-database configurations using the
+``databases`` argument to the :func:`django_db <pytest.mark.django_db>` mark::
 
-If you have any ideas about the best API to support multiple databases
-directly in ``pytest-django`` please get in touch, we are interested
-in eventually supporting this but unsure about simply following
-Django's approach.
+   @pytest.mark.django_db(databases=['default', 'other'])
+   def test_spam():
+       assert MyModel.objects.using('other').count() == 0
 
-See `https://github.com/pytest-dev/pytest-django/pull/431` for an idea /
-discussion to approach this.
+If you don't specify ``databases``, only the default database is requested.
+To request all databases, you may use the shortcut ``'__all__'``.
+
+For details see :attr:`django.test.TransactionTestCase.databases` and
+:attr:`django.test.TestCase.databases`.
+
 
 ``--reuse-db`` - reuse the testing database between test runs
 --------------------------------------------------------------
@@ -125,13 +120,13 @@ A good way to use ``--reuse-db`` and ``--create-db`` can be:
 * When you alter your database schema, run ``pytest --create-db``, to force
   re-creation of the test database.
 
-``--nomigrations`` - Disable Django 1.7+ migrations
---------------------------------------------------------------
+``--no-migrations`` - Disable Django migrations
+-----------------------------------------------
 
-Using ``--nomigrations`` will disable Django migrations and create the database
+Using ``--no-migrations`` (alias: ``--nomigrations``) will disable Django migrations and create the database
 by inspecting all models. It may be faster when there are several migrations to
 run in the database setup.  You can use ``--migrations`` to force running
-migrations in case ``--nomigrations`` is used, e.g. in ``setup.cfg``.
+migrations in case ``--no-migrations`` is used, e.g. in ``pyproject.toml``.
 
 .. _advanced-database-configuration:
 
@@ -156,7 +151,7 @@ project by specifying a fixture with the same name and scope in ``conftest.py``.
 .. admonition:: Use the pytest-django source code
 
     The default implementation of these fixtures can be found in
-    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py>`_.
+    `fixtures.py <https://github.com/pytest-dev/pytest-django/blob/main/pytest_django/fixtures.py>`_.
 
     The code is relatively short and straightforward and can provide a
     starting point when you need to customize database setup in your own
@@ -184,8 +179,9 @@ django_db_modify_db_settings
 
 .. fixture:: django_db_modify_db_settings
 
-This fixture allows modifying `django.conf.settings.DATABASES` just before the
-databases are configured.
+This fixture allows modifying
+`django.conf.settings.DATABASES <https://docs.djangoproject.com/en/stable/ref/settings/#databases>`_
+just before the databases are configured.
 
 If you need to customize the location of your test database, this is the
 fixture you want to override.
@@ -238,7 +234,7 @@ Returns whether or not to use migrations to create the test
 databases.
 
 The default implementation returns the value of the
-``--migrations``/``--nomigrations`` command line options.
+``--migrations``/``--no-migrations`` command line options.
 
 This fixture is by default requested from :fixture:`django_db_setup`.
 
@@ -293,19 +289,21 @@ access for the specified block::
 
 You can also manage the access manually via these methods:
 
-.. py:method:: django_db_blocker.unblock()
+.. py:class:: pytest_django.DjangoDbBlocker
 
-  Enable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore`.
+    .. py:method:: django_db_blocker.unblock()
 
-.. py:method:: django_db_blocker.block()
+    Enable database access. Should be followed by a call to
+    :func:`~django_db_blocker.restore` or used as a context manager.
 
-  Disable database access. Should be followed by a call to
-  :func:`~django_db_blocker.restore`.
+    .. py:method:: django_db_blocker.block()
 
-.. py:function:: django_db_blocker.restore()
+    Disable database access. Should be followed by a call to
+    :func:`~django_db_blocker.restore` or used as a context manager.
 
-  Restore the previous state of the database blocking.
+    .. py:method:: django_db_blocker.restore()
+
+    Restore the previous state of the database blocking.
 
 Examples
 ########
@@ -321,19 +319,15 @@ Put this into ``conftest.py``::
     import pytest
     from django.db import connections
 
-    import psycopg2
-    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+    import psycopg
 
 
     def run_sql(sql):
-        conn = psycopg2.connect(database='postgres')
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cur = conn.cursor()
-        cur.execute(sql)
-        conn.close()
+        with psycopg.connect(database='postgres') as conn:
+            conn.execute(sql)
 
 
-    @pytest.yield_fixture(scope='session')
+    @pytest.fixture(scope='session')
     def django_db_setup():
         from django.conf import settings
 
@@ -366,6 +360,8 @@ Put this into ``conftest.py``::
 
     @pytest.fixture(scope='session')
     def django_db_setup():
+        from django.conf import settings
+
         settings.DATABASES['default'] = {
             'ENGINE': 'django.db.backends.mysql',
             'HOST': 'db.example.com',
@@ -376,17 +372,17 @@ Put this into ``conftest.py``::
 Populate the database with initial test data
 """"""""""""""""""""""""""""""""""""""""""""
 
-This example shows how you can populate the test database with test data. The
-test data will be saved in the database, i.e. it will not just be part of a
-transactions. This example uses Django's fixture loading mechanism, but it can
-be replaced with any way of loading data into the database.
+In some cases you want to populate the test database before you start the
+tests. Because of different ways you may use the test database, there are
+different ways to populate it.
 
-Notice that :fixture:`django_db_setup` is in the argument list. This may look
-odd at first, but it will make sure that the original pytest-django fixture
-is used to create the test database. When ``call_command`` is invoked, the
-test database is already prepared and configured.
+Populate the test database if you don't use transactional or live_server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Put this in ``conftest.py``::
+If you are using the :func:`pytest.mark.django_db` marker or :fixture:`db`
+fixture, you probably don't want to explicitly handle transactions in your
+tests. In this case, it is sufficient to populate your database only
+once. You can put code like this in ``conftest.py``::
 
     import pytest
 
@@ -395,13 +391,49 @@ Put this in ``conftest.py``::
     @pytest.fixture(scope='session')
     def django_db_setup(django_db_setup, django_db_blocker):
         with django_db_blocker.unblock():
-            call_command('loaddata', 'your_data_fixture.json')
+            call_command('loaddata', 'my_fixture.json')
+
+This loads the Django fixture ``my_fixture.json`` once for the entire test
+session. This data will be available to tests marked with the
+:func:`pytest.mark.django_db` mark, or tests which use the :fixture:`db`
+fixture. The test data will be saved in the database and will not be reset.
+This example uses Django's fixture loading mechanism, but it can be replaced
+with any way of loading data into the database.
+
+Notice :fixture:`django_db_setup` in the argument list. This triggers the
+original pytest-django fixture to create the test database, so that when
+``call_command`` is invoked, the test database is already prepared and
+configured.
+
+Populate the test database if you use transactional or live_server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case you use transactional tests (you use the :func:`pytest.mark.django_db`
+marker with ``transaction=True``, or the :fixture:`transactional_db` fixture),
+you need to repopulate your database every time a test starts, because the
+database is cleared between tests.
+
+The :fixture:`live_server` fixture uses :fixture:`transactional_db`, so you
+also need to populate the test database this way when using it.
+
+You can put this code into ``conftest.py``. Note that while it it is similar to
+the previous one, the scope is changed from ``session`` to ``function``::
+
+    import pytest
+
+    from myapp.models import Widget
+
+    @pytest.fixture(scope='function')
+    def django_db_setup(django_db_setup, django_db_blocker):
+        with django_db_blocker.unblock():
+            Widget.objects.create(...)
+
 
 Use the same database for all xdist processes
 """""""""""""""""""""""""""""""""""""""""""""
 
 By default, each xdist process gets its own database to run tests on. This is
-needed to have transactional tests that does not interfere with eachother.
+needed to have transactional tests that do not interfere with each other.
 
 If you instead want your tests to use the same database, override the
 :fixture:`django_db_modify_db_settings` to not do anything. Put this in
@@ -463,7 +495,7 @@ Put this in ``conftest.py``::
 
 .. warning::
     This snippet shows ``cursor().executescript()`` which is `sqlite` specific, for
-    other database engines this method might differ. For instance, psycopg2 uses
+    other database engines this method might differ. For instance, psycopg uses
     ``cursor().execute()``.
 
 
@@ -490,4 +522,5 @@ Put this in ``conftest.py``::
     @pytest.fixture
     def db_access_without_rollback_and_truncate(request, django_db_setup, django_db_blocker):
         django_db_blocker.unblock()
-        request.addfinalizer(django_db_blocker.restore)
+        yield
+        django_db_blocker.restore()
