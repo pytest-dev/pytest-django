@@ -46,7 +46,7 @@ def pytester(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> pyte
     return pytester
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_pytester(
     request: pytest.FixtureRequest,
     pytester: pytest.Pytester,
