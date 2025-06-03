@@ -180,7 +180,7 @@ jobs:
           coverage combine combined_coverage_data/*
           coverage xml
           coverage html
-          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          coverage report --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
 
       - name: Determine retention days
         id: determine-retention-days
