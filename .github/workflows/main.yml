@@ -9,7 +9,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
@@ -49,8 +49,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
-          echo "${{ github.ref }}"
           python -m pip install --upgrade pip
           pip install tox==4.26.0
 
