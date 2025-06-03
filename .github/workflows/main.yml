@@ -40,6 +40,8 @@ jobs:
           sudo systemctl start mysql.service
           echo "TEST_DB_USER=root" >> $GITHUB_ENV
           echo "TEST_DB_PASSWORD=root" >> $GITHUB_ENV
+          echo "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+          echo "${{ github.ref }}"
 
       - name: Setup postgresql
         if: contains(matrix.name, 'postgres')
