@@ -40,8 +40,6 @@ jobs:
           sudo systemctl start mysql.service
           echo "TEST_DB_USER=root" >> $GITHUB_ENV
           echo "TEST_DB_PASSWORD=root" >> $GITHUB_ENV
-          echo "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
-          echo "${{ github.ref }}"
 
       - name: Setup postgresql
         if: contains(matrix.name, 'postgres')
@@ -51,6 +49,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+          echo "${{ github.ref }}"
           python -m pip install --upgrade pip
           pip install tox==4.26.0
 
