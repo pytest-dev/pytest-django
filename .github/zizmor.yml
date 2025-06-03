@@ -4,3 +4,4 @@ rules:
       policies:
         actions/*: ref-pin
         codecov/codecov-action: ref-pin
+        geekyeggo/delete-artifact: ref-pin

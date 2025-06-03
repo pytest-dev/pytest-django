@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    env:
+      MATRIX_NAME: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,12 +56,10 @@ jobs:
 
       - name: Run tox
         run: tox -e "${MATRIX_NAME}"
-        env:
-          MATRIX_NAME: ${{ matrix.name }}
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
-        run: mv .coverage coverage.${{ matrix.name }}
+        run: mv .coverage coverage.${MATRIX_NAME}
 
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
@@ -185,11 +185,13 @@ jobs:
       - name: Determine retention days
         id: determine-retention-days
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ] || [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          if [ "${GITHUB_REF}" = "refs/heads/main" ] || [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             echo "retention_days=90" >> $GITHUB_OUTPUT
           else
             echo "retention_days=3" >> $GITHUB_OUTPUT
           fi
+        env:
+          GITHUB_REF: ${{ github.ref }}
 
       - name: Upload combined .coverage file
         uses: actions/upload-artifact@v4
