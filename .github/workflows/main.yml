@@ -53,7 +53,9 @@ jobs:
           pip install tox==4.26.0
 
       - name: Run tox
-        run: tox -e ${{ matrix.name }}
+        run: tox -e "${MATRIX_NAME}"
+        env:
+          MATRIX_NAME: ${{ matrix.name }}
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
