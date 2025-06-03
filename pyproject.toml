@@ -63,8 +63,9 @@ xdist = [
     "pytest-xdist",
 ]
 linting = [
-    "ruff==0.9.5",
     "mypy==1.15.0",
+    "ruff==0.9.5",
+    "zizmor==1.9.0",
 ]
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"
@@ -157,7 +158,6 @@ extend-select = [
 ignore = [
     "PLR0913",  # Too many arguments in function definition
     "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
-    "PT023",    # Use `@pytest.mark.django_db()` over `@pytest.mark.django_db`
 ]
 
 [tool.ruff.lint.isort]
