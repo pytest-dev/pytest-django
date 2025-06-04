@@ -54,8 +54,15 @@ jobs:
 
       - name: Run tox
         run: tox -e "${MATRIX_NAME}"
-        env:
-          MATRIX_NAME: ${{ matrix.name }}
+        # run: tox -e "${MATRIX_NAME}"
+        # env:
+        #   MATRIX_NAME: ${{ matrix.name }}
+
+      - name: Upload SARIF report into the GitHub repo code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
 
       - name: Report coverage
         if: contains(matrix.name, 'coverage')
