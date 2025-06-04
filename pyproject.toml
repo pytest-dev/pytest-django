@@ -122,7 +122,7 @@ include = [
     "tests/*",
 ]
 omit = [
-    "pytest_django/_version.py",
+    "pytest_django/_version.py",  # coverage fails when the file stops existing randomly, see .gitnore
 ]
 skip_covered = true
 exclude_lines = [
