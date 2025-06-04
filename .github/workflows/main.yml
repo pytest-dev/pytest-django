@@ -209,7 +209,7 @@ jobs:
           retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
 
       - name: Delete temporary coverage artifacts from run
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@f275313  # 5.1.0
         with:
           name: coverage-artifact-*
 
