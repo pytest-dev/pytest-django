@@ -53,10 +53,9 @@ jobs:
           pip install tox==4.26.0
 
       - name: Run tox
-        run: tox -e "${{ matrix.name }}"
-        # run: tox -e "${MATRIX_NAME}"
-        # env:
-        #   MATRIX_NAME: ${{ matrix.name }}
+        run: tox -e "${MATRIX_NAME}"
+        env:
+          MATRIX_NAME: ${{ matrix.name }}
 
       - name: Upload SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
