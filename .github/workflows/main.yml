@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    env:
+      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,9 +55,7 @@ jobs:
           pip install tox==4.26.0
 
       - name: Run tox
-        run: tox -e "${MATRIX_NAME}"
-        env:
-          MATRIX_NAME: ${{ matrix.name }}
+        run: tox
 
       - name: Report coverage
         if: contains(matrix.name, 'coverage')
