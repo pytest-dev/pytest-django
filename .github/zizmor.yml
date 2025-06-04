@@ -4,4 +4,4 @@ rules:
       policies:
         actions/*: ref-pin
         codecov/codecov-action: ref-pin
-        codeql-action/upload-sarif: ref-pin
+        github/*: ref-pin
