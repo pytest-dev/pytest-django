@@ -118,6 +118,8 @@ branch = true
 [tool.coverage.report]
 include = [
     "pytest_django/*",
+    "pytest_django_test/*",
+    "tests/*",
 ]
 omit = [
     "pytest_django/_version.py",
