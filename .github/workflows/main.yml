@@ -26,7 +26,7 @@ jobs:
     permissions:
       contents: read
     env:
-      MATRIX_NAME: ${{ matrix.name }}
+      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
