@@ -26,6 +26,8 @@ jobs:
     permissions:
       contents: read
       security-events: write
+    env:
+      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,9 +56,7 @@ jobs:
           pip install tox==4.26.0
 
       - name: Run tox
-        run: tox -e "${MATRIX_NAME}"
-        env:
-          MATRIX_NAME: ${{ matrix.name }}
+        run: tox
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
