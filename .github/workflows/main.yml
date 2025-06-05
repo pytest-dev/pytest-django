@@ -9,7 +9,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ci-main-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      security-events: write
+    env:
+      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +56,14 @@ jobs:
           pip install tox==4.26.0
 
       - name: Run tox
-        run: tox -e ${{ matrix.name }}
+        run: tox
+
+      - name: Upload zizmor SARIF report into the GitHub repo code scanning
+        if: contains(matrix.name, 'linting')
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
 
       - name: Report coverage
         if: contains(matrix.name, 'coverage')
