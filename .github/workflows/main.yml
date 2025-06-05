@@ -25,6 +25,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      security-events: write
     env:
       TOXENV: ${{ matrix.name }}
     steps:
@@ -56,6 +57,13 @@ jobs:
 
       - name: Run tox
         run: tox
+
+      - name: Upload zizmor SARIF report into the GitHub repo code scanning
+        if: contains(matrix.name, 'linting')
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
 
       - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
