@@ -56,7 +56,7 @@ jobs:
           uv tool install tox==4.26.0 --with tox-uv
 
       - name: Run tox
-        run: tox
+        run: tox ${{ matrix.use_factor && '-f' || '-e' }} ${{ matrix.name }}
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
