@@ -4,6 +4,7 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
+import os
 import socket
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -443,6 +444,7 @@ class TestSettings:
 
 
 class TestLiveServer:
+    @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
     def test_settings_before(self) -> None:
         from django.conf import settings
 
@@ -458,6 +460,7 @@ class TestLiveServer:
     def test_change_settings(self, live_server, settings) -> None:
         assert live_server.url == force_str(live_server)
 
+    @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
     def test_settings_restored(self) -> None:
         """Ensure that settings are restored after test_settings_before."""
         from django.conf import settings
