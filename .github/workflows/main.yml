@@ -26,8 +26,6 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    env:
-      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,7 +54,9 @@ jobs:
           uv tool install tox==4.26.0 --with tox-uv
 
       - name: Run tox
-        run: tox ${{ matrix.use_factor && '-f' || '-e' }} ${{ matrix.name }}
+        run: tox ${TOX_ARGS}
+        env:
+          TOX_ARGS: ${{ matrix.use_factor && format('-f {0}', matrix.name) || format('-e {0}', matrix.name) }}
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
