@@ -65,10 +65,6 @@ jobs:
           sarif_file: zizmor.sarif
           category: zizmor
 
-      - name: Prepare coverage file for upload
-        if: contains(matrix.name, 'coverage')
-        run: mv .coverage coverage.${TOXENV}
-
       - name: Upload temporary coverage artifact
         if: contains(matrix.name, 'coverage')
         uses: actions/upload-artifact@v4
