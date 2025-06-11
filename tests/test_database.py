@@ -454,6 +454,35 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1)
 
 
+def test_fixture_multi_db(django_pytester: DjangoPytester) -> None:
+    """Test that fixture multi-db support works."""
+
+    django_pytester.create_test_module(
+        """
+        import pytest
+        from django.test import TestCase
+        from .app.models import Item, SecondItem
+
+        TestCase.databases = ["default", "second"]
+
+        @pytest.fixture
+        def item(db):
+            return Item.objects.create(name="test")
+
+        @pytest.fixture
+        def second_item(db):
+            return SecondItem.objects.create(name="test")
+
+        def test_db_access(item, second_item):
+            Item.objects.count() == 1
+            SecondItem.objects.count() == 1
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=1)
+
+
 class Test_database_blocking:
     def test_db_access_in_conftest(self, django_pytester: DjangoPytester) -> None:
         """Make sure database access in conftest module is prohibited."""
