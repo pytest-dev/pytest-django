@@ -378,7 +378,7 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 # ############### User visible fixtures ################
 
 
-@pytest.fixture
+@pytest.fixture(name="djt")
 def django_testcase(_django_db_helper: django.test.TestCase | None) -> django.test.TestCase | None:
     return _django_db_helper
 

@@ -34,7 +34,7 @@ def _wrapper(name: str):
     def assertion_func(*args, **kwargs):
         message = (
             f"Using pytest_django.asserts.{name} is deprecated. "
-            f'Use fixture "django_testcase" and django_testcase.{name} instead.'
+            f'Use fixture "djt" and djt.{name} instead.'
         )
         warnings.warn(
             message,

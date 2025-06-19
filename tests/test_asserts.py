@@ -76,21 +76,21 @@ def test_sanity() -> None:
     assert assertContains.__doc__
 
 
-def test_fixture_assert(django_testcase: django.test.TestCase) -> None:
-    django_testcase.assertEqual("a", "a")  # noqa: PT009
+def test_fixture_assert(djt: django.test.TestCase) -> None:
+    djt.assertEqual("a", "a")  # noqa: PT009
 
     with pytest.raises(AssertionError):
-        django_testcase.assertXMLEqual("a" * 10_000, "a")
+        djt.assertXMLEqual("a" * 10_000, "a")
 
 
 class TestInternalDjangoAssert:
-    def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
-        assert django_testcase != self
-        django_testcase.assertEqual("a", "a")  # noqa: PT009
+    def test_fixture_assert(self, djt: django.test.TestCase) -> None:
+        assert djt != self
+        djt.assertEqual("a", "a")  # noqa: PT009
         assert not hasattr(self, "assertEqual")
 
         with pytest.raises(AssertionError):
-            django_testcase.assertXMLEqual("a" * 10_000, "a")
+            djt.assertXMLEqual("a" * 10_000, "a")
 
 
 @pytest.mark.django_project(create_manage_py=True)
@@ -101,7 +101,7 @@ def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
         import django.test
 
         class TestDjangoAssert(django.test.TestCase):
-            def test_fixture_assert(self, django_testcase: django.test.TestCase) -> None:
+            def test_fixture_assert(self, djt: django.test.TestCase) -> None:
                 assert False, "Cannot use the fixture"
 
             def test_normal_assert(self) -> None:
@@ -112,7 +112,7 @@ def test_django_test_case_assert(django_pytester: DjangoPytester) -> None:
     )
     result = django_pytester.runpytest_subprocess()
     result.assert_outcomes(failed=1, passed=1)
-    assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
+    assert "missing 1 required positional argument: 'djt'" in result.stdout.str()
 
 
 @pytest.mark.django_project(create_manage_py=True)
@@ -122,7 +122,7 @@ def test_unittest_assert(django_pytester: DjangoPytester) -> None:
         import unittest
 
         class TestUnittestAssert(unittest.TestCase):
-            def test_fixture_assert(self, django_testcase: unittest.TestCase) -> None:
+            def test_fixture_assert(self, djt: unittest.TestCase) -> None:
                 assert False, "Cannot use the fixture"
 
             def test_normal_assert(self) -> None:
@@ -131,4 +131,4 @@ def test_unittest_assert(django_pytester: DjangoPytester) -> None:
     )
     result = django_pytester.runpytest_subprocess()
     result.assert_outcomes(failed=1, passed=1)
-    assert "missing 1 required positional argument: 'django_testcase'" in result.stdout.str()
+    assert "missing 1 required positional argument: 'djt'" in result.stdout.str()
