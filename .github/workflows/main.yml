@@ -176,14 +176,19 @@ jobs:
 
       - name: Determine retention days
         id: determine-retention-days
-        run: |
-          if [ "${GITHUB_REF}" = "refs/heads/main" ] || [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "retention_days=90" >> $GITHUB_OUTPUT
-          else
-            echo "retention_days=3" >> $GITHUB_OUTPUT
-          fi
+        run: >-
+          echo "retention_days=${RETENTION_DAYS}"
+          >> "${GITHUB_OUTPUT}"
         env:
-          GITHUB_REF: ${{ github.ref }}
+          RETENTION_DAYS: >-
+            ${{
+              (
+                github.ref_type == 'tag'
+                && github.ref_name == github.event.repository.default_branch
+              )
+              && 90
+              || 3
+            }}
 
       - name: Upload combined .coverage file
         uses: actions/upload-artifact@v4
@@ -191,7 +196,6 @@ jobs:
           name: coverage-file
           path: .coverage
           retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
-          include-hidden-files: true
 
       - name: Upload HTML coverage report
         uses: actions/upload-artifact@v4
