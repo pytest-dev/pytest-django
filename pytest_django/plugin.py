@@ -12,8 +12,10 @@ import os
 import pathlib
 import sys
 import types
+from collections.abc import Generator
+from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING, ContextManager, Generator, List, NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
@@ -259,7 +261,7 @@ def _get_boolean_value(
         ) from None
 
 
-report_header_key = pytest.StashKey[List[str]]()
+report_header_key = pytest.StashKey[list[str]]()
 
 
 @pytest.hookimpl()
@@ -603,7 +605,7 @@ def _dj_autoclear_mailbox() -> None:
         mail.outbox.clear()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mailoutbox(
     django_mail_patch_dns: None,
     _dj_autoclear_mailbox: None,
@@ -618,7 +620,7 @@ def mailoutbox(
     return []
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_mail_patch_dns(
     monkeypatch: pytest.MonkeyPatch,
     django_mail_dnsname: str,
@@ -629,7 +631,7 @@ def django_mail_patch_dns(
     monkeypatch.setattr(mail.message, "DNS_NAME", django_mail_dnsname)
 
 
-@pytest.fixture()
+@pytest.fixture
 def django_mail_dnsname() -> str:
     """Return server dns name for using in email messages."""
     return "fake-tests.example.com"
@@ -837,13 +839,13 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it.'
         )
 
-    def unblock(self) -> ContextManager[None]:
+    def unblock(self) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
         return _DatabaseBlockerContextManager(self)
 
-    def block(self) -> ContextManager[None]:
+    def block(self) -> AbstractContextManager[None]:
         """Disable access to the Django database."""
         self._save_active_wrapper()
         self._dj_db_wrapper.ensure_connection = self._blocking_wrapper

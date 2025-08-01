@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sqlite3
 import subprocess
-from typing import Mapping
+from collections.abc import Mapping
 
 import pytest
 from django.conf import settings
