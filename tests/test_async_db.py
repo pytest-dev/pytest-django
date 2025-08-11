@@ -1,24 +1,27 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable
-from typing import Any, Callable, ParamSpec, TypeVar, Union
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pytest_django_test.app.models import Item
 
 
-_R = TypeVar("_R", bound=Union[Awaitable[Any], AsyncIterator[Any]])
-_P = ParamSpec("_P")
-FixtureFunction = Callable[_P, _R]
+if TYPE_CHECKING:
+    from typing import Any, Callable, ParamSpec, TypeVar, Union
+
+    _R = TypeVar("_R", bound=Union[Awaitable[Any], AsyncIterator[Any]])
+    _P = ParamSpec("_P")
+    FixtureFunction = Callable[_P, _R]
 
 try:
     import pytest_asyncio
 except ImportError:
-    pytestmark: Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]] = pytest.mark.skip(
+    pytestmark: "Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]]" = pytest.mark.skip(  # noqa: UP037
         "pytest-asyncio is not installed"
     )
-    fixturemark: Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]] = pytest.mark.skip(
+    fixturemark: "Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]]" = pytest.mark.skip(  # noqa: UP037
         "pytest-asyncio is not installed"
     )
 
