@@ -11,18 +11,21 @@ import inspect
 import os
 import pathlib
 import sys
+import threading
 import types
 from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, Any, Callable, NoReturn
 
 import pytest
 
 from .django_compat import is_django_unittest
 from .fixtures import (
+    _async_django_db_helper,  # noqa: F401
     _django_db_helper,  # noqa: F401
     _live_server_helper,  # noqa: F401
+    _sync_django_db_helper,  # noqa: F401
     admin_client,  # noqa: F401
     admin_user,  # noqa: F401
     async_client,  # noqa: F401
@@ -815,7 +818,7 @@ class DjangoDbBlocker:
             )
 
         self._history = []  # type: ignore[var-annotated]
-        self._real_ensure_connection = None
+        self._real_ensure_connection: None | Callable[[Any], Any] = None
 
     @property
     def _dj_db_wrapper(self) -> django.db.backends.base.base.BaseDatabaseWrapper:
@@ -831,7 +834,7 @@ class DjangoDbBlocker:
     def _save_active_wrapper(self) -> None:
         self._history.append(self._dj_db_wrapper.ensure_connection)
 
-    def _blocking_wrapper(*args, **kwargs) -> NoReturn:
+    def _blocking_wrapper(self, *args, **kwargs) -> NoReturn:
         __tracebackhide__ = True
         raise RuntimeError(
             "Database access not allowed, "
@@ -839,10 +842,42 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it.'
         )
 
-    def unblock(self) -> AbstractContextManager[None]:
+    def _unblocked_async_only(self, *args, **kwargs):
+        __tracebackhide__ = True
+        from asgiref.sync import SyncToAsync
+
+        is_in_sync_to_async_thread = (
+            next(iter(SyncToAsync.single_thread_executor._threads)) == threading.current_thread()
+        )
+        if not is_in_sync_to_async_thread:
+            raise RuntimeError(
+                "Database access is only allowed in an async context, "
+                "modify your test fixtures to be async or use the transactional_db fixture."
+            )
+        elif self._real_ensure_connection is not None:
+            self._real_ensure_connection(*args, **kwargs)
+
+    def _unblocked_sync_only(self, *args, **kwargs):
+        __tracebackhide__ = True
+        if threading.current_thread() != threading.main_thread():
+            raise RuntimeError(
+                "Database access is only allowed in the main thread, "
+                "modify your test fixtures to be sync or use the transactional_db fixture."
+            )
+        elif self._real_ensure_connection is not None:
+            self._real_ensure_connection(*args, **kwargs)
+
+    def unblock(self, sync_only=False, async_only=False) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
+        if sync_only and async_only:
+            raise ValueError("Cannot use both sync_only and async_only. Choose at most one.")
         self._save_active_wrapper()
-        self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
+        if sync_only:
+            self._dj_db_wrapper.ensure_connection = self._unblocked_sync_only
+        elif async_only:
+            self._dj_db_wrapper.ensure_connection = self._unblocked_async_only
+        else:
+            self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
         return _DatabaseBlockerContextManager(self)
 
     def block(self) -> AbstractContextManager[None]:
