@@ -493,11 +493,11 @@ def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
 
         @pytest.mark.django_db
         def test_plain_db():
-            assert callers == ["_django_db_helper"]
+            assert callers == ["_sync_django_db_helper"]
 
         @pytest.mark.django_db(transaction=True)
         def test_transactional_db():
-            assert callers == ["_django_db_helper", "setUpClass"]
+            assert callers == ["_sync_django_db_helper", "setUpClass"]
         """
     )
 

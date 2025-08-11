@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Generator, Iterable, Sequence
+from collections.abc import AsyncGenerator, Callable, Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Any, Protocol
@@ -258,7 +258,7 @@ def _build_pytest_django_test_case(
 
 
 @pytest.fixture
-def _django_db_helper(
+def _sync_django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
@@ -319,6 +319,106 @@ def _django_db_helper(
         PytestDjangoTestCase.tearDownClass()
 
         PytestDjangoTestCase.doClassCleanups()
+
+
+try:
+    import pytest_asyncio
+except ImportError:
+
+    async def _async_django_db_helper(
+        request: pytest.FixtureRequest,  # noqa: ARG001
+        django_db_blocker: DjangoDbBlocker,  # noqa: ARG001
+    ) -> AsyncGenerator[None]:
+        raise RuntimeError(
+            "The `pytest_asyncio` plugin is required to use the `async_django_db` fixture."
+        )
+        yield  # pragma: no cover
+else:
+
+    @pytest_asyncio.fixture
+    async def _async_django_db_helper(
+        request: pytest.FixtureRequest,
+        django_db_blocker: DjangoDbBlocker,
+    ) -> AsyncGenerator[None]:
+        # same as _sync_django_db_helper, except for running the transaction start and rollback wrapped in a
+        # `sync_to_async` call
+        _transactional, reset_sequences, databases, serialized_rollback, available_apps = (
+            _get_django_db_settings(request)
+        )
+
+        with django_db_blocker.unblock(async_only=True):
+            PytestDjangoTestCase = _build_pytest_django_test_case(
+                reset_sequences=reset_sequences,
+                serialized_rollback=serialized_rollback,
+                databases=databases,
+                available_apps=available_apps,
+                transactional=False,
+            )
+
+            from asgiref.sync import sync_to_async
+
+            await sync_to_async(PytestDjangoTestCase.setUpClass)()
+
+            test_case = PytestDjangoTestCase(methodName="__init__")
+            await sync_to_async(test_case._pre_setup, thread_sensitive=True)()
+
+            yield
+
+            await sync_to_async(test_case._post_teardown, thread_sensitive=True)()
+
+            await sync_to_async(PytestDjangoTestCase.tearDownClass)()
+
+            await sync_to_async(PytestDjangoTestCase.doClassCleanups)()
+
+
+def _get_django_db_settings(request: pytest.FixtureRequest) -> _DjangoDb:
+    django_marker = request.node.get_closest_marker("django_db")
+    if django_marker:
+        (
+            transactional,
+            reset_sequences,
+            databases,
+            serialized_rollback,
+            available_apps,
+        ) = validate_django_db(django_marker)
+    else:
+        (
+            transactional,
+            reset_sequences,
+            databases,
+            serialized_rollback,
+            available_apps,
+        ) = False, False, None, False, None
+
+    transactional = (
+        transactional
+        or reset_sequences
+        or ("transactional_db" in request.fixturenames or "live_server" in request.fixturenames)
+    )
+
+    reset_sequences = reset_sequences or ("django_db_reset_sequences" in request.fixturenames)
+    serialized_rollback = serialized_rollback or (
+        "django_db_serialized_rollback" in request.fixturenames
+    )
+    return transactional, reset_sequences, databases, serialized_rollback, available_apps
+
+
+@pytest.fixture
+def _django_db_helper(
+    request: pytest.FixtureRequest,
+    django_db_setup: None,  # noqa: ARG001
+    django_db_blocker: DjangoDbBlocker,  # noqa: ARG001
+) -> None:
+    asyncio_marker = request.node.get_closest_marker("asyncio")
+    transactional, *_ = _get_django_db_settings(request)
+    if transactional or not asyncio_marker:
+        # add the original sync fixture
+        request.getfixturevalue("_sync_django_db_helper")
+    else:
+        # add the async fixture. Will run it inside the event loop, which will cause the sync to async calls to
+        # start a transaction on the thread safe executor for that loop. This allows us to roll back orm calls made
+        # in that async test context.
+        request.getfixturevalue("_async_django_db_helper")
 
 
 def _django_db_signature(
