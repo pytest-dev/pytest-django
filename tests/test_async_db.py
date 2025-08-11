@@ -1,33 +1,22 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable
-from typing import TYPE_CHECKING
+from typing import Any, cast
 
 import pytest
+from _pytest.mark import MarkDecorator
 
 from pytest_django_test.app.models import Item
 
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, ParamSpec, TypeVar, Union
-
-    _R = TypeVar("_R", bound=Union[Awaitable[Any], AsyncIterator[Any]])
-    _P = ParamSpec("_P")
-    FixtureFunction = Callable[_P, _R]
-
 try:
     import pytest_asyncio
 except ImportError:
-    pytestmark: "Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]]" = pytest.mark.skip(  # noqa: UP037
-        "pytest-asyncio is not installed"
-    )
-    fixturemark: "Callable[[FixtureFunction[_P, _R]], FixtureFunction[_P, _R]]" = pytest.mark.skip(  # noqa: UP037
-        "pytest-asyncio is not installed"
-    )
+    pytestmark: MarkDecorator = pytest.mark.skip("pytest-asyncio is not installed")
+    fixturemark: MarkDecorator = pytest.mark.skip("pytest-asyncio is not installed")
 
 else:
     pytestmark = pytest.mark.asyncio
-    fixturemark = pytest_asyncio.fixture
+    fixturemark = cast(MarkDecorator, pytest_asyncio.fixture)
 
 
 @pytest.mark.parametrize("run_number", [1, 2])
