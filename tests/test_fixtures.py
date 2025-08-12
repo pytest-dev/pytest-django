@@ -750,7 +750,9 @@ class Test_django_db_blocker:
         with django_db_blocker.unblock():
             Item.objects.exists()
 
-    def test_unblock_with_both_flags_raises_valueerror(self, django_db_blocker: DjangoDbBlocker) -> None:
+    def test_unblock_with_both_flags_raises_valueerror(
+        self, django_db_blocker: DjangoDbBlocker
+    ) -> None:
         # When both sync_only and async_only are True, unblock should reject with ValueError
         with pytest.raises(ValueError, match="Cannot use both sync_only and async_only"):
             django_db_blocker.unblock(sync_only=True, async_only=True)
