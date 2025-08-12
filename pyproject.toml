@@ -63,6 +63,7 @@ xdist = [
     "pytest-xdist",
 ]
 linting = [
+    "editorconfig-checker==3.2.1",
     "mypy==1.15.0",
     "ruff==0.9.5",
     "zizmor==1.9.0",
