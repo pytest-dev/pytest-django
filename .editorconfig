@@ -24,7 +24,7 @@ indent_size = 2
 insert_final_newline = unset
 
 [*.rst]
-indent_size = 4
+indent_size = unset
 insert_final_newline = unset
 
 [*.bat]
@@ -32,3 +32,6 @@ indent_style = tab
 
 [LICENSE]
 indent_size = unset
+
+[docs/Makefile]
+indent_style = tab
