@@ -67,7 +67,7 @@ INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
 @pytest.hookimpl()
 def pytest_addoption(parser: pytest.Parser) -> None:
-    group = parser.getgroup("django")
+    group = parser.getgroup("pytest-django")
     group.addoption(
         "--reuse-db",
         action="store_true",
