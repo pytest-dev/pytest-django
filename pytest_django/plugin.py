@@ -875,11 +875,13 @@ class DjangoDbBlocker:
             raise ValueError("Cannot use both sync_only and async_only. Choose at most one.")
         self._save_active_wrapper()
         if sync_only:
+
             def _method(wrapper_self, *args, **kwargs):
                 return self._unblocked_sync_only(wrapper_self, *args, **kwargs)
 
             self._dj_db_wrapper.ensure_connection = _method
         elif async_only:
+
             def _method(wrapper_self, *args, **kwargs):
                 return self._unblocked_async_only(wrapper_self, *args, **kwargs)
 
