@@ -23,7 +23,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - uses: editorconfig-checker/action-editorconfig-checker@main
+        with:
+          persist-credentials: false
+      - uses: editorconfig-checker/action-editorconfig-checker@0ab3427a3f09b17c21d489172245be511e0a16ea. # v2
       - run: editorconfig-checker
 
   test:
