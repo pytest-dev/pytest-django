@@ -13,7 +13,7 @@ Quick Start
 
 .. code-block:: bash
 
-   $ pip install pytest-django
+    $ pip install pytest-django
 
 Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
 :ref:`configuring_django_settings`) and make your tests discoverable
@@ -24,28 +24,28 @@ Example using pytest.ini or tox.ini
 
 .. code-block:: ini
 
-   # -- FILE: pytest.ini (or tox.ini)
-   [pytest]
-   DJANGO_SETTINGS_MODULE = test.settings
-   # -- recommended but optional:
-   python_files = tests.py test_*.py *_tests.py
+    # -- FILE: pytest.ini (or tox.ini)
+    [pytest]
+    DJANGO_SETTINGS_MODULE = test.settings
+    # -- recommended but optional:
+    python_files = tests.py test_*.py *_tests.py
 
 Example using pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: toml
 
-   # -- Example FILE: pyproject.toml
-   [tool.pytest.ini_options]
-   DJANGO_SETTINGS_MODULE = "test.settings"
-   # -- recommended but optional:
-   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+    # -- Example FILE: pyproject.toml
+    [tool.pytest.ini_options]
+    DJANGO_SETTINGS_MODULE = "test.settings"
+    # -- recommended but optional:
+    python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
 
 Run your tests with ``pytest``:
 
 .. code-block:: bash
 
-   $ pytest
+    $ pytest
 
 Why would I use this instead of Django's manage.py test command?
 ================================================================
@@ -73,17 +73,17 @@ Table of Contents
 =================
 
 .. toctree::
-   :maxdepth: 3
+    :maxdepth: 3
 
-   tutorial
-   configuring_django
-   managing_python_path
-   usage
-   database
-   helpers
-   faq
-   contributing
-   changelog
+    tutorial
+    configuring_django
+    managing_python_path
+    usage
+    database
+    helpers
+    faq
+    contributing
+    changelog
 
 Indices and Tables
 ==================

@@ -383,15 +383,15 @@ created in data migrations, you should add the
 
 .. note:: Combining database access fixtures.
 
-  When using multiple database fixtures together, only one of them is
-  used.  Their order of precedence is as follows (the last one wins):
+    When using multiple database fixtures together, only one of them is
+    used.  Their order of precedence is as follows (the last one wins):
 
-  * ``db``
-  * ``transactional_db``
+    * ``db``
+    * ``transactional_db``
 
-  In addition, using ``live_server`` or ``django_db_reset_sequences`` will also
-  trigger transactional database access, and ``django_db_serialized_rollback``
-  regular database access, if not specified.
+    In addition, using ``live_server`` or ``django_db_reset_sequences`` will also
+    trigger transactional database access, and ``django_db_serialized_rollback``
+    regular database access, if not specified.
 
 .. fixture:: settings
 
@@ -419,10 +419,10 @@ Example
 
 .. py:function:: django_assert_num_queries(num, connection=None, info=None, *, using=None)
 
-  :param num: expected number of queries
-  :param connection: optional database connection
-  :param str info: optional info message to display on failure
-  :param str using: optional database alias
+    :param num: expected number of queries
+    :param connection: optional database connection
+    :param str info: optional info message to display on failure
+    :param str using: optional database alias
 
 This fixture allows to check for an expected number of DB queries.
 
@@ -459,10 +459,10 @@ If you use type annotations, you can annotate the fixture like this::
 
 .. py:function:: django_assert_max_num_queries(num, connection=None, info=None, *, using=None)
 
-  :param num: expected maximum number of queries
-  :param connection: optional database connection
-  :param str info: optional info message to display on failure
-  :param str using: optional database alias
+    :param num: expected maximum number of queries
+    :param connection: optional database connection
+    :param str info: optional info message to display on failure
+    :param str using: optional database alias
 
 This fixture allows to check for an expected maximum number of DB queries.
 
@@ -492,12 +492,12 @@ If you use type annotations, you can annotate the fixture like this::
 
 .. py:function:: django_capture_on_commit_callbacks(*, using=DEFAULT_DB_ALIAS, execute=False)
 
-  :param using:
-    The alias of the database connection to capture callbacks for.
-  :param execute:
-    If True, all the callbacks will be called as the context manager exits, if
-    no exception occurred. This emulates a commit after the wrapped block of
-    code.
+    :param using:
+        The alias of the database connection to capture callbacks for.
+    :param execute:
+        If True, all the callbacks will be called as the context manager exits, if
+        no exception occurred. This emulates a commit after the wrapped block of
+        code.
 
 .. versionadded:: 4.4
 
