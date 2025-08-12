@@ -69,7 +69,7 @@ This requires the `pytest-asyncio <https://github.com/pytest-dev/pytest-asyncio>
 plugin and marking your tests appropriately.
 
 Requirements
-""""""""""""
+------------
 
 - Install ``pytest-asyncio``.
 - Mark async tests with both ``@pytest.mark.asyncio`` and
@@ -90,7 +90,7 @@ Example (async ORM with transactional rollback per test)::
 .. _`async-db-behavior`:
 
 Behavior of ``db`` in async tests
-"""""""""""""""""""""""""""""""""
+---------------------------------
 
 Tests using ``db`` wrap each test in a transaction and roll that transaction back at the end
 (like ``django.test.TestCase``). In Django, transactions are bound to the database
@@ -111,8 +111,9 @@ about sync/async database access if your test uses ``transactional_db``, at the 
 A flush is generally slower than rolling back a transaction.
 
 .. _`db-thread-safeguards`:
+
 Safeguards against database access from different threads
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+---------------------------------------------------------
 When using the database in a test with transaction rollback, you must ensure that
 database access is only done from the same thread that the test is running on.
 
