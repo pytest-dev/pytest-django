@@ -197,7 +197,7 @@ def test_django_settings_configure(
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
 
     p = pytester.makepyfile(
-        """
+        run="""
         from django.conf import settings
         settings.configure(
             SECRET_KEY='set from settings.configure()',
