@@ -19,6 +19,13 @@ env:
 permissions: {}
 
 jobs:
+  editorconfig:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - run: editorconfig-checker
+
   test:
     runs-on: ubuntu-24.04
     continue-on-error: ${{ matrix.allow_failure }}
@@ -156,6 +163,7 @@ jobs:
 
     needs:
     - test
+    - editorconfig
 
     runs-on: ubuntu-24.04
 
