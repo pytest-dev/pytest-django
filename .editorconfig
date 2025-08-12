@@ -21,14 +21,14 @@ indent_size = 2
 
 [*.json]
 indent_size = 2
-insert_final_newline = UNSET
+insert_final_newline = unset
 
 [*.rst]
 indent_size = 4
-insert_final_newline = UNSET
+insert_final_newline = unset
 
 [*.bat]
 indent_style = tab
 
 [LICENSE]
-indent_size = UNSET
+indent_size = unset
