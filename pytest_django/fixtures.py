@@ -239,7 +239,7 @@ def _sync_django_db_helper(
         "django_db_serialized_rollback" in request.fixturenames
     )
 
-    with django_db_blocker.unblock():
+    with django_db_blocker.unblock(sync_only=not transactional):
         import django.db
         import django.test
 

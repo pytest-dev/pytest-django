@@ -839,7 +839,7 @@ class DjangoDbBlocker:
         raise RuntimeError(
             "Database access not allowed, "
             'use the "django_db" mark, or the '
-            '"db" or "transactional_db" fixtures to enable it.'
+            '"db" or "transactional_db" fixtures to enable it. '
         )
 
     def _unblocked_async_only(self, *args, **kwargs):
@@ -853,6 +853,7 @@ class DjangoDbBlocker:
             raise RuntimeError(
                 "Database access is only allowed in an async context, "
                 "modify your test fixtures to be async or use the transactional_db fixture."
+                "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
         elif self._real_ensure_connection is not None:
             self._real_ensure_connection(*args, **kwargs)
@@ -863,6 +864,7 @@ class DjangoDbBlocker:
             raise RuntimeError(
                 "Database access is only allowed in the main thread, "
                 "modify your test fixtures to be sync or use the transactional_db fixture."
+                "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
         elif self._real_ensure_connection is not None:
             self._real_ensure_connection(*args, **kwargs)

@@ -60,6 +60,87 @@ select using an argument to the ``django_db`` mark::
    def test_spam():
        pass  # test relying on transactions
 
+
+Async tests and database transactions
+-------------------------------------
+
+``pytest-django`` supports async tests that use Django's async ORM APIs.
+This requires the `pytest-asyncio <https://github.com/pytest-dev/pytest-asyncio>`_
+plugin and marking your tests appropriately.
+
+Requirements
+""""""""""""
+
+- Install ``pytest-asyncio``.
+- Mark async tests with both ``@pytest.mark.asyncio`` and
+  ``@pytest.mark.django_db`` (or request the ``db``/``transactional_db`` fixtures).
+
+Example (async ORM with transactional rollback per test)::
+
+   import pytest
+
+   @pytest.mark.asyncio
+   @pytest.mark.django_db
+   async def test_async_db_is_isolated():
+       assert await Item.objects.acount() == 0
+       await Item.objects.acreate(name="example")
+       assert await Item.objects.acount() == 1
+       # changes are rolled back after the test
+
+.. _`async-db-behavior`:
+
+Behavior of ``db`` in async tests
+"""""""""""""""""""""""""""""""""
+
+Tests using ``db`` wrap each test in a transaction and roll that transaction back at the end
+(like ``django.test.TestCase``). In Django, transactions are bound to the database
+connection, which is unique per thread. This means that all your database changes
+must be made within the same thread to ensure they are rolled back before the next test.
+
+Django Async ORM calls, as of writing, use the ``asgiref.sync.sync_to_async``
+decorator to run the ORM calls on a dedicated thread executor.
+
+For async tests, pytest-django ensures the transaction
+setup/teardown happens via ``asgiref.sync.sync_to_async``, which means the transaction is started & run on the
+same thread on which async orm calls inside your test, like ``aget()`` are made. This ensures your test code
+can safely modify the database using the async calls, as all its queries will be rolled back after the test.
+
+Tests using ``transactional_db`` flush the database between tests. This means that no matter in which thread
+your test modifies the database, the changes will be removed after the test. This means you can avoid thinking
+about sync/async database access if your test uses ``transactional_db``, at the cost of slower tests:
+A flush is generally slower than rolling back a transaction.
+
+.. _`db-thread-safeguards`:
+Safeguards against database access from different threads
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+When using the database in a test with transaction rollback, you must ensure that
+database access is only done from the same thread that the test is running on.
+
+To avoid your fixtures/tests making changes outside the test thread, and as a result, the transaction, pytest-django
+actively restricts where database connections may be opened:
+
+- In async tests using ``db``: database access is only allowed from the single
+  thread used by ``SyncToAsync``. Using sync fixtures that touch the database in
+  an async test will raise::
+
+      RuntimeError: Database access is only allowed in an async context, modify your
+      test fixtures to be async or use the transactional_db fixture.
+
+  Fix by converting those fixtures to async (use ``pytest_asyncio.fixture``) and
+  using Django's async ORM methods (e.g. ``.acreate()``, ``.aget()``, ``.acount()``),
+  or by requesting ``transactional_db`` if you must keep sync fixtures.
+  See :ref:`async-db-behavior` for more details.
+
+- In sync tests: database access is only allowed from the main thread. Attempting to use the database connection
+  from a different thread will raise::
+
+      RuntimeError: Database access is only allowed in the main thread, modify your
+      test fixtures to be sync or use the transactional_db fixture.
+
+  Fix this by ensuring all database transactions run in the main thread (e.g., avoiding the use of async fixtures),
+  or use ``transactional_db`` to allow mixing.
+
+
 .. _`multi-db`:
 
 Tests requiring multiple databases
@@ -524,3 +605,4 @@ Put this in ``conftest.py``::
         django_db_blocker.unblock()
         yield
         django_db_blocker.restore()
+
