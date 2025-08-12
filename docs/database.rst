@@ -132,6 +132,15 @@ actively restricts where database connections may be opened:
   or by requesting ``transactional_db`` if you must keep sync fixtures.
   See :ref:`async-db-behavior` for more details.
 
+- In sync tests: database access is only allowed from the main thread. Attempting to use the database connection
+  from a different thread will raise::
+
+      RuntimeError: Database access is only allowed in the main thread, modify your
+      test fixtures to be sync or use the transactional_db fixture.
+
+  Fix this by ensuring all database transactions run in the main thread (e.g., avoiding the use of async fixtures),
+  or use ``transactional_db`` to allow mixing.
+
 
 .. _`multi-db`:
 
