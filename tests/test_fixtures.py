@@ -402,10 +402,12 @@ class TestSettings:
                                                         '<<does not exist>>')}
                     fmt_dict.update(kwargs)
 
-                    print('Setting changed: '
-                          'enter=%(enter)s,setting=%(setting)s,'
-                          'value=%(value)s,actual_value=%(actual_value)s'
-                          % fmt_dict)
+                    print(
+                        'Setting changed: '
+                        'enter=%(enter)s,setting=%(setting)s,'
+                        'value=%(value)s,actual_value=%(actual_value)s'
+                        % fmt_dict
+                    )
 
                 setting_changed.connect(receiver, weak=False)
 
@@ -417,7 +419,7 @@ class TestSettings:
 
             def test_set_non_existent(settings):
                 settings.FOOBAR = 'abc123'
-         """
+        """
         )
 
         result = django_pytester.runpytest_subprocess("--tb=short", "-v", "-s")
@@ -792,8 +794,7 @@ def test_mail_message_uses_django_mail_dnsname_fixture(django_pytester: DjangoPy
             return 'from.django_mail_dnsname'
 
         def test_mailbox_inner(mailoutbox):
-            mail.send_mail('subject', 'body', 'from@example.com',
-                           ['to@example.com'])
+            mail.send_mail('subject', 'body', 'from@example.com', ['to@example.com'])
             m = mailoutbox[0]
             message = m.message()
             assert message['Message-ID'].endswith('@from.django_mail_dnsname>')
@@ -824,8 +825,9 @@ def test_mail_message_dns_patching_can_be_skipped(django_pytester: DjangoPyteste
             mocked_make_msgid.called = []
 
             monkeypatch.setattr(mail.message, 'make_msgid', mocked_make_msgid)
-            mail.send_mail('subject', 'body', 'from@example.com',
-                           ['to@example.com'])
+            mail.send_mail(
+                'subject', 'body', 'from@example.com', ['to@example.com']
+            )
             m = mailoutbox[0]
             assert len(mocked_make_msgid.called) == 1
 

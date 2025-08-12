@@ -87,7 +87,7 @@ You can explicitly add paths to the Python search path using pytest's
 Example: project with src layout
 ````````````````````````````````
 
-For a Django package using the ``src`` layout, with test settings located in a 
+For a Django package using the ``src`` layout, with test settings located in a
 ``tests`` package at the top level::
 
     myproj
