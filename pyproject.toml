@@ -72,7 +72,7 @@ Documentation = "https://pytest-django.readthedocs.io/"
 Repository = "https://github.com/pytest-dev/pytest-django"
 Changelog = "https://pytest-django.readthedocs.io/en/latest/changelog.html"
 [project.entry-points.pytest11]
-django = "pytest_django.plugin"
+pytest-django = "pytest_django.plugin"
 
 [tool.setuptools]
 packages = ["pytest_django"]
