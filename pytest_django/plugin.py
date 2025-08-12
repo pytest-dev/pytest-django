@@ -858,25 +858,10 @@ class DjangoDbBlocker:
         elif self._real_ensure_connection is not None:
             self._real_ensure_connection(*args, **kwargs)
 
-    def _unblocked_sync_only(self, *args, **kwargs):
-        __tracebackhide__ = True
-        if threading.current_thread() != threading.main_thread():
-            raise RuntimeError(
-                "Database access is only allowed in the main thread, "
-                "modify your test fixtures to be sync or use the transactional_db fixture."
-                "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
-            )
-        elif self._real_ensure_connection is not None:
-            self._real_ensure_connection(*args, **kwargs)
-
-    def unblock(self, sync_only=False, async_only=False) -> AbstractContextManager[None]:
+    def unblock(self, async_only=False) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
-        if sync_only and async_only:
-            raise ValueError("Cannot use both sync_only and async_only. Choose at most one.")
         self._save_active_wrapper()
-        if sync_only:
-            self._dj_db_wrapper.ensure_connection = self._unblocked_sync_only
-        elif async_only:
+        if async_only:
             self._dj_db_wrapper.ensure_connection = self._unblocked_async_only
         else:
             self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
