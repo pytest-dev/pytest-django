@@ -2,7 +2,7 @@
   "Exclude": [
     "pytest_django/fixtures.py", 
     ".tox/*",
-    "./ruff_cache/*",
+    ".ruff_cache/*",
     "pytest_django.egg-info/*"
   ],
   "Disable": {
