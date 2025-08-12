@@ -1,5 +1,10 @@
 {
-  "Exclude": ["pytest_django/fixtures.py", ".tox/*"],
+  "Exclude": [
+    "pytest_django/fixtures.py", 
+    ".tox/*",
+    "./ruff_cache/*",
+    "pytest_django.egg-info/*"
+  ],
   "Disable": {
     "MaxLineLength": true
   }
