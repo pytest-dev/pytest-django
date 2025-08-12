@@ -842,7 +842,7 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it. '
         )
 
-    def _unblocked_async_only(self, wrapper_self, *args, **kwargs):
+    def _unblocked_async_only(self, wrapper_self: Any, *args, **kwargs):
         __tracebackhide__ = True
         from asgiref.sync import SyncToAsync
 
@@ -858,7 +858,7 @@ class DjangoDbBlocker:
         elif self._real_ensure_connection is not None:
             self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
-    def _unblocked_sync_only(self, wrapper_self, *args, **kwargs):
+    def _unblocked_sync_only(self, wrapper_self: Any, *args, **kwargs):
         __tracebackhide__ = True
         if threading.current_thread() != threading.main_thread():
             raise RuntimeError(

@@ -219,7 +219,7 @@ def _build_pytest_django_test_case(
     _databases = databases
     _available_apps = available_apps
 
-    class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+    class PytestDjangoTestCase(test_case_class):
         reset_sequences = _reset_sequences
         serialized_rollback = _serialized_rollback
         if _databases is not None:
@@ -230,12 +230,12 @@ def _build_pytest_django_test_case(
         if skip_django_testcase_class_setup:
 
             @classmethod
-            def setUpClass(cls) -> None:  # type: ignore[override]
+            def setUpClass(cls) -> None:
                 # Skip django.test.TestCase.setUpClass, call its super instead
                 super(django.test.TestCase, cls).setUpClass()
 
             @classmethod
-            def tearDownClass(cls) -> None:  # type: ignore[override]
+            def tearDownClass(cls) -> None:
                 # Skip django.test.TestCase.tearDownClass, call its super instead
                 super(django.test.TestCase, cls).tearDownClass()
 
