@@ -33,7 +33,7 @@ You can switch it on in `pytest.ini`::
 
     [pytest]
     FAIL_INVALID_TEMPLATE_VARS = True
-    
+
 Additional pytest.ini settings
 ------------------------------
 
