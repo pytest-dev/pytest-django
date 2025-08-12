@@ -1,5 +1,5 @@
 {
-  "Exclude": ["pytest_django/fixtures.py"],
+  "Exclude": ["pytest_django/fixtures.py", ".tox/*"],
   "Disable": {
     "MaxLineLength": true
   }
