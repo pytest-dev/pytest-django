@@ -21,6 +21,7 @@ indent_size = 2
 
 [*.json]
 indent_size = 2
+insert_final_newline = false
 
 [*.rst]
 indent_size = 4

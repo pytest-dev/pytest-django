@@ -419,7 +419,7 @@ class TestSettings:
 
             def test_set_non_existent(settings):
                 settings.FOOBAR = 'abc123'
-         """
+        """
         )
 
         result = django_pytester.runpytest_subprocess("--tb=short", "-v", "-s")

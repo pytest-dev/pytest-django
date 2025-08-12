@@ -28,82 +28,82 @@ dynamically in a hook or fixture.
 
 .. decorator:: pytest.mark.django_db([transaction=False, reset_sequences=False, databases=None, serialized_rollback=False, available_apps=None])
 
-  This is used to mark a test function as requiring the database. It
-  will ensure the database is set up correctly for the test. Each test
-  will run in its own transaction which will be rolled back at the end
-  of the test. This behavior is the same as Django's standard
-  :class:`~django.test.TestCase` class.
+    This is used to mark a test function as requiring the database. It
+    will ensure the database is set up correctly for the test. Each test
+    will run in its own transaction which will be rolled back at the end
+    of the test. This behavior is the same as Django's standard
+    :class:`~django.test.TestCase` class.
 
-  In order for a test to have access to the database it must either be marked
-  using the :func:`~pytest.mark.django_db` mark or request one of the :fixture:`db`,
-  :fixture:`transactional_db` or :fixture:`django_db_reset_sequences` fixtures.
-  Otherwise the test will fail when trying to access the database.
+    In order for a test to have access to the database it must either be marked
+    using the :func:`~pytest.mark.django_db` mark or request one of the :fixture:`db`,
+    :fixture:`transactional_db` or :fixture:`django_db_reset_sequences` fixtures.
+    Otherwise the test will fail when trying to access the database.
 
-  :type transaction: bool
-  :param transaction:
-    The ``transaction`` argument will allow the test to use real transactions.
-    With ``transaction=False`` (the default when not specified), transaction
-    operations are noops during the test. This is the same behavior that
-    :class:`django.test.TestCase` uses. When ``transaction=True``, the behavior
-    will be the same as :class:`django.test.TransactionTestCase`.
-
-
-  :type reset_sequences: bool
-  :param reset_sequences:
-    The ``reset_sequences`` argument will ask to reset auto increment sequence
-    values (e.g. primary keys) before running the test.  Defaults to
-    ``False``.  Must be used together with ``transaction=True`` to have an
-    effect.  Please be aware that not all databases support this feature.
-    For details see :attr:`django.test.TransactionTestCase.reset_sequences`.
+    :type transaction: bool
+    :param transaction:
+        The ``transaction`` argument will allow the test to use real transactions.
+        With ``transaction=False`` (the default when not specified), transaction
+        operations are noops during the test. This is the same behavior that
+        :class:`django.test.TestCase` uses. When ``transaction=True``, the behavior
+        will be the same as :class:`django.test.TransactionTestCase`.
 
 
-  :type databases: Iterable[str] | str | None
-  :param databases:
+    :type reset_sequences: bool
+    :param reset_sequences:
+        The ``reset_sequences`` argument will ask to reset auto increment sequence
+        values (e.g. primary keys) before running the test.  Defaults to
+        ``False``.  Must be used together with ``transaction=True`` to have an
+        effect.  Please be aware that not all databases support this feature.
+        For details see :attr:`django.test.TransactionTestCase.reset_sequences`.
 
-    The ``databases`` argument defines which databases in a multi-database
-    configuration will be set up and may be used by the test.  Defaults to
-    only the ``default`` database.  The special value ``"__all__"`` may be used
-    to specify all configured databases.
-    For details see :attr:`django.test.TransactionTestCase.databases` and
-    :attr:`django.test.TestCase.databases`.
 
-  :type serialized_rollback: bool
-  :param serialized_rollback:
-    The ``serialized_rollback`` argument enables :ref:`rollback emulation
-    <test-case-serialized-rollback>`.  After a transactional test (or any test
-    using a database backend which doesn't support transactions) runs, the
-    database is flushed, destroying data created in data migrations.  Setting
-    ``serialized_rollback=True`` tells Django to serialize the database content
-    during setup, and restore it during teardown.
+    :type databases: Iterable[str] | str | None
+    :param databases:
 
-    Note that this will slow down that test suite by approximately 3x.
+        The ``databases`` argument defines which databases in a multi-database
+        configuration will be set up and may be used by the test.  Defaults to
+        only the ``default`` database.  The special value ``"__all__"`` may be used
+        to specify all configured databases.
+        For details see :attr:`django.test.TransactionTestCase.databases` and
+        :attr:`django.test.TestCase.databases`.
 
-  :type available_apps: Iterable[str] | None
-  :param available_apps:
-    .. caution::
+    :type serialized_rollback: bool
+    :param serialized_rollback:
+        The ``serialized_rollback`` argument enables :ref:`rollback emulation
+        <test-case-serialized-rollback>`.  After a transactional test (or any test
+        using a database backend which doesn't support transactions) runs, the
+        database is flushed, destroying data created in data migrations.  Setting
+        ``serialized_rollback=True`` tells Django to serialize the database content
+        during setup, and restore it during teardown.
 
-      This argument is **experimental** and is subject to change without
-      deprecation.
+        Note that this will slow down that test suite by approximately 3x.
 
-    The ``available_apps`` argument defines a subset of apps that are enabled
-    for a specific set of tests. Setting ``available_apps`` configures models
-    for which types/permissions will be created before each test, and which
-    model tables will be emptied after each test (this truncation may cascade
-    to unavailable apps models).
+    :type available_apps: Iterable[str] | None
+    :param available_apps:
+        .. caution::
 
-    For details see :attr:`django.test.TransactionTestCase.available_apps`
+            This argument is **experimental** and is subject to change without
+            deprecation.
+
+        The ``available_apps`` argument defines a subset of apps that are enabled
+        for a specific set of tests. Setting ``available_apps`` configures models
+        for which types/permissions will be created before each test, and which
+        model tables will be emptied after each test (this truncation may cascade
+        to unavailable apps models).
+
+        For details see :attr:`django.test.TransactionTestCase.available_apps`
 
 
 .. note::
 
-  If you want access to the Django database inside a *fixture*, this marker may
-  or may not help even if the function requesting your fixture has this marker
-  applied, depending on pytest's fixture execution order. To access the database
-  in a fixture, it is recommended that the fixture explicitly request one of the
-  :fixture:`db`, :fixture:`transactional_db`,
-  :fixture:`django_db_reset_sequences` or
-  :fixture:`django_db_serialized_rollback` fixtures. See below for a description
-  of them.
+    If you want access to the Django database inside a *fixture*, this marker may
+    or may not help even if the function requesting your fixture has this marker
+    applied, depending on pytest's fixture execution order. To access the database
+    in a fixture, it is recommended that the fixture explicitly request one of the
+    :fixture:`db`, :fixture:`transactional_db`,
+    :fixture:`django_db_reset_sequences` or
+    :fixture:`django_db_serialized_rollback` fixtures. See below for a description
+    of them.
 
 .. note:: Automatic usage with ``django.test.TestCase``.
 
@@ -118,18 +118,18 @@ dynamically in a hook or fixture.
 
 .. decorator:: pytest.mark.urls(urls)
 
-   Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
+    Specify a different ``settings.ROOT_URLCONF`` module for the marked tests.
 
-   :type urls: str
-   :param urls:
-     The urlconf module to use for the test, e.g. ``myapp.test_urls``.  This is
-     similar to Django's ``TestCase.urls`` attribute.
+    :type urls: str
+    :param urls:
+        The urlconf module to use for the test, e.g. ``myapp.test_urls``.  This is
+        similar to Django's ``TestCase.urls`` attribute.
 
-   Example usage::
+    Example usage::
 
-     @pytest.mark.urls('myapp.test_urls')
-     def test_something(client):
-         assert b'Success!' in client.get('/some_url_defined_in_test_urls/').content
+        @pytest.mark.urls('myapp.test_urls')
+        def test_something(client):
+            assert b'Success!' in client.get('/some_url_defined_in_test_urls/').content
 
 
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
@@ -137,17 +137,17 @@ dynamically in a hook or fixture.
 
 .. decorator:: pytest.mark.ignore_template_errors
 
-  Ignore errors when using the ``--fail-on-template-vars`` option, i.e.
-  do not cause tests to fail if your templates contain invalid variables.
+    Ignore errors when using the ``--fail-on-template-vars`` option, i.e.
+    do not cause tests to fail if your templates contain invalid variables.
 
-  This marker sets the ``string_if_invalid`` template option.
-  See :ref:`django:invalid-template-variables`.
+    This marker sets the ``string_if_invalid`` template option.
+    See :ref:`django:invalid-template-variables`.
 
-  Example usage::
+    Example usage::
 
-     @pytest.mark.ignore_template_errors
-     def test_something(client):
-         client('some-url-with-invalid-template-vars')
+        @pytest.mark.ignore_template_errors
+        def test_something(client):
+            client('some-url-with-invalid-template-vars')
 
 
 Fixtures
