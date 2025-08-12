@@ -201,6 +201,47 @@ def django_db_setup(
                 )
 
 
+def _build_pytest_django_test_case(
+    test_case_class,
+    *,
+    reset_sequences: bool,
+    serialized_rollback: bool,
+    databases,
+    available_apps,
+    skip_django_testcase_class_setup: bool,
+):
+    # Build a custom TestCase subclass with configured attributes and optional
+    # overrides to skip Django's TestCase class-level setup/teardown.
+    import django.test  # local import to avoid hard dependency at import time
+
+    _reset_sequences = reset_sequences
+    _serialized_rollback = serialized_rollback
+    _databases = databases
+    _available_apps = available_apps
+
+    class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+        reset_sequences = _reset_sequences
+        serialized_rollback = _serialized_rollback
+        if _databases is not None:
+            databases = _databases
+        if _available_apps is not None:
+            available_apps = _available_apps
+
+        if skip_django_testcase_class_setup:
+
+            @classmethod
+            def setUpClass(cls) -> None:  # type: ignore[override]
+                # Skip django.test.TestCase.setUpClass, call its super instead
+                super(django.test.TestCase, cls).setUpClass()
+
+            @classmethod
+            def tearDownClass(cls) -> None:  # type: ignore[override]
+                # Skip django.test.TestCase.tearDownClass, call its super instead
+                super(django.test.TestCase, cls).tearDownClass()
+
+    return PytestDjangoTestCase
+
+
 @pytest.fixture
 def _sync_django_db_helper(
     request: pytest.FixtureRequest,
@@ -248,41 +289,14 @@ def _sync_django_db_helper(
         else:
             test_case_class = django.test.TestCase
 
-        _reset_sequences = reset_sequences
-        _serialized_rollback = serialized_rollback
-        _databases = databases
-        _available_apps = available_apps
-
-        class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
-            reset_sequences = _reset_sequences
-            serialized_rollback = _serialized_rollback
-            if _databases is not None:
-                databases = _databases
-            if _available_apps is not None:
-                available_apps = _available_apps
-
-            # For non-transactional tests, skip executing `django.test.TestCase`'s
-            # `setUpClass`/`tearDownClass`, only execute the super class ones.
-            #
-            # `TestCase`'s class setup manages the `setUpTestData`/class-level
-            # transaction functionality. We don't use it; instead we (will) offer
-            # our own alternatives. So it only adds overhead, and does some things
-            # which conflict with our (planned) functionality, particularly, it
-            # closes all database connections in `tearDownClass` which inhibits
-            # wrapping tests in higher-scoped transactions.
-            #
-            # It's possible a new version of Django will add some unrelated
-            # functionality to these methods, in which case skipping them completely
-            # would not be desirable. Let's cross that bridge when we get there...
-            if not transactional:
-
-                @classmethod
-                def setUpClass(cls) -> None:
-                    super(django.test.TestCase, cls).setUpClass()
-
-                @classmethod
-                def tearDownClass(cls) -> None:
-                    super(django.test.TestCase, cls).tearDownClass()
+        PytestDjangoTestCase = _build_pytest_django_test_case(
+            test_case_class,
+            reset_sequences=reset_sequences,
+            serialized_rollback=serialized_rollback,
+            databases=databases,
+            available_apps=available_apps,
+            skip_django_testcase_class_setup=(not transactional),
+        )
 
         PytestDjangoTestCase.setUpClass()
 
@@ -319,9 +333,6 @@ else:
     ) -> AsyncGenerator[None, None]:
         # same as _sync_django_db_helper, except for running the transaction start and rollback wrapped in a
         # `sync_to_async` call
-        if is_django_unittest(request):
-            yield
-            return
         transactional, reset_sequences, databases, serialized_rollback, available_apps = (
             _get_django_db_settings(request)
         )
@@ -330,46 +341,16 @@ else:
             import django.db
             import django.test
 
-            if transactional:
-                test_case_class = django.test.TransactionTestCase
-            else:
-                test_case_class = django.test.TestCase
+            test_case_class = django.test.TestCase
 
-            _reset_sequences = reset_sequences
-            _serialized_rollback = serialized_rollback
-            _databases = databases
-            _available_apps = available_apps
-
-            class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
-                reset_sequences = _reset_sequences
-                serialized_rollback = _serialized_rollback
-                if _databases is not None:
-                    databases = _databases
-                if _available_apps is not None:
-                    available_apps = _available_apps
-
-                # For non-transactional tests, skip executing `django.test.TestCase`'s
-                # `setUpClass`/`tearDownClass`, only execute the super class ones.
-                #
-                # `TestCase`'s class setup manages the `setUpTestData`/class-level
-                # transaction functionality. We don't use it; instead we (will) offer
-                # our own alternatives. So it only adds overhead, and does some things
-                # which conflict with our (planned) functionality, particularly, it
-                # closes all database connections in `tearDownClass` which inhibits
-                # wrapping tests in higher-scoped transactions.
-                #
-                # It's possible a new version of Django will add some unrelated
-                # functionality to these methods, in which case skipping them completely
-                # would not be desirable. Let's cross that bridge when we get there...
-                if not transactional:
-
-                    @classmethod
-                    def setUpClass(cls) -> None:
-                        super(django.test.TestCase, cls).setUpClass()
-
-                    @classmethod
-                    def tearDownClass(cls) -> None:
-                        super(django.test.TestCase, cls).tearDownClass()
+            PytestDjangoTestCase = _build_pytest_django_test_case(
+                test_case_class,
+                reset_sequences=reset_sequences,
+                serialized_rollback=serialized_rollback,
+                databases=databases,
+                available_apps=available_apps,
+                skip_django_testcase_class_setup=True,
+            )
 
             from asgiref.sync import sync_to_async
 
