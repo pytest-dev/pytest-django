@@ -1,4 +1,5 @@
 {
+  "Exclude": ["pytest_django/fixtures.py"],
   "Disable": {
     "MaxLineLength": true
   }
