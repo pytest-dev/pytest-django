@@ -21,3 +21,6 @@ indent_size = 2
 
 [*.rst]
 indent_size = 4
+
+[*.bat]
+indent_style = tab

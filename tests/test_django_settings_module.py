@@ -22,8 +22,8 @@ def test_ds_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -72,8 +72,8 @@ def test_ds_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -101,8 +101,8 @@ def test_ds_env_override_ini(pytester: pytest.Pytester, monkeypatch: pytest.Monk
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     pytester.makeini(
         """\
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -166,8 +166,10 @@ def test_ds_in_pytest_configure(
 
         def pytest_configure():
             if not settings.configured:
-                os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                                      'tpkg.settings_ds')
+                os.environ.setdefault(
+                    'DJANGO_SETTINGS_MODULE',
+                    'tpkg.settings_ds',
+                )
     """
     )
 
