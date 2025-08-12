@@ -22,8 +22,8 @@ def test_ds_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -72,8 +72,8 @@ def test_ds_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DO_NOT_USE_env")
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -101,8 +101,8 @@ def test_ds_env_override_ini(pytester: pytest.Pytester, monkeypatch: pytest.Monk
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_env")
     pytester.makeini(
         """\
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -166,8 +166,10 @@ def test_ds_in_pytest_configure(
 
         def pytest_configure():
             if not settings.configured:
-                os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                                      'tpkg.settings_ds')
+                os.environ.setdefault(
+                    'DJANGO_SETTINGS_MODULE',
+                    'tpkg.settings_ds',
+                )
     """
     )
 
@@ -196,18 +198,24 @@ def test_django_settings_configure(
 
     p = pytester.makepyfile(
         run="""
-            from django.conf import settings
-            settings.configure(SECRET_KEY='set from settings.configure()',
-                               DATABASES={'default': {
-                                   'ENGINE': 'django.db.backends.sqlite3',
-                                   'NAME': ':memory:'
-                               }},
-                               INSTALLED_APPS=['django.contrib.auth',
-                                               'django.contrib.contenttypes',])
+        from django.conf import settings
+        settings.configure(
+            SECRET_KEY='set from settings.configure()',
+            DATABASES={
+                'default': {
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'NAME': ':memory:'
+                }
+            },
+            INSTALLED_APPS=[
+                'django.contrib.auth',
+                'django.contrib.contenttypes',
+            ]
+        )
 
-            import pytest
+        import pytest
 
-            pytest.main()
+        pytest.main()
     """
     )
 
@@ -249,12 +257,19 @@ def test_settings_in_hook(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyP
         from django.conf import settings
 
         def pytest_configure():
-            settings.configure(SECRET_KEY='set from pytest_configure',
-                               DATABASES={'default': {
-                                   'ENGINE': 'django.db.backends.sqlite3',
-                                   'NAME': ':memory:'}},
-                               INSTALLED_APPS=['django.contrib.auth',
-                                               'django.contrib.contenttypes',])
+            settings.configure(
+                SECRET_KEY='set from pytest_configure',
+                DATABASES={
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:'
+                    }
+                },
+                INSTALLED_APPS=[
+                    'django.contrib.auth',
+                    'django.contrib.contenttypes',
+                ]
+            )
     """
     )
     pytester.makepyfile(
@@ -305,13 +320,20 @@ def test_debug_false_by_default(
         from django.conf import settings
 
         def pytest_configure():
-            settings.configure(SECRET_KEY='set from pytest_configure',
-                               DEBUG=True,
-                               DATABASES={'default': {
-                                   'ENGINE': 'django.db.backends.sqlite3',
-                                   'NAME': ':memory:'}},
-                               INSTALLED_APPS=['django.contrib.auth',
-                                               'django.contrib.contenttypes',])
+            settings.configure(
+                SECRET_KEY='set from pytest_configure',
+                DEBUG=True,
+                DATABASES={
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:'
+                    }
+                },
+                INSTALLED_APPS=[
+                    'django.contrib.auth',
+                    'django.contrib.contenttypes',
+                ]
+            )
     """
     )
 
@@ -336,8 +358,8 @@ def test_django_debug_mode_true_false(
     monkeypatch.delenv("DJANGO_SETTINGS_MODULE")
     pytester.makeini(
         f"""
-       [pytest]
-       django_debug_mode = {django_debug_mode}
+        [pytest]
+        django_debug_mode = {django_debug_mode}
     """
     )
     pytester.makeconftest(
@@ -345,13 +367,20 @@ def test_django_debug_mode_true_false(
         from django.conf import settings
 
         def pytest_configure():
-            settings.configure(SECRET_KEY='set from pytest_configure',
-                               DEBUG=%s,
-                               DATABASES={'default': {
-                                   'ENGINE': 'django.db.backends.sqlite3',
-                                   'NAME': ':memory:'}},
-                               INSTALLED_APPS=['django.contrib.auth',
-                                               'django.contrib.contenttypes',])
+            settings.configure(
+                SECRET_KEY='set from pytest_configure',
+                DEBUG=%s,
+                DATABASES={
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3',
+                        'NAME': ':memory:'
+                    }
+                },
+                INSTALLED_APPS=[
+                    'django.contrib.auth',
+                    'django.contrib.contenttypes',
+                ]
+            )
     """
         % (not django_debug_mode)
     )

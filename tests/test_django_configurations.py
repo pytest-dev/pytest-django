@@ -58,9 +58,9 @@ def test_dc_env_overrides_ini(pytester: pytest.Pytester, monkeypatch: pytest.Mon
 
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-       DJANGO_CONFIGURATION = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        DJANGO_CONFIGURATION = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -91,9 +91,9 @@ def test_dc_ini(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -> N
 
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = tpkg.settings_ini
-       DJANGO_CONFIGURATION = MySettings
+        [pytest]
+        DJANGO_SETTINGS_MODULE = tpkg.settings_ini
+        DJANGO_CONFIGURATION = MySettings
     """
     )
     pkg = pytester.mkpydir("tpkg")
@@ -125,9 +125,9 @@ def test_dc_option(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch) -
 
     pytester.makeini(
         """
-       [pytest]
-       DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
-       DJANGO_CONFIGURATION = DO_NOT_USE_ini
+        [pytest]
+        DJANGO_SETTINGS_MODULE = DO_NOT_USE_ini
+        DJANGO_CONFIGURATION = DO_NOT_USE_ini
     """
     )
     pkg = pytester.mkpydir("tpkg")
