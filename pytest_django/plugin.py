@@ -842,7 +842,7 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it. '
         )
 
-    def _unblocked_async_only(self, *args, **kwargs):
+    def _unblocked_async_only(self, wrapper_self, *args, **kwargs):
         __tracebackhide__ = True
         from asgiref.sync import SyncToAsync
 
@@ -856,9 +856,9 @@ class DjangoDbBlocker:
                 "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
         elif self._real_ensure_connection is not None:
-            self._real_ensure_connection(*args, **kwargs)
+            self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
-    def _unblocked_sync_only(self, *args, **kwargs):
+    def _unblocked_sync_only(self, wrapper_self, *args, **kwargs):
         __tracebackhide__ = True
         if threading.current_thread() != threading.main_thread():
             raise RuntimeError(
@@ -867,7 +867,7 @@ class DjangoDbBlocker:
                 "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
         elif self._real_ensure_connection is not None:
-            self._real_ensure_connection(*args, **kwargs)
+            self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
     def unblock(self, sync_only=False, async_only=False) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
@@ -875,9 +875,15 @@ class DjangoDbBlocker:
             raise ValueError("Cannot use both sync_only and async_only. Choose at most one.")
         self._save_active_wrapper()
         if sync_only:
-            self._dj_db_wrapper.ensure_connection = self._unblocked_sync_only
+            def _method(wrapper_self, *args, **kwargs):
+                return self._unblocked_sync_only(wrapper_self, *args, **kwargs)
+
+            self._dj_db_wrapper.ensure_connection = _method
         elif async_only:
-            self._dj_db_wrapper.ensure_connection = self._unblocked_async_only
+            def _method(wrapper_self, *args, **kwargs):
+                return self._unblocked_async_only(wrapper_self, *args, **kwargs)
+
+            self._dj_db_wrapper.ensure_connection = _method
         else:
             self._dj_db_wrapper.ensure_connection = self._real_ensure_connection
         return _DatabaseBlockerContextManager(self)
