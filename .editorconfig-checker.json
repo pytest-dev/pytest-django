@@ -3,7 +3,9 @@
     "pytest_django/fixtures.py",
     ".tox/*",
     ".ruff_cache/*",
-    "pytest_django.egg-info/*"
+    "pytest_django.egg-info/*",
+    "__pycache__/*",
+    "zizmor.sarif"
   ],
   "Disable": {
     "MaxLineLength": true
