@@ -1,6 +1,17 @@
 import datetime
 import os
 import sys
+import urllib.request
+
+# Configure proxy if available
+proxy = os.getenv("HTTP_PROXY")
+if proxy:
+    proxy_handler = urllib.request.ProxyHandler({
+        'http': proxy,
+        'https': proxy,
+    })
+    opener = urllib.request.build_opener(proxy_handler)
+    urllib.request.install_opener(opener)
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
