@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: Build and Check Package
-        uses: hynek/build-and-inspect-python-package@b5076c307dc91924a82ad150cdd1533b444d3310  # v2.12.0
+        uses: hynek/build-and-inspect-python-package@c52c3a4710070b50470d903818a7b25115dcd076  # v2.13.0
 
   deploy:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && github.repository == 'pytest-dev/pytest-django'
