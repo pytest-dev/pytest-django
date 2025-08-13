@@ -16,6 +16,7 @@ from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
 from typing import TYPE_CHECKING, NoReturn
+import threading
 
 import pytest
 
@@ -63,6 +64,8 @@ INVALID_TEMPLATE_VARS_ENV = "FAIL_INVALID_TEMPLATE_VARS"
 
 
 # ############### pytest hooks ################
+
+urlconf_lock = threading.Lock()
 
 
 @pytest.hookimpl()
@@ -646,20 +649,20 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None,
         import django.conf
         from django.urls import clear_url_caches, set_urlconf
 
-        urls = validate_urls(marker)
-        original_urlconf = django.conf.settings.ROOT_URLCONF
-        django.conf.settings.ROOT_URLCONF = urls
-        clear_url_caches()
-        set_urlconf(None)
+        with urlconf_lock:
+            urls = validate_urls(marker)
+            original_urlconf = django.conf.settings.ROOT_URLCONF
+            django.conf.settings.ROOT_URLCONF = urls
+            clear_url_caches()
+            set_urlconf(None)
 
     yield
 
     if marker:
-        django.conf.settings.ROOT_URLCONF = original_urlconf
-        # Copy the pattern from
-        # https://github.com/django/django/blob/main/django/test/signals.py#L152
-        clear_url_caches()
-        set_urlconf(None)
+        with urlconf_lock:
+            django.conf.settings.ROOT_URLCONF = original_urlconf
+            clear_url_caches()
+            set_urlconf(None)
 
 
 @pytest.fixture(autouse=True, scope="session")

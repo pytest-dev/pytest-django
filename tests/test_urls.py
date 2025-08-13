@@ -107,3 +107,46 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(
 
     result = django_pytester.runpytest_subprocess()
     assert result.ret == 0
+
+@pytest.mark.django_project(
+    extra_settings="""
+    ROOT_URLCONF = "empty"
+    """
+)
+def test_urls_concurrent(django_pytester: DjangoPytester) -> None:
+    "Test that the URL cache clearing is thread-safe with pytest-xdist."
+    pytest.importorskip("xdist")
+
+    django_pytester.makepyfile(
+        empty="urlpatterns = []",
+        urls1="""
+        from django.urls import path
+        urlpatterns = [path('url1/', lambda r: None, name='url1')]
+        """,
+        urls2="""
+        from django.urls import path
+        urlpatterns = [path('url2/', lambda r: None, name='url2')]
+        """,
+    )
+
+    django_pytester.create_test_module(
+        """
+        import pytest
+        from django.urls import reverse, NoReverseMatch
+
+        @pytest.mark.urls('urls1')
+        def test_urls1():
+            reverse('url1')
+            with pytest.raises(NoReverseMatch):
+                reverse('url2')
+
+        @pytest.mark.urls('urls2')
+        def test_urls2():
+            reverse('url2')
+            with pytest.raises(NoReverseMatch):
+                reverse('url1')
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-n", "2")
+    assert result.ret == 0
