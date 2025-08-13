@@ -108,6 +108,7 @@ def test_urls_cache_is_cleared_and_new_urls_can_be_assigned(
     result = django_pytester.runpytest_subprocess()
     assert result.ret == 0
 
+
 @pytest.mark.django_project(
     extra_settings="""
     ROOT_URLCONF = "empty"
