@@ -135,27 +135,34 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-extend-select = [
-    "B",     # flake8-bugbear
-    "BLE",   # flake8-blind-except
-    "DTZ",   # flake8-datetimez
-    "FA",    # flake8-future-annotations
-    "G",     # flake8-logging-format
-    "I",     # isort
-    "PGH",   # pygrep-hooks
-    "PIE",   # flake8-pie
-    "PL",    # pylint
-    "PT",    # flake8-pytest-style
-    "PYI",   # flake8-pyi
-    "RUF",   # Ruff-specific rules
-    "SLOT",  # flake8-slots
-    "T10",   # flake8-debugger
-    "UP",    # pyupgrade
-    "YTT",   # flake8-2020
-]
+select = ["ALL"]
 ignore = [
+    # "D203",
+    # "D212",
+    # "COM812",
     "PLR0913",  # Too many arguments in function definition
     "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "ANN",    # Disable all annotations
+    "D100",   # Missing docstring in public module
+    "D101",   # Missing docstring in public class
+    "D205",   # 1 blank line required between summary line and description
+    "D102",   # Missing docstring in public method
+    "D103",   # Missing docstring in public function
+    "D401",   # First line of docstring should be in imperative mood
+    "D404",   # First word of the docstring should not be "This"
+    "FIX003", # Line contains XXX, consider resolving the issue
+    "N801",   # Class name should use CapWords convention
+    "N802",   # Function name should be lowercase
+    "S",      # Disable all security checks
+    "TD001",  # Invalid TODO tag
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link for this TODO
+
+    "D400",   # First line should end with a period
+    "D415",   # First line should end with a period, question mark, or exclamation points
 ]
 
 [tool.ruff.lint.isort]
