@@ -11,12 +11,12 @@ import inspect
 import os
 import pathlib
 import sys
+import threading
 import types
 from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
 from typing import TYPE_CHECKING, NoReturn
-import threading
 
 import pytest
 
