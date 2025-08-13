@@ -58,16 +58,16 @@ postgres = [
     "psycopg[binary]",
 ]
 mysql = [
-    "mysqlclient==2.1.0",
+    "mysqlclient==2.2.7",
 ]
 xdist = [
     "pytest-xdist",
 ]
 linting = [
     "editorconfig-checker==3.2.1",
-    "mypy==1.15.0",
-    "ruff==0.9.5",
-    "zizmor==1.9.0",
+    "mypy==1.17.1",
+    "ruff==0.12.8",
+    "zizmor==1.11.0",
 ]
 
 [project.urls]
