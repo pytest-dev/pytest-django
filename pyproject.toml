@@ -40,7 +40,8 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
-[dependency-groups]
+
+[project.optional-dependencies]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
@@ -68,6 +69,7 @@ linting = [
     "ruff==0.9.5",
     "zizmor==1.9.0",
 ]
+
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"
 Repository = "https://github.com/pytest-dev/pytest-django"
