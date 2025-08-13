@@ -5,7 +5,8 @@
     ".ruff_cache/*",
     "pytest_django.egg-info/*",
     "__pycache__/*",
-    "zizmor.sarif"
+    "zizmor.sarif",
+    "docs/_build/*"
   ],
   "Disable": {
     "MaxLineLength": true
