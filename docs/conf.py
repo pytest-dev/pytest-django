@@ -43,11 +43,8 @@ htmlhelp_basename = "pytest-djangodoc"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "django": (
-        "https://docs.djangoproject.com/en/stable/",
-        "https://docs.djangoproject.com/en/stable/_objects/",
-    ),
-    "pytest": ("https://docs.pytest.org/en/stable/", None),
+    "django": ("https://docs.djangoproject.com/en/stable/", None),
+    "pytest": ("https://docs.pytest.org/en/latest/", None),
 }
 
 # Warn about all references where the target cannot be found
