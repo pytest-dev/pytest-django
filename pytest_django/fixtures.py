@@ -458,7 +458,9 @@ def async_client() -> django.test.AsyncClient:
 
 
 @pytest.fixture
-def django_user_model() -> type[django.contrib.auth.models.User]:
+def django_user_model(
+    # db: None
+) -> type[django.contrib.auth.models.User]:
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
 
@@ -474,6 +476,7 @@ def django_username_field(django_user_model: type[django.contrib.auth.models.Use
 
 @pytest.fixture
 def admin_user(
+    # db: None,
     django_user_model: type[django.contrib.auth.models.User],
     django_username_field: str,
 ) -> django.contrib.auth.models.User:
@@ -504,6 +507,7 @@ def admin_user(
 
 @pytest.fixture
 def admin_client(
+    # db: None,
     admin_user: django.contrib.auth.models.User,
 ) -> django.test.Client:
     """A Django test client logged in as an admin user."""

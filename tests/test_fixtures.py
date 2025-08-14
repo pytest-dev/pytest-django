@@ -59,7 +59,7 @@ def test_admin_client(admin_client: Client) -> None:
     assert force_str(resp.content) == "You are an admin"
 
 
-def test_admin_client_no_db_marker(admin_client: Client) -> None:
+def test_admin_client_no_db_marker(db: None, admin_client: Client) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
@@ -71,6 +71,7 @@ def existing_admin_user(django_user_model: type[User]) -> User:
     return django_user_model._default_manager.create_superuser("admin", None, None)
 
 
+@pytest.mark.django_db
 @pytest.mark.usefixtures("existing_admin_user", "admin_user")
 def test_admin_client_existing_user(
     admin_client: Client,
@@ -84,7 +85,7 @@ def test_admin_user(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
-def test_admin_user_no_db_marker(admin_user, django_user_model) -> None:
+def test_admin_user_no_db_marker(db: None, admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
@@ -676,9 +677,11 @@ def test_custom_user_model(django_pytester: DjangoPytester, username_field: str)
     )
     django_pytester.makepyfile(
         """
+        import pytest
         from django.utils.encoding import force_str
         from tpkg.app.models import MyCustomUser
 
+        @pytest.mark.django_db
         def test_custom_user_model(admin_client):
             resp = admin_client.get('/admin-required/')
             assert force_str(resp.content) == 'You are an admin'
