@@ -51,7 +51,6 @@ def test_database(pytester: pytest.Pytester) -> None:
     r.stdout.fnmatch_lines(["*4 skipped*"])
 
 
-# @pytest.mark.django_db
 def test_client(pytester: pytest.Pytester) -> None:
     pytester.makepyfile(
         """
