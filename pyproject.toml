@@ -255,7 +255,7 @@ ignore = [
     "TRY003",  # Avoid specifying long messages outside the exception class
 ]
 [tool.ruff.lint.per-file-ignores]
-"tests/*.py,pytest_django_test/*.py" = [
+"tests/*.py" = [
     "ANN",    # Disable all annotations
     "FIX003", # Line contains XXX, consider resolving the issue
     "DJ008",  # Model does not define .. method
@@ -265,6 +265,43 @@ ignore = [
     "TD001",  # Invalid TODO tag
     "TD002",  # Missing author in TODO
     "TD003",  # Missing issue link for this TODO
+
+    # TODO - need to fix these
+    "ARG005",  # Unused lambda argument
+    "D300",    # Use triple double quotes `"""`
+    "D403",    # First word of the docstring should be capitalized
+    "ERA001",  # Found commented-out code
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    "TC001",   # Move application import .. into a type-checking block
+    "TC006",   # Add quotes to type expression in `typing.cast()`
+    "PTH108",  # `os.unlink()` should be replaced by `Path.unlink()`
+    "PTH110",  # `os.path.exists()` should be replaced by `Path.exists()`
+    "RET503",  # Missing explicit `return` at the end of function able to return non-`None` value
+    "RSE102",  # Unnecessary parentheses on raised exception
+]
+"pytest_django_test/*.py" = [
+    "ANN",    # Disable all annotations
+    "FIX003", # Line contains XXX, consider resolving the issue
+    "DJ008",  # Model does not define .. method
+    "N801",   # Class name should use CapWords convention
+    "N802",   # Function name should be lowercase
+    "S",      # Disable all security checks
+    "TD001",  # Invalid TODO tag
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link for this TODO
+
+    # TODO - need to fix these
+    "ARG005",  # Unused lambda argument
+    "D300",    # Use triple double quotes `"""`
+    "D403",    # First word of the docstring should be capitalized
+    "ERA001",  # Found commented-out code
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    "TC001",   # Move application import .. into a type-checking block
+    "TC006",   # Add quotes to type expression in `typing.cast()`
+    "PTH108",  # `os.unlink()` should be replaced by `Path.unlink()`
+    "PTH110",  # `os.path.exists()` should be replaced by `Path.exists()`
+    "RET503",  # Missing explicit `return` at the end of function able to return non-`None` value
+    "RSE102",  # Unnecessary parentheses on raised exception
 ]
 
 [tool.ruff.lint.isort]
