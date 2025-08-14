@@ -6,7 +6,7 @@ import os
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Literal, Optional, Protocol, Union
 
 import pytest
 
