@@ -135,23 +135,82 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    # "D203",
-    # "D212",
-    # "COM812",
-    "PLR0913",  # Too many arguments in function definition
-    "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
+select = [
+    "AIR",   # Airflow
+    "ERA",   # eradicate
+    "FAST",  # FastAPI
+    "YTT",   # flake8-2020
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "BLE",   # flake8-blind-except
+    "FBT",   # flake8-boolean-trap
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "C4",    # flake8-comprehensions
+    "CPY",   # flake8-copyright
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "DJ",    # flake8-django
+    "EM",    # flake8-errmsg
+    "EXE",   # flake8-executable
+    "FIX",   # flake8-fixme
+    "FA",    # flake8-future-annotations
+    "INT",   # flake8-gettext
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "SLOT",  # flake8-slots
+    "TID",   # flake8-tidy-imports
+    "TD",    # flake8-todos
+    "TC",    # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "FLY",   # flynt
+    "I",     # isort
+    "C90",   # mccabe
+    "PD",    # pandas-vet
+    "N",     # pep8-naming
+    "PERF",  # Perflint
+    "E",     # pycodestyle Error
+    "W",     # pycodestyle Warning
+    "DOC",   # pydoclint
+    "D",     # pydocstyle
+    "F",     # Pyflakes
+    "PGH",   # pygrep-hooks
+    "PL",    # Pylint
+    "PLC",   # Pylint Convention
+    "PLE",   # Pylint Error
+    "PLR",   # Pylint Refactor
+    "PLW",   # Pylint Warning
+    "UP",    # pyupgrade
+    "FURB",  # refurb
+    "TRY",   # tryceratops
+    "RUF",   # Ruff-specific rules
 ]
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = [
     "ANN",    # Disable all annotations
     "D100",   # Missing docstring in public module
     "D101",   # Missing docstring in public class
-    "D205",   # 1 blank line required between summary line and description
     "D102",   # Missing docstring in public method
     "D103",   # Missing docstring in public function
+    "D205",   # 1 blank line required between summary line and description
+    "D400",   # First line should end with a period
     "D401",   # First line of docstring should be in imperative mood
+    "D415",   # First line should end with a period, question mark, or exclamation points
     "D404",   # First word of the docstring should not be "This"
     "FIX003", # Line contains XXX, consider resolving the issue
     "N801",   # Class name should use CapWords convention
@@ -160,9 +219,6 @@ ignore = [
     "TD001",  # Invalid TODO tag
     "TD002",  # Missing author in TODO
     "TD003",  # Missing issue link for this TODO
-
-    "D400",   # First line should end with a period
-    "D415",   # First line should end with a period, question mark, or exclamation points
 ]
 
 [tool.ruff.lint.isort]
