@@ -129,7 +129,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-# preview = true  # TODO: Enable this after resolving all Ruff preview lint errors (see https://github.com/pytest-dev/pytest-django/issues/1234)
+# preview = true  # TODO: Enable this when we have the bandwidth
 line-length = 99
 extend-exclude = [
     "pytest_django/_version.py",
