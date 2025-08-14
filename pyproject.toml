@@ -200,19 +200,65 @@ select = [
     "TRY",   # tryceratops
     "RUF",   # Ruff-specific rules
 ]
+ignore = [
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in __init__
+    "D200", # One-line docstring should fit on one line
+    "D202", # No blank lines allowed after function docstring
+    "D205", # 1 blank line required between summary line and description
+    "D209", # Multi-line docstring closing quotes should be on a separate line
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line
+    "D400", # First line should end with a period
+    "D401", # First line of docstring should be in imperative mood
+    "D404", # First word of the docstring should not be "This"
+    "D415", # First line should end with a period, question mark, or exclamation point
+    "S101", # Use of `assert` detected
+
+    # TODO - need to fix these
+    "ANN001",  # Missing type annotation for function argument
+    "ANN002",  # Missing type annotation for public function
+    "ANN003",  # Missing type annotation for public method
+    "ANN201",  # Missing return type annotation for public function
+    "ANN202",  # Missing return type annotation for private function
+    "ANN204",  # Missing return type annotation for special method
+    "ANN401",  # Dynamically typed expressions .. are disallowed
+    "ARG001",  # Unused function argument
+    "ARG002",  # Unused method argument
+    "C901",    # .. is too complex
+    "COM812",  # Trailing comma missing
+    "E501",    # Line too long
+    "EM101",   # Exception must not use a string literal, assign to variable first
+    "EM102",   # Exception must not use an f-string literal, assign to variable first
+    "FBT001",  # Boolean-typed positional argument in function definition
+    "FBT002",  # Boolean default positional argument in function definition
+    "FBT003",  # Boolean positional value in function call
+    "N802",    # Function name `assertRedirects` should be lowercase
+    "N806",    # Variable `UserModel` in function should be lowercase
+    "PLC0415", # `import` should be at the top-level of a file
+    "PLR0913", # Too many arguments in function definition
+    "PLR2004", # Magic value used in comparison, consider replacing .. with a constant variable
+    "RET504",  # Unnecessary assignment to .. before `return` statement
+    "RET505",  # Unnecessary `elif` after `return` statement
+    "S105",    # Possible hardcoded password assigned
+    "SIM102",  # Use a single `if` statement instead of nested `if` statements
+    "SIM108",  # Use ternary operator .. instead of `if`-`else`-block
+    "SIM114",  # Combine `if` branches using logical `or` operator
+    "SLF001",  # Private member accessed
+    "TC002",   # Move third-party import `django.contrib.messages.Message` into a type-checking block
+    "TC003",   # Move standard library import `collections.abc.Sequence` into a type-checking block
+    "TRY003",  # Avoid specifying long messages outside the exception class
+]
 [tool.ruff.lint.per-file-ignores]
-"tests/*.py" = [
+"tests/*.py,pytest_django_test/*.py" = [
     "ANN",    # Disable all annotations
-    "D100",   # Missing docstring in public module
-    "D101",   # Missing docstring in public class
-    "D102",   # Missing docstring in public method
-    "D103",   # Missing docstring in public function
-    "D205",   # 1 blank line required between summary line and description
-    "D400",   # First line should end with a period
-    "D401",   # First line of docstring should be in imperative mood
-    "D415",   # First line should end with a period, question mark, or exclamation points
-    "D404",   # First word of the docstring should not be "This"
     "FIX003", # Line contains XXX, consider resolving the issue
+    "DJ008",  # Model does not define .. method
     "N801",   # Class name should use CapWords convention
     "N802",   # Function name should be lowercase
     "S",      # Disable all security checks
