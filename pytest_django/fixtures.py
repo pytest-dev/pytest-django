@@ -6,7 +6,7 @@ import os
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Protocol, Union
 
 import pytest
 
@@ -16,6 +16,8 @@ from .lazy_django import skip_if_no_django
 
 
 if TYPE_CHECKING:
+    from typing import Any, Callable
+
     import django
     import django.test
 
@@ -337,7 +339,7 @@ def _disable_migrations() -> None:
     settings.MIGRATION_MODULES = DisableMigrations()
 
     class MigrateSilentCommand(migrate.Command):
-        def handle(self, *args, **kwargs):
+        def handle(self, *args: Any, **kwargs: Any) -> Any:
             kwargs["verbosity"] = 0
             return super().handle(*args, **kwargs)
 
@@ -456,7 +458,7 @@ def async_client() -> django.test.AsyncClient:
 
 
 @pytest.fixture
-def django_user_model(db: None):
+def django_user_model() -> type[django.contrib.auth.models.User]:
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
 
@@ -464,7 +466,7 @@ def django_user_model(db: None):
 
 
 @pytest.fixture
-def django_username_field(django_user_model) -> str:
+def django_username_field(django_user_model: type[django.contrib.auth.models.User]) -> str:
     """The fieldname for the username used with Django's user model."""
     field: str = django_user_model.USERNAME_FIELD
     return field
@@ -472,10 +474,9 @@ def django_username_field(django_user_model) -> str:
 
 @pytest.fixture
 def admin_user(
-    db: None,
-    django_user_model,
+    django_user_model: type[django.contrib.auth.models.User],
     django_username_field: str,
-):
+) -> django.contrib.auth.models.User:
     """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
@@ -503,8 +504,7 @@ def admin_user(
 
 @pytest.fixture
 def admin_client(
-    db: None,
-    admin_user,
+    admin_user: django.contrib.auth.models.User,
 ) -> django.test.Client:
     """A Django test client logged in as an admin user."""
     from django.test import Client
@@ -550,14 +550,14 @@ class SettingsWrapper:
 
         self._to_restore.append(override)
 
-    def __setattr__(self, attr: str, value) -> None:
+    def __setattr__(self, attr: str, value: Any) -> None:
         from django.test import override_settings
 
         override = override_settings(**{attr: value})
         override.enable()
         self._to_restore.append(override)
 
-    def __getattr__(self, attr: str):
+    def __getattr__(self, attr: str) -> Any:
         from django.conf import settings
 
         return getattr(settings, attr)
@@ -570,7 +570,7 @@ class SettingsWrapper:
 
 
 @pytest.fixture
-def settings():
+def settings() -> Generator[SettingsWrapper, None, None]:
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
@@ -580,7 +580,9 @@ def settings():
 
 
 @pytest.fixture(scope="session")
-def live_server(request: pytest.FixtureRequest):
+def live_server(
+    request: pytest.FixtureRequest,
+) -> Generator[live_server_helper.LiveServer, None, None]:
     """Run a live Django server in the background during tests
 
     The address the server is started from is taken from the

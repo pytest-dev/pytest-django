@@ -219,13 +219,6 @@ ignore = [
     "S101", # Use of `assert` detected
 
     # TODO - need to fix these
-    "ANN001",  # Missing type annotation for function argument
-    "ANN002",  # Missing type annotation for public function
-    "ANN003",  # Missing type annotation for public method
-    "ANN201",  # Missing return type annotation for public function
-    "ANN202",  # Missing return type annotation for private function
-    "ANN204",  # Missing return type annotation for special method
-    "ANN401",  # Dynamically typed expressions .. are disallowed
     "ARG001",  # Unused function argument
     "ARG002",  # Unused method argument
     "C901",    # .. is too complex

@@ -8,6 +8,7 @@ import os
 import socket
 from collections.abc import Generator
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
@@ -23,6 +24,10 @@ from .helpers import DjangoPytester
 
 from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
 from pytest_django_test.app.models import Item
+
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
 
 
 @contextmanager
@@ -60,14 +65,12 @@ def test_admin_client_no_db_marker(admin_client: Client) -> None:
 
 # For test below.
 @pytest.fixture
-def existing_admin_user(django_user_model):
+def existing_admin_user(django_user_model: type[User]) -> User:
     return django_user_model._default_manager.create_superuser("admin", None, None)
 
 
+@pytest.mark.usefixtures("existing_admin_user", "admin_user")
 def test_admin_client_existing_user(
-    db: None,
-    existing_admin_user,
-    admin_user,
     admin_client: Client,
 ) -> None:
     resp = admin_client.get("/admin-required/")

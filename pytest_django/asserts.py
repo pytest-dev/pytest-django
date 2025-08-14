@@ -4,9 +4,8 @@ Dynamically load all Django assertion cases and expose them for importing.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, overload
 
 from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
@@ -26,11 +25,11 @@ else:
     test_case = TestCase("run")
 
 
-def _wrapper(name: str):
+def _wrapper(name: str) -> Callable[..., Any]:
     func = getattr(test_case, name)
 
     @wraps(func)
-    def assertion_func(*args, **kwargs):
+    def assertion_func(*args: Any, **kwargs: Any) -> Any:
         return func(*args, **kwargs)
 
     return assertion_func
@@ -56,7 +55,10 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
+    from collections.abc import Collection, Iterator, Sequence
+
     from django import forms
+    from django.db.models import Model, QuerySet, RawQuerySet
     from django.http.response import HttpResponseBase
 
     def assertRedirects(
@@ -111,34 +113,34 @@ if TYPE_CHECKING:
         template_name: str | None = ...,
         msg_prefix: str = ...,
         count: int | None = ...,
-    ): ...
+    ) -> None: ...
 
     def assertTemplateNotUsed(
         response: HttpResponseBase | str | None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
-    ): ...
+    ) -> None: ...
 
     def assertRaisesMessage(
         expected_exception: type[Exception],
         expected_message: str,
-        *args,
-        **kwargs,
-    ): ...
+        *args: Any,
+        **kwargs: Any,
+    ) -> None: ...
 
     def assertWarnsMessage(
         expected_warning: Warning,
         expected_message: str,
-        *args,
-        **kwargs,
-    ): ...
+        *args: Any,
+        **kwargs: Any,
+    ) -> None: ...
 
     def assertFieldOutput(
-        fieldclass,
-        valid,
-        invalid,
-        field_args=...,
-        field_kwargs=...,
+        fieldclass: type[forms.Field],
+        valid: Any,
+        invalid: Any,
+        field_args: Any = ...,
+        field_kwargs: Any = ...,
         empty_value: str = ...,
     ) -> None: ...
 
@@ -194,34 +196,41 @@ if TYPE_CHECKING:
 
     # Removed in Django 5.1: use assertQuerySetEqual.
     def assertQuerysetEqual(
-        qs,
-        values,
-        transform=...,
+        qs: Iterator[Any] | list[Model] | QuerySet | RawQuerySet,
+        values: Collection[Any],
+        transform: Callable[[Model], Any] | type[str] | None = ...,
         ordered: bool = ...,
         msg: str | None = ...,
     ) -> None: ...
 
     def assertQuerySetEqual(
-        qs,
-        values,
-        transform=...,
+        qs: Iterator[Any] | list[Model] | QuerySet | RawQuerySet,
+        values: Collection[Any],
+        transform: Callable[[Model], Any] | type[str] | None = ...,
         ordered: bool = ...,
         msg: str | None = ...,
+    ) -> None: ...
+
+    @overload
+    def assertNumQueries(num: int, func: None = None, *, using: str = ...) -> None: ...
+    @overload
+    def assertNumQueries(
+        num: int, func: Callable[..., Any], *args: Any, using: str = ..., **kwargs: Any
     ) -> None: ...
 
     def assertNumQueries(
         num: int,
         func=...,
-        *args,
+        *args: Any,
         using: str = ...,
-        **kwargs,
+        **kwargs: Any,
     ): ...
 
     # Added in Django 5.0.
     def assertMessages(
         response: HttpResponseBase,
         expected_messages: Sequence[Message],
-        *args,
+        *args: Any,
         ordered: bool = ...,
     ) -> None: ...
 
