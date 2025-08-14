@@ -6,7 +6,7 @@ import os
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Literal, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Protocol
 
 import pytest
 
@@ -16,7 +16,7 @@ from .lazy_django import skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from typing import Any, Callable, Literal, Optional, Union
 
     import django
     import django.test
@@ -24,11 +24,10 @@ if TYPE_CHECKING:
     from . import DjangoDbBlocker
     from .django_compat import _User, _UserModel
 
-
-_DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
-_DjangoDbAvailableApps = Optional[list[str]]
-# transaction, reset_sequences, databases, serialized_rollback, available_apps
-_DjangoDb = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
+    _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
+    _DjangoDbAvailableApps = Optional[list[str]]
+    # transaction, reset_sequences, databases, serialized_rollback, available_apps
+    _DjangoDb = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 
 
 __all__ = [
