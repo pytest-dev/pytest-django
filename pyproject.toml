@@ -53,6 +53,10 @@ coverage = [
     "coverage[toml]",
     "coverage-enable-subprocess",
 ]
+async = [
+    "asgiref>=3.9.1",
+    "pytest-asyncio",
+]
 postgres = [
     "psycopg[binary]",
 ]
