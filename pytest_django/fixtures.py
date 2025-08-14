@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     import django.test
 
     from . import DjangoDbBlocker
+    from .django_compat import _User, _UserModel
 
 
 _DjangoDbDatabases = Optional[Union[Literal["__all__"], Iterable[str]]]
@@ -458,7 +459,7 @@ def async_client() -> django.test.AsyncClient:
 
 
 @pytest.fixture
-def django_user_model(db: None) -> type[django.contrib.auth.models.User]:
+def django_user_model(db: None) -> _UserModel:
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
 
@@ -466,7 +467,7 @@ def django_user_model(db: None) -> type[django.contrib.auth.models.User]:
 
 
 @pytest.fixture
-def django_username_field(django_user_model: type[django.contrib.auth.models.User]) -> str:
+def django_username_field(django_user_model: _UserModel) -> str:
     """The fieldname for the username used with Django's user model."""
     field: str = django_user_model.USERNAME_FIELD
     return field
@@ -475,9 +476,9 @@ def django_username_field(django_user_model: type[django.contrib.auth.models.Use
 @pytest.fixture
 def admin_user(
     db: None,
-    django_user_model: type[django.contrib.auth.models.User],
+    django_user_model: _User,
     django_username_field: str,
-) -> django.contrib.auth.models.User:
+) -> _User:
     """A Django admin user.
 
     This uses an existing user with username "admin", or creates a new one with
@@ -506,7 +507,7 @@ def admin_user(
 @pytest.fixture
 def admin_client(
     db: None,
-    admin_user: django.contrib.auth.models.User,
+    admin_user: _User,
 ) -> django.test.Client:
     """A Django test client logged in as an admin user."""
     from django.test import Client

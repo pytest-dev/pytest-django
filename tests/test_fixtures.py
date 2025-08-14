@@ -29,7 +29,7 @@ from pytest_django_test.app.models import Item
 
 
 if TYPE_CHECKING:
-    from django.contrib.auth.models import User
+    from pytest_django.django_compat import _User, _UserModel
 
 
 @contextmanager
@@ -67,7 +67,7 @@ def test_admin_client_no_db_marker(db: None, admin_client: Client) -> None:
 
 # For test below.
 @pytest.fixture
-def existing_admin_user(django_user_model: type[User]) -> User:
+def existing_admin_user(django_user_model: _UserModel) -> _User:
     return django_user_model._default_manager.create_superuser("admin", None, None)
 
 

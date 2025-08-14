@@ -573,7 +573,7 @@ def _django_setup_unittest(
 
     original_runtest = TestCaseFunction.runtest
 
-    def non_debugging_runtest(self) -> None:
+    def non_debugging_runtest(self) -> None:  # noqa: ANN001
         self._testcase(result=self)
 
     from django.test import SimpleTestCase
