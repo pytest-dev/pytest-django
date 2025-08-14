@@ -56,7 +56,7 @@ for assert_func in assertions_names:
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterator, Sequence
-    from typing import overload
+    from typing import ContextManager, overload
 
     from django import forms
     from django.db.models import Model, QuerySet, RawQuerySet
@@ -213,7 +213,10 @@ if TYPE_CHECKING:
     ) -> None: ...
 
     @overload
-    def assertNumQueries(num: int, func: None = None, *, using: str = ...) -> None: ...
+    def assertNumQueries(
+        num: int, func: None = None, *, using: str = ...
+    ) -> ContextManager[None]: ...
+
     @overload
     def assertNumQueries(
         num: int, func: Callable[..., Any], *args: Any, using: str = ..., **kwargs: Any

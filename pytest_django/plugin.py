@@ -54,7 +54,7 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Self
+    from typing import Any, NoReturn
 
     import django
 
@@ -573,7 +573,7 @@ def _django_setup_unittest(
 
     original_runtest = TestCaseFunction.runtest
 
-    def non_debugging_runtest(self: Self) -> None:
+    def non_debugging_runtest(self) -> None:
         self._testcase(result=self)
 
     from django.test import SimpleTestCase
