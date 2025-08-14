@@ -85,7 +85,7 @@ def test_admin_user(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
-def test_admin_user_no_db_marker(db: None, admin_user, django_user_model) -> None:
+def test_admin_user_no_db_marker(admin_user, django_user_model) -> None:
     assert isinstance(admin_user, django_user_model)
 
 
