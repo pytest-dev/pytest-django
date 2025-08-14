@@ -129,7 +129,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-# preview = true  # TODO - enable this when we have time to fix all the issues
+# preview = true  # TODO: Enable this after resolving all Ruff preview lint errors (see https://github.com/pytest-dev/pytest-django/issues/1234)
 line-length = 99
 extend-exclude = [
     "pytest_django/_version.py",
@@ -192,10 +192,6 @@ select = [
     "F",     # Pyflakes
     "PGH",   # pygrep-hooks
     "PL",    # Pylint
-    "PLC",   # Pylint Convention
-    "PLE",   # Pylint Error
-    "PLR",   # Pylint Refactor
-    "PLW",   # Pylint Warning
     "UP",    # pyupgrade
     "FURB",  # refurb
     "TRY",   # tryceratops
