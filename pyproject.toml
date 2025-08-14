@@ -136,7 +136,7 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-select = [
+extend-select = [
     "AIR",   # Airflow
     "ERA",   # eradicate
     "FAST",  # FastAPI
