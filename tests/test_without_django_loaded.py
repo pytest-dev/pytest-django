@@ -54,12 +54,9 @@ def test_database(pytester: pytest.Pytester) -> None:
 def test_client(pytester: pytest.Pytester) -> None:
     pytester.makepyfile(
         """
-        import pytest
-
         def test_client(client):
             assert 0
 
-        @pytest.mark.django_db
         def test_admin_client(admin_client):
             assert 0
     """

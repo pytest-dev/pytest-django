@@ -5,7 +5,7 @@ Dynamically load all Django assertion cases and expose them for importing.
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, overload
+from typing import TYPE_CHECKING, Any, Callable
 
 from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
@@ -55,7 +55,7 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Iterator, Sequence
+    from collections.abc import Collection, Iterator, Sequence, overload
 
     from django import forms
     from django.db.models import Model, QuerySet, RawQuerySet

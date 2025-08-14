@@ -677,11 +677,9 @@ def test_custom_user_model(django_pytester: DjangoPytester, username_field: str)
     )
     django_pytester.makepyfile(
         """
-        import pytest
         from django.utils.encoding import force_str
         from tpkg.app.models import MyCustomUser
 
-        @pytest.mark.django_db
         def test_custom_user_model(admin_client):
             resp = admin_client.get('/admin-required/')
             assert force_str(resp.content) == 'You are an admin'
