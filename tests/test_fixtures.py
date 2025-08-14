@@ -4,6 +4,8 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
+from __future__ import annotations
+
 import os
 import socket
 from collections.abc import Generator
