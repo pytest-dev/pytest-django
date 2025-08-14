@@ -129,6 +129,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
+# preview = true  # TODO - enable this when we have time to fix all the issues
 line-length = 99
 extend-exclude = [
     "pytest_django/_version.py",
@@ -210,6 +211,7 @@ ignore = [
     "D107", # Missing docstring in __init__
     "D200", # One-line docstring should fit on one line
     "D202", # No blank lines allowed after function docstring
+    "D203", # Class definitions that are not preceded by a blank line
     "D205", # 1 blank line required between summary line and description
     "D209", # Multi-line docstring closing quotes should be on a separate line
     "D212", # Multi-line docstring summary should start at the first line
