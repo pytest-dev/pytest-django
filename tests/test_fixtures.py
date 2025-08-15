@@ -4,10 +4,13 @@ Not quite all fixtures are tested here, the db and transactional_db
 fixtures are tested in test_database.
 """
 
+from __future__ import annotations
+
 import os
 import socket
 from collections.abc import Generator
 from contextlib import contextmanager
+from typing import TYPE_CHECKING
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
@@ -23,6 +26,10 @@ from .helpers import DjangoPytester
 
 from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
 from pytest_django_test.app.models import Item
+
+
+if TYPE_CHECKING:
+    from pytest_django.django_compat import _User, _UserModel
 
 
 @contextmanager
@@ -52,7 +59,7 @@ def test_admin_client(admin_client: Client) -> None:
     assert force_str(resp.content) == "You are an admin"
 
 
-def test_admin_client_no_db_marker(admin_client: Client) -> None:
+def test_admin_client_no_db_marker(db: None, admin_client: Client) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
@@ -60,14 +67,13 @@ def test_admin_client_no_db_marker(admin_client: Client) -> None:
 
 # For test below.
 @pytest.fixture
-def existing_admin_user(django_user_model):
+def existing_admin_user(django_user_model: _UserModel) -> _User:
     return django_user_model._default_manager.create_superuser("admin", None, None)
 
 
+@pytest.mark.django_db
+@pytest.mark.usefixtures("existing_admin_user", "admin_user")
 def test_admin_client_existing_user(
-    db: None,
-    existing_admin_user,
-    admin_user,
     admin_client: Client,
 ) -> None:
     resp = admin_client.get("/admin-required/")
