@@ -492,3 +492,67 @@ class Test_database_blocking:
                 'or the "db" or "transactional_db" fixtures to enable it.'
             ]
         )
+
+
+def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
+    pytest.importorskip("xdist")
+    pytest.importorskip("psycopg")
+
+    django_pytester.makeconftest(
+        """
+        import pytest
+        import psycopg
+        from django.conf import settings as django_settings
+
+        def run_sql(query, fetch=False, db='default'):
+            conn = psycopg.connect(
+                user=django_settings.DATABASES[db]['USER'],
+                password=django_settings.DATABASES[db]['PASSWORD'],
+                host=django_settings.DATABASES[db]['HOST'],
+                port=django_settings.DATABASES['default']['PORT']
+            )
+            (cur := conn.cursor()).execute(query)
+            response = cur.fetchone() if fetch else None
+            conn.close()
+            return response
+
+        @pytest.fixture(scope='session')
+        def django_db_createdb(request, django_db_createdb) -> bool:
+            db_name = f'test_{django_settings.DATABASES["default"]["NAME"]}'
+            if xdist_suffix := getattr(request.config, 'workerinput', {}).get('workerid'):
+                db_name = f'{db_name}_{xdist_suffix}'
+            db_exists = (result := run_sql(query=f"SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname='{db_name}')", fetch=True)) and result and result[0]
+            if django_db_createdb or not db_exists:
+                run_sql('CREATE EXTENSION IF NOT EXISTS vector')
+            return django_db_createdb or not db_exists
+
+        @pytest.fixture(scope='session')
+        def django_db_setup(django_db_setup, django_db_blocker, django_db_createdb) -> None:
+            del django_db_setup
+            if django_db_createdb:
+                with django_db_blocker.unblock():
+                    call_command('flush', '--noinput')
+                    call_command('loaddata', *pathlib.Path().glob('tests/db_fixtures/**/*.yaml'))
+        """
+    )
+
+    django_pytester.create_test_module(
+        """
+        import pytest
+        from .app.models import Item
+
+        @pytest.mark.django_db
+        def test_simple():
+            assert Item.objects.count() == 0
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-vv", "--reuse-db", "-n", "auto")
+    print(result.stdout.str())
+    print(result.stderr.str())
+    result.assert_outcomes(passed=1)
+
+    result = django_pytester.runpytest_subprocess("-vv", "--reuse-db", "-n", "auto")
+    print(result.stdout.str())
+    print(result.stderr.str())
+    result.assert_outcomes(passed=1)
