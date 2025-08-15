@@ -1,14 +1,9 @@
 from textwrap import dedent
 
-import pytest
-
 from .helpers import DjangoPytester
 
 
-def test_django_setup_order_and_uniqueness(
-    django_pytester: DjangoPytester,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_django_setup_order_and_uniqueness(django_pytester: DjangoPytester) -> None:
     """
     The django.setup() function shall not be called multiple times by
     pytest-django, since it resets logging conf each time.

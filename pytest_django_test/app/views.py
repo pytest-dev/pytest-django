@@ -10,5 +10,5 @@ def admin_required_view(request: HttpRequest) -> HttpResponse:
     return HttpResponse(Template("You are an admin").render(Context()))
 
 
-def item_count(request: HttpRequest) -> HttpResponse:
+def item_count(request: HttpRequest) -> HttpResponse:  # noqa: ARG001
     return HttpResponse(f"Item count: {Item.objects.count()}")

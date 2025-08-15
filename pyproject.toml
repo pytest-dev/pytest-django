@@ -40,8 +40,7 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
-
-[project.optional-dependencies]
+[dependency-groups]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
@@ -65,11 +64,10 @@ xdist = [
 ]
 linting = [
     "editorconfig-checker==3.2.1",
-    "mypy==1.15.0",
-    "ruff==0.9.5",
-    "zizmor==1.9.0",
+    "mypy==1.17.1",
+    "ruff==0.12.8",
+    "zizmor==1.11.0",
 ]
-
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"
 Repository = "https://github.com/pytest-dev/pytest-django"
@@ -134,6 +132,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
+# preview = true  # TODO: Enable this when we have the bandwidth
 line-length = 99
 extend-exclude = [
     "pytest_django/_version.py",
@@ -141,26 +140,161 @@ extend-exclude = [
 
 [tool.ruff.lint]
 extend-select = [
-    "B",     # flake8-bugbear
-    "BLE",   # flake8-blind-except
-    "DTZ",   # flake8-datetimez
-    "FA",    # flake8-future-annotations
-    "G",     # flake8-logging-format
-    "I",     # isort
-    "PGH",   # pygrep-hooks
-    "PIE",   # flake8-pie
-    "PL",    # pylint
-    "PT",    # flake8-pytest-style
-    "PYI",   # flake8-pyi
-    "RUF",   # Ruff-specific rules
-    "SLOT",  # flake8-slots
-    "T10",   # flake8-debugger
-    "UP",    # pyupgrade
+    "AIR",   # Airflow
+    "ERA",   # eradicate
+    "FAST",  # FastAPI
     "YTT",   # flake8-2020
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "BLE",   # flake8-blind-except
+    "FBT",   # flake8-boolean-trap
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "C4",    # flake8-comprehensions
+    "CPY",   # flake8-copyright
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "DJ",    # flake8-django
+    "EM",    # flake8-errmsg
+    "EXE",   # flake8-executable
+    "FIX",   # flake8-fixme
+    "FA",    # flake8-future-annotations
+    "INT",   # flake8-gettext
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "SLOT",  # flake8-slots
+    "TID",   # flake8-tidy-imports
+    "TD",    # flake8-todos
+    "TC",    # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "FLY",   # flynt
+    "I",     # isort
+    "C90",   # mccabe
+    "PD",    # pandas-vet
+    "N",     # pep8-naming
+    "PERF",  # Perflint
+    "E",     # pycodestyle Error
+    "W",     # pycodestyle Warning
+    "DOC",   # pydoclint
+    "D",     # pydocstyle
+    "F",     # Pyflakes
+    "PGH",   # pygrep-hooks
+    "PL",    # Pylint
+    "UP",    # pyupgrade
+    "FURB",  # refurb
+    "TRY",   # tryceratops
+    "RUF",   # Ruff-specific rules
 ]
 ignore = [
-    "PLR0913",  # Too many arguments in function definition
-    "PLR2004",  # Magic value used in comparison, consider replacing 3 with a constant variable
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "D100",   # Missing docstring in public module
+    "D101",   # Missing docstring in public class
+    "D102",   # Missing docstring in public method
+    "D103",   # Missing docstring in public function
+    "D104",   # Missing docstring in public package
+    "D105",   # Missing docstring in magic method
+    "D107",   # Missing docstring in __init__
+    "D200",   # One-line docstring should fit on one line
+    "D202",   # No blank lines allowed after function docstring
+    "D203",   # Class definitions that are not preceded by a blank line
+    "D205",   # 1 blank line required between summary line and description
+    "D209",   # Multi-line docstring closing quotes should be on a separate line
+    "D212",   # Multi-line docstring summary should start at the first line
+    "D213",   # Multi-line docstring summary should start at the second line
+    "D400",   # First line should end with a period
+    "D401",   # First line of docstring should be in imperative mood
+    "D404",   # First word of the docstring should not be "This"
+    "D415",   # First line should end with a period, question mark, or exclamation point
+    "S101",   # Use of `assert` detected
+
+    # TODO - need to fix these
+    "C901",    # .. is too complex
+    "COM812",  # Trailing comma missing
+    "E501",    # Line too long
+    "EM101",   # Exception must not use a string literal, assign to variable first
+    "EM102",   # Exception must not use an f-string literal, assign to variable first
+    "FBT001",  # Boolean-typed positional argument in function definition
+    "FBT002",  # Boolean default positional argument in function definition
+    "FBT003",  # Boolean positional value in function call
+    "N802",    # Function name `assertRedirects` should be lowercase
+    "N806",    # Variable `UserModel` in function should be lowercase
+    "PLC0415", # `import` should be at the top-level of a file
+    "PLR0913", # Too many arguments in function definition
+    "PLR2004", # Magic value used in comparison, consider replacing .. with a constant variable
+    "RET504",  # Unnecessary assignment to .. before `return` statement
+    "RET505",  # Unnecessary `elif` after `return` statement
+    "S105",    # Possible hardcoded password assigned
+    "SIM102",  # Use a single `if` statement instead of nested `if` statements
+    "SIM108",  # Use ternary operator .. instead of `if`-`else`-block
+    "SIM114",  # Combine `if` branches using logical `or` operator
+    "SLF001",  # Private member accessed
+    "TC002",   # Move third-party import `django.contrib.messages.Message` into a type-checking block
+    "TC003",   # Move standard library import `collections.abc.Sequence` into a type-checking block
+    "TRY003",  # Avoid specifying long messages outside the exception class
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "ANN",    # Disable all annotations
+    "FIX003", # Line contains XXX, consider resolving the issue
+    "DJ008",  # Model does not define .. method
+    "N801",   # Class name should use CapWords convention
+    "N802",   # Function name should be lowercase
+    "S",      # Disable all security checks
+    "TD001",  # Invalid TODO tag
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link for this TODO
+
+    # TODO - need to fix these
+    "ARG005",  # Unused lambda argument
+    "D300",    # Use triple double quotes `"""`
+    "D403",    # First word of the docstring should be capitalized
+    "ERA001",  # Found commented-out code
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    "TC001",   # Move application import .. into a type-checking block
+    "TC006",   # Add quotes to type expression in `typing.cast()`
+    "PTH108",  # `os.unlink()` should be replaced by `Path.unlink()`
+    "PTH110",  # `os.path.exists()` should be replaced by `Path.exists()`
+    "RET503",  # Missing explicit `return` at the end of function able to return non-`None` value
+    "RSE102",  # Unnecessary parentheses on raised exception
+]
+"pytest_django_test/*.py" = [
+    "ANN",    # Disable all annotations
+    "FIX003", # Line contains XXX, consider resolving the issue
+    "DJ008",  # Model does not define .. method
+    "N801",   # Class name should use CapWords convention
+    "N802",   # Function name should be lowercase
+    "S",      # Disable all security checks
+    "TD001",  # Invalid TODO tag
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link for this TODO
+
+    # TODO - need to fix these
+    "ARG005",  # Unused lambda argument
+    "D300",    # Use triple double quotes `"""`
+    "D403",    # First word of the docstring should be capitalized
+    "ERA001",  # Found commented-out code
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    "TC001",   # Move application import .. into a type-checking block
+    "TC006",   # Add quotes to type expression in `typing.cast()`
+    "PTH108",  # `os.unlink()` should be replaced by `Path.unlink()`
+    "PTH110",  # `os.path.exists()` should be replaced by `Path.exists()`
+    "RET503",  # Missing explicit `return` at the end of function able to return non-`None` value
+    "RSE102",  # Unnecessary parentheses on raised exception
 ]
 
 [tool.ruff.lint.isort]
