@@ -30,6 +30,7 @@ from pytest_django_test.app.models import Item
 
 if TYPE_CHECKING:
     from pytest_django.django_compat import _User, _UserModel
+    from pytest_django.fixtures import SettingsWrapper
     from pytest_django.live_server_helper import LiveServer
 
 
@@ -475,7 +476,11 @@ class TestLiveServer:
     def test_url(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_change_settings(self, live_server: LiveServer) -> None:
+    def test_change_settings(
+        self,
+        live_server: LiveServer,
+        settings: SettingsWrapper,  # noqa: ARG002
+    ) -> None:
         assert live_server.url == force_str(live_server)
 
     @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
