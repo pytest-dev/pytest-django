@@ -508,6 +508,7 @@ def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
             conn = psycopg.connect(
                 user=django_settings.DATABASES[db]['USER'],
                 password=django_settings.DATABASES[db]['PASSWORD'],
+                database="postgres",
                 host=django_settings.DATABASES[db]['HOST'],
                 port=django_settings.DATABASES['default']['PORT']
             )
