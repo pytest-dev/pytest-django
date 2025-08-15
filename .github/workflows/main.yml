@@ -82,8 +82,8 @@ jobs:
           - name: linting,docs
             python: '3.13'
             allow_failure: false
-            use_factor: false 
-            
+            use_factor: false
+
           - name: py39-sqlite-xdist-coverage
             python: '3.9'
             allow_failure: false
