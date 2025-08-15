@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-  "setuptools>=61.0.0",
-  "setuptools-scm[toml]>=5.0.0",
+    "setuptools>=61.0.0",
+    "setuptools-scm[toml]>=5.0.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -40,7 +40,8 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
-[dependency-groups]
+
+[project.optional-dependencies]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
@@ -63,10 +64,12 @@ xdist = [
     "pytest-xdist",
 ]
 linting = [
+    "editorconfig-checker==3.2.1",
     "mypy==1.15.0",
     "ruff==0.9.5",
     "zizmor==1.9.0",
 ]
+
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"
 Repository = "https://github.com/pytest-dev/pytest-django"
