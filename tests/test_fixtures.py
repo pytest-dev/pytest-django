@@ -30,6 +30,7 @@ from pytest_django_test.app.models import Item
 
 if TYPE_CHECKING:
     from pytest_django.django_compat import _User, _UserModel
+    from pytest_django.live_server_helper import LiveServer
 
 
 @contextmanager
@@ -61,7 +62,7 @@ def test_admin_client(admin_client: Client) -> None:
 
 def test_admin_client_no_db_marker(
     db: None,  # noqa: ARG001
-    admin_client: Client
+    admin_client: Client,
 ) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
@@ -377,12 +378,12 @@ class TestSettings:
         result = []
 
         def assert_signal(
-                signal,  # noqa: ARG001
-                sender,  # noqa: ARG001
-                setting,
-                value,
-                enter
-            ) -> None:
+            signal,  # noqa: ARG001
+            sender,  # noqa: ARG001
+            setting,
+            value,
+            enter,
+        ) -> None:
             result.append((setting, value, enter))
 
         from django.test.signals import setting_changed
@@ -471,10 +472,10 @@ class TestLiveServer:
         )
         TestLiveServer._test_settings_before_run = True  # type: ignore[attr-defined]
 
-    def test_url(self, live_server) -> None:
+    def test_url(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_change_settings(self, live_server, settings) -> None:
+    def test_change_settings(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
     @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
@@ -489,7 +490,7 @@ class TestLiveServer:
         )
         assert settings.ALLOWED_HOSTS == ["testserver"]
 
-    def test_transactions(self, live_server) -> None:
+    def test_transactions(self, live_server: LiveServer) -> None:  # noqa: ARG002
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
@@ -502,12 +503,20 @@ class TestLiveServer:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
-    def test_fixture_db(self, db: None, live_server) -> None:
+    def test_fixture_db(
+        self,
+        db: None,  # noqa: ARG002
+        live_server: LiveServer,
+    ) -> None:
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
-    def test_fixture_transactional_db(self, transactional_db: None, live_server) -> None:
+    def test_fixture_transactional_db(
+        self,
+        transactional_db: None,  # noqa: ARG002
+        live_server: LiveServer,
+    ) -> None:
         Item.objects.create(name="foo")
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
@@ -519,24 +528,32 @@ class TestLiveServer:
         item: Item = Item.objects.create(name="foo")
         return item
 
-    def test_item(self, item: Item, live_server: None) -> None:
+    def test_item(self, item: Item, live_server: LiveServer) -> None:
         pass
 
     @pytest.fixture
-    def item_db(self, db: None) -> Item:
+    def item_db(self, db: None) -> Item:  # noqa: ARG002
         item: Item = Item.objects.create(name="foo")
         return item
 
-    def test_item_db(self, item_db: Item, live_server) -> None:
+    def test_item_db(
+        self,
+        item_db: Item,  # noqa: ARG002
+        live_server,
+    ) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 
     @pytest.fixture
-    def item_transactional_db(self, transactional_db: None) -> Item:
+    def item_transactional_db(self, transactional_db: None) -> Item:  # noqa: ARG002
         item: Item = Item.objects.create(name="foo")
         return item
 
-    def test_item_transactional_db(self, item_transactional_db: Item, live_server) -> None:
+    def test_item_transactional_db(
+        self,
+        item_transactional_db: Item,  # noqa: ARG002
+        live_server: LiveServer,
+    ) -> None:
         response_data = urlopen(live_server + "/item_count/").read()
         assert force_str(response_data) == "Item count: 1"
 

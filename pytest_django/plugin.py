@@ -833,7 +833,7 @@ class DjangoDbBlocker:
     def _save_active_wrapper(self) -> None:
         self._history.append(self._dj_db_wrapper.ensure_connection)
 
-    def _blocking_wrapper(*args: Any, **kwargs: Any) -> NoReturn:
+    def _blocking_wrapper(*args: Any, **kwargs: Any) -> NoReturn:  # noqa: ARG002
         __tracebackhide__ = True
         raise RuntimeError(
             "Database access not allowed, "

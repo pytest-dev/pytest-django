@@ -73,20 +73,20 @@ class TestDatabaseFixtures:
         else:
             raise AssertionError()  # pragma: no cover
 
-    def test_access(self, all_dbs: None) -> None:
+    def test_access(self, all_dbs: None) -> None:  # noqa: ARG002
         Item.objects.create(name="spam")
 
-    def test_clean_db(self, all_dbs: None) -> None:
+    def test_clean_db(self, all_dbs: None) -> None:  # noqa: ARG002
         # Relies on the order: test_access created an object
         assert Item.objects.count() == 0
 
-    def test_transactions_disabled(self, db: None) -> None:
+    def test_transactions_disabled(self, db: None) -> None:  # noqa: ARG002
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
         assert connection.in_atomic_block
 
-    def test_transactions_enabled(self, transactional_db: None) -> None:
+    def test_transactions_enabled(self, transactional_db: None) -> None:  # noqa: ARG002
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
@@ -94,7 +94,7 @@ class TestDatabaseFixtures:
 
     def test_transactions_enabled_via_reset_seq(
         self,
-        django_db_reset_sequences: None,
+        django_db_reset_sequences: None,  # noqa: ARG002
     ) -> None:
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
@@ -103,9 +103,9 @@ class TestDatabaseFixtures:
 
     def test_django_db_reset_sequences_fixture(
         self,
-        db: None,
+        db: None,  # noqa: ARG002
         django_pytester: DjangoPytester,
-        non_zero_sequences_counter: None,
+        non_zero_sequences_counter: None,  # noqa: ARG002
     ) -> None:
         if not db_supports_reset_sequences():
             pytest.skip(
@@ -130,7 +130,11 @@ class TestDatabaseFixtures:
         result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
         result.stdout.fnmatch_lines(["*test_django_db_reset_sequences_requested PASSED*"])
 
-    def test_serialized_rollback(self, db: None, django_pytester: DjangoPytester) -> None:
+    def test_serialized_rollback(
+        self,
+        db: None,  # noqa: ARG002
+        django_pytester: DjangoPytester,
+    ) -> None:
         django_pytester.create_app_file(
             """
             from django.db import migrations
@@ -176,11 +180,11 @@ class TestDatabaseFixtures:
         assert result.ret == 0
 
     @pytest.fixture
-    def mydb(self, all_dbs: None) -> None:
+    def mydb(self, all_dbs: None) -> None:  # noqa: ARG002
         # This fixture must be able to access the database
         Item.objects.create(name="spam")
 
-    def test_mydb(self, mydb: None) -> None:
+    def test_mydb(self, mydb: None) -> None:  # noqa: ARG002
         if not connection.features.supports_transactions:
             pytest.skip("transactions required for this test")
 
@@ -188,13 +192,13 @@ class TestDatabaseFixtures:
         item = Item.objects.get(name="spam")
         assert item
 
-    def test_fixture_clean(self, all_dbs: None) -> None:
+    def test_fixture_clean(self, all_dbs: None) -> None:  # noqa: ARG002
         # Relies on the order: test_mydb created an object
         # See https://github.com/pytest-dev/pytest-django/issues/17
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, request: pytest.FixtureRequest, all_dbs: None) -> Generator[None, None, None]:
+    def fin(self, all_dbs: None) -> Generator[None, None, None]:  # noqa: ARG002
         # This finalizer must be able to access the database
         yield
         Item.objects.create(name="spam")
@@ -203,7 +207,7 @@ class TestDatabaseFixtures:
         # Check finalizer has db access (teardown will fail if not)
         pass
 
-    def test_durable_transactions(self, all_dbs: None) -> None:
+    def test_durable_transactions(self, all_dbs: None) -> None:  # noqa: ARG002
         with transaction.atomic(durable=True):
             item = Item.objects.create(name="foo")
         assert Item.objects.get() == item
@@ -211,19 +215,19 @@ class TestDatabaseFixtures:
 
 class TestDatabaseFixturesAllOrder:
     @pytest.fixture
-    def fixture_with_db(self, db: None) -> None:
+    def fixture_with_db(self, db: None) -> None:  # noqa: ARG002
         Item.objects.create(name="spam")
 
     @pytest.fixture
-    def fixture_with_transdb(self, transactional_db: None) -> None:
+    def fixture_with_transdb(self, transactional_db: None) -> None:  # noqa: ARG002
         Item.objects.create(name="spam")
 
     @pytest.fixture
-    def fixture_with_reset_sequences(self, django_db_reset_sequences: None) -> None:
+    def fixture_with_reset_sequences(self, django_db_reset_sequences: None) -> None:  # noqa: ARG002
         Item.objects.create(name="spam")
 
     @pytest.fixture
-    def fixture_with_serialized_rollback(self, django_db_serialized_rollback: None) -> None:
+    def fixture_with_serialized_rollback(self, django_db_serialized_rollback: None) -> None:  # noqa: ARG002
         Item.objects.create(name="ham")
 
     def test_trans(self, fixture_with_transdb: None) -> None:
@@ -311,27 +315,27 @@ class TestDatabaseMarker:
         assert marker.kwargs["databases"] == ["default", "replica", "second"]
 
     @pytest.mark.django_db(databases=["second"])
-    def test_second_database(self, request: pytest.FixtureRequest) -> None:
+    def test_second_database(self) -> None:
         SecondItem.objects.create(name="spam")
 
     @pytest.mark.django_db(databases=["default"])
-    def test_not_allowed_database(self, request: pytest.FixtureRequest) -> None:
+    def test_not_allowed_database(self) -> None:
         with pytest.raises(AssertionError, match="not allowed"):
             SecondItem.objects.count()
         with pytest.raises(AssertionError, match="not allowed"):
             SecondItem.objects.create(name="spam")
 
     @pytest.mark.django_db(databases=["replica"])
-    def test_replica_database(self, request: pytest.FixtureRequest) -> None:
+    def test_replica_database(self) -> None:
         Item.objects.using("replica").count()
 
     @pytest.mark.django_db(databases=["replica"])
-    def test_replica_database_not_allowed(self, request: pytest.FixtureRequest) -> None:
+    def test_replica_database_not_allowed(self) -> None:
         with pytest.raises(AssertionError, match="not allowed"):
             Item.objects.count()
 
     @pytest.mark.django_db(transaction=True, databases=["default", "replica"])
-    def test_replica_mirrors_default_database(self, request: pytest.FixtureRequest) -> None:
+    def test_replica_mirrors_default_database(self) -> None:
         Item.objects.create(name="spam")
         Item.objects.using("replica").create(name="spam")
 
@@ -339,7 +343,7 @@ class TestDatabaseMarker:
         assert Item.objects.using("replica").count() == 2
 
     @pytest.mark.django_db(databases="__all__")
-    def test_all_databases(self, request: pytest.FixtureRequest) -> None:
+    def test_all_databases(self) -> None:
         Item.objects.count()
         Item.objects.create(name="spam")
         SecondItem.objects.count()
@@ -369,7 +373,7 @@ class TestDatabaseMarker:
         assert marker.kwargs["available_apps"] == ["pytest_django_test.app"]
 
     @pytest.mark.django_db
-    def test_available_apps_default(self, request: pytest.FixtureRequest) -> None:
+    def test_available_apps_default(self) -> None:
         from django.apps import apps
         from django.conf import settings
 
@@ -377,7 +381,7 @@ class TestDatabaseMarker:
             assert apps.is_installed(app)
 
     @pytest.mark.django_db(available_apps=["pytest_django_test.app"])
-    def test_available_apps_limited(self, request: pytest.FixtureRequest) -> None:
+    def test_available_apps_limited(self) -> None:
         from django.apps import apps
         from django.conf import settings
 
