@@ -524,7 +524,7 @@ def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
                 db_name = f'{db_name}_{xdist_suffix}'
             db_exists = (result := run_sql(query=f"SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname='{db_name}')", fetch=True)) and result and result[0]
             if django_db_createdb or not db_exists:
-                run_sql('CREATE EXTENSION IF NOT EXISTS vector')
+                run_sql('CREATE EXTENSION IF NOT EXISTS postgis')
             return django_db_createdb or not db_exists
 
         @pytest.fixture(scope='session')
