@@ -75,15 +75,15 @@ def django_db_modify_db_settings_xdist_suffix(request: pytest.FixtureRequest) ->
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_parallel_suffix(
-    django_db_modify_db_settings_tox_suffix: None,
-    django_db_modify_db_settings_xdist_suffix: None,
+    django_db_modify_db_settings_tox_suffix: None,  # noqa: ARG001
+    django_db_modify_db_settings_xdist_suffix: None,  # noqa: ARG001
 ) -> None:
     skip_if_no_django()
 
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings(
-    django_db_modify_db_settings_parallel_suffix: None,
+    django_db_modify_db_settings_parallel_suffix: None,  # noqa: ARG001
 ) -> None:
     """Modify db settings just before the databases are configured."""
     skip_if_no_django()
@@ -162,12 +162,12 @@ def _get_databases_for_setup(
 @pytest.fixture(scope="session")
 def django_db_setup(
     request: pytest.FixtureRequest,
-    django_test_environment: None,
+    django_test_environment: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
     django_db_use_migrations: bool,
     django_db_keepdb: bool,
     django_db_createdb: bool,
-    django_db_modify_db_settings: None,
+    django_db_modify_db_settings: None,  # noqa: ARG001
 ) -> Generator[None, None, None]:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
@@ -206,7 +206,7 @@ def django_db_setup(
 @pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
-    django_db_setup: None,
+    django_db_setup: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
 ) -> Generator[None, None, None]:
     if is_django_unittest(request):
@@ -458,7 +458,7 @@ def async_client() -> django.test.AsyncClient:
 
 
 @pytest.fixture
-def django_user_model(db: None) -> _UserModel:
+def django_user_model(db: None) -> _UserModel:  # noqa: ARG001
     """The class of Django's user model."""
     from django.contrib.auth import get_user_model
 
@@ -474,7 +474,7 @@ def django_username_field(django_user_model: _UserModel) -> str:
 
 @pytest.fixture
 def admin_user(
-    db: None,
+    db: None,  # noqa: ARG001
     django_user_model: _User,
     django_username_field: str,
 ) -> _User:
@@ -505,7 +505,7 @@ def admin_user(
 
 @pytest.fixture
 def admin_client(
-    db: None,
+    db: None,  # noqa: ARG001
     admin_user: _User,
 ) -> django.test.Client:
     """A Django test client logged in as an admin user."""

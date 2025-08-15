@@ -609,7 +609,7 @@ def _dj_autoclear_mailbox() -> None:
 
 @pytest.fixture
 def mailoutbox(
-    django_mail_patch_dns: None,
+    django_mail_patch_dns: None,  # noqa: ARG001
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
     """A clean email outbox to which Django-generated emails are sent."""
@@ -833,7 +833,7 @@ class DjangoDbBlocker:
     def _save_active_wrapper(self) -> None:
         self._history.append(self._dj_db_wrapper.ensure_connection)
 
-    def _blocking_wrapper(*args: Any, **kwargs: Any) -> NoReturn:
+    def _blocking_wrapper(*args: Any, **kwargs: Any) -> NoReturn:  # noqa: ARG002
         __tracebackhide__ = True
         raise RuntimeError(
             "Database access not allowed, "

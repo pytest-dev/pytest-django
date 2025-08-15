@@ -220,8 +220,6 @@ ignore = [
     "S101",   # Use of `assert` detected
 
     # TODO - need to fix these
-    "ARG001",  # Unused function argument
-    "ARG002",  # Unused method argument
     "C901",    # .. is too complex
     "COM812",  # Trailing comma missing
     "E501",    # Line too long
