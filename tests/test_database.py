@@ -39,7 +39,7 @@ def test_noaccess_fixture(noaccess: None) -> None:
 
 
 @pytest.fixture
-def non_zero_sequences_counter(db: None) -> None:
+def non_zero_sequences_counter(db: None) -> None:  # noqa: ARG001
     """Ensure that the db's internal sequence counter is > 1.
 
     This is used to test the `reset_sequences` feature.

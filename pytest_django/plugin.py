@@ -609,7 +609,7 @@ def _dj_autoclear_mailbox() -> None:
 
 @pytest.fixture
 def mailoutbox(
-    django_mail_patch_dns: None,
+    django_mail_patch_dns: None,  # noqa: ARG001
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
     """A clean email outbox to which Django-generated emails are sent."""

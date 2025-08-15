@@ -59,7 +59,10 @@ def test_admin_client(admin_client: Client) -> None:
     assert force_str(resp.content) == "You are an admin"
 
 
-def test_admin_client_no_db_marker(db: None, admin_client: Client) -> None:
+def test_admin_client_no_db_marker(
+    db: None,  # noqa: ARG001
+    admin_client: Client
+) -> None:
     assert isinstance(admin_client, Client)
     resp = admin_client.get("/admin-required/")
     assert force_str(resp.content) == "You are an admin"
@@ -144,7 +147,7 @@ def test_django_assert_max_num_queries_db(
 @pytest.mark.django_db(transaction=True)
 def test_django_assert_num_queries_transactional_db(
     request: pytest.FixtureRequest,
-    transactional_db: None,
+    transactional_db: None,  # noqa: ARG001
     django_assert_num_queries: DjangoAssertNumQueries,
 ) -> None:
     with nonverbose_config(request.config):
@@ -373,7 +376,13 @@ class TestSettings:
     def test_signals(self, settings) -> None:
         result = []
 
-        def assert_signal(signal, sender, setting, value, enter) -> None:
+        def assert_signal(
+                signal,  # noqa: ARG001
+                sender,  # noqa: ARG001
+                setting,
+                value,
+                enter
+            ) -> None:
             result.append((setting, value, enter))
 
         from django.test.signals import setting_changed
@@ -510,7 +519,7 @@ class TestLiveServer:
         item: Item = Item.objects.create(name="foo")
         return item
 
-    def test_item(self, item: Item, live_server) -> None:
+    def test_item(self, item: Item, live_server: None) -> None:
         pass
 
     @pytest.fixture
@@ -548,7 +557,6 @@ class TestLiveServer:
     def test_serve_static_with_staticfiles_app(
         self,
         django_pytester: DjangoPytester,
-        settings,
     ) -> None:
         """
         LiveServer always serves statics with ``django.contrib.staticfiles``
@@ -573,7 +581,7 @@ class TestLiveServer:
         result.stdout.fnmatch_lines(["*test_a*PASSED*"])
         assert result.ret == 0
 
-    def test_serve_static_dj17_without_staticfiles_app(self, live_server, settings) -> None:
+    def test_serve_static_dj17_without_staticfiles_app(self, live_server) -> None:
         """
         Because ``django.contrib.staticfiles`` is not installed
         LiveServer can not serve statics with django >= 1.7 .
