@@ -279,7 +279,7 @@ for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
 ``djt`` - Django test case assertions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Instance of the test case class. This fixture is particularly useful when you want 
+Instance of the test case class. This fixture is particularly useful when you want
 to use Django's specialized assertions for testing web applications.
 
 Example
