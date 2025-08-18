@@ -535,7 +535,6 @@ def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
             if django_db_createdb:
                 with django_db_blocker.unblock():
                     call_command('flush', '--noinput')
-                    call_command('loaddata', *pathlib.Path().glob('tests/db_fixtures/**/*.yaml'))
         """
     )
 
