@@ -549,12 +549,12 @@ def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
         """
     )
 
-    result = django_pytester.runpytest_subprocess("-vv", "--reuse-db", "-n", "auto")
+    result = django_pytester.runpytest_subprocess("-vv", "-s", "--reuse-db", "-n", "auto")
     print(result.stdout.str())
     print(result.stderr.str())
     result.assert_outcomes(passed=1)
 
-    result = django_pytester.runpytest_subprocess("-vv", "--reuse-db", "-n", "auto")
+    result = django_pytester.runpytest_subprocess("-vv", "-s", "--reuse-db", "-n", "auto")
     print(result.stdout.str())
     print(result.stderr.str())
     result.assert_outcomes(passed=1)
