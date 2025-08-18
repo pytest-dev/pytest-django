@@ -503,6 +503,7 @@ def test_custom_django_db_setup(django_pytester: DjangoPytester) -> None:
         import pytest
         import psycopg
         from django.conf import settings as django_settings
+        from django.core.management import call_command
 
         def run_sql(query, fetch=False, db='default'):
             conn = psycopg.connect(
