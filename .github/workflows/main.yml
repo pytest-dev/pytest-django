@@ -49,6 +49,7 @@ jobs:
         run: |
           sudo systemctl start postgresql.service
           sudo -u postgres createuser --createdb $USER
+          sudo -u postgres psql -c "ALTER USER $USER WITH SUPERUSER"
 
       - name: Install dependencies
         run: |
