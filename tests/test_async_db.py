@@ -22,7 +22,7 @@ else:
 @pytest.mark.parametrize("run_number", [1, 2])
 @pytestmark
 @pytest.mark.django_db
-async def test_async_db(db, run_number) -> None:
+async def test_async_db(run_number: int) -> None:  # noqa: ARG001
     # test async database usage remains isolated between tests
 
     assert await Item.objects.acount() == 0
@@ -32,18 +32,19 @@ async def test_async_db(db, run_number) -> None:
 
 
 @fixturemark
-async def db_item(db) -> Any:
+async def db_item() -> Any:
     return await Item.objects.acreate(name="async")
 
 
 @pytest.fixture
-def sync_db_item(db) -> Any:
+def sync_db_item() -> Any:
     return Item.objects.create(name="sync")
 
 
 @pytestmark
 @pytest.mark.xfail(strict=True, reason="Sync fixture used in async test")
-async def test_db_item(db_item: Item, sync_db_item) -> None:
+@pytest.mark.usefixtures("db_item", "sync_db_item")
+async def test_db_item() -> None:
     pass
 
 

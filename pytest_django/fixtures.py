@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncGenerator, Generator, Iterable, Sequence
+from collections.abc import Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Protocol
@@ -16,6 +16,7 @@ from .lazy_django import skip_if_no_django
 
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
     from typing import Any, Callable, Literal, Optional, Union
 
     import django
