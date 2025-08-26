@@ -16,7 +16,7 @@ import types
 from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING, Any, Callable, NoReturn
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -57,6 +57,8 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 if TYPE_CHECKING:
+    from typing import Any, NoReturn, Callable
+
     import django
 
 
@@ -189,7 +191,7 @@ def _handle_import_error(extra_message: str) -> Generator[None, None, None]:
         raise ImportError(msg) from None
 
 
-def _add_django_project_to_path(args) -> str:
+def _add_django_project_to_path(args: list[str]) -> str:
     def is_django_project(path: pathlib.Path) -> bool:
         try:
             return path.is_dir() and (path / "manage.py").exists()
@@ -201,7 +203,7 @@ def _add_django_project_to_path(args) -> str:
         arg = arg.split("::", 1)[0]
         return pathlib.Path(arg)
 
-    def find_django_path(args) -> pathlib.Path | None:
+    def find_django_path(args: list[str]) -> pathlib.Path | None:
         str_args = (str(arg) for arg in args)
         path_args = [arg_to_path(x) for x in str_args if not x.startswith("-")]
 
@@ -574,7 +576,7 @@ def _django_setup_unittest(
 
     original_runtest = TestCaseFunction.runtest
 
-    def non_debugging_runtest(self) -> None:
+    def non_debugging_runtest(self) -> None:  # noqa: ANN001
         self._testcase(result=self)
 
     from django.test import SimpleTestCase
@@ -610,7 +612,7 @@ def _dj_autoclear_mailbox() -> None:
 
 @pytest.fixture
 def mailoutbox(
-    django_mail_patch_dns: None,
+    django_mail_patch_dns: None,  # noqa: ARG001
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
     """A clean email outbox to which Django-generated emails are sent."""
@@ -834,7 +836,7 @@ class DjangoDbBlocker:
     def _save_active_wrapper(self) -> None:
         self._history.append(self._dj_db_wrapper.ensure_connection)
 
-    def _blocking_wrapper(self, *args, **kwargs) -> NoReturn:
+    def _blocking_wrapper(self, *args: Any, **kwargs: Any) -> NoReturn:  # noqa: ARG002
         __tracebackhide__ = True
         raise RuntimeError(
             "Database access not allowed, "
