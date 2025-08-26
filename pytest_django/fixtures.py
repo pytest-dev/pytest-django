@@ -319,7 +319,10 @@ try:
     import pytest_asyncio
 except ImportError:
 
-    async def _async_django_db_helper() -> AsyncGenerator[None, None]:
+    async def _async_django_db_helper(
+        request: pytest.FixtureRequest,  # noqa: ARG001
+        django_db_blocker: DjangoDbBlocker,  # noqa: ARG001
+    ) -> AsyncGenerator[None, None]:
         raise RuntimeError(
             "The `pytest_asyncio` plugin is required to use the `async_django_db` fixture."
         )
