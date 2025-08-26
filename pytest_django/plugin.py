@@ -57,7 +57,7 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Callable
+    from typing import Any, Callable, NoReturn
 
     import django
 
@@ -857,7 +857,7 @@ class DjangoDbBlocker:
                 "modify your test fixtures to be async or use the transactional_db fixture."
                 "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
-        elif self._real_ensure_connection is not None:
+        if self._real_ensure_connection is not None:
             self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
     def _unblocked_sync_only(self, wrapper_self: Any, *args, **kwargs):
@@ -868,21 +868,13 @@ class DjangoDbBlocker:
                 "modify your test fixtures to be sync or use the transactional_db fixture."
                 "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
             )
-        elif self._real_ensure_connection is not None:
+        if self._real_ensure_connection is not None:
             self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
-    def unblock(self, sync_only=False, async_only=False) -> AbstractContextManager[None]:
+    def unblock(self, async_only=False) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
-        if sync_only and async_only:
-            raise ValueError("Cannot use both sync_only and async_only. Choose at most one.")
         self._save_active_wrapper()
-        if sync_only:
-
-            def _method(wrapper_self, *args, **kwargs):
-                return self._unblocked_sync_only(wrapper_self, *args, **kwargs)
-
-            self._dj_db_wrapper.ensure_connection = _method
-        elif async_only:
+        if async_only:
 
             def _method(wrapper_self, *args, **kwargs):
                 return self._unblocked_async_only(wrapper_self, *args, **kwargs)
