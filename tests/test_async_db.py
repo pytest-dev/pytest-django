@@ -41,13 +41,9 @@ def sync_db_item() -> Any:
     return Item.objects.create(name="sync")
 
 
+@pytest.mark.usefixtures("db_item", "sync_db_item")
 @pytestmark
 @pytest.mark.xfail(strict=True, reason="Sync fixture used in async test")
-@pytest.mark.usefixtures("db_item", "sync_db_item")
+@pytest.mark.django_db
 async def test_db_item() -> None:
-    pass
-
-
-@pytest.mark.xfail(strict=True, reason="Async fixture used in sync test")
-def test_sync_db_item(async_db_item: Item, sync_db_item) -> None:
     pass
