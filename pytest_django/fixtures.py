@@ -205,14 +205,14 @@ def django_db_setup(
 
 
 def _build_pytest_django_test_case(
-    test_case_class,
+    test_case_class: type[django.test.TestCase],
     *,
     reset_sequences: bool,
     serialized_rollback: bool,
-    databases,
-    available_apps,
+    databases: _DjangoDbDatabases,
+    available_apps: _DjangoDbAvailableApps,
     skip_django_testcase_class_setup: bool,
-):
+) -> type[django.test.TestCase]:
     # Build a custom TestCase subclass with configured attributes and optional
     # overrides to skip Django's TestCase class-level setup/teardown.
     import django.test  # local import to avoid hard dependency at import time
@@ -319,10 +319,7 @@ try:
     import pytest_asyncio
 except ImportError:
 
-    async def _async_django_db_helper(
-        request: pytest.FixtureRequest,
-        django_db_blocker: DjangoDbBlocker,
-    ) -> AsyncGenerator[None, None]:
+    async def _async_django_db_helper() -> AsyncGenerator[None, None]:
         raise RuntimeError(
             "The `pytest_asyncio` plugin is required to use the `async_django_db` fixture."
         )
@@ -406,9 +403,9 @@ def _get_django_db_settings(request: pytest.FixtureRequest) -> _DjangoDb:
 @pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
-    django_db_setup: None,
-    django_db_blocker: DjangoDbBlocker,
-):
+    django_db_setup: None,  # noqa: ARG001
+    django_db_blocker: DjangoDbBlocker,  # noqa: ARG001
+) -> None:
     asyncio_marker = request.node.get_closest_marker("asyncio")
     transactional, *_ = _get_django_db_settings(request)
     if transactional or not asyncio_marker:

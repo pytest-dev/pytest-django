@@ -844,7 +844,7 @@ class DjangoDbBlocker:
             '"db" or "transactional_db" fixtures to enable it. '
         )
 
-    def _unblocked_async_only(self, wrapper_self: Any, *args, **kwargs):
+    def _unblocked_async_only(self, wrapper_self: Any, *args: Any, **kwargs: Any) -> None:
         __tracebackhide__ = True
         from asgiref.sync import SyncToAsync
 
@@ -860,23 +860,12 @@ class DjangoDbBlocker:
         if self._real_ensure_connection is not None:
             self._real_ensure_connection(wrapper_self, *args, **kwargs)
 
-    def _unblocked_sync_only(self, wrapper_self: Any, *args, **kwargs):
-        __tracebackhide__ = True
-        if threading.current_thread() != threading.main_thread():
-            raise RuntimeError(
-                "Database access is only allowed in the main thread, "
-                "modify your test fixtures to be sync or use the transactional_db fixture."
-                "See https://pytest-django.readthedocs.io/en/latest/database.html#db-thread-safeguards for more information."
-            )
-        if self._real_ensure_connection is not None:
-            self._real_ensure_connection(wrapper_self, *args, **kwargs)
-
-    def unblock(self, async_only=False) -> AbstractContextManager[None]:
+    def unblock(self, async_only: bool = False) -> AbstractContextManager[None]:
         """Enable access to the Django database."""
         self._save_active_wrapper()
         if async_only:
 
-            def _method(wrapper_self, *args, **kwargs):
+            def _method(wrapper_self: Any, *args: Any, **kwargs: Any) -> None:
                 return self._unblocked_async_only(wrapper_self, *args, **kwargs)
 
             self._dj_db_wrapper.ensure_connection = _method
