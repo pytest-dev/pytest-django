@@ -84,7 +84,7 @@ class LiveServer:
     def __str__(self) -> str:
         return self.url
 
-    def __add__(self, other) -> str:
+    def __add__(self, other: str) -> str:
         return f"{self}{other}"
 
     def __repr__(self) -> str:

@@ -198,36 +198,28 @@ extend-select = [
     "RUF",   # Ruff-specific rules
 ]
 ignore = [
-    "D100", # Missing docstring in public module
-    "D101", # Missing docstring in public class
-    "D102", # Missing docstring in public method
-    "D103", # Missing docstring in public function
-    "D104", # Missing docstring in public package
-    "D105", # Missing docstring in magic method
-    "D107", # Missing docstring in __init__
-    "D200", # One-line docstring should fit on one line
-    "D202", # No blank lines allowed after function docstring
-    "D203", # Class definitions that are not preceded by a blank line
-    "D205", # 1 blank line required between summary line and description
-    "D209", # Multi-line docstring closing quotes should be on a separate line
-    "D212", # Multi-line docstring summary should start at the first line
-    "D213", # Multi-line docstring summary should start at the second line
-    "D400", # First line should end with a period
-    "D401", # First line of docstring should be in imperative mood
-    "D404", # First word of the docstring should not be "This"
-    "D415", # First line should end with a period, question mark, or exclamation point
-    "S101", # Use of `assert` detected
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
+    "D100",   # Missing docstring in public module
+    "D101",   # Missing docstring in public class
+    "D102",   # Missing docstring in public method
+    "D103",   # Missing docstring in public function
+    "D104",   # Missing docstring in public package
+    "D105",   # Missing docstring in magic method
+    "D107",   # Missing docstring in __init__
+    "D200",   # One-line docstring should fit on one line
+    "D202",   # No blank lines allowed after function docstring
+    "D203",   # Class definitions that are not preceded by a blank line
+    "D205",   # 1 blank line required between summary line and description
+    "D209",   # Multi-line docstring closing quotes should be on a separate line
+    "D212",   # Multi-line docstring summary should start at the first line
+    "D213",   # Multi-line docstring summary should start at the second line
+    "D400",   # First line should end with a period
+    "D401",   # First line of docstring should be in imperative mood
+    "D404",   # First word of the docstring should not be "This"
+    "D415",   # First line should end with a period, question mark, or exclamation point
+    "S101",   # Use of `assert` detected
 
     # TODO - need to fix these
-    "ANN001",  # Missing type annotation for function argument
-    "ANN002",  # Missing type annotation for public function
-    "ANN003",  # Missing type annotation for public method
-    "ANN201",  # Missing return type annotation for public function
-    "ANN202",  # Missing return type annotation for private function
-    "ANN204",  # Missing return type annotation for special method
-    "ANN401",  # Dynamically typed expressions .. are disallowed
-    "ARG001",  # Unused function argument
-    "ARG002",  # Unused method argument
     "C901",    # .. is too complex
     "COM812",  # Trailing comma missing
     "E501",    # Line too long
