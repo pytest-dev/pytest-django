@@ -290,7 +290,7 @@ def django_testcase_class(
 @pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
-    django_db_setup: None,
+    django_db_setup: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
     django_testcase_class: type[django.test.TestCase],
 ) -> Generator[None, None, None]:
