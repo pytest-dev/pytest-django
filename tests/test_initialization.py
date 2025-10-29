@@ -1,4 +1,5 @@
 from textwrap import dedent
+import pytest
 
 from .helpers import DjangoPytester
 
