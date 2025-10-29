@@ -63,7 +63,7 @@ def test_django_setup_order_and_uniqueness(django_pytester: DjangoPytester) -> N
     assert result.ret == 0
 
 
-def test_django_setup_dependency_load(django_pytester: DjangoPytester, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_django_setup_dependency_load(pytester: pytest.Pytester, django_pytester: DjangoPytester, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "tpkg.settings_dev")
     pkg = pytester.mkpydir("tpkg")
     pkg.joinpath("settings_dev.py").write_text(
