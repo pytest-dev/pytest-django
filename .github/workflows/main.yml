@@ -26,8 +26,6 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    env:
-      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -56,7 +54,9 @@ jobs:
           uv tool install tox==4.28.4 --with tox-uv
 
       - name: Run tox
-        run: tox
+        run: tox ${TOX_ARGS}
+        env:
+          TOX_ARGS: ${{ matrix.use_factor && format('-f {0}', matrix.name) || format('-e {0}', matrix.name) }}
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
@@ -77,79 +77,68 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - name: linting,docs
-          python: '3.13'
-          allow_failure: false
+          - name: linting,docs
+            python: '3.13'
+            allow_failure: false
+            use_factor: false
 
-        # Explicitly test min pytest.
-        - name: py313-dj52-sqlite-pytestmin-coverage
-          python: '3.13'
-          allow_failure: false
+          - name: py39-sqlite-xdist-coverage
+            python: '3.9'
+            allow_failure: false
+            use_factor: true
 
-        - name: py313-dj52-postgres-xdist-coverage
-          python: '3.13'
-          allow_failure: false
+          - name: py310-sqlite-xdist-coverage
+            python: '3.10'
+            allow_failure: false
+            use_factor: true
 
-        - name: py313-dj51-postgres-xdist-coverage
-          python: '3.13'
-          allow_failure: false
+          - name: py311-sqlite-xdist-coverage
+            python: '3.11'
+            allow_failure: false
+            use_factor: true
 
-        - name: py312-dj42-postgres-xdist-coverage
-          python: '3.12'
-          allow_failure: false
+          # start: Speeding up tests by running them in parallel.
+          - name: py312-dj42-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
 
-        - name: py311-dj50-postgres-xdist-coverage
-          python: '3.11'
-          allow_failure: false
+          - name: py312-dj51-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
 
-        - name: py311-dj42-postgres-xdist-coverage
-          python: '3.11'
-          allow_failure: false
+          - name: py312-dj52-sqlite-xdist-coverage
+            python: '3.12'
+            allow_failure: false
+            use_factor: false
+          # end: Speeding up tests by running them in parallel.
 
-        - name: py310-dj52-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+          - name: py313-sqlite-xdist-coverage
+            python: '3.13'
+            allow_failure: false
+            use_factor: true
 
-        - name: py310-dj51-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+          - name: py313-djmain-postgres-coverage
+            python: '3.13'
+            allow_failure: false
+            use_factor: false
 
-        - name: py310-dj42-postgres-xdist-coverage
-          python: '3.10'
-          allow_failure: false
+          - name: py313-djmain-mysql-coverage
+            python: '3.13'
+            allow_failure: false
+            use_factor: false
 
-        - name: py311-dj51-mysql-coverage
-          python: '3.11'
-          allow_failure: false
+          - name: py313-djmain-sqlite-pytestmin
+            python: '3.13'
+            allow_failure: false
+            use_factor: false
 
-        - name: py310-dj42-mysql-coverage
-          python: '3.10'
-          allow_failure: false
-
-        - name: py39-dj42-mysql-xdist-coverage
-          python: '3.9'
-          allow_failure: false
-
-        - name: py313-djmain-sqlite-coverage
-          python: '3.13'
-          allow_failure: true
-
-        - name: py313-dj52-sqlite-coverage
-          python: '3.13'
-          allow_failure: true
-
-        - name: py312-dj51-sqlite-xdist-coverage
-          python: '3.12'
-          allow_failure: false
-
-        - name: py311-dj42-sqlite-xdist-coverage
-          python: '3.11'
-          allow_failure: false
-
-        # pypy3: not included with coverage reports (much slower then).
-        - name: pypy3-dj42-postgres
-          python: 'pypy3.9'
-          allow_failure: false
+          # pypy3: not included with coverage reports (much slower then).
+          - name: pypy3-dj52-sqlite
+            python: 'pypy3.11'
+            allow_failure: false
+            use_factor: false
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()
