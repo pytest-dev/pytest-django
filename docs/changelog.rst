@@ -4,6 +4,11 @@ Changelog
 v4.12.0 (Not released yet)
 --------------------------
 
+Compatibility
+^^^^^^^^^^^^^
+
+* Official Python 3.14 support.
+
 Improvements
 ^^^^^^^^^^^^
 
