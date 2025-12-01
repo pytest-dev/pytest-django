@@ -82,8 +82,8 @@ jobs:
           allow_failure: false
 
         # Explicitly test min pytest.
-        - name: py314-dj52-sqlite-pytestmin-coverage
-          python: '3.14'
+        - name: py313-dj52-sqlite-pytestmin-coverage
+          python: '3.13'
           allow_failure: false
 
         - name: py314-dj52-postgres-xdist-coverage
