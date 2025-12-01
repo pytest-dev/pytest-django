@@ -27,7 +27,7 @@ else:
 if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterator, Sequence
     from contextlib import AbstractContextManager
-    from typing import overload, Any
+    from typing import Any, overload
 
     from django import forms
     from django.db.models import Model, QuerySet, RawQuerySet
@@ -64,6 +64,7 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
+
     def assertRedirects(
         response: HttpResponseBase,
         expected_url: str,

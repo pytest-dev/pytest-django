@@ -16,7 +16,7 @@ from .lazy_django import skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Union
+    from typing import Any, Literal
 
     import django
     import django.test
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from . import DjangoDbBlocker
     from .django_compat import _User, _UserModel
 
-    _DjangoDbDatabases = Union[Literal["__all__"] | Iterable[str]]
+    _DjangoDbDatabases = Literal["__all__"] | Iterable[str] | None
     _DjangoDbAvailableApps = list[str] | None
     # transaction, reset_sequences, databases, serialized_rollback, available_apps
     _DjangoDb = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
