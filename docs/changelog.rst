@@ -4,6 +4,12 @@ Changelog
 v4.12.0 (Not released yet)
 --------------------------
 
+Compatibility
+^^^^^^^^^^^^^
+
+* Official Python 3.14 support.
+* Dropped support for Python 3.9, minimum version is now Python 3.10.
+
 Improvements
 ^^^^^^^^^^^^
 

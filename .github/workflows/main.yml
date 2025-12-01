@@ -86,6 +86,14 @@ jobs:
           python: '3.13'
           allow_failure: false
 
+        - name: py314-djmain-postgres-xdist-coverage
+          python: '3.14'
+          allow_failure: true
+
+        - name: py314-dj52-postgres-xdist-coverage
+          python: '3.14'
+          allow_failure: false
+
         - name: py313-dj52-postgres-xdist-coverage
           python: '3.13'
           allow_failure: false
@@ -126,17 +134,13 @@ jobs:
           python: '3.10'
           allow_failure: false
 
-        - name: py39-dj42-mysql-xdist-coverage
-          python: '3.9'
-          allow_failure: false
-
         - name: py313-djmain-sqlite-coverage
           python: '3.13'
           allow_failure: true
 
         - name: py313-dj52-sqlite-coverage
           python: '3.13'
-          allow_failure: true
+          allow_failure: false
 
         - name: py312-dj51-sqlite-xdist-coverage
           python: '3.12'
@@ -148,7 +152,7 @@ jobs:
 
         # pypy3: not included with coverage reports (much slower then).
         - name: pypy3-dj42-postgres
-          python: 'pypy3.9'
+          python: 'pypy3.10'
           allow_failure: false
 
   check:  # This job does nothing and is only used for the branch protection
