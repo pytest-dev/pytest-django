@@ -78,7 +78,7 @@ jobs:
       matrix:
         include:
         - name: linting,docs
-          python: '3.14'
+          python: '3.13'
           allow_failure: false
 
         # Explicitly test min pytest.
