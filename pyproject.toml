@@ -123,6 +123,9 @@ include = [
     "pytest_django_test/*",
     "tests/*",
 ]
+omit = [
+    "pytest_django/_version.py",  # coverage fails when the file stops existing randomly, see .gitignore
+]
 skip_covered = true
 exclude_lines = [
     "pragma: no cover",
