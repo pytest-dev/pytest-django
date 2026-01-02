@@ -6,6 +6,8 @@ from typing import Any
 class TestRunner:
     """A Django test runner which uses pytest to discover and run tests when using `manage.py test`."""
 
+    __test__ = False
+
     def __init__(
         self,
         *,
