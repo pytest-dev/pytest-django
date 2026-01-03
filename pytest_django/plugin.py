@@ -467,7 +467,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 uses_db = False
                 transactional = False
             fixtures = getattr(test, "fixturenames", [])
-            transactional = transactional or "transactional_db" in fixtures
+            transactional = transactional or (
+                "transactional_db" in fixtures or "live_server" in fixtures
+            )
             uses_db = uses_db or "db" in fixtures
 
         if transactional:
