@@ -57,7 +57,7 @@ __all__ = [
 def django_db_modify_db_settings_tox_suffix() -> None:
     skip_if_no_django()
 
-    tox_environment = os.getenv("TOX_PARALLEL_ENV")
+    tox_environment = os.getenv("TOX_ENV_NAME")
     if tox_environment:
         # Put a suffix like _py27-django21 on tox workers
         _set_suffix_to_test_databases(suffix=tox_environment)
