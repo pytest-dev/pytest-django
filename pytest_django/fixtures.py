@@ -44,6 +44,8 @@ __all__ = [
     "django_db_reset_sequences",
     "django_db_serialized_rollback",
     "django_db_setup",
+    "django_testcase",
+    "django_testcase_class",
     "django_user_model",
     "django_username_field",
     "live_server",
@@ -204,14 +206,14 @@ def django_db_setup(
 
 
 @pytest.fixture
-def _django_db_helper(
+def django_testcase_class(
     request: pytest.FixtureRequest,
-    django_db_setup: None,  # noqa: ARG001
-    django_db_blocker: DjangoDbBlocker,
-) -> Generator[None, None, None]:
+) -> Generator[type[django.test.TestCase] | None, None, None]:
     if is_django_unittest(request):
-        yield
+        yield None
         return
+
+    import django.test
 
     marker = request.node.get_closest_marker("django_db")
     if marker:
@@ -241,63 +243,74 @@ def _django_db_helper(
         "django_db_serialized_rollback" in request.fixturenames
     )
 
+    if transactional:
+        test_case_class = django.test.TransactionTestCase
+    else:
+        test_case_class = django.test.TestCase
+
+    _reset_sequences = reset_sequences
+    _serialized_rollback = serialized_rollback
+    _databases = databases
+    _available_apps = available_apps
+
+    class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+        reset_sequences = _reset_sequences
+        serialized_rollback = _serialized_rollback
+        if _databases is not None:
+            databases = _databases
+        if _available_apps is not None:
+            available_apps = _available_apps
+
+        # For non-transactional tests, skip executing `django.test.TestCase`'s
+        # `setUpClass`/`tearDownClass`, only execute the super class ones.
+        #
+        # `TestCase`'s class setup manages the `setUpTestData`/class-level
+        # transaction functionality. We don't use it; instead we (will) offer
+        # our own alternatives. So it only adds overhead, and does some things
+        # which conflict with our (planned) functionality, particularly, it
+        # closes all database connections in `tearDownClass` which inhibits
+        # wrapping tests in higher-scoped transactions.
+        #
+        # It's possible a new version of Django will add some unrelated
+        # functionality to these methods, in which case skipping them completely
+        # would not be desirable. Let's cross that bridge when we get there...
+        if not transactional:
+
+            @classmethod
+            def setUpClass(cls) -> None:
+                super(django.test.TestCase, cls).setUpClass()
+
+            @classmethod
+            def tearDownClass(cls) -> None:
+                super(django.test.TestCase, cls).tearDownClass()
+
+    yield PytestDjangoTestCase
+
+
+@pytest.fixture
+def _django_db_helper(
+    request: pytest.FixtureRequest,
+    django_db_setup: None,  # noqa: ARG001
+    django_db_blocker: DjangoDbBlocker,
+    django_testcase_class: type[django.test.TestCase],
+) -> Generator[None, None, None]:
+    if is_django_unittest(request):
+        yield
+        return
+
     with django_db_blocker.unblock():
-        import django.db
-        import django.test
+        django_testcase_class.setUpClass()
 
-        if transactional:
-            test_case_class = django.test.TransactionTestCase
-        else:
-            test_case_class = django.test.TestCase
-
-        _reset_sequences = reset_sequences
-        _serialized_rollback = serialized_rollback
-        _databases = databases
-        _available_apps = available_apps
-
-        class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
-            reset_sequences = _reset_sequences
-            serialized_rollback = _serialized_rollback
-            if _databases is not None:
-                databases = _databases
-            if _available_apps is not None:
-                available_apps = _available_apps
-
-            # For non-transactional tests, skip executing `django.test.TestCase`'s
-            # `setUpClass`/`tearDownClass`, only execute the super class ones.
-            #
-            # `TestCase`'s class setup manages the `setUpTestData`/class-level
-            # transaction functionality. We don't use it; instead we (will) offer
-            # our own alternatives. So it only adds overhead, and does some things
-            # which conflict with our (planned) functionality, particularly, it
-            # closes all database connections in `tearDownClass` which inhibits
-            # wrapping tests in higher-scoped transactions.
-            #
-            # It's possible a new version of Django will add some unrelated
-            # functionality to these methods, in which case skipping them completely
-            # would not be desirable. Let's cross that bridge when we get there...
-            if not transactional:
-
-                @classmethod
-                def setUpClass(cls) -> None:
-                    super(django.test.TestCase, cls).setUpClass()
-
-                @classmethod
-                def tearDownClass(cls) -> None:
-                    super(django.test.TestCase, cls).tearDownClass()
-
-        PytestDjangoTestCase.setUpClass()
-
-        test_case = PytestDjangoTestCase(methodName="__init__")
+        test_case = django_testcase_class(methodName="__init__")
         test_case._pre_setup()
 
-        yield
+        yield test_case
 
         test_case._post_teardown()
 
-        PytestDjangoTestCase.tearDownClass()
+        django_testcase_class.tearDownClass()
 
-        PytestDjangoTestCase.doClassCleanups()
+        django_testcase_class.doClassCleanups()
 
 
 def _django_db_signature(
@@ -365,6 +378,11 @@ def _set_suffix_to_test_databases(suffix: str) -> None:
 
 
 # ############### User visible fixtures ################
+
+
+@pytest.fixture(name="djt")
+def django_testcase(_django_db_helper: django.test.TestCase | None) -> django.test.TestCase | None:
+    return _django_db_helper
 
 
 @pytest.fixture
