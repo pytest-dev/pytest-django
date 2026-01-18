@@ -49,6 +49,7 @@ docs = [
 testing = [
     "Django",
     "django-configurations>=2.0",
+    "pytest>=9",
 ]
 coverage = [
     "coverage[toml]",
@@ -84,13 +85,12 @@ pytest_django = ["py.typed"]
 [tool.setuptools_scm]
 write_to = "pytest_django/_version.py"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
-    # Error on using unregistered marker.
-    "--strict-markers",
     # Show extra test summary info for everything.
     "-ra",
 ]
+strict = true
 pythonpath = ["."]
 DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
 testpaths = ["tests"]
