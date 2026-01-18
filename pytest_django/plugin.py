@@ -445,6 +445,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
     from django.test import TestCase, TransactionTestCase
 
+    # Reorder the tests as Django does:
+    # https://docs.djangoproject.com/en/6.0/topics/testing/overview/#order-in-which-tests-are-executed
+
     def get_order_number(test: pytest.Item) -> int:
         test_cls = getattr(test, "cls", None)
         if test_cls and issubclass(test_cls, TransactionTestCase):
