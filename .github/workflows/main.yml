@@ -140,7 +140,7 @@ jobs:
 
         - name: py313-djmain-sqlite-coverage
           python: '3.13'
-          allow_failure: false
+          allow_failure: true
 
         - name: py313-dj60-sqlite-coverage
           python: '3.13'
