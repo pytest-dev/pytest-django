@@ -90,12 +90,24 @@ jobs:
           python: '3.14'
           allow_failure: true
 
+        - name: py314t-djmain-postgres-xdist-coverage
+          python: '3.14t'
+          allow_failure: true
+
         - name: py314-dj60-postgres-xdist-coverage
           python: '3.14'
           allow_failure: false
 
+        - name: py314t-dj60-postgres-xdist-coverage
+          python: '3.14t'
+          allow_failure: false
+
         - name: py314-dj52-postgres-xdist-coverage
           python: '3.14'
+          allow_failure: false
+
+        - name: py314t-dj52-postgres-xdist-coverage
+          python: '3.14t'
           allow_failure: false
 
         - name: py313-dj52-postgres-xdist-coverage
