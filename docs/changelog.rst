@@ -7,7 +7,8 @@ v4.12.0 (Not released yet)
 Compatibility
 ^^^^^^^^^^^^^
 
-* Official Python 3.14 support.
+* Official Python 3.14 support (with free threading support).
+* Dropped support for Django 5.1
 * Dropped support for Python 3.9, minimum version is now Python 3.10.
 * Official Django 6.0 support.
 
