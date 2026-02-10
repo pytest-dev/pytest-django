@@ -55,7 +55,7 @@ coverage = [
     "coverage-enable-subprocess",
 ]
 postgres = [
-    "psycopg[binary]",
+    "psycopg",
 ]
 mysql = [
     "mysqlclient==2.2.7",
