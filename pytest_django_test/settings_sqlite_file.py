@@ -32,6 +32,7 @@ DATABASES = {
         "NAME": "/pytest_django_tests_second",
         "TEST": {
             "NAME": _filename_second,
+            "DEPENDENCIES": [],
         },
     },
 }
