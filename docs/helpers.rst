@@ -132,6 +132,29 @@ dynamically in a hook or fixture.
          assert b'Success!' in client.get('/some_url_defined_in_test_urls/').content
 
 
+``pytest.mark.django_isolate_apps`` - isolate the app registry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. decorator:: pytest.mark.django_isolate_apps(*app_labels)
+
+   Isolate models defined within the marked tests into their own isolated apps registry.
+   See :func:`Isolating apps <django.test.utils.isolate_apps>` for when this might be useful.
+
+   :type app_labels: str
+   :param app_labels:
+     One or more application labels to include in the isolated registry.
+
+   The :fixture:`django_isolated_apps` fixture provides access to the isolated
+   apps registry instance, if needed.
+
+   Example usage::
+
+     @pytest.mark.django_isolate_apps("myapp")
+     def test_something(django_isolated_apps):
+         assert django_isolated_apps.is_installed("myapp")
+         assert not django_isolated_apps.is_installed("otherapp")
+
+
 ``pytest.mark.ignore_template_errors`` - ignore invalid template variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -316,6 +339,14 @@ This fixture extracts the field name used for the username on the user model, i.
 resolves to the user model's :attr:`~django.contrib.auth.models.CustomUser.USERNAME_FIELD`.
 Use this fixture to make pluggable apps testable regardless what the username field
 is configured to be in the containing Django project.
+
+.. fixture:: django_isolated_apps
+
+``django_isolated_apps`` - isolated app registry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Access the isolated app registry created by
+:func:`@pytest.mark.django_isolate_apps([...]) <pytest.mark.django_isolate_apps>`.
 
 .. fixture:: db
 
