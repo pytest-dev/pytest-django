@@ -879,9 +879,10 @@ class DjangoDbBlocker:
     def _blocking_wrapper(*args: Any, **kwargs: Any) -> NoReturn:  # noqa: ARG002
         __tracebackhide__ = True
         raise RuntimeError(
-            "Database access not allowed, "
-            'use the "django_db" mark, or the '
-            '"db" or "transactional_db" fixtures to enable it.'
+            "Database access not allowed. "
+            "Use the @pytest.mark.django_db mark or the db/transactional_db "
+            "fixtures to enable it. "
+            "See https://pytest-django.readthedocs.io/en/latest/database.html#database-access"
         )
 
     def unblock(self) -> AbstractContextManager[None]:

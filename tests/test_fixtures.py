@@ -766,7 +766,7 @@ class Test_django_db_blocker:
     def test_block_manually(self, django_db_blocker: DjangoDbBlocker) -> None:
         try:
             django_db_blocker.block()
-            with pytest.raises(RuntimeError, match="^Database access not allowed,"):
+            with pytest.raises(RuntimeError, match="^Database access not allowed\. Use the @pytest\.mark\.django_db mark or the db/transactional_db fixtures to enable it\. See https://pytest-django\.readthedocs\.io/en/latest/database\.html#database-access"):
                 Item.objects.exists()
         finally:
             django_db_blocker.restore()
@@ -774,7 +774,7 @@ class Test_django_db_blocker:
     @pytest.mark.django_db
     def test_block_with_block(self, django_db_blocker: DjangoDbBlocker) -> None:
         with django_db_blocker.block():
-            with pytest.raises(RuntimeError, match="^Database access not allowed,"):
+            with pytest.raises(RuntimeError, match="^Database access not allowed\. Use the @pytest\.mark\.django_db mark or the db/transactional_db fixtures to enable it\. See https://pytest-django\.readthedocs\.io/en/latest/database\.html#database-access"):
                 Item.objects.exists()
 
     def test_unblock_manually(self, django_db_blocker: DjangoDbBlocker) -> None:

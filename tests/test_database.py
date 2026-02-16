@@ -435,8 +435,7 @@ def test_unittest_interaction(django_pytester: DjangoPytester) -> None:
             "*test_db_access_2 FAILED*",
             "*test_db_access_3 FAILED*",
             "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-            '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-            'or the "db" or "transactional_db" fixtures to enable it.',
+            '*RuntimeError: Database access not allowed. Use the @pytest.mark.django_db mark or the db/transactional_db fixtures to enable it. See https://pytest-django.readthedocs.io/en/latest/database.html#database-access'
         ]
     )
 
@@ -477,8 +476,7 @@ class Test_database_blocking:
         result = django_pytester.runpytest_subprocess("-v")
         result.stderr.fnmatch_lines(
             [
-                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-                'or the "db" or "transactional_db" fixtures to enable it.*'
+                '*RuntimeError: Database access not allowed. Use the @pytest.mark.django_db mark or the db/transactional_db fixtures to enable it. See https://pytest-django.readthedocs.io/en/latest/database.html#database-access*'
             ]
         )
 
@@ -493,7 +491,6 @@ class Test_database_blocking:
         result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
-                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-                'or the "db" or "transactional_db" fixtures to enable it.'
+                '*RuntimeError: Database access not allowed. Use the @pytest.mark.django_db mark or the db/transactional_db fixtures to enable it. See https://pytest-django.readthedocs.io/en/latest/database.html#database-access'
             ]
         )
