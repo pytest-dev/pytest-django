@@ -371,7 +371,7 @@ class TestSqliteWithTox:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         "A test to check that Tox DB suffix works when running in parallel."
-        monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
+        monkeypatch.setenv("TOX_ENV_NAME", "py37-django22")
 
         django_pytester.create_test_module(
             """
@@ -399,7 +399,7 @@ class TestSqliteWithTox:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         "A test to check that Tox DB suffix is not used when suffix would be empty."
-        monkeypatch.setenv("TOX_PARALLEL_ENV", "")
+        monkeypatch.setenv("TOX_ENV_NAME", "")
 
         django_pytester.create_test_module(
             """
@@ -438,7 +438,7 @@ class TestSqliteWithToxAndXdist:
     ) -> None:
         "A test to check that both Tox and xdist suffixes work together."
         pytest.importorskip("xdist")
-        monkeypatch.setenv("TOX_PARALLEL_ENV", "py37-django22")
+        monkeypatch.setenv("TOX_ENV_NAME", "py37-django22")
 
         django_pytester.create_test_module(
             """
