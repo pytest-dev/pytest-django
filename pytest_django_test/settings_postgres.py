@@ -27,5 +27,8 @@ DATABASES = {
         "USER": environ.get("TEST_DB_USER", ""),
         "PASSWORD": environ.get("TEST_DB_PASSWORD", ""),
         "HOST": environ.get("TEST_DB_HOST", ""),
+        "TEST": {
+            "DEPENDENCIES": [],
+        },
     },
 }

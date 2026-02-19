@@ -16,5 +16,8 @@ DATABASES = {
     "second": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
+        "TEST": {
+            "DEPENDENCIES": [],
+        },
     },
 }
