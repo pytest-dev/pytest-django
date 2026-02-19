@@ -7,11 +7,7 @@ Assertions
 ----------
 
 All of Django's :class:`~django:django.test.TestCase`
-:ref:`django:assertions` are available in ``pytest_django.asserts``, e.g.
-
-::
-
-    from pytest_django.asserts import assertTemplateUsed
+:ref:`django:assertions` are available in via the :fixture:`djt` fixture.
 
 Markers
 -------
@@ -300,6 +296,27 @@ Example
 
 Using the `admin_client` fixture will cause the test to automatically be marked
 for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
+
+.. fixture:: djt
+
+``djt`` - Django test case assertions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Instance of the test case class. This fixture is particularly useful when you want
+to use Django's specialized assertions for testing web applications.
+
+Example
+"""""""
+
+::
+
+    def test_add(djt):
+        djt.assertEqual(1 + 1, 2)
+        djt.assertXMLEqual(..., ...)
+        djt.assertJSONEqual(..., ...)
+
+        with djt.assertNumQueries(2):
+            some_function()
 
 .. fixture:: admin_user
 
