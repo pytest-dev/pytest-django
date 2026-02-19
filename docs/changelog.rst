@@ -1,13 +1,23 @@
 Changelog
 =========
 
-v4.12.0 (Not released yet)
---------------------------
+v4.12.0 (2026-02-14)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Official Python 3.14 support.
+* Dropped support for Python 3.9, minimum version is now Python 3.10.
+* Official Django 6.0 support.
 
 Improvements
 ^^^^^^^^^^^^
 
 * The :ref:`multiple databases <multi-db>` support added in v4.3.0 is no longer considered experimental.
+* Added :func:`@pytest.mark.django_isolate_apps <pytest.mark.django_isolate_apps>`
+  for isolating Django's app registry in pytest tests, and a
+  :fixture:`django_isolated_apps` fixture to access the isolated Apps registry instance if needed.
 
 v4.11.1 (2025-04-03)
 --------------------

@@ -54,6 +54,9 @@ def test_db_order(django_pytester: DjangoPytester) -> None:
         def test_run_second_fixture(transactional_db):
             pass
 
+        def test_run_second_live_server_fixture(live_server):
+            pass
+
         def test_run_second_reset_sequences_fixture(django_db_reset_sequences):
             pass
 
@@ -107,6 +110,7 @@ def test_db_order(django_pytester: DjangoPytester) -> None:
             "*test_run_first_serialized_rollback_decorator*",
             "*test_run_second_decorator*",
             "*test_run_second_fixture*",
+            "*test_run_second_live_server_fixture*",
             "*test_run_second_reset_sequences_fixture*",
             "*test_run_second_transaction_test_case*",
             "*test_run_second_fixture_class*",

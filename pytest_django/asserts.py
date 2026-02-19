@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import warnings
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING
 
 from django import VERSION
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
@@ -24,6 +24,15 @@ if USE_CONTRIB_MESSAGES:
     test_case = MessagesTestCase("run")
 else:
     test_case = TestCase("run")
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Iterator, Sequence
+    from contextlib import AbstractContextManager
+    from typing import Any, overload
+
+    from django import forms
+    from django.db.models import Model, QuerySet, RawQuerySet
+    from django.http.response import HttpResponseBase
 
 
 def _wrapper(name: str) -> Callable[..., Any]:
@@ -65,13 +74,6 @@ for assert_func in assertions_names:
 
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Iterator, Sequence
-    from contextlib import AbstractContextManager
-    from typing import overload
-
-    from django import forms
-    from django.db.models import Model, QuerySet, RawQuerySet
-    from django.http.response import HttpResponseBase
 
     def assertRedirects(
         response: HttpResponseBase,

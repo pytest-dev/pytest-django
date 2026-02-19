@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "pytest-django"
 description = "A Django plugin for pytest."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 authors = [
     { name = "Andreas Pelme", email = "andreas@pelme.se" },
@@ -24,15 +24,16 @@ classifiers = [
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Software Development :: Testing",
@@ -48,6 +49,7 @@ docs = [
 testing = [
     "Django",
     "django-configurations>=2.0",
+    "pytest>=9",
 ]
 coverage = [
     "coverage[toml]",
@@ -83,13 +85,12 @@ pytest_django = ["py.typed"]
 [tool.setuptools_scm]
 write_to = "pytest_django/_version.py"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
-    # Error on using unregistered marker.
-    "--strict-markers",
     # Show extra test summary info for everything.
     "-ra",
 ]
+strict = true
 pythonpath = ["."]
 DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
 testpaths = ["tests"]

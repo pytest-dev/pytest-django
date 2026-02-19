@@ -325,6 +325,11 @@ class TestDatabaseMarker:
         with pytest.raises(AssertionError, match="not allowed"):
             SecondItem.objects.create(name="spam")
 
+    @pytest.mark.django_db(databases=["second"])
+    def test_not_allowed_database_non_default(self) -> None:
+        with pytest.raises(AssertionError, match="not allowed"):
+            Item.objects.create(name="spam")
+
     @pytest.mark.django_db(databases=["replica"])
     def test_replica_database(self) -> None:
         Item.objects.using("replica").count()

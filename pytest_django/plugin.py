@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from typing import Any, NoReturn
 
     import django
+    import django.apps.registry
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
@@ -298,6 +299,10 @@ def pytest_load_initial_conftests(
     )
     early_config.addinivalue_line(
         "markers",
+        "django_isolate_apps(*app_labels): isolate Django's app registry for this test.",
+    )
+    early_config.addinivalue_line(
+        "markers",
         "ignore_template_errors(): ignore errors from invalid template "
         "variables (if --fail-on-template-vars is used).",
     )
@@ -447,6 +452,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
     from django.test import TestCase, TransactionTestCase
 
+    # Reorder the tests as Django does:
+    # https://docs.djangoproject.com/en/6.0/topics/testing/overview/#order-in-which-tests-are-executed
+
     def get_order_number(test: pytest.Item) -> int:
         test_cls = getattr(test, "cls", None)
         if test_cls and issubclass(test_cls, TransactionTestCase):
@@ -469,7 +477,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 uses_db = False
                 transactional = False
             fixtures = getattr(test, "fixturenames", [])
-            transactional = transactional or "transactional_db" in fixtures
+            transactional = transactional or (
+                "transactional_db" in fixtures or "live_server" in fixtures
+            )
             uses_db = uses_db or "db" in fixtures
 
         if transactional:
@@ -664,6 +674,39 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None,
         # https://github.com/django/django/blob/main/django/test/signals.py#L152
         clear_url_caches()
         set_urlconf(None)
+
+
+@pytest.fixture(autouse=True)
+def _django_isolate_apps(
+    request: pytest.FixtureRequest,
+) -> Generator[django.apps.registry.Apps, None, None]:
+    """Apply the @pytest.mark.django_isolate_apps marker if present, internal to pytest-django."""
+    marker: pytest.Mark | None = request.node.get_closest_marker("django_isolate_apps")
+    if not marker:
+        yield None
+        return
+
+    skip_if_no_django()
+
+    from django.test.utils import isolate_apps
+
+    app_labels = validate_django_isolate_apps(marker)
+
+    with isolate_apps(*app_labels) as apps:
+        yield apps
+
+
+@pytest.fixture
+def django_isolated_apps(
+    _django_isolate_apps: django.apps.registry.Apps | None,
+) -> django.apps.registry.Apps:
+    """Access the isolated Apps registry instance for tests marked with
+    @pytest.mark.django_isolate_apps(...)."""
+    if _django_isolate_apps is None:
+        raise pytest.UsageError(
+            "The django_isolated_apps fixture requires @pytest.mark.django_isolate_apps([...])."
+        )
+    return _django_isolate_apps
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -882,5 +925,16 @@ def validate_urls(marker: pytest.Mark) -> list[str]:
 
     def apifun(urls: list[str]) -> list[str]:
         return urls
+
+    return apifun(*marker.args, **marker.kwargs)
+
+
+def validate_django_isolate_apps(marker: pytest.Mark) -> tuple[str, ...]:
+    """Validate the django_isolate_apps marker."""
+
+    def apifun(*app_labels: str) -> tuple[str, ...]:
+        if not app_labels:
+            raise ValueError("@pytest.mark.django_isolate_apps requires at least one app label")
+        return app_labels
 
     return apifun(*marker.args, **marker.kwargs)

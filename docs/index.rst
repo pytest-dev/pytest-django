@@ -33,6 +33,18 @@ Example using pytest.ini or tox.ini
 Example using pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+For pytest 9.0 and later, use the native TOML format:
+
+.. code-block:: toml
+
+   # -- Example FILE: pyproject.toml
+   [tool.pytest]
+   DJANGO_SETTINGS_MODULE = "test.settings"
+   # -- recommended but optional:
+   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+
+For pytest 7.x and 8.x, use the INI-compatible format:
+
 .. code-block:: toml
 
    # -- Example FILE: pyproject.toml
