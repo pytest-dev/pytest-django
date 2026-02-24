@@ -7,7 +7,7 @@ Assertions
 ----------
 
 All of Django's :class:`~django:django.test.TestCase`
-:ref:`django:assertions` are available in via the :fixture:`djt` fixture.
+:ref:`django:assertions` are available via the :fixture:`djt` fixture.
 
 Markers
 -------
