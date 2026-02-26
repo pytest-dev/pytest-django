@@ -25,7 +25,7 @@ else:
     test_case = TestCase("run")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Sequence
     from contextlib import AbstractContextManager
     from typing import Any, overload
 
