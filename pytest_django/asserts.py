@@ -25,7 +25,7 @@ else:
     test_case = TestCase("run")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Sequence
     from contextlib import AbstractContextManager
     from typing import Any, overload
 
@@ -130,14 +130,14 @@ if TYPE_CHECKING:
         expected_message: str,
         *args: Any,
         **kwargs: Any,
-    ) -> None: ...
+    ) -> Any: ...
 
     def assertWarnsMessage(
         expected_warning: Warning,
         expected_message: str,
         *args: Any,
         **kwargs: Any,
-    ) -> None: ...
+    ) -> Any: ...
 
     def assertFieldOutput(
         fieldclass: type[forms.Field],
@@ -146,7 +146,7 @@ if TYPE_CHECKING:
         field_args: Any = ...,
         field_kwargs: Any = ...,
         empty_value: str = ...,
-    ) -> None: ...
+    ) -> Any: ...
 
     def assertHTMLEqual(
         html1: str,
@@ -201,7 +201,7 @@ if TYPE_CHECKING:
     # Removed in Django 5.1: use assertQuerySetEqual.
     def assertQuerysetEqual(
         qs: Iterator[Any] | list[Model] | QuerySet | RawQuerySet,
-        values: Collection[Any],
+        values: Iterable[Any],
         transform: Callable[[Model], Any] | type[str] | None = ...,
         ordered: bool = ...,
         msg: str | None = ...,
@@ -209,7 +209,7 @@ if TYPE_CHECKING:
 
     def assertQuerySetEqual(
         qs: Iterator[Any] | list[Model] | QuerySet | RawQuerySet,
-        values: Collection[Any],
+        values: Iterable[Any],
         transform: Callable[[Model], Any] | type[str] | None = ...,
         ordered: bool = ...,
         msg: str | None = ...,
