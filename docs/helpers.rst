@@ -309,6 +309,9 @@ for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
 An instance of a superuser, with username "admin" and password "password" (in
 case there is no "admin" user yet).
 
+If :attr:`~django.contrib.auth.models.CustomUser.USERNAME_FIELD` is set to "email",
+the username will be "admin@example.com".
+
 Using the `admin_user` fixture will cause the test to automatically be marked
 for database use (no need to specify the :func:`~pytest.mark.django_db` mark).
 
