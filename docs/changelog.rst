@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v4.12.1 (unreleased)
+--------------------
+
+Bugfixes
+^^^^^^^^
+
+* Fixed type hints of assert methods to match actual signature
+
 v4.12.0 (2026-02-14)
 --------------------
 
