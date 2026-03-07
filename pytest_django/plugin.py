@@ -307,8 +307,7 @@ def pytest_load_initial_conftests(
 
     options = parser.parse_known_args(args)
 
-    if options.version or options.help:
-        return
+    is_help_or_version = bool(options.version or options.help)
 
     django_find_project = _get_boolean_value(
         early_config.getini("django_find_project"), "django_find_project"
@@ -363,11 +362,21 @@ def pytest_load_initial_conftests(
         from django.conf import settings as dj_settings
 
         with _handle_import_error(_django_project_scan_outcome):
-            dj_settings.DATABASES  # noqa: B018
+            try:
+                dj_settings.DATABASES  # noqa: B018
+            except ImportError:
+                # Don't allow invalid settings to prevent printing these
+                if not is_help_or_version:
+                    raise
 
     early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
 
-    _setup_django(early_config)
+    try:
+        _setup_django(early_config)
+    except Exception:
+        # Don't allow invalid settings to prevent printing these
+        if not is_help_or_version:
+            raise
 
 
 @pytest.hookimpl(trylast=True)
