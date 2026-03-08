@@ -7,7 +7,7 @@ v4.12.1 (unreleased)
 Bugfixes
 ^^^^^^^^
 
-* Fixed type hints of assert methods to match actual signature (`PR #1274 <https://github.com/pytest-dev/pytest-django/pull/1274>`__)
+* Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
 
 v4.12.0 (2026-02-14)
 --------------------
