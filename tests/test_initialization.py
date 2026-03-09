@@ -1,5 +1,7 @@
 from textwrap import dedent
 
+import pytest
+
 from .helpers import DjangoPytester
 
 
@@ -60,3 +62,38 @@ def test_django_setup_order_and_uniqueness(django_pytester: DjangoPytester) -> N
         ]
     )
     assert result.ret == 0
+
+
+@pytest.mark.parametrize("flag", ["--help", "--version"])
+def test_django_setup_for_help_and_version_with_model_import(
+    django_pytester: DjangoPytester,
+    flag: str,
+) -> None:
+    """Django should be set up before conftest files are loaded, even with
+    --help/--version, so that top-level model imports in conftest files
+    don't fail with AppRegistryNotReady.
+
+    Regression test for https://github.com/pytest-dev/pytest-django/issues/1152
+    """
+    django_pytester.makeconftest(
+        """
+        from tpkg.app.models import Item
+    """
+    )
+
+    django_pytester.makepyfile(
+        """
+        def test_placeholder():
+            pass
+    """
+    )
+
+    args = [flag]
+    if flag == "--version":
+        # pytest requires -V passed twice to actually print version info
+        args.append(flag)
+
+    result = django_pytester.runpytest_subprocess(*args)
+    assert result.ret == 0
+    result.stderr.no_fnmatch_line("*AppRegistryNotReady*")
+    result.stderr.no_fnmatch_line("*could not load initial conftests*")

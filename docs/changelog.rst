@@ -8,6 +8,7 @@ Bugfixes
 ^^^^^^^^
 
 * Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
+* Fix Pytest `--help`/`--version` options when a `conftest.py` file imports Django models (`PR #1275 <https://github.com/pytest-dev/pytest-django/pull/1275>`__).
 
 v4.12.0 (2026-02-14)
 --------------------
