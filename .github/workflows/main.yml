@@ -65,13 +65,18 @@ jobs:
           sarif_file: zizmor.sarif
           category: zizmor
 
-      - name: Report coverage
+      - name: Prepare coverage file for upload
         if: contains(matrix.name, 'coverage')
-        uses: codecov/codecov-action@v5
+        run: mv .coverage coverage.${TOXENV}
+
+      - name: Upload temporary coverage artifact
+        if: contains(matrix.name, 'coverage')
+        uses: actions/upload-artifact@v4
+        timeout-minutes: 1
         with:
-          fail_ci_if_error: true
-          files: ./coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
+          name: coverage-artifact-${{ matrix.name }}
+          path: coverage.${{ matrix.name }}
+          retention-days: 1
 
     strategy:
       fail-fast: false
@@ -163,11 +168,89 @@ jobs:
           python: 'pypy3.10'
           allow_failure: false
 
+  report-coverage:
+    name: Report Combined Coverage
+    runs-on: ubuntu-24.04
+    needs: test
+    if: always()
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install coverage tool
+        run: python -m pip install coverage[toml]
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-coverage-artifacts
+          pattern: coverage-artifact-*
+
+      - name: Combine coverage reports
+        run: |
+          mkdir combined_coverage_data
+          find downloaded-coverage-artifacts -type f -name 'coverage.*' -exec cp {} combined_coverage_data/ \;
+          coverage combine combined_coverage_data/*
+          coverage xml
+          coverage html
+          coverage report --show-missing --format=markdown >> $GITHUB_STEP_SUMMARY
+
+      - name: Determine retention days
+        id: determine-retention-days
+        run: >-
+          echo "retention_days=${RETENTION_DAYS}"
+          >> "${GITHUB_OUTPUT}"
+        env:
+          RETENTION_DAYS: >-
+            ${{
+              (
+                github.ref_type == 'tag'
+                && github.ref_name == github.event.repository.default_branch
+              )
+              && 90
+              || 3
+            }}
+
+      - name: Upload combined .coverage file
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-file
+          path: .coverage
+          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: htmlcov
+          retention-days: ${{ steps.determine-retention-days.outputs.retention_days }}
+
+      - name: Delete temporary coverage artifacts from run
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # 5.1.0
+        with:
+          name: coverage-artifact-*
+
+      - name: Report coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
   check:  # This job does nothing and is only used for the branch protection
     if: always()
 
     needs:
-    - test
+    - report-coverage
 
     runs-on: ubuntu-24.04
 
