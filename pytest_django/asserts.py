@@ -113,18 +113,69 @@ if TYPE_CHECKING:
         msg_prefix: str = ...,
     ) -> None: ...
 
+    # with assertTemplateUsed("template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: str,
+        template_name: None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> AbstractContextManager[None]: ...
+
+    # with assertTemplateUsed(template_name="template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: None = ...,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> AbstractContextManager[None]: ...
+
+    # assertTemplateUsed(response, "template.html")  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: HttpResponseBase,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> None: ...
+
     def assertTemplateUsed(
         response: HttpResponseBase | str | None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
         count: int | None = ...,
+    ): ...
+
+    # with assertTemplateNotUsed("template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: str,
+        template_name: None = ...,
+        msg_prefix: str = ...,
+    ) -> AbstractContextManager[None]: ...
+
+    # with assertTemplateNotUsed(template_name="template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: None = ...,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+    ) -> AbstractContextManager[None]: ...
+
+    # assertTemplateNotUsed(response, "template.html")  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: HttpResponseBase,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
     ) -> None: ...
 
     def assertTemplateNotUsed(
         response: HttpResponseBase | str | None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
-    ) -> None: ...
+    ): ...
 
     def assertRaisesMessage(
         expected_exception: type[Exception],
