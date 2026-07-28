@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v4.12.1 (unreleased)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Dropped support for Django 4.2 and 5.1.
+
+Bugfixes
+^^^^^^^^
+
+* Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
+* Handled Django 6.2's ``ImproperlyConfigured`` (in addition to ``ImportError``) when the configured ``DJANGO_SETTINGS_MODULE`` cannot be imported, so pytest-django still shows its guidance message.
+
 v4.12.0 (2026-02-14)
 --------------------
 
