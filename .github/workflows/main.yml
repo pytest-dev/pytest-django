@@ -81,7 +81,7 @@ jobs:
 
           # Django 5.1 / Python 3.10–3.11
           - {name: py310-dj51-postgres-xdist-coverage,   python: '3.10',     allow_failure: false}
-          - {name: py311-dj51-mysql-coverage,            python:  3.11',     allow_failure: fals }
+          - {name: py311-dj51-mysql-coverage,            python: '3.11',     allow_failure: false}
 
           # Django 5.2 LTS / Python 3.10–3.14
           - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false}
