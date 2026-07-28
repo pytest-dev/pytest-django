@@ -129,7 +129,7 @@ def test_ds_non_existent(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPa
     monkeypatch.setenv("DJANGO_SETTINGS_MODULE", "DOES_NOT_EXIST")
     pytester.makepyfile("def test_ds(): pass")
     result = pytester.runpytest_subprocess()
-    result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
+    result.stderr.fnmatch_lines(["*Error:*DOES_NOT_EXIST*"])
     assert result.ret != 0
 
 

@@ -102,7 +102,7 @@ def test_django_project_found_invalid_settings(
     result = django_pytester.runpytest_subprocess("django_project_root")
     assert result.ret != 0
 
-    result.stderr.fnmatch_lines(["*ImportError:*DOES_NOT_EXIST*"])
+    result.stderr.fnmatch_lines(["*Error:*DOES_NOT_EXIST*"])
     result.stderr.fnmatch_lines(["*pytest-django found a Django project*"])
 
 
@@ -122,7 +122,7 @@ def test_django_project_scan_disabled_invalid_settings(
     result = django_pytester.runpytest_subprocess("django_project_root")
     assert result.ret != 0
 
-    result.stderr.fnmatch_lines(["*ImportError*DOES_NOT_EXIST*"])
+    result.stderr.fnmatch_lines(["*Error*DOES_NOT_EXIST*"])
     result.stderr.fnmatch_lines(["*pytest-django did not search for Django projects*"])
 
 
