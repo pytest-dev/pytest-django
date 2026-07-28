@@ -4,6 +4,11 @@ Changelog
 v4.12.1 (unreleased)
 --------------------
 
+Compatibility
+^^^^^^^^^^^^^
+
+* Dropped support for Django 4.2 and 5.1.
+
 Bugfixes
 ^^^^^^^^
 
