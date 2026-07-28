@@ -77,37 +77,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - {name: 'linting,docs',                       python: '3.14',     allow_failure: false}
+          - {name: 'linting,docs',                       python: '3.14',     allow_failure: false}
 
-        # Django 5.1 / Python 3.10–3.11
-        - {name: py310-dj51-postgres-xdist-coverage,   python: '3.10',     allow_failure: false}
-        - {name: py311-dj51-mysql-coverage,            python:  3.11',     allow_failure: fals }
+          # Django 5.1 / Python 3.10–3.11
+          - {name: py310-dj51-postgres-xdist-coverage,   python: '3.10',     allow_failure: false}
+          - {name: py311-dj51-mysql-coverage,            python:  3.11',     allow_failure: fals }
 
-        # Django 5.2 LTS / Python 3.10–3.14
-        - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false}
-        - {name: py311-dj52-sqlite-xdist-coverage,     python: '3.11',     allow_failure: false}
-        - {name: py312-dj52-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
-        - {name: py313-dj52-sqlite-coverage,           python: '3.13',     allow_failure: false}
-        - {name: py314-dj52-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
+          # Django 5.2 LTS / Python 3.10–3.14
+          - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false}
+          - {name: py311-dj52-sqlite-xdist-coverage,     python: '3.11',     allow_failure: false}
+          - {name: py312-dj52-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
+          - {name: py313-dj52-sqlite-coverage,           python: '3.13',     allow_failure: false}
+          - {name: py314-dj52-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
 
-        # Django 6.0 / Python 3.12–3.14
-        - {name: py312-dj60-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
-        - {name: py313-dj60-sqlite-coverage,           python: '3.13',     allow_failure: false}
-        - {name: py314-dj60-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
+          # Django 6.0 / Python 3.12–3.14
+          - {name: py312-dj60-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
+          - {name: py313-dj60-sqlite-coverage,           python: '3.13',     allow_failure: false}
+          - {name: py314-dj60-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
 
-        # Django 6.1 / Python 3.12–3.14
-        - {name: py312-dj61-sqlite-xdist-coverage,     python: '3.12',     allow_failure: false}
-        - {name: py313-dj61-postgres-xdist-coverage,   python: '3.13',     allow_failure: false}
-        - {name: py314-dj61-mysql-coverage,            python: '3.14',     allow_failure: false}
-        # Pin the minimum supported pytest on the latest stable combo.
-        - {name: py313-dj61-sqlite-pytestmin-coverage, python: '3.13',     allow_failure: false}
+          # Django 6.1 / Python 3.12–3.14
+          - {name: py312-dj61-sqlite-xdist-coverage,     python: '3.12',     allow_failure: false}
+          - {name: py313-dj61-postgres-xdist-coverage,   python: '3.13',     allow_failure: false}
+          - {name: py314-dj61-mysql-coverage,            python: '3.14',     allow_failure: false}
+          # Pin the minimum supported pytest on the latest stable combo.
+          - {name: py313-dj61-sqlite-pytestmin-coverage, python: '3.13',     allow_failure: false}
 
-        # Django main / Python [latest]
-        - {name: py313-djmain-sqlite-coverage,         python: '3.13',     allow_failure: true}
-        - {name: py314-djmain-postgres-xdist-coverage, python: '3.14',     allow_failure: true}
+          # Django main / Python [latest]
+          - {name: py313-djmain-sqlite-coverage,         python: '3.13',     allow_failure: true}
+          - {name: py314-djmain-postgres-xdist-coverage, python: '3.14',     allow_failure: true}
 
-        # PyPy: one representative combo, no coverage (too slow)
-        - {name: pypy3-dj52-postgres,                  python: 'pypy3.10', allow_failure: false}
+          # PyPy: one representative combo, no coverage (too slow)
+          - {name: pypy3-dj52-postgres,                  python: 'pypy3.10', allow_failure: false}
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()
