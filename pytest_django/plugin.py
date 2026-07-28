@@ -181,9 +181,14 @@ PROJECT_SCAN_DISABLED = (
 
 @contextlib.contextmanager
 def _handle_import_error(extra_message: str) -> Generator[None, None, None]:
+    # An invalid DJANGO_SETTINGS_MODULE raises ImportError on Django < 6.2, but
+    # Django >= 6.2 wraps it in ImproperlyConfigured. Handle both so the
+    # guidance message is shown regardless of the Django version.
+    from django.core.exceptions import ImproperlyConfigured
+
     try:
         yield
-    except ImportError as e:
+    except (ImportError, ImproperlyConfigured) as e:
         django_msg = (e.args[0] + "\n\n") if e.args else ""
         msg = django_msg + extra_message
         raise ImportError(msg) from None
