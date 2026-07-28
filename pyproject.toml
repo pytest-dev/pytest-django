@@ -57,7 +57,7 @@ postgres = [
     "psycopg[binary]",
 ]
 mysql = [
-    "mysqlclient==2.2.8",
+    "mysqlclient==2.2.7",
 ]
 xdist = [
     "pytest-xdist",
