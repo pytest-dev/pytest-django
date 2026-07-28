@@ -22,6 +22,7 @@ Bugfixes
 * Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
 * Handled Django 6.2's ``ImproperlyConfigured`` (in addition to ``ImportError``) when the configured ``DJANGO_SETTINGS_MODULE`` cannot be imported, so pytest-django still shows its guidance message.
 * Fixed ``django_db(transaction=True)`` tests being set up twice, which repeated the ``serialized_rollback`` restore and the ``fixtures`` load, and sent ``setting_changed`` and ``post_migrate`` twice when ``available_apps`` is set.
+* Fixed ``--help``/``--version`` failing with ``AppRegistryNotReady`` (surfaced as a ``could not load initial conftests`` warning) when a ``conftest.py`` imports Django models at the top level. Django is now set up even when ``--help``/``--version`` are passed, before the initial conftests are loaded for these options (`#1152 <https://github.com/pytest-dev/pytest-django/issues/1152>`__).
 
 v4.12.0 (2026-02-14)
 --------------------

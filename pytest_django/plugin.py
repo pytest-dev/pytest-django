@@ -6,6 +6,7 @@ test database and provides some useful text fixtures.
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import inspect
 import os
@@ -312,9 +313,36 @@ def pytest_load_initial_conftests(
 
     options = parser.parse_known_args(args)
 
-    if options.version or options.help:
-        return
+    # pytest still imports the initial conftests for `--help`/`--version`, so
+    # Django is set up for them as well. Otherwise a conftest with top-level
+    # model imports fails with AppRegistryNotReady (issue #1152).
+    is_help_or_version = bool(options.version or options.help)
 
+    # Stashed up front, to be available even if the setup below fails.
+    report_header: list[str] = []
+    early_config.stash[report_header_key] = report_header
+    early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
+
+    try:
+        _initialize_django(early_config, options, args, report_header)
+    except Exception:
+        # `--help`/`--version` never run tests, so they must keep working on a
+        # broken configuration (issue #235); a real run still fails loudly.
+        if not is_help_or_version:
+            raise
+
+
+def _initialize_django(
+    early_config: pytest.Config,
+    options: argparse.Namespace,
+    args: list[str],
+    report_header: list[str],
+) -> None:
+    """Configure and set up Django from the pytest options/ini/environment.
+
+    Everything which can fail on a broken configuration lives here, so that
+    `pytest_load_initial_conftests` can tolerate it for `--help`/`--version`.
+    """
     django_find_project = _get_boolean_value(
         early_config.getini("django_find_project"), "django_find_project"
     )
@@ -347,9 +375,6 @@ def pytest_load_initial_conftests(
     ds, ds_source = _get_option_with_source(options.ds, SETTINGS_MODULE_ENV)
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
-    report_header: list[str] = []
-    early_config.stash[report_header_key] = report_header
-
     if ds:
         report_header.append(f"settings: {ds} (from {ds_source})")
         os.environ[SETTINGS_MODULE_ENV] = ds
@@ -370,8 +395,7 @@ def pytest_load_initial_conftests(
         with _handle_import_error(_django_project_scan_outcome):
             dj_settings.DATABASES  # noqa: B018
 
-    early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
-
+    # Populates the app registry, which fails on a broken INSTALLED_APPS.
     _setup_django(early_config)
 
 
