@@ -463,6 +463,46 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1)
 
 
+def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
+    """A transactional test is set up twice, a plain one once.
+
+    Django's TransactionTestCase.setUpClass() runs _pre_setup() eagerly, and we then run
+    it again ourselves.
+    """
+
+    django_pytester.create_test_module(
+        """
+        import sys
+
+        import pytest
+        from django.test import TransactionTestCase
+
+        # Name of the function that called _pre_setup(), appended once per call and
+        # never reset, so the list below is the setup history of the whole module.
+        callers = []
+        original_pre_setup = TransactionTestCase._pre_setup.__func__
+
+        @classmethod
+        def recording_pre_setup(cls):
+            callers.append(sys._getframe(1).f_code.co_name)
+            original_pre_setup(cls)
+
+        TransactionTestCase._pre_setup = recording_pre_setup
+
+        @pytest.mark.django_db
+        def test_plain_db():
+            assert callers == ["_django_db_helper"]
+
+        @pytest.mark.django_db(transaction=True)
+        def test_transactional_db():
+            assert callers == ["_django_db_helper", "setUpClass", "_django_db_helper"]
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=2)
+
+
 class Test_database_blocking:
     def test_db_access_in_conftest(self, django_pytester: DjangoPytester) -> None:
         """Make sure database access in conftest module is prohibited."""
