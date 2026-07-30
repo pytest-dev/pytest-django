@@ -464,10 +464,10 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
 
 
 def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
-    """A transactional test is set up twice, a plain one once.
+    """Each test is set up by exactly one _pre_setup() call.
 
-    Django's TransactionTestCase.setUpClass() runs _pre_setup() eagerly, and we then run
-    it again ourselves.
+    A plain test is set up by us, a transactional one by Django's
+    TransactionTestCase.setUpClass(), which runs _pre_setup() eagerly.
     """
 
     django_pytester.create_test_module(
@@ -495,7 +495,7 @@ def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
 
         @pytest.mark.django_db(transaction=True)
         def test_transactional_db():
-            assert callers == ["_django_db_helper", "setUpClass", "_django_db_helper"]
+            assert callers == ["_django_db_helper", "setUpClass"]
         """
     )
 
