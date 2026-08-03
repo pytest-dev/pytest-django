@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 
 @contextmanager
-def nonverbose_config(config: pytest.Config) -> Generator[None, None, None]:
+def nonverbose_config(config: pytest.Config) -> Generator[None]:
     """Ensure that pytest's config.option.verbose is <= 0."""
     if config.option.verbose <= 0:
         yield
