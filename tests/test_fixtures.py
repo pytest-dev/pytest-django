@@ -482,11 +482,7 @@ class TestLiveServer:
     def test_url(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_change_settings(
-        self,
-        live_server: LiveServer,
-        settings: Settings,  # noqa: ARG002
-    ) -> None:
+    def test_change_settings(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
     @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
