@@ -168,7 +168,7 @@ def django_db_setup(  # noqa: PLR0917
     django_db_keepdb: bool,
     django_db_createdb: bool,
     django_db_modify_db_settings: None,  # noqa: ARG001
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
 
