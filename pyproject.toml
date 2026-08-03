@@ -72,6 +72,7 @@ xdist = [
 linting = [
     "editorconfig-checker==3.2.1",
     "mypy==2.3.0",
+    "pyupgrade==3.21.2",
     "ruff==0.16.1",
     "zizmor==1.11.0",
 ]
