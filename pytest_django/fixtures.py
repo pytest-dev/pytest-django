@@ -539,8 +539,17 @@ def async_rf() -> django.test.AsyncRequestFactory:
     return AsyncRequestFactory()
 
 
-class SettingsWrapper:
-    def __init__(self) -> None:
+class Settings:
+    """The type of the :fixture:`settings` fixture."""
+
+    def __init__(
+        self,
+        *,
+        _is_pytest_django: bool = False,
+    ) -> None:
+        assert _is_pytest_django, (
+            "Settings should only be instantiated from the `settings` fixture"
+        )
         self._to_restore: list[django.test.override_settings]
         object.__setattr__(self, "_to_restore", [])
 
@@ -567,7 +576,7 @@ class SettingsWrapper:
 
         return getattr(settings, attr)
 
-    def finalize(self) -> None:
+    def _finalize(self) -> None:
         for override in reversed(self._to_restore):
             override.disable()
 
@@ -575,13 +584,13 @@ class SettingsWrapper:
 
 
 @pytest.fixture
-def settings() -> Generator[SettingsWrapper, None, None]:
+def settings() -> Generator[Settings, None, None]:
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
-    wrapper = SettingsWrapper()
+    wrapper = Settings(_is_pytest_django=True)
     yield wrapper
-    wrapper.finalize()
+    wrapper._finalize()
 
 
 @pytest.fixture(scope="session")
