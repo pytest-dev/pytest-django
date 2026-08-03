@@ -63,10 +63,10 @@ xdist = [
     "pytest-xdist",
 ]
 linting = [
-    "editorconfig-checker==3.2.1",
-    "mypy==1.17.1",
-    "ruff==0.12.8",
-    "zizmor==1.11.0",
+    "editorconfig-checker==3.8.0",
+    "mypy==2.3.0",
+    "ruff==0.16.1",
+    "zizmor==1.29.0",
 ]
 [project.urls]
 Documentation = "https://pytest-django.readthedocs.io/"

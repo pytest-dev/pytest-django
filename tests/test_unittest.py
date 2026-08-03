@@ -66,14 +66,14 @@ class TestDjangoTagsToPytestMarkers(SimpleTestCase):
     def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
         self.markers = {m.name for m in request.node.iter_markers()}
 
-    @tag("tag3", "tag4")  # type: ignore[misc]
+    @tag("tag3", "tag4")  # type: ignore[untyped-decorator]
     def test_1(self) -> None:
         assert self.markers == {"tag1", "tag2", "tag3", "tag4"}
 
     def test_2(self) -> None:
         assert self.markers == {"tag1", "tag2"}
 
-    @tag("tag5")  # type: ignore[misc]
+    @tag("tag5")  # type: ignore[untyped-decorator]
     def test_3(self) -> None:
         assert self.markers == {"tag1", "tag2", "tag5"}
 
@@ -87,7 +87,7 @@ class TestNonDjangoClassWithTags:
     def gimme_my_markers(self, request: pytest.FixtureRequest) -> None:
         self.markers = {m.name for m in request.node.iter_markers()}
 
-    @tag("tag2")  # type: ignore[misc]
+    @tag("tag2")  # type: ignore[untyped-decorator]
     def test_1(self) -> None:
         assert not self.markers
 
