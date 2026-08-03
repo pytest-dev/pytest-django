@@ -120,7 +120,7 @@ if TYPE_CHECKING:
         template_name: None = ...,
         msg_prefix: str = ...,
         count: int | None = ...,
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     # with assertTemplateUsed(template_name="template.html"): ...  # noqa: ERA001
     @overload
@@ -129,7 +129,7 @@ if TYPE_CHECKING:
         template_name: str | None = ...,
         msg_prefix: str = ...,
         count: int | None = ...,
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     # assertTemplateUsed(response, "template.html")  # noqa: ERA001
     @overload
@@ -153,7 +153,7 @@ if TYPE_CHECKING:
         response: str,
         template_name: None = ...,
         msg_prefix: str = ...,
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     # with assertTemplateNotUsed(template_name="template.html"): ...  # noqa: ERA001
     @overload
@@ -161,7 +161,7 @@ if TYPE_CHECKING:
         response: None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     # assertTemplateNotUsed(response, "template.html")  # noqa: ERA001
     @overload
@@ -270,7 +270,7 @@ if TYPE_CHECKING:
     @overload
     def assertNumQueries(
         num: int, func: None = None, *, using: str = ...
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     @overload
     def assertNumQueries(
