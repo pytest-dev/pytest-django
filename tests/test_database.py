@@ -198,7 +198,7 @@ class TestDatabaseFixtures:
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, all_dbs: None) -> Generator[None, None, None]:  # noqa: ARG002
+    def fin(self, all_dbs: None) -> Generator[None]:  # noqa: ARG002
         # This finalizer must be able to access the database
         yield
         Item.objects.create(name="spam")
@@ -435,8 +435,10 @@ def test_unittest_interaction(django_pytester: DjangoPytester) -> None:
             "*test_db_access_2 FAILED*",
             "*test_db_access_3 FAILED*",
             "*ERROR at setup of TestCase_setupClass.test_db_access_1*",
-            '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-            'or the "db" or "transactional_db" fixtures to enable it.',
+            (
+                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
+                'or the "db" or "transactional_db" fixtures to enable it.'
+            ),
         ]
     )
 
@@ -463,6 +465,46 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1)
 
 
+def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
+    """Each test is set up by exactly one _pre_setup() call.
+
+    A plain test is set up by us, a transactional one by Django's
+    TransactionTestCase.setUpClass(), which runs _pre_setup() eagerly.
+    """
+
+    django_pytester.create_test_module(
+        """
+        import sys
+
+        import pytest
+        from django.test import TransactionTestCase
+
+        # Name of the function that called _pre_setup(), appended once per call and
+        # never reset, so the list below is the setup history of the whole module.
+        callers = []
+        original_pre_setup = TransactionTestCase._pre_setup.__func__
+
+        @classmethod
+        def recording_pre_setup(cls):
+            callers.append(sys._getframe(1).f_code.co_name)
+            original_pre_setup(cls)
+
+        TransactionTestCase._pre_setup = recording_pre_setup
+
+        @pytest.mark.django_db
+        def test_plain_db():
+            assert callers == ["_django_db_helper"]
+
+        @pytest.mark.django_db(transaction=True)
+        def test_transactional_db():
+            assert callers == ["_django_db_helper", "setUpClass"]
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=2)
+
+
 class Test_database_blocking:
     def test_db_access_in_conftest(self, django_pytester: DjangoPytester) -> None:
         """Make sure database access in conftest module is prohibited."""
@@ -477,8 +519,10 @@ class Test_database_blocking:
         result = django_pytester.runpytest_subprocess("-v")
         result.stderr.fnmatch_lines(
             [
-                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-                'or the "db" or "transactional_db" fixtures to enable it.*'
+                (
+                    '*RuntimeError: Database access not allowed, use the "django_db" mark, '
+                    'or the "db" or "transactional_db" fixtures to enable it.*'
+                )
             ]
         )
 
@@ -493,7 +537,9 @@ class Test_database_blocking:
         result = django_pytester.runpytest_subprocess("-v")
         result.stdout.fnmatch_lines(
             [
-                '*RuntimeError: Database access not allowed, use the "django_db" mark, '
-                'or the "db" or "transactional_db" fixtures to enable it.'
+                (
+                    '*RuntimeError: Database access not allowed, use the "django_db" mark, '
+                    'or the "db" or "transactional_db" fixtures to enable it.'
+                )
             ]
         )

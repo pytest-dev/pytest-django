@@ -126,11 +126,11 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
         marker_db = test.get_closest_marker("django_db")
         if marker_db:
             (
-                transaction,
-                reset_sequences,
+                _transaction,
+                _reset_sequences,
                 databases,
                 serialized_rollback,
-                available_apps,
+                _available_apps,
             ) = validate_django_db(marker_db)
         elif "db" in fixtures or "transactional_db" in fixtures or "live_server" in fixtures:
             serialized_rollback = "django_db_serialized_rollback" in fixtures
@@ -162,7 +162,7 @@ def _get_databases_for_setup(
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(
+def django_db_setup(  # noqa: PLR0917
     request: pytest.FixtureRequest,
     django_test_environment: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
@@ -170,7 +170,7 @@ def django_db_setup(
     django_db_keepdb: bool,
     django_db_createdb: bool,
     django_db_modify_db_settings: None,  # noqa: ARG001
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
 
@@ -208,7 +208,9 @@ def django_db_setup(
 @pytest.fixture
 def django_testcase_class(
     request: pytest.FixtureRequest,
-) -> Generator[type[django.test.TestCase] | None, None, None]:
+    django_db_setup: None,  # noqa: ARG001
+    django_db_blocker: DjangoDbBlocker,
+) -> Generator[None]:
     if is_django_unittest(request):
         yield None
         return
@@ -301,8 +303,54 @@ def _django_db_helper(
     with django_db_blocker.unblock():
         django_testcase_class.setUpClass()
 
-        test_case = django_testcase_class(methodName="__init__")
-        test_case._pre_setup()
+        if transactional:
+            test_case_class = django.test.TransactionTestCase
+        else:
+            test_case_class = django.test.TestCase
+
+        _reset_sequences = reset_sequences
+        _serialized_rollback = serialized_rollback
+        _databases = databases
+        _available_apps = available_apps
+
+        class PytestDjangoTestCase(test_case_class):  # type: ignore[misc,valid-type]
+            reset_sequences = _reset_sequences
+            serialized_rollback = _serialized_rollback
+            if _databases is not None:
+                databases = _databases
+            if _available_apps is not None:
+                available_apps = _available_apps
+
+            # For non-transactional tests, skip executing `django.test.TestCase`'s
+            # `setUpClass`/`tearDownClass`, only execute the super class ones.
+            #
+            # `TestCase`'s class setup manages the `setUpTestData`/class-level
+            # transaction functionality. We don't use it; instead we (will) offer
+            # our own alternatives. So it only adds overhead, and does some things
+            # which conflict with our (planned) functionality, particularly, it
+            # closes all database connections in `tearDownClass` which inhibits
+            # wrapping tests in higher-scoped transactions.
+            #
+            # It's possible a new version of Django will add some unrelated
+            # functionality to these methods, in which case skipping them completely
+            # would not be desirable. Let's cross that bridge when we get there...
+            if not transactional:
+
+                @classmethod
+                def setUpClass(cls) -> None:
+                    super(django.test.TestCase, cls).setUpClass()
+
+                @classmethod
+                def tearDownClass(cls) -> None:
+                    super(django.test.TestCase, cls).tearDownClass()
+
+        PytestDjangoTestCase.setUpClass()
+
+        test_case = PytestDjangoTestCase(methodName="__init__")
+        if not PytestDjangoTestCase._pre_setup_ran_eagerly:
+            # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
+            # this flag to say so.
+            test_case._pre_setup()
 
         yield test_case
 
@@ -554,8 +602,17 @@ def async_rf() -> django.test.AsyncRequestFactory:
     return AsyncRequestFactory()
 
 
-class SettingsWrapper:
-    def __init__(self) -> None:
+class Settings:
+    """The type of the :fixture:`settings` fixture."""
+
+    def __init__(
+        self,
+        *,
+        _is_pytest_django: bool = False,
+    ) -> None:
+        assert _is_pytest_django, (
+            "Settings should only be instantiated from the `settings` fixture"
+        )
         self._to_restore: list[django.test.override_settings]
         object.__setattr__(self, "_to_restore", [])
 
@@ -582,7 +639,7 @@ class SettingsWrapper:
 
         return getattr(settings, attr)
 
-    def finalize(self) -> None:
+    def _finalize(self) -> None:
         for override in reversed(self._to_restore):
             override.disable()
 
@@ -590,19 +647,19 @@ class SettingsWrapper:
 
 
 @pytest.fixture
-def settings() -> Generator[SettingsWrapper, None, None]:
+def settings() -> Generator[Settings]:
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
-    wrapper = SettingsWrapper()
+    wrapper = Settings(_is_pytest_django=True)
     yield wrapper
-    wrapper.finalize()
+    wrapper._finalize()
 
 
 @pytest.fixture(scope="session")
 def live_server(
     request: pytest.FixtureRequest,
-) -> Generator[live_server_helper.LiveServer, None, None]:
+) -> Generator[live_server_helper.LiveServer]:
     """Run a live Django server in the background during tests
 
     The address the server is started from is taken from the
@@ -635,7 +692,7 @@ def live_server(
 
 
 @pytest.fixture(autouse=True)
-def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None]:
     """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
@@ -686,7 +743,7 @@ def _assert_num_queries(
     info: str | None = None,
     *,
     using: str | None = None,
-) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
+) -> Generator[django.test.utils.CaptureQueriesContext]:
     from django.db import connection as default_conn, connections
     from django.test.utils import CaptureQueriesContext
 

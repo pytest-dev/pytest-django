@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v4.12.1 (unreleased)
+v4.13.0 (unreleased)
 --------------------
 
 Compatibility
@@ -9,11 +9,19 @@ Compatibility
 
 * Dropped support for Django 4.2 and 5.1.
 
+Improvements
+^^^^^^^^^^^^
+
+* Export ``pytest_django.Settings`` from the top-level ``pytest_django``
+  module so the :fixture:`settings` fixture can be type-annotated
+  (`#1257 <https://github.com/pytest-dev/pytest-django/issues/1257>`__).
+
 Bugfixes
 ^^^^^^^^
 
 * Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
 * Handled Django 6.2's ``ImproperlyConfigured`` (in addition to ``ImportError``) when the configured ``DJANGO_SETTINGS_MODULE`` cannot be imported, so pytest-django still shows its guidance message.
+* Fixed ``django_db(transaction=True)`` tests being set up twice, which repeated the ``serialized_rollback`` restore and the ``fixtures`` load, and sent ``setting_changed`` and ``post_migrate`` twice when ``available_apps`` is set.
 
 v4.12.0 (2026-02-14)
 --------------------

@@ -5,6 +5,8 @@ Tests the dynamic loading of all Django assertion cases.
 from __future__ import annotations
 
 import inspect
+from collections.abc import Sequence
+from typing import cast
 
 import django.test
 import pytest
@@ -50,7 +52,7 @@ def _get_actual_assertions_names() -> list[str]:
 
 def test_django_asserts_available() -> None:
     django_assertions = _get_actual_assertions_names()
-    expected_assertions = asserts_all
+    expected_assertions = cast(Sequence[str], asserts_all)
     assert set(django_assertions) == set(expected_assertions)
 
     for name in expected_assertions:

@@ -8,7 +8,8 @@
     "pytest_django.egg-info/*",
     "__pycache__/*",
     "zizmor.sarif",
-    "docs/_build/*"
+    "docs/_build/*",
+    ".venv/"
   ],
   "Disable": {
     "MaxLineLength": true
