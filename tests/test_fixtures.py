@@ -139,8 +139,10 @@ def test_django_assert_max_num_queries_db(
                 Item.objects.create(name="3-quux")
 
         assert excinfo.value.args == (
-            "Expected to perform 2 queries or less but 3 were done "
-            "(add -v option to show queries)",
+            (
+                "Expected to perform 2 queries or less but 3 were done "
+                "(add -v option to show queries)"
+            ),
         )
         assert len(captured.captured_queries) == 3
         assert "1-foo" in captured.captured_queries[0]["sql"]
@@ -766,7 +768,7 @@ class Test_django_db_blocker:
     def test_block_manually(self, django_db_blocker: DjangoDbBlocker) -> None:
         try:
             django_db_blocker.block()
-            with pytest.raises(RuntimeError, match="^Database access not allowed,"):
+            with pytest.raises(RuntimeError, match=r"^Database access not allowed,"):
                 Item.objects.exists()
         finally:
             django_db_blocker.restore()
@@ -774,7 +776,7 @@ class Test_django_db_blocker:
     @pytest.mark.django_db
     def test_block_with_block(self, django_db_blocker: DjangoDbBlocker) -> None:
         with django_db_blocker.block():
-            with pytest.raises(RuntimeError, match="^Database access not allowed,"):
+            with pytest.raises(RuntimeError, match=r"^Database access not allowed,"):
                 Item.objects.exists()
 
     def test_unblock_manually(self, django_db_blocker: DjangoDbBlocker) -> None:

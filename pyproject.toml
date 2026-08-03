@@ -65,7 +65,7 @@ xdist = [
 linting = [
     "editorconfig-checker==3.2.1",
     "mypy==1.17.1",
-    "ruff==0.12.8",
+    "ruff==0.16.1",
     "zizmor==1.11.0",
 ]
 [project.urls]
@@ -219,6 +219,7 @@ ignore = [
     "S101",   # Use of `assert` detected
 
     # TODO - need to fix these
+    "CPY001",  # Missing copyright notice at top of file
     "C901",    # .. is too complex
     "COM812",  # Trailing comma missing
     "E501",    # Line too long
