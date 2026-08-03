@@ -24,18 +24,22 @@ from django.utils.encoding import force_str
 
 from .helpers import DjangoPytester
 
-from pytest_django import DjangoAssertNumQueries, DjangoCaptureOnCommitCallbacks, DjangoDbBlocker
+from pytest_django import (
+    DjangoAssertNumQueries,
+    DjangoCaptureOnCommitCallbacks,
+    DjangoDbBlocker,
+    Settings,
+)
 from pytest_django_test.app.models import Item
 
 
 if TYPE_CHECKING:
     from pytest_django.django_compat import _User, _UserModel
-    from pytest_django.fixtures import SettingsWrapper
     from pytest_django.live_server_helper import LiveServer
 
 
 @contextmanager
-def nonverbose_config(config: pytest.Config) -> Generator[None, None, None]:
+def nonverbose_config(config: pytest.Config) -> Generator[None]:
     """Ensure that pytest's config.option.verbose is <= 0."""
     if config.option.verbose <= 0:
         yield
@@ -344,40 +348,40 @@ def test_django_capture_on_commit_callbacks_transactional(
 class TestSettings:
     """Tests for the settings fixture, order matters"""
 
-    def test_modify_existing(self, settings) -> None:
+    def test_modify_existing(self, settings: Settings) -> None:
         assert settings.SECRET_KEY == "foobar"
         assert real_settings.SECRET_KEY == "foobar"
         settings.SECRET_KEY = "spam"
         assert settings.SECRET_KEY == "spam"
         assert real_settings.SECRET_KEY == "spam"
 
-    def test_modify_existing_again(self, settings) -> None:
+    def test_modify_existing_again(self, settings: Settings) -> None:
         assert settings.SECRET_KEY == "foobar"
         assert real_settings.SECRET_KEY == "foobar"
 
-    def test_new(self, settings) -> None:
+    def test_new(self, settings: Settings) -> None:
         assert not hasattr(settings, "SPAM")
         assert not hasattr(real_settings, "SPAM")
         settings.SPAM = "ham"
         assert settings.SPAM == "ham"
         assert real_settings.SPAM == "ham"
 
-    def test_new_again(self, settings) -> None:
+    def test_new_again(self, settings: Settings) -> None:
         assert not hasattr(settings, "SPAM")
         assert not hasattr(real_settings, "SPAM")
 
-    def test_deleted(self, settings) -> None:
+    def test_deleted(self, settings: Settings) -> None:
         assert hasattr(settings, "SECRET_KEY")
         assert hasattr(real_settings, "SECRET_KEY")
         del settings.SECRET_KEY
         assert not hasattr(settings, "SECRET_KEY")
         assert not hasattr(real_settings, "SECRET_KEY")
 
-    def test_deleted_again(self, settings) -> None:
+    def test_deleted_again(self, settings: Settings) -> None:
         assert hasattr(settings, "SECRET_KEY")
         assert hasattr(real_settings, "SECRET_KEY")
 
-    def test_signals(self, settings) -> None:
+    def test_signals(self, settings: Settings) -> None:
         result = []
 
         def assert_signal(
@@ -481,7 +485,7 @@ class TestLiveServer:
     def test_change_settings(
         self,
         live_server: LiveServer,
-        settings: SettingsWrapper,  # noqa: ARG002
+        settings: Settings,  # noqa: ARG002
     ) -> None:
         assert live_server.url == force_str(live_server)
 

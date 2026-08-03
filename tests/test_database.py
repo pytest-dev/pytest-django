@@ -198,7 +198,7 @@ class TestDatabaseFixtures:
         assert Item.objects.count() == 0
 
     @pytest.fixture
-    def fin(self, all_dbs: None) -> Generator[None, None, None]:  # noqa: ARG002
+    def fin(self, all_dbs: None) -> Generator[None]:  # noqa: ARG002
         # This finalizer must be able to access the database
         yield
         Item.objects.create(name="spam")

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v4.12.1 (unreleased)
+v4.13.0 (unreleased)
 --------------------
 
 Compatibility
@@ -9,6 +9,13 @@ Compatibility
 
 * Official Django 6.1 support.
 * Dropped support for Django 4.2 and 5.1.
+
+Improvements
+^^^^^^^^^^^^
+
+* Export ``pytest_django.Settings`` from the top-level ``pytest_django``
+  module so the :fixture:`settings` fixture can be type-annotated
+  (`#1257 <https://github.com/pytest-dev/pytest-django/issues/1257>`__).
 
 Bugfixes
 ^^^^^^^^
