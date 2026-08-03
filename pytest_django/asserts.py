@@ -1,6 +1,7 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
+# ruff: noqa: PLR0917
 
 from __future__ import annotations
 
@@ -112,18 +113,69 @@ if TYPE_CHECKING:
         msg_prefix: str = ...,
     ) -> None: ...
 
+    # with assertTemplateUsed("template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: str,
+        template_name: None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> AbstractContextManager[Any]: ...
+
+    # with assertTemplateUsed(template_name="template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: None = ...,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> AbstractContextManager[Any]: ...
+
+    # assertTemplateUsed(response, "template.html")  # noqa: ERA001
+    @overload
+    def assertTemplateUsed(
+        response: HttpResponseBase,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+        count: int | None = ...,
+    ) -> None: ...
+
     def assertTemplateUsed(
         response: HttpResponseBase | str | None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
         count: int | None = ...,
+    ): ...
+
+    # with assertTemplateNotUsed("template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: str,
+        template_name: None = ...,
+        msg_prefix: str = ...,
+    ) -> AbstractContextManager[Any]: ...
+
+    # with assertTemplateNotUsed(template_name="template.html"): ...  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: None = ...,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
+    ) -> AbstractContextManager[Any]: ...
+
+    # assertTemplateNotUsed(response, "template.html")  # noqa: ERA001
+    @overload
+    def assertTemplateNotUsed(
+        response: HttpResponseBase,
+        template_name: str | None = ...,
+        msg_prefix: str = ...,
     ) -> None: ...
 
     def assertTemplateNotUsed(
         response: HttpResponseBase | str | None = ...,
         template_name: str | None = ...,
         msg_prefix: str = ...,
-    ) -> None: ...
+    ): ...
 
     def assertRaisesMessage(
         expected_exception: type[Exception],
@@ -218,7 +270,7 @@ if TYPE_CHECKING:
     @overload
     def assertNumQueries(
         num: int, func: None = None, *, using: str = ...
-    ) -> AbstractContextManager[None]: ...
+    ) -> AbstractContextManager[Any]: ...
 
     @overload
     def assertNumQueries(

@@ -180,7 +180,7 @@ PROJECT_SCAN_DISABLED = (
 
 
 @contextlib.contextmanager
-def _handle_import_error(extra_message: str) -> Generator[None, None, None]:
+def _handle_import_error(extra_message: str) -> Generator[None]:
     # An invalid DJANGO_SETTINGS_MODULE raises ImportError on Django < 6.2, but
     # Django >= 6.2 wraps it in ImproperlyConfigured. Handle both so the
     # guidance message is shown regardless of the Django version.
@@ -251,7 +251,7 @@ def _setup_django(config: pytest.Config) -> None:
 
 
 def _get_boolean_value(
-    x: None | (bool | str),
+    x: bool | str | None,
     name: str,
     default: bool | None = None,
 ) -> bool:
@@ -470,9 +470,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 (
                     transaction,
                     reset_sequences,
-                    databases,
-                    serialized_rollback,
-                    available_apps,
+                    _databases,
+                    _serialized_rollback,
+                    _available_apps,
                 ) = validate_django_db(marker_db)
                 uses_db = True
                 transactional = transaction or reset_sequences
@@ -506,7 +506,7 @@ def pytest_unconfigure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def django_test_environment(request: pytest.FixtureRequest) -> Generator[None]:
     """Setup Django's test environment for the testing session.
 
     XXX It is a little dodgy that this is an autouse fixture.  Perhaps
@@ -575,7 +575,7 @@ def _django_db_marker(request: pytest.FixtureRequest) -> None:
 def _django_setup_unittest(
     request: pytest.FixtureRequest,
     django_db_blocker: DjangoDbBlocker,
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
         yield
@@ -655,7 +655,7 @@ def django_mail_dnsname() -> str:
 
 
 @pytest.fixture(autouse=True)
-def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None]:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker: pytest.Mark | None = request.node.get_closest_marker("urls")
     if marker:
@@ -682,7 +682,7 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None,
 @pytest.fixture(autouse=True)
 def _django_isolate_apps(
     request: pytest.FixtureRequest,
-) -> Generator[django.apps.registry.Apps, None, None]:
+) -> Generator[django.apps.registry.Apps]:
     """Apply the @pytest.mark.django_isolate_apps marker if present, internal to pytest-django."""
     marker: pytest.Mark | None = request.node.get_closest_marker("django_isolate_apps")
     if not marker:
@@ -713,7 +713,7 @@ def django_isolated_apps(
 
 
 @pytest.fixture(autouse=True, scope="session")
-def _fail_for_invalid_template_variable() -> Generator[None, None, None]:
+def _fail_for_invalid_template_variable() -> Generator[None]:
     """Fixture that fails for invalid variables in templates.
 
     This fixture will fail each test that uses django template rendering

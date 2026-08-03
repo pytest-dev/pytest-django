@@ -39,10 +39,17 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
+[project.optional-dependencies]
+# .readthedocs.yml doesn't support dependency groups yet, so duplicate the docs
+# group as an extra. Can be removed once RTD supports groups.
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 [dependency-groups]
 docs = [
     "sphinx",
-    "sphinx_rtd_theme",
+    "sphinx-rtd-theme",
 ]
 testing = [
     "Django",
@@ -64,8 +71,9 @@ xdist = [
 ]
 linting = [
     "editorconfig-checker==3.2.1",
-    "mypy==1.17.1",
-    "ruff==0.12.8",
+    "mypy==2.3.0",
+    "pyupgrade==3.21.2",
+    "ruff==0.16.1",
     "zizmor==1.11.0",
 ]
 [project.urls]
@@ -219,6 +227,7 @@ ignore = [
     "S101",   # Use of `assert` detected
 
     # TODO - need to fix these
+    "CPY001",  # Missing copyright notice at top of file
     "C901",    # .. is too complex
     "COM812",  # Trailing comma missing
     "E501",    # Line too long
