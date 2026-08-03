@@ -39,10 +39,17 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
+[project.optional-dependencies]
+# .readthedocs.yml doesn't support dependency groups yet, so duplicate the docs
+# group as an extra. Can be removed once RTD supports groups.
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 [dependency-groups]
 docs = [
     "sphinx",
-    "sphinx_rtd_theme",
+    "sphinx-rtd-theme",
 ]
 testing = [
     "Django",
