@@ -15,6 +15,7 @@ Bugfixes
 
 * Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
 * Handled Django 6.2's ``ImproperlyConfigured`` (in addition to ``ImportError``) when the configured ``DJANGO_SETTINGS_MODULE`` cannot be imported, so pytest-django still shows its guidance message.
+* Fixed ``django_db(transaction=True)`` tests being set up twice, which repeated the ``serialized_rollback`` restore and the ``fixtures`` load, and sent ``setting_changed`` and ``post_migrate`` twice when ``available_apps`` is set.
 
 v4.12.0 (2026-02-14)
 --------------------

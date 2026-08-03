@@ -124,11 +124,11 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
         marker_db = test.get_closest_marker("django_db")
         if marker_db:
             (
-                transaction,
-                reset_sequences,
+                _transaction,
+                _reset_sequences,
                 databases,
                 serialized_rollback,
-                available_apps,
+                _available_apps,
             ) = validate_django_db(marker_db)
         elif "db" in fixtures or "transactional_db" in fixtures or "live_server" in fixtures:
             serialized_rollback = "django_db_serialized_rollback" in fixtures
@@ -160,7 +160,7 @@ def _get_databases_for_setup(
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(
+def django_db_setup(  # noqa: PLR0917
     request: pytest.FixtureRequest,
     django_test_environment: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
@@ -289,7 +289,10 @@ def _django_db_helper(
         PytestDjangoTestCase.setUpClass()
 
         test_case = PytestDjangoTestCase(methodName="__init__")
-        test_case._pre_setup()
+        if not PytestDjangoTestCase._pre_setup_ran_eagerly:
+            # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
+            # this flag to say so.
+            test_case._pre_setup()
 
         yield
 
