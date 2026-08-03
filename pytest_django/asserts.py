@@ -1,6 +1,7 @@
 """
 Dynamically load all Django assertion cases and expose them for importing.
 """
+# ruff: noqa: PLR0917
 
 from __future__ import annotations
 

@@ -251,7 +251,7 @@ def _setup_django(config: pytest.Config) -> None:
 
 
 def _get_boolean_value(
-    x: None | (bool | str),
+    x: bool | str | None,
     name: str,
     default: bool | None = None,
 ) -> bool:
@@ -470,9 +470,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 (
                     transaction,
                     reset_sequences,
-                    databases,
-                    serialized_rollback,
-                    available_apps,
+                    _databases,
+                    _serialized_rollback,
+                    _available_apps,
                 ) = validate_django_db(marker_db)
                 uses_db = True
                 transactional = transaction or reset_sequences
