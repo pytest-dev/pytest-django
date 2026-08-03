@@ -70,7 +70,6 @@ xdist = [
     "pytest-xdist",
 ]
 linting = [
-    "django-upgrade==1.31.1",
     "editorconfig-checker==3.2.1",
     "mypy==2.3.0",
     "pyupgrade==3.21.2",
