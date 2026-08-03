@@ -442,6 +442,13 @@ Example
         settings.USE_TZ = True
         assert settings.USE_TZ
 
+If you use type annotations, you can annotate the fixture like this::
+
+    from pytest_django import Settings
+
+    def test_with_specific_settings(settings: Settings):
+        ...
+
 
 .. fixture:: django_assert_num_queries
 

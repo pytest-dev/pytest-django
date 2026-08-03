@@ -168,7 +168,7 @@ def django_db_setup(  # noqa: PLR0917
     django_db_keepdb: bool,
     django_db_createdb: bool,
     django_db_modify_db_settings: None,  # noqa: ARG001
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Top level fixture to ensure test databases are available"""
     from django.test.utils import setup_databases, teardown_databases
 
@@ -208,7 +208,7 @@ def _django_db_helper(
     request: pytest.FixtureRequest,
     django_db_setup: None,  # noqa: ARG001
     django_db_blocker: DjangoDbBlocker,
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     if is_django_unittest(request):
         yield
         return
@@ -539,8 +539,17 @@ def async_rf() -> django.test.AsyncRequestFactory:
     return AsyncRequestFactory()
 
 
-class SettingsWrapper:
-    def __init__(self) -> None:
+class Settings:
+    """The type of the :fixture:`settings` fixture."""
+
+    def __init__(
+        self,
+        *,
+        _is_pytest_django: bool = False,
+    ) -> None:
+        assert _is_pytest_django, (
+            "Settings should only be instantiated from the `settings` fixture"
+        )
         self._to_restore: list[django.test.override_settings]
         object.__setattr__(self, "_to_restore", [])
 
@@ -567,7 +576,7 @@ class SettingsWrapper:
 
         return getattr(settings, attr)
 
-    def finalize(self) -> None:
+    def _finalize(self) -> None:
         for override in reversed(self._to_restore):
             override.disable()
 
@@ -575,19 +584,19 @@ class SettingsWrapper:
 
 
 @pytest.fixture
-def settings() -> Generator[SettingsWrapper, None, None]:
+def settings() -> Generator[Settings]:
     """A Django settings object which restores changes after the testrun"""
     skip_if_no_django()
 
-    wrapper = SettingsWrapper()
+    wrapper = Settings(_is_pytest_django=True)
     yield wrapper
-    wrapper.finalize()
+    wrapper._finalize()
 
 
 @pytest.fixture(scope="session")
 def live_server(
     request: pytest.FixtureRequest,
-) -> Generator[live_server_helper.LiveServer, None, None]:
+) -> Generator[live_server_helper.LiveServer]:
     """Run a live Django server in the background during tests
 
     The address the server is started from is taken from the
@@ -620,7 +629,7 @@ def live_server(
 
 
 @pytest.fixture(autouse=True)
-def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def _live_server_helper(request: pytest.FixtureRequest) -> Generator[None]:
     """Helper to make live_server work, internal to pytest-django.
 
     This helper will dynamically request the transactional_db fixture
@@ -671,7 +680,7 @@ def _assert_num_queries(
     info: str | None = None,
     *,
     using: str | None = None,
-) -> Generator[django.test.utils.CaptureQueriesContext, None, None]:
+) -> Generator[django.test.utils.CaptureQueriesContext]:
     from django.db import connection as default_conn, connections
     from django.test.utils import CaptureQueriesContext
 
