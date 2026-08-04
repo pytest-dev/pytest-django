@@ -16,7 +16,7 @@ import types
 from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import pytest
 
@@ -55,8 +55,6 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn
-
     import django
     import django.apps.registry
 
