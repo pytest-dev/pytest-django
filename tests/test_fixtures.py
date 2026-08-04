@@ -482,9 +482,6 @@ class TestLiveServer:
     def test_url(self, live_server: LiveServer) -> None:
         assert live_server.url == force_str(live_server)
 
-    def test_change_settings(self, live_server: LiveServer) -> None:
-        assert live_server.url == force_str(live_server)
-
     @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
     def test_settings_restored(self) -> None:
         """Ensure that settings are restored after test_settings_before."""
