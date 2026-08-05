@@ -30,6 +30,15 @@ def _wrapper(name: str) -> Callable[..., Any]:
 
     @wraps(func)
     def assertion_func(*args: Any, **kwargs: Any) -> Any:
+        message = (
+            f"Using pytest_django.asserts.{name} is deprecated. "
+            f'Use fixture "djt" and djt.{name} instead.'
+        )
+        warnings.warn(
+            message,
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return func(*args, **kwargs)
 
     return assertion_func
