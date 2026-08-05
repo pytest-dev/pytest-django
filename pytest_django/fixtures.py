@@ -540,7 +540,10 @@ def async_rf() -> django.test.AsyncRequestFactory:
 
 
 class Settings:
-    """The type of the :fixture:`settings` fixture."""
+    """The type of the :fixture:`settings` fixture.
+
+    Allows getting, setting and deleting Django settings for the duration of the test.
+    """
 
     def __init__(
         self,
