@@ -140,10 +140,10 @@ writing), running them all will take a long time. All valid configurations can
 be found in `tox.ini`. To test against a few of them, invoke tox with the `-e`
 flag::
 
-    $ tox -e py313-dj60-postgres,py314-dj62-mysql
+    $ tox -e py313-dj61-postgres,py314-dj52-mysql
 
-This will run the tests on Python 3.13/Django 60/PostgeSQL and Python
-3.14/Django 6.2/MySQL.
+This will run the tests on Python 3.13/Django 6.1/PostgeSQL and Python
+3.14/Django 5.2/MySQL.
 
 
 Measuring test coverage
