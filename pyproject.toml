@@ -55,6 +55,7 @@ testing = [
     "Django",
     "django-configurations>=2.0",
     "pytest>=9",
+    "pytest-asyncio",
 ]
 coverage = [
     "coverage[toml]",
@@ -114,6 +115,7 @@ files = [
 ]
 [[tool.mypy.overrides]]
 module = [
+    "asgiref.*",
     "django.*",
     "configurations.*",
 ]

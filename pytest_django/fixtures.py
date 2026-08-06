@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import threading
+import types
 from collections.abc import Callable, Generator, Iterable, Sequence
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import AbstractContextManager, ExitStack, contextmanager, nullcontext
 from functools import partial
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -203,6 +205,123 @@ def django_db_setup(  # noqa: PLR0917
                 )
 
 
+@contextmanager
+def _override_instance_attribute(instance: Any, name: str, value: Any) -> Generator[None]:
+    """Temporarily replace an instance attribute and restore its exact previous state.
+
+    ``object.__setattr__`` deliberately bypasses custom ``__setattr__``
+    implementations such as the one used by ``asgiref.local.Local``. The
+    sentinel distinguishes an absent instance attribute from one whose value
+    was ``None``, so an inherited method is exposed again by deleting the
+    override rather than leaving a bound copy on the instance.
+    """
+    sentinel = object()
+    previous_value = vars(instance).get(name, sentinel)
+    object.__setattr__(instance, name, value)
+    try:
+        yield
+    finally:
+        if previous_value is sentinel:
+            object.__delattr__(instance, name)
+        else:
+            object.__setattr__(instance, name, previous_value)
+
+
+@contextmanager
+def _share_database_connections_with_async_executor() -> Generator[None]:
+    """Share Django's thread-local connections with the async ORM executor.
+
+    Django stores its database wrappers as attributes on an
+    ``asgiref.local.Local`` instance. With its ``thread_critical`` mode, the
+    main test thread and the thread-sensitive ``SyncToAsync`` executor would
+    normally resolve an alias such as ``default`` to different wrappers. A
+    transaction opened by the synchronous pytest fixture would consequently
+    not contain async ORM queries executed on the executor thread.
+
+    For the lifetime of this context, ``Local._lock_storage`` returns one
+    shared ``SimpleNamespace`` for those two threads. Other threads continue
+    to use the original local storage.
+
+    Existing wrappers are copied into the shared namespace. Wrappers created
+    lazily during the test are handled by a temporary ``create_connection``
+    method. Every shared wrapper also gets a temporary thread-validation
+    method that permits the two participating threads and retains Django's
+    normal validation for all other threads.
+
+    ``ExitStack`` owns all of these temporary method replacements and sets
+    them back to their original values if the test ends or raises an
+    exception. It also allows wrapper overrides to be added after the context
+    has started, as wrappers are discovered or created dynamically.
+    """
+    from asgiref.sync import SyncToAsync
+    from django.db import connections
+
+    main_thread_id = threading.get_ident()
+    executor_thread_id = SyncToAsync.single_thread_executor.submit(threading.get_ident).result()
+    allowed_thread_ids = frozenset({main_thread_id, executor_thread_id})
+
+    connection_local = connections._connections
+    shared_storage = types.SimpleNamespace()
+    original_lock_storage = connection_local._lock_storage
+    original_create_connection = connections.create_connection
+
+    # New wrapper overrides can be added to the stack while the test is
+    # running; all registered overrides are restored when this block exits.
+    with ExitStack() as stack:
+
+        def patch_wrapper(wrapper: Any) -> Any:
+            original_validate_thread_sharing = wrapper.validate_thread_sharing
+
+            def validate_thread_sharing(_wrapper: Any) -> None:
+                if threading.get_ident() in allowed_thread_ids:
+                    return
+                original_validate_thread_sharing()
+
+            stack.enter_context(
+                _override_instance_attribute(
+                    wrapper,
+                    "validate_thread_sharing",
+                    # Functions assigned to an instance do not bind ``self``
+                    # automatically, so explicitly bind this replacement.
+                    types.MethodType(validate_thread_sharing, wrapper),
+                )
+            )
+            return wrapper
+
+        @contextmanager
+        def lock_storage() -> Generator[Any]:
+            if threading.get_ident() in allowed_thread_ids:
+                yield shared_storage
+            else:
+                with original_lock_storage() as storage:
+                    yield storage
+
+        def create_connection(_connections: Any, alias: str) -> Any:
+            # Apply the same validation override to aliases first used after
+            # this context was entered.
+            return patch_wrapper(original_create_connection(alias))
+
+        with original_lock_storage() as storage:
+            for alias in connections:
+                if hasattr(storage, alias):
+                    setattr(shared_storage, alias, patch_wrapper(getattr(storage, alias)))
+
+        # Local.__setattr__ stores non-internal attributes in the local storage,
+        # so override the method on this Local instance itself.
+        stack.enter_context(
+            _override_instance_attribute(connection_local, "_lock_storage", lock_storage)
+        )
+        stack.enter_context(
+            _override_instance_attribute(
+                connections,
+                "create_connection",
+                types.MethodType(create_connection, connections),
+            )
+        )
+
+        yield
+
+
 @pytest.fixture
 def _django_db_helper(
     request: pytest.FixtureRequest,
@@ -241,7 +360,13 @@ def _django_db_helper(
         "django_db_serialized_rollback" in request.fixturenames
     )
 
-    with django_db_blocker.unblock():
+    connection_sharing = (
+        _share_database_connections_with_async_executor()
+        if request.node.get_closest_marker("asyncio")
+        else nullcontext()
+    )
+
+    with django_db_blocker.unblock(), connection_sharing:
         import django.db
         import django.test
 

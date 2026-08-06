@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Next
+----
+
+Bugfixes
+^^^^^^^^
+
+* Fixed database transaction isolation for asyncio tests using Django's async
+  ORM (`#580 <https://github.com/pytest-dev/pytest-django/issues/580>`__).
+
 v4.13.0 (2026-08-06)
 --------------------
 
