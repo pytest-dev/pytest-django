@@ -115,6 +115,7 @@ files = [
 ]
 [[tool.mypy.overrides]]
 module = [
+    "asgiref.*",
     "django.*",
     "configurations.*",
 ]
