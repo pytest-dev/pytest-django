@@ -213,6 +213,8 @@ def _django_db_helper(
         yield
         return
 
+    from django import VERSION
+
     marker = request.node.get_closest_marker("django_db")
     if marker:
         (
@@ -289,7 +291,11 @@ def _django_db_helper(
         PytestDjangoTestCase.setUpClass()
 
         test_case = PytestDjangoTestCase(methodName="__init__")
-        if not PytestDjangoTestCase._pre_setup_ran_eagerly:
+        if VERSION >= (6, 0):
+            pre_setup_ran_eagerly = PytestDjangoTestCase._pre_setup_ran_eagerly
+        else:
+            pre_setup_ran_eagerly = getattr(PytestDjangoTestCase, "_pre_setup_ran_eagerly", False)
+        if not pre_setup_ran_eagerly:
             # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
             # this flag to say so.
             test_case._pre_setup()
