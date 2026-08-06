@@ -60,6 +60,30 @@ select using an argument to the ``django_db`` mark::
    def test_spam():
        pass  # test relying on transactions
 
+
+Async tests
+-----------
+
+Database access also works in async tests managed by
+`pytest-asyncio <https://pytest-asyncio.readthedocs.io/>`_. Mark the test for
+both asyncio and database access, then use Django's async ORM methods::
+
+   @pytest.mark.asyncio
+   @pytest.mark.django_db
+   async def test_async_user():
+       user = await User.objects.acreate(username="me")
+       assert user.username == "me"
+
+The :fixture:`db` fixture still wraps the test in a transaction and rolls it
+back afterward. Django runs async ORM operations on a dedicated synchronous
+executor thread. For an asyncio test, ``pytest-django`` shares the database
+connection between the main thread, where fixtures and transaction setup run,
+and that executor thread. This means synchronous fixtures and async test code
+participate in the same transaction.
+
+Sharing is limited to these two threads and lasts only for the test. Django's
+usual thread-sharing validation continues to apply to any other threads.
+
 .. _`multi-db`:
 
 Tests requiring multiple databases
