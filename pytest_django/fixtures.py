@@ -289,7 +289,7 @@ def _django_db_helper(
         PytestDjangoTestCase.setUpClass()
 
         test_case = PytestDjangoTestCase(methodName="__init__")
-        if not PytestDjangoTestCase._pre_setup_ran_eagerly:
+        if not getattr(PytestDjangoTestCase, "_pre_setup_ran_eagerly", False):
             # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
             # this flag to say so.
             test_case._pre_setup()
