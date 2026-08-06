@@ -264,16 +264,12 @@ def _share_database_connections_with_async_executor() -> Generator[None]:
     shared_storage = types.SimpleNamespace()
     original_lock_storage = connection_local._lock_storage
     original_create_connection = connections.create_connection
-    patched_wrappers: list[Any] = []
 
     # New wrapper overrides can be added to the stack while the test is
     # running; all registered overrides are restored when this block exits.
     with ExitStack() as stack:
 
         def patch_wrapper(wrapper: Any) -> Any:
-            if any(existing_wrapper is wrapper for existing_wrapper in patched_wrappers):
-                return wrapper
-
             original_validate_thread_sharing = wrapper.validate_thread_sharing
 
             def validate_thread_sharing(_wrapper: Any) -> None:
@@ -290,7 +286,6 @@ def _share_database_connections_with_async_executor() -> Generator[None]:
                     types.MethodType(validate_thread_sharing, wrapper),
                 )
             )
-            patched_wrappers.append(wrapper)
             return wrapper
 
         @contextmanager
