@@ -57,11 +57,11 @@ def test_sanity() -> None:
 
     from pytest_django.asserts import assertContains, assertNumQueries
 
-    response = HttpResponse("My response")
+    response = HttpResponse(b"My response")
 
-    assertContains(response, "My response")
+    assertContains(response, b"My response")
     with pytest.raises(AssertionError):
-        assertContains(response, "Not my response")
+        assertContains(response, b"Not my response")
 
     assertNumQueries(0, lambda: 1 + 1)
     with assertNumQueries(0):
