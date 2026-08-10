@@ -11,6 +11,7 @@ from typing import cast
 import pytest
 
 import pytest_django
+import pytest_django.asserts
 from pytest_django.asserts import __all__ as asserts_all
 
 
