@@ -27,8 +27,6 @@ Example using pytest.ini or tox.ini
    # -- FILE: pytest.ini (or tox.ini)
    [pytest]
    DJANGO_SETTINGS_MODULE = test.settings
-   # -- recommended but optional:
-   python_files = tests.py test_*.py *_tests.py
 
 Example using pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,8 +38,6 @@ For pytest 9.0 and later, use the native TOML format:
    # -- Example FILE: pyproject.toml
    [tool.pytest]
    DJANGO_SETTINGS_MODULE = "test.settings"
-   # -- recommended but optional:
-   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
 
 For pytest 7.x and 8.x, use the INI-compatible format:
 
@@ -50,8 +46,6 @@ For pytest 7.x and 8.x, use the INI-compatible format:
    # -- Example FILE: pyproject.toml
    [tool.pytest.ini_options]
    DJANGO_SETTINGS_MODULE = "test.settings"
-   # -- recommended but optional:
-   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
 
 Run your tests with ``pytest``:
 
