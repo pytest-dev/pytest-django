@@ -20,18 +20,13 @@ def _get_actual_assertions_names() -> list[str]:
     """
     from unittest import TestCase as DefaultTestCase
 
-    from django import VERSION
+    from django.contrib.messages.test import MessagesTestMixin
     from django.test import TestCase as DjangoTestCase
 
-    if VERSION >= (5, 0):
-        from django.contrib.messages.test import MessagesTestMixin
+    class MessagesTestCase(MessagesTestMixin, DjangoTestCase):
+        pass
 
-        class MessagesTestCase(MessagesTestMixin, DjangoTestCase):
-            pass
-
-        obj = MessagesTestCase("run")
-    else:
-        obj = DjangoTestCase("run")
+    obj = MessagesTestCase("run")
 
     def is_assert(func) -> bool:
         return func.startswith("assert") and "_" not in func
