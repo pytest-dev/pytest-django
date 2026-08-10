@@ -26,8 +26,6 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    env:
-      TOXENV: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -56,7 +54,9 @@ jobs:
           uv tool install tox==4.28.4 --with tox-uv
 
       - name: Run tox
-        run: tox
+        run: tox ${TOX_ARGS}
+        env:
+          TOX_ARGS: ${{ matrix.use_factor && format('-f {0}', matrix.name) || format('-e {0}', matrix.name) }}
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
@@ -77,29 +77,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: 'linting,docs',                       python: '3.14',     allow_failure: false}
+          - {name: 'linting,docs',                       python: '3.14',     allow_failure: false, use_factor: false}
 
           # Django 5.2 LTS / Python 3.10–3.14
-          - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false}
-          - {name: py311-dj52-sqlite-xdist-coverage,     python: '3.11',     allow_failure: false}
-          - {name: py311-dj52-mysql-coverage,            python: '3.11',     allow_failure: false}
-          - {name: py312-dj52-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
-          - {name: py313-dj52-sqlite-coverage,           python: '3.13',     allow_failure: false}
-          - {name: py314-dj52-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
+          - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false, use_factor: true}
+          - {name: py311-dj52-sqlite-xdist-coverage,     python: '3.11',     allow_failure: false, use_factor: true}
+          - {name: py311-dj52-mysql-coverage,            python: '3.11',     allow_failure: false, use_factor: true}
+          - {name: py312-dj52-postgres-xdist-coverage,   python: '3.12',     allow_failure: false, use_factor: true}
+          - {name: py313-dj52-sqlite-coverage,           python: '3.13',     allow_failure: false, use_factor: true}
+          - {name: py314-dj52-postgres-xdist-coverage,   python: '3.14',     allow_failure: false, use_factor: true}
 
           # Django 6.0 / Python 3.12–3.14
-          - {name: py312-dj60-postgres-xdist-coverage,   python: '3.12',     allow_failure: false}
-          - {name: py313-dj60-sqlite-coverage,           python: '3.13',     allow_failure: false}
-          - {name: py314-dj60-postgres-xdist-coverage,   python: '3.14',     allow_failure: false}
+          - {name: py312-dj60-postgres-xdist-coverage,   python: '3.12',     allow_failure: false, use_factor: true}
+          - {name: py313-dj60-sqlite-coverage,           python: '3.13',     allow_failure: false, use_factor: true}
+          - {name: py314-dj60-postgres-xdist-coverage,   python: '3.14',     allow_failure: false, use_factor: true}
           # Pin the minimum supported pytest on the latest stable combo.
-          - {name: py313-dj60-sqlite-pytestmin-coverage, python: '3.13',     allow_failure: false}
+          - {name: py313-dj60-sqlite-pytestmin-coverage, python: '3.13',     allow_failure: false, use_factor: true}
 
           # Django main / Python [latest]
-          - {name: py313-djmain-sqlite-coverage,         python: '3.13',     allow_failure: true}
-          - {name: py314-djmain-postgres-xdist-coverage, python: '3.14',     allow_failure: true}
+          - {name: py313-djmain-sqlite-coverage,         python: '3.13',     allow_failure: true, use_factor: true}
+          - {name: py314-djmain-postgres-xdist-coverage, python: '3.14',     allow_failure: true, use_factor: true}
 
           # PyPy: one representative combo, no coverage (too slow)
-          - {name: pypy3-dj52-postgres,                  python: 'pypy3.10', allow_failure: false}
+          - {name: pypy3-dj52-postgres,                  python: 'pypy3.10', allow_failure: false, use_factor: false}
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()
