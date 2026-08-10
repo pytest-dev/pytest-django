@@ -19,6 +19,16 @@ Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
 :ref:`configuring_django_settings`) and make your tests discoverable
 (see :ref:`faq-tests-not-being-picked-up`):
 
+By default, pytest-django does not depend on Django. If you want to ensure your
+Django version is compatible with the installed pytest-django version (lower
+bound only), it's recommended to add the ``django`` `extra`_::
+
+.. code-block:: bash
+
+   $ pip install pytest-django[django]
+
+.. _extra: https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras
+
 Example using pytest.ini or tox.ini
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
