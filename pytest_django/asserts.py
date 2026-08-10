@@ -8,21 +8,15 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
-from django import VERSION
+from django.contrib.messages.test import MessagesTestMixin
 from django.test import LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase
 
 
-USE_CONTRIB_MESSAGES = VERSION >= (5, 0)
+class MessagesTestCase(MessagesTestMixin, TestCase):
+    pass
 
-if USE_CONTRIB_MESSAGES:
-    from django.contrib.messages.test import MessagesTestMixin
 
-    class MessagesTestCase(MessagesTestMixin, TestCase):
-        pass
-
-    test_case = MessagesTestCase("run")
-else:
-    test_case = TestCase("run")
+test_case = MessagesTestCase("run")
 
 
 def _wrapper(name: str) -> Callable[..., Any]:
@@ -42,12 +36,8 @@ assertions_names.update(
     {attr for attr in vars(SimpleTestCase) if attr.startswith("assert")},
     {attr for attr in vars(LiveServerTestCase) if attr.startswith("assert")},
     {attr for attr in vars(TransactionTestCase) if attr.startswith("assert")},
+    {attr for attr in vars(MessagesTestMixin) if attr.startswith("assert")},
 )
-
-if USE_CONTRIB_MESSAGES:
-    assertions_names.update(
-        {attr for attr in vars(MessagesTestMixin) if attr.startswith("assert")},
-    )
 
 for assert_func in assertions_names:
     globals()[assert_func] = _wrapper(assert_func)
