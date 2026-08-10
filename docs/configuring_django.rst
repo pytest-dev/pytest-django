@@ -43,7 +43,7 @@ Example contents of pytest.ini::
 
 Example contents of pyproject.toml::
 
-    [tool.pytest.ini_options]
+    [tool.pytest]
     DJANGO_SETTINGS_MODULE = "test.settings"
 
 Order of choosing settings
@@ -83,7 +83,7 @@ INI File Contents::
 
 pyproject.toml File Contents::
 
-    [tool.pytest.ini_options]
+    [tool.pytest]
     DJANGO_CONFIGURATION = "MySettings"
 
 Using ``django.conf.settings.configure()``
