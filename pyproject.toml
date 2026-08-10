@@ -40,6 +40,14 @@ dependencies = [
     "pytest>=7.0.0",
 ]
 [project.optional-dependencies]
+# pytest-django intentionally does not depend on Django. The django extra
+# adds the dependency. The idea is that users can specify it to obtain the
+# lower-bound constraint on pytest-django's supported Django versions. This
+# way if they use an older version of Django, the dependency resolver will
+# give them an older, compatible version of pytest-django.
+django = [
+    "django>=5.2",
+]
 # .readthedocs.yml doesn't support dependency groups yet, so duplicate the docs
 # group as an extra. Can be removed once RTD supports groups.
 docs = [
