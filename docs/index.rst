@@ -24,7 +24,6 @@ Example using pytest.ini or tox.ini
 
 .. code-block:: ini
 
-   # -- FILE: pytest.ini (or tox.ini)
    [pytest]
    DJANGO_SETTINGS_MODULE = test.settings
 
@@ -35,7 +34,6 @@ For pytest 9.0 and later, use the native TOML format:
 
 .. code-block:: toml
 
-   # -- Example FILE: pyproject.toml
    [tool.pytest]
    DJANGO_SETTINGS_MODULE = "test.settings"
 
@@ -43,7 +41,6 @@ For pytest 7.x and 8.x, use the INI-compatible format:
 
 .. code-block:: toml
 
-   # -- Example FILE: pyproject.toml
    [tool.pytest.ini_options]
    DJANGO_SETTINGS_MODULE = "test.settings"
 
