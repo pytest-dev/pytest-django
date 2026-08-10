@@ -45,7 +45,7 @@ bound only), it's recommended to add the ``django`` `extra`_:
 
 .. code-block:: bash
 
-   $ pip install pytest-django[django]
+   pip install pytest-django[django]
 
 .. _extra: https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras
 
