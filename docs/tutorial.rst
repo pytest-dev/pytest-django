@@ -39,6 +39,16 @@ Installing pytest-django will also automatically install the latest version of
 pytest. ``pytest-django`` uses ``pytest``'s plugin system and can be used right away
 after installation, there is nothing more to configure.
 
+By default, pytest-django does not depend on Django. If you want to ensure your
+Django version is compatible with the installed pytest-django version (lower
+bound only), it's recommended to add the ``django`` `extra`_:
+
+.. code-block:: bash
+
+   $ pip install pytest-django[django]
+
+.. _extra: https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras
+
 Step 2: Point pytest to your Django settings
 --------------------------------------------
 
