@@ -1,6 +1,22 @@
 Changelog
 =========
 
+v4.14.0 (2026-08-10)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Restored (unofficial) support for Django 5.0 and Django 5.1.
+
+Improvements
+^^^^^^^^^^^^
+
+* Added a ``django`` extra to the package. By depending on this extra
+  (e.g. ``pip install pytest-django[django]``), the dependency resolver
+  will ensure you get a version of pytest-django that is compatible with
+  your version of Django (lower bound only). At least from now on...
+
 v4.13.0 (2026-08-06)
 --------------------
 
