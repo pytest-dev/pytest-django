@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v4.15.0 (unreleased)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Official Django 6.1 support.
+
 v4.14.0 (2026-08-10)
 --------------------
 
@@ -23,7 +31,6 @@ v4.13.0 (2026-08-06)
 Compatibility
 ^^^^^^^^^^^^^
 
-* Official Django 6.1 support.
 * Dropped support for Django 4.2 and 5.1.
 
 Improvements
