@@ -6,7 +6,7 @@ import os
 from collections.abc import Callable, Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import pytest
 
@@ -16,7 +16,7 @@ from .lazy_django import skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, Literal
+    from typing import Literal, TypeAlias
 
     import django
     import django.test
@@ -24,10 +24,10 @@ if TYPE_CHECKING:
     from . import DjangoDbBlocker
     from .django_compat import _User, _UserModel
 
-    _DjangoDbDatabases = Literal["__all__"] | Iterable[str] | None
-    _DjangoDbAvailableApps = list[str] | None
+    _DjangoDbDatabases: TypeAlias = Literal["__all__"] | Iterable[str] | None
+    _DjangoDbAvailableApps: TypeAlias = list[str] | None
     # transaction, reset_sequences, databases, serialized_rollback, available_apps
-    _DjangoDb = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
+    _DjangoDb: TypeAlias = tuple[bool, bool, _DjangoDbDatabases, bool, _DjangoDbAvailableApps]
 
 
 __all__ = [
@@ -213,6 +213,8 @@ def _django_db_helper(
         yield
         return
 
+    from django import VERSION
+
     marker = request.node.get_closest_marker("django_db")
     if marker:
         (
@@ -289,7 +291,11 @@ def _django_db_helper(
         PytestDjangoTestCase.setUpClass()
 
         test_case = PytestDjangoTestCase(methodName="__init__")
-        if not PytestDjangoTestCase._pre_setup_ran_eagerly:
+        if VERSION >= (6, 0):
+            pre_setup_ran_eagerly = PytestDjangoTestCase._pre_setup_ran_eagerly
+        else:
+            pre_setup_ran_eagerly = getattr(PytestDjangoTestCase, "_pre_setup_ran_eagerly", False)
+        if not pre_setup_ran_eagerly:
             # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
             # this flag to say so.
             test_case._pre_setup()
@@ -540,7 +546,10 @@ def async_rf() -> django.test.AsyncRequestFactory:
 
 
 class Settings:
-    """The type of the :fixture:`settings` fixture."""
+    """The type of the :fixture:`settings` fixture.
+
+    Allows getting, setting and deleting Django settings for the duration of the test.
+    """
 
     def __init__(
         self,
