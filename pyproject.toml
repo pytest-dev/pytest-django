@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "pytest-django"
 description = "A Django plugin for pytest."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 authors = [
     { name = "Andreas Pelme", email = "andreas@pelme.se" },
@@ -21,18 +21,17 @@ license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Framework :: Django",
-    "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Software Development :: Testing",
@@ -40,14 +39,30 @@ classifiers = [
 dependencies = [
     "pytest>=7.0.0",
 ]
+[project.optional-dependencies]
+# pytest-django intentionally does not depend on Django. The django extra
+# adds the dependency. The idea is that users can specify it to obtain the
+# lower-bound constraint on pytest-django's supported Django versions. This
+# way if they use an older version of Django, the dependency resolver will
+# give them an older, compatible version of pytest-django.
+django = [
+    "django>=5.2",
+]
+# .readthedocs.yml doesn't support dependency groups yet, so duplicate the docs
+# group as an extra. Can be removed once RTD supports groups.
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 [dependency-groups]
 docs = [
     "sphinx",
-    "sphinx_rtd_theme",
+    "sphinx-rtd-theme",
 ]
 testing = [
     "Django",
     "django-configurations>=2.0",
+    "pytest>=9",
 ]
 coverage = [
     "coverage[toml]",
@@ -64,8 +79,9 @@ xdist = [
 ]
 linting = [
     "editorconfig-checker==3.2.1",
-    "mypy==1.17.1",
-    "ruff==0.12.8",
+    "mypy==2.3.0",
+    "pyupgrade==3.21.2",
+    "ruff==0.16.1",
     "zizmor==1.11.0",
 ]
 [project.urls]
@@ -83,13 +99,12 @@ pytest_django = ["py.typed"]
 [tool.setuptools_scm]
 write_to = "pytest_django/_version.py"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
-    # Error on using unregistered marker.
-    "--strict-markers",
     # Show extra test summary info for everything.
     "-ra",
 ]
+strict = true
 pythonpath = ["."]
 DJANGO_SETTINGS_MODULE = "pytest_django_test.settings_sqlite_file"
 testpaths = ["tests"]
@@ -223,6 +238,7 @@ ignore = [
     "S101",   # Use of `assert` detected
 
     # TODO - need to fix these
+    "CPY001",  # Missing copyright notice at top of file
     "C901",    # .. is too complex
     "COM812",  # Trailing comma missing
     "E501",    # Line too long

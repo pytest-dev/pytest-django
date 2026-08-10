@@ -13,7 +13,7 @@ Quick Start
 
 .. code-block:: bash
 
-   $ pip install pytest-django
+   $ pip install pytest-django[django]
 
 Make sure ``DJANGO_SETTINGS_MODULE`` is defined (see
 :ref:`configuring_django_settings`) and make your tests discoverable
@@ -24,22 +24,25 @@ Example using pytest.ini or tox.ini
 
 .. code-block:: ini
 
-   # -- FILE: pytest.ini (or tox.ini)
    [pytest]
    DJANGO_SETTINGS_MODULE = test.settings
-   # -- recommended but optional:
-   python_files = tests.py test_*.py *_tests.py
 
 Example using pyproject.toml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+For pytest 9.0 and later, use the native TOML format:
+
 .. code-block:: toml
 
-   # -- Example FILE: pyproject.toml
+   [tool.pytest]
+   DJANGO_SETTINGS_MODULE = "test.settings"
+
+For pytest 7.x and 8.x, use the INI-compatible format:
+
+.. code-block:: toml
+
    [tool.pytest.ini_options]
    DJANGO_SETTINGS_MODULE = "test.settings"
-   # -- recommended but optional:
-   python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
 
 Run your tests with ``pytest``:
 

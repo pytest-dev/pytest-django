@@ -27,11 +27,11 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
 
@@ -60,14 +60,14 @@ jobs:
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4.37.3
         with:
           sarif_file: zizmor.sarif
           category: zizmor
 
       - name: Report coverage
         if: contains(matrix.name, 'coverage')
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: true
           files: ./coverage.xml
@@ -77,68 +77,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: linting,docs
-            python: '3.13'
-            allow_failure: false
-            use_factor: false
+          - {name: 'linting,docs',                       python: '3.14',     allow_failure: false, use_factor: false}
 
-          - name: py39-sqlite-xdist-coverage
-            python: '3.9'
-            allow_failure: false
-            use_factor: true
+          # Django 5.2 LTS / Python 3.10–3.14
+          - {name: py310-dj52-mysql-coverage,            python: '3.10',     allow_failure: false, use_factor: true}
+          - {name: py311-dj52-sqlite-xdist-coverage,     python: '3.11',     allow_failure: false, use_factor: true}
+          - {name: py311-dj52-mysql-coverage,            python: '3.11',     allow_failure: false, use_factor: true}
+          - {name: py312-dj52-postgres-xdist-coverage,   python: '3.12',     allow_failure: false, use_factor: true}
+          - {name: py313-dj52-sqlite-coverage,           python: '3.13',     allow_failure: false, use_factor: true}
+          - {name: py314-dj52-postgres-xdist-coverage,   python: '3.14',     allow_failure: false, use_factor: true}
 
-          - name: py310-sqlite-xdist-coverage
-            python: '3.10'
-            allow_failure: false
-            use_factor: true
+          # Django 6.0 / Python 3.12–3.14
+          - {name: py312-dj60-postgres-xdist-coverage,   python: '3.12',     allow_failure: false, use_factor: true}
+          - {name: py313-dj60-sqlite-coverage,           python: '3.13',     allow_failure: false, use_factor: true}
+          - {name: py314-dj60-postgres-xdist-coverage,   python: '3.14',     allow_failure: false, use_factor: true}
+          # Pin the minimum supported pytest on the latest stable combo.
+          - {name: py313-dj60-sqlite-pytestmin-coverage, python: '3.13',     allow_failure: false, use_factor: true}
 
-          - name: py311-sqlite-xdist-coverage
-            python: '3.11'
-            allow_failure: false
-            use_factor: true
+          # Django main / Python [latest]
+          - {name: py313-djmain-sqlite-coverage,         python: '3.13',     allow_failure: true, use_factor: true}
+          - {name: py314-djmain-postgres-xdist-coverage, python: '3.14',     allow_failure: true, use_factor: true}
 
-          # start: Speeding up tests by running them in parallel.
-          - name: py312-dj42-sqlite-xdist-coverage
-            python: '3.12'
-            allow_failure: false
-            use_factor: false
-
-          - name: py312-dj51-sqlite-xdist-coverage
-            python: '3.12'
-            allow_failure: false
-            use_factor: false
-
-          - name: py312-dj52-sqlite-xdist-coverage
-            python: '3.12'
-            allow_failure: false
-            use_factor: false
-          # end: Speeding up tests by running them in parallel.
-
-          - name: py313-sqlite-xdist-coverage
-            python: '3.13'
-            allow_failure: false
-            use_factor: true
-
-          - name: py313-djmain-postgres-coverage
-            python: '3.13'
-            allow_failure: false
-            use_factor: false
-
-          - name: py313-djmain-mysql-coverage
-            python: '3.13'
-            allow_failure: false
-            use_factor: false
-
-          - name: py313-djmain-sqlite-pytestmin
-            python: '3.13'
-            allow_failure: false
-            use_factor: false
-
-          # pypy3: not included with coverage reports (much slower then).
-          - name: pypy3-dj52-sqlite
-            python: 'pypy3.11'
-            allow_failure: false
-            use_factor: false
+          # PyPy: one representative combo, no coverage (too slow)
+          - {name: pypy3-dj52-postgres,                  python: 'pypy3.10', allow_failure: false, use_factor: false}
 
   check:  # This job does nothing and is only used for the branch protection
     if: always()

@@ -6,6 +6,7 @@ test database and provides some useful text fixtures.
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import inspect
 import os
@@ -15,7 +16,7 @@ import types
 from collections.abc import Generator
 from contextlib import AbstractContextManager
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import pytest
 
@@ -54,9 +55,8 @@ from .lazy_django import django_settings_is_configured, skip_if_no_django
 
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn
-
     import django
+    import django.apps.registry
 
 
 SETTINGS_MODULE_ENV = "DJANGO_SETTINGS_MODULE"
@@ -179,10 +179,15 @@ PROJECT_SCAN_DISABLED = (
 
 
 @contextlib.contextmanager
-def _handle_import_error(extra_message: str) -> Generator[None, None, None]:
+def _handle_import_error(extra_message: str) -> Generator[None]:
+    # An invalid DJANGO_SETTINGS_MODULE raises ImportError on Django < 6.2, but
+    # Django >= 6.2 wraps it in ImproperlyConfigured. Handle both so the
+    # guidance message is shown regardless of the Django version.
+    from django.core.exceptions import ImproperlyConfigured
+
     try:
         yield
-    except ImportError as e:
+    except (ImportError, ImproperlyConfigured) as e:
         django_msg = (e.args[0] + "\n\n") if e.args else ""
         msg = django_msg + extra_message
         raise ImportError(msg) from None
@@ -245,7 +250,7 @@ def _setup_django(config: pytest.Config) -> None:
 
 
 def _get_boolean_value(
-    x: None | (bool | str),
+    x: bool | str | None,
     name: str,
     default: bool | None = None,
 ) -> bool:
@@ -296,15 +301,46 @@ def pytest_load_initial_conftests(
     )
     early_config.addinivalue_line(
         "markers",
+        "django_isolate_apps(*app_labels): isolate Django's app registry for this test.",
+    )
+    early_config.addinivalue_line(
+        "markers",
         "ignore_template_errors(): ignore errors from invalid template "
         "variables (if --fail-on-template-vars is used).",
     )
 
     options = parser.parse_known_args(args)
 
-    if options.version or options.help:
-        return
+    # pytest still imports the initial conftests for `--help`/`--version`, so
+    # Django is set up for them as well. Otherwise a conftest with top-level
+    # model imports fails with AppRegistryNotReady (issue #1152).
+    is_help_or_version = bool(options.version or options.help)
 
+    # Stashed up front, to be available even if the setup below fails.
+    report_header: list[str] = []
+    early_config.stash[report_header_key] = report_header
+    early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
+
+    try:
+        _initialize_django(early_config, options, args, report_header)
+    except Exception:
+        # `--help`/`--version` never run tests, so they must keep working on a
+        # broken configuration (issue #235); a real run still fails loudly.
+        if not is_help_or_version:
+            raise
+
+
+def _initialize_django(
+    early_config: pytest.Config,
+    options: argparse.Namespace,
+    args: list[str],
+    report_header: list[str],
+) -> None:
+    """Configure and set up Django from the pytest options/ini/environment.
+
+    Everything which can fail on a broken configuration lives here, so that
+    `pytest_load_initial_conftests` can tolerate it for `--help`/`--version`.
+    """
     django_find_project = _get_boolean_value(
         early_config.getini("django_find_project"), "django_find_project"
     )
@@ -337,9 +373,6 @@ def pytest_load_initial_conftests(
     ds, ds_source = _get_option_with_source(options.ds, SETTINGS_MODULE_ENV)
     dc, dc_source = _get_option_with_source(options.dc, CONFIGURATION_ENV)
 
-    report_header: list[str] = []
-    early_config.stash[report_header_key] = report_header
-
     if ds:
         report_header.append(f"settings: {ds} (from {ds_source})")
         os.environ[SETTINGS_MODULE_ENV] = ds
@@ -360,8 +393,7 @@ def pytest_load_initial_conftests(
         with _handle_import_error(_django_project_scan_outcome):
             dj_settings.DATABASES  # noqa: B018
 
-    early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
-
+    # Populates the app registry, which fails on a broken INSTALLED_APPS.
     _setup_django(early_config)
 
 
@@ -445,6 +477,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
     from django.test import TestCase, TransactionTestCase
 
+    # Reorder the tests as Django does:
+    # https://docs.djangoproject.com/en/6.0/topics/testing/overview/#order-in-which-tests-are-executed
+
     def get_order_number(test: pytest.Item) -> int:
         test_cls = getattr(test, "cls", None)
         if test_cls and issubclass(test_cls, TransactionTestCase):
@@ -457,9 +492,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 (
                     transaction,
                     reset_sequences,
-                    databases,
-                    serialized_rollback,
-                    available_apps,
+                    _databases,
+                    _serialized_rollback,
+                    _available_apps,
                 ) = validate_django_db(marker_db)
                 uses_db = True
                 transactional = transaction or reset_sequences
@@ -467,7 +502,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 uses_db = False
                 transactional = False
             fixtures = getattr(test, "fixturenames", [])
-            transactional = transactional or "transactional_db" in fixtures
+            transactional = transactional or (
+                "transactional_db" in fixtures or "live_server" in fixtures
+            )
             uses_db = uses_db or "db" in fixtures
 
         if transactional:
@@ -491,7 +528,7 @@ def pytest_unconfigure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(autouse=True, scope="session")
-def django_test_environment(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def django_test_environment(request: pytest.FixtureRequest) -> Generator[None]:
     """Setup Django's test environment for the testing session.
 
     XXX It is a little dodgy that this is an autouse fixture.  Perhaps
@@ -560,7 +597,7 @@ def _django_db_marker(request: pytest.FixtureRequest) -> None:
 def _django_setup_unittest(
     request: pytest.FixtureRequest,
     django_db_blocker: DjangoDbBlocker,
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
         yield
@@ -573,7 +610,7 @@ def _django_setup_unittest(
 
     original_runtest = TestCaseFunction.runtest
 
-    def non_debugging_runtest(self) -> None:  # noqa: ANN001
+    def non_debugging_runtest(self: TestCaseFunction) -> None:
         self._testcase(result=self)
 
     from django.test import SimpleTestCase
@@ -640,7 +677,7 @@ def django_mail_dnsname() -> str:
 
 
 @pytest.fixture(autouse=True)
-def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None]:
     """Apply the @pytest.mark.urls marker, internal to pytest-django."""
     marker: pytest.Mark | None = request.node.get_closest_marker("urls")
     if marker:
@@ -664,8 +701,41 @@ def _django_set_urlconf(request: pytest.FixtureRequest) -> Generator[None, None,
         set_urlconf(None)
 
 
+@pytest.fixture(autouse=True)
+def _django_isolate_apps(
+    request: pytest.FixtureRequest,
+) -> Generator[django.apps.registry.Apps]:
+    """Apply the @pytest.mark.django_isolate_apps marker if present, internal to pytest-django."""
+    marker: pytest.Mark | None = request.node.get_closest_marker("django_isolate_apps")
+    if not marker:
+        yield None
+        return
+
+    skip_if_no_django()
+
+    from django.test.utils import isolate_apps
+
+    app_labels = validate_django_isolate_apps(marker)
+
+    with isolate_apps(*app_labels) as apps:
+        yield apps
+
+
+@pytest.fixture
+def django_isolated_apps(
+    _django_isolate_apps: django.apps.registry.Apps | None,
+) -> django.apps.registry.Apps:
+    """Access the isolated Apps registry instance for tests marked with
+    @pytest.mark.django_isolate_apps(...)."""
+    if _django_isolate_apps is None:
+        raise pytest.UsageError(
+            "The django_isolated_apps fixture requires @pytest.mark.django_isolate_apps([...])."
+        )
+    return _django_isolate_apps
+
+
 @pytest.fixture(autouse=True, scope="session")
-def _fail_for_invalid_template_variable() -> Generator[None, None, None]:
+def _fail_for_invalid_template_variable() -> Generator[None]:
     """Fixture that fails for invalid variables in templates.
 
     This fixture will fail each test that uses django template rendering
@@ -880,5 +950,16 @@ def validate_urls(marker: pytest.Mark) -> list[str]:
 
     def apifun(urls: list[str]) -> list[str]:
         return urls
+
+    return apifun(*marker.args, **marker.kwargs)
+
+
+def validate_django_isolate_apps(marker: pytest.Mark) -> tuple[str, ...]:
+    """Validate the django_isolate_apps marker."""
+
+    def apifun(*app_labels: str) -> tuple[str, ...]:
+        if not app_labels:
+            raise ValueError("@pytest.mark.django_isolate_apps requires at least one app label")
+        return app_labels
 
     return apifun(*marker.args, **marker.kwargs)

@@ -1,13 +1,62 @@
 Changelog
 =========
 
-v4.12.0 (Not released yet)
---------------------------
+v4.14.0 (2026-08-10)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Restored (unofficial) support for Django 5.0 and Django 5.1.
+
+Improvements
+^^^^^^^^^^^^
+
+* Added a ``django`` extra to the package. By depending on this extra
+  (e.g. ``pip install pytest-django[django]``), the dependency resolver
+  will ensure you get a version of pytest-django that is compatible with
+  your version of Django (lower bound only). At least from now on...
+
+v4.13.0 (2026-08-06)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Dropped support for Django 4.2 and 5.1.
+
+Improvements
+^^^^^^^^^^^^
+
+* Export ``pytest_django.Settings`` from the top-level ``pytest_django``
+  module so the :fixture:`settings` fixture can be type-annotated
+  (`#1257 <https://github.com/pytest-dev/pytest-django/issues/1257>`__).
+
+Bugfixes
+^^^^^^^^
+
+* Fixed type hints of assert methods to match actual signature (`PR #1271 <https://github.com/pytest-dev/pytest-django/pull/1271>`__)
+* Handled Django 6.2's ``ImproperlyConfigured`` (in addition to ``ImportError``) when the configured ``DJANGO_SETTINGS_MODULE`` cannot be imported, so pytest-django still shows its guidance message.
+* Fixed ``django_db(transaction=True)`` tests being set up twice, which repeated the ``serialized_rollback`` restore and the ``fixtures`` load, and sent ``setting_changed`` and ``post_migrate`` twice when ``available_apps`` is set.
+* Fixed ``--help``/``--version`` failing with ``AppRegistryNotReady`` (surfaced as a ``could not load initial conftests`` warning) when a ``conftest.py`` imports Django models at the top level. Django is now set up even when ``--help``/``--version`` are passed, before the initial conftests are loaded for these options (`#1152 <https://github.com/pytest-dev/pytest-django/issues/1152>`__).
+
+v4.12.0 (2026-02-14)
+--------------------
+
+Compatibility
+^^^^^^^^^^^^^
+
+* Official Python 3.14 support.
+* Dropped support for Python 3.9, minimum version is now Python 3.10.
+* Official Django 6.0 support.
 
 Improvements
 ^^^^^^^^^^^^
 
 * The :ref:`multiple databases <multi-db>` support added in v4.3.0 is no longer considered experimental.
+* Added :func:`@pytest.mark.django_isolate_apps <pytest.mark.django_isolate_apps>`
+  for isolating Django's app registry in pytest tests, and a
+  :fixture:`django_isolated_apps` fixture to access the isolated Apps registry instance if needed.
 
 v4.11.1 (2025-04-03)
 --------------------
