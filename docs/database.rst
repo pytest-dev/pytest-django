@@ -328,7 +328,7 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup():
+    def django_db_setup(request):
         from django.conf import settings
 
         settings.DATABASES['default']['NAME'] = 'the_copied_db'
@@ -336,7 +336,7 @@ Put this into ``conftest.py``::
         run_sql('DROP DATABASE IF EXISTS the_copied_db')
         run_sql('CREATE DATABASE the_copied_db TEMPLATE the_source_db')
 
-        yield
+        yield request.getfixturevalue("django_db_setup")
 
         for connection in connections.all():
             connection.close()
@@ -359,14 +359,16 @@ Put this into ``conftest.py``::
 
 
     @pytest.fixture(scope='session')
-    def django_db_setup():
+    def django_db_setup(request):
         from django.conf import settings
 
-        settings.DATABASES['default'] = {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': 'db.example.com',
-            'NAME': 'external_db',
-        }
+        # Do NOT override the whole `settings.DATABASES['default'] = {..}`
+        # as this could lead to errors.
+        settings.DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+        settings.DATABASES['default']['HOST'] = 'db.example.com'
+        settings.DATABASES['default']['NAME'] = 'external_db'
+
+        yield request.getfixturevalue("django_db_setup")
 
 
 Populate the database with initial test data
