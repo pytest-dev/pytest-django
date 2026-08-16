@@ -646,11 +646,17 @@ def _dj_autoclear_mailbox() -> None:
 
 @pytest.fixture
 def mailoutbox(
+    request: pytest.FixtureRequest,
     django_mail_patch_dns: None,  # noqa: ARG001
     _dj_autoclear_mailbox: None,
 ) -> list[django.core.mail.EmailMessage] | None:
     """A clean email outbox to which Django-generated emails are sent."""
     skip_if_no_django()
+
+    # Django's TestCase._pre_setup() replaces mail.outbox. Run the database
+    # helper first so mailoutbox returns the replacement list.
+    if "_django_db_helper" in request.fixturenames:
+        request.getfixturevalue("_django_db_helper")
 
     from django.core import mail
 

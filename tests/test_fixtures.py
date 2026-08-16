@@ -804,6 +804,23 @@ def test_mail_again(mailoutbox) -> None:
     test_mail(mailoutbox)
 
 
+def test_mailoutbox_with_db(mailoutbox, db: None) -> None:  # noqa: ARG001
+    assert mailoutbox is mail.outbox
+
+
+@pytest.fixture
+def mail_sending_db_fixture(db: None) -> None:  # noqa: ARG001
+    mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
+
+
+def test_mailoutbox_with_db_dependent_fixture(
+    mailoutbox,
+    mail_sending_db_fixture: None,  # noqa: ARG001
+) -> None:
+    assert mailoutbox is mail.outbox
+    assert len(mailoutbox) == 1
+
+
 def test_mail_message_uses_mocked_DNS_NAME(mailoutbox) -> None:
     mail.send_mail("subject", "body", "from@example.com", ["to@example.com"])
     m = mailoutbox[0]
