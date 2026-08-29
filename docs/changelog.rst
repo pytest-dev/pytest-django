@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Improvements
+^^^^^^^^^^^^
+
+* Added the ``django_asserts_max_diff`` configuration option to set the
+  maximum diff length emitted by ``pytest_django.asserts`` (`#1155 <https://github.com/pytest-dev/pytest-django/issues/1155>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 
