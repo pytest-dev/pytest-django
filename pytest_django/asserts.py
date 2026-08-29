@@ -16,7 +16,7 @@ class MessagesTestCase(MessagesTestMixin, TestCase):
     pass
 
 
-test_case = MessagesTestCase("run")
+test_case: Any = MessagesTestCase("run")
 
 
 def _wrapper(name: str) -> Callable[..., Any]:

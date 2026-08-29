@@ -62,7 +62,7 @@ use ``addopts = --ds=yourtestsettings``.
 Configuring Django assertion diffs
 ----------------------------------
 
-The assertion helpers in :mod:`pytest_django.asserts` use Django's
+The assertion helpers in ``pytest_django.asserts`` use Django's
 ``TestCase`` assertions. To change the maximum amount of assertion diff shown,
 set ``django_asserts_max_diff`` in your pytest configuration. The default is
 ``640``, matching ``unittest.TestCase.maxDiff``. Set it to ``None`` to show the
