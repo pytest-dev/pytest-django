@@ -106,6 +106,22 @@ def test_async_rf(async_rf: AsyncRequestFactory) -> None:
     assert isinstance(async_rf, AsyncRequestFactory)
 
 
+def test_parallel_database_fixture_docstrings(django_pytester: DjangoPytester) -> None:
+    result = django_pytester.runpytest_subprocess("--fixtures", "-q")
+
+    result.stdout.fnmatch_lines(
+        [
+            "*django_db_modify_db_settings_tox_suffix*",
+            "*Add a suffix to test database names when tox runs in parallel.*",
+            "*django_db_modify_db_settings_xdist_suffix*",
+            "*Add a suffix to test database names when pytest-xdist runs tests.*",
+            "*django_db_modify_db_settings_parallel_suffix*",
+            "*Add a suffix to test database names when tests run in parallel.*",
+        ]
+    )
+    assert result.ret == 0
+
+
 @pytest.mark.django_db
 def test_django_assert_num_queries_db(
     request: pytest.FixtureRequest,
