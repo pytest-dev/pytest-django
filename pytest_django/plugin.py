@@ -418,14 +418,14 @@ def pytest_configure(config: pytest.Config) -> None:
     if "django" not in sys.modules:
         return
 
-    from pytest_django.asserts import test_case
+    from pytest_django.asserts import _set_max_diff
 
     max_diff = config.getini("django_asserts_max_diff")
     if max_diff.lower() == "none":
-        test_case.maxDiff = None
+        _set_max_diff(None)
     else:
         try:
-            test_case.maxDiff = int(max_diff)
+            _set_max_diff(int(max_diff))
         except ValueError as error:
             raise pytest.UsageError(
                 "django_asserts_max_diff must be an integer or None"

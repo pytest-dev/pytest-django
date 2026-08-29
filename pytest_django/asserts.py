@@ -19,6 +19,10 @@ class MessagesTestCase(MessagesTestMixin, TestCase):
 test_case: Any = MessagesTestCase("run")
 
 
+def _set_max_diff(max_diff: int | None) -> None:
+    test_case.maxDiff = max_diff
+
+
 def _wrapper(name: str) -> Callable[..., Any]:
     func = getattr(test_case, name)
 
