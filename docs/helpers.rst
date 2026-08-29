@@ -619,6 +619,14 @@ be cleared for each test to avoid hitting the cache and causing the wrong Site
 object to be returned by ``Site.objects.get_current()``.
 
 
+Clearing of ContentType cache
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If ``django.contrib.contenttypes`` is in your INSTALLED_APPS, the ContentType
+cache will be cleared for each test to avoid test ordering affecting query
+counts.
+
+
 Clearing of mail.outbox
 ~~~~~~~~~~~~~~~~~~~~~~~
 

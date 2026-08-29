@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Clear Django's ContentType cache between tests so query counts do not depend
+  on test ordering (`#1156 <https://github.com/pytest-dev/pytest-django/issues/1156>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 

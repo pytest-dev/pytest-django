@@ -854,6 +854,21 @@ def _django_clear_site_cache() -> None:
             Site.objects.clear_cache()
 
 
+@pytest.fixture(autouse=True)
+def _django_clear_contenttypes_cache() -> None:
+    """Clears ``ContentType`` cache to avoid unexpected behavior with cached
+    content types.
+    """
+
+    if django_settings_is_configured():
+        from django.conf import settings as dj_settings
+
+        if "django.contrib.contenttypes" in dj_settings.INSTALLED_APPS:
+            from django.contrib.contenttypes.models import ContentType
+
+            ContentType.objects.clear_cache()
+
+
 # ############### Helper Functions ################
 
 
