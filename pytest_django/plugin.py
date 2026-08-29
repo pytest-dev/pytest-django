@@ -415,6 +415,9 @@ def pytest_configure(config: pytest.Config) -> None:
     # it's fully initialized here.
     _setup_django(config)
 
+    if "django" not in sys.modules:
+        return
+
     from pytest_django.asserts import test_case
 
     max_diff = config.getini("django_asserts_max_diff")
