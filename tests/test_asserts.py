@@ -101,3 +101,21 @@ def test_django_asserts_max_diff_can_be_unlimited(
     result = django_pytester.runpytest_subprocess()
 
     result.assert_outcomes(passed=1)
+
+
+def test_django_asserts_max_diff_requires_an_integer_or_none(
+    django_pytester: pytest.Pytester,
+) -> None:
+    django_pytester.makeini(
+        """
+        [pytest]
+        django_asserts_max_diff = unlimited
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess()
+
+    assert result.ret == pytest.ExitCode.USAGE_ERROR
+    result.stderr.fnmatch_lines(
+        ["*django_asserts_max_diff must be an integer or None*"]
+    )
