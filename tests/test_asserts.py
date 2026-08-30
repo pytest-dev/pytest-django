@@ -116,6 +116,4 @@ def test_django_asserts_max_diff_requires_an_integer_or_none(
     result = django_pytester.runpytest_subprocess()
 
     assert result.ret == pytest.ExitCode.USAGE_ERROR
-    result.stderr.fnmatch_lines(
-        ["*django_asserts_max_diff must be an integer or None*"]
-    )
+    result.stderr.fnmatch_lines(["*django_asserts_max_diff must be an integer or None*"])
