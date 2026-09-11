@@ -170,6 +170,7 @@ def django_db_setup(  # noqa: PLR0917
     django_db_modify_db_settings: None,  # noqa: ARG001
 ) -> Generator[None]:
     """Top level fixture to ensure test databases are available"""
+    from django.db import DEFAULT_DB_ALIAS
     from django.test.utils import setup_databases, teardown_databases
 
     setup_databases_args = {}
@@ -181,6 +182,11 @@ def django_db_setup(  # noqa: PLR0917
         setup_databases_args["keepdb"] = True
 
     aliases, serialized_aliases = _get_databases_for_setup(request.session.items)
+    if not aliases:
+        # This fixture is only requested when a test needs the database. Tests
+        # that obtain db fixtures via getfixturevalue() are invisible at
+        # collection time, so fall back to the default alias.
+        aliases = {DEFAULT_DB_ALIAS}
 
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
@@ -201,6 +207,24 @@ def django_db_setup(  # noqa: PLR0917
                 request.node.warn(
                     pytest.PytestWarning(f"Error when trying to teardown test databases: {exc!r}")
                 )
+
+
+def _requested_fixture_names(request: pytest.FixtureRequest) -> set[str]:
+    """Return fixture names for this test, including those currently being set up.
+
+    ``request.fixturenames`` is the collected fixture closure plus fixtures that
+    have already finished. A fixture requested via ``request.getfixturevalue()``
+    is only recorded after it finishes, so ``_django_db_helper`` (a dependency
+    of ``db`` / ``transactional_db``) would otherwise miss it.
+    """
+    names = set(request.fixturenames)
+    current: pytest.FixtureRequest | None = request
+    while current is not None:
+        fixturename = current.fixturename
+        if fixturename is not None:
+            names.add(fixturename)
+        current = getattr(current, "_parent_request", None)
+    return names
 
 
 @pytest.fixture
@@ -233,14 +257,13 @@ def _django_db_helper(
             available_apps,
         ) = False, False, None, False, None
 
+    requested = _requested_fixture_names(request)
+    reset_sequences = reset_sequences or ("django_db_reset_sequences" in requested)
+    serialized_rollback = serialized_rollback or ("django_db_serialized_rollback" in requested)
     transactional = (
         transactional
         or reset_sequences
-        or ("transactional_db" in request.fixturenames or "live_server" in request.fixturenames)
-    )
-    reset_sequences = reset_sequences or ("django_db_reset_sequences" in request.fixturenames)
-    serialized_rollback = serialized_rollback or (
-        "django_db_serialized_rollback" in request.fixturenames
+        or ("transactional_db" in requested or "live_server" in requested)
     )
 
     with django_db_blocker.unblock():

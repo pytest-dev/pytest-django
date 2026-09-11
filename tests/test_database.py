@@ -101,6 +101,20 @@ class TestDatabaseFixtures:
 
         assert not connection.in_atomic_block
 
+    def test_transactions_match_dynamic_db_fixture(
+        self,
+        all_dbs: None,  # noqa: ARG002
+        request: pytest.FixtureRequest,
+    ) -> None:
+        if not connection.features.supports_transactions:
+            pytest.skip("transactions required for this test")
+
+        fixture_name = request.node.callspec.params["all_dbs"]
+        if fixture_name in {"transactional_db", "django_db_reset_sequences"}:
+            assert not connection.in_atomic_block
+        else:
+            assert connection.in_atomic_block
+
     def test_django_db_reset_sequences_fixture(
         self,
         db: None,  # noqa: ARG002
@@ -211,6 +225,26 @@ class TestDatabaseFixtures:
         with transaction.atomic(durable=True):
             item = Item.objects.create(name="foo")
         assert Item.objects.get() == item
+
+
+@pytest.mark.parametrize("db_access", ["db", "transactional_db"], indirect=True)
+class TestIndirectDbParametrization:
+    """Indirect parametrization of db vs transactional_db (issue #1157)."""
+
+    @pytest.fixture
+    def db_access(self, request: pytest.FixtureRequest) -> str:
+        fixture_name: str = request.param
+        request.getfixturevalue(fixture_name)
+        return fixture_name
+
+    def test_atomic_block_matches_fixture(self, db_access: str) -> None:
+        if not connection.features.supports_transactions:
+            pytest.skip("transactions required for this test")
+
+        if db_access == "transactional_db":
+            assert not connection.in_atomic_block
+        else:
+            assert connection.in_atomic_block
 
 
 class TestDatabaseFixturesAllOrder:

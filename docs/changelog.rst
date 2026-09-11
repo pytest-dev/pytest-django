@@ -9,6 +9,14 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Fixed ``db`` / ``transactional_db`` (and related database fixtures) requested
+  via ``request.getfixturevalue()``, including indirect parametrization, always
+  using ``django.test.TestCase`` without transaction support
+  (`#1157 <https://github.com/pytest-dev/pytest-django/issues/1157>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 
