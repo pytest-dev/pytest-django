@@ -191,6 +191,24 @@ def django_db_setup(  # noqa: PLR0917
             **setup_databases_args,
         )
 
+    if django_db_keepdb and not django_db_createdb:
+        from django.db import connections
+
+        in_memory_aliases = sorted(
+            alias
+            for alias in aliases
+            if connections[alias].vendor == "sqlite" and connections[alias].is_in_memory_db()
+        )
+        if in_memory_aliases:
+            request.node.warn(
+                pytest.PytestWarning(
+                    "--reuse-db has no effect for the in-memory sqlite database(s) "
+                    f"{', '.join(repr(alias) for alias in in_memory_aliases)}: an in-memory "
+                    "database only exists for the duration of the process, so there "
+                    "is nothing to reuse between test runs."
+                )
+            )
+
     yield
 
     if not django_db_keepdb:

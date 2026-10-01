@@ -94,6 +94,11 @@ instantly be re used. This will allow much faster startup time for tests.
 This can be especially useful when running a few tests, when there are a lot
 of database tables to set up.
 
+Note that ``--reuse-db`` has no effect for an in-memory SQLite database (the
+default for SQLite): such a database only exists while the process is running,
+so there is nothing to reuse between runs. pytest-django emits a warning in
+this case.
+
 ``--reuse-db`` will not pick up schema changes between test runs. You must run
 the tests with ``--reuse-db --create-db`` to re-create the database according
 to the new schema. Running without ``--reuse-db`` is also possible, since the
