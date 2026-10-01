@@ -69,3 +69,51 @@ def test_sanity() -> None:
         pass
 
     assert assertContains.__doc__
+
+
+def test_django_asserts_max_diff_can_be_unlimited(
+    django_pytester: pytest.Pytester,
+) -> None:
+    django_pytester.makeini(
+        """
+        [pytest]
+        django_asserts_max_diff = None
+        """
+    )
+    django_pytester.makepyfile(
+        """
+        from pytest_django.asserts import assertXMLEqual
+
+
+        def test_assert_xml_equal_uses_the_configured_max_diff():
+            expected = "<root>" + "".join(f"<item>{i}</item>" for i in range(100)) + "</root>"
+            actual = "<root>" + "".join(f"<item>{i + 1}</item>" for i in range(100)) + "</root>"
+
+            try:
+                assertXMLEqual(expected, actual)
+            except AssertionError as error:
+                assert "Set self.maxDiff to None" not in str(error)
+            else:
+                raise AssertionError("assertXMLEqual unexpectedly passed")
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess()
+
+    result.assert_outcomes(passed=1)
+
+
+def test_django_asserts_max_diff_requires_an_integer_or_none(
+    django_pytester: pytest.Pytester,
+) -> None:
+    django_pytester.makeini(
+        """
+        [pytest]
+        django_asserts_max_diff = unlimited
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess()
+
+    assert result.ret == pytest.ExitCode.USAGE_ERROR
+    result.stderr.fnmatch_lines(["*django_asserts_max_diff must be an integer or None*"])

@@ -142,6 +142,11 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "How to set the Django DEBUG setting (default `False`). Use `keep` to not override.",
         default="False",
     )
+    parser.addini(
+        "django_asserts_max_diff",
+        "Maximum diff length for pytest_django.asserts (use `None` for no limit).",
+        default="640",
+    )
     group.addoption(
         "--fail-on-template-vars",
         action="store_true",
@@ -409,6 +414,22 @@ def pytest_configure(config: pytest.Config) -> None:
     # `pytest_load_initial_conftests` only partially initializes Django, and
     # it's fully initialized here.
     _setup_django(config)
+
+    if "django" not in sys.modules:
+        return
+
+    from pytest_django.asserts import _set_max_diff
+
+    max_diff = config.getini("django_asserts_max_diff")
+    if max_diff.lower() == "none":
+        _set_max_diff(None)
+    else:
+        try:
+            _set_max_diff(int(max_diff))
+        except ValueError as error:
+            raise pytest.UsageError(
+                "django_asserts_max_diff must be an integer or None"
+            ) from error
 
 
 @pytest.hookimpl()
