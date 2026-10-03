@@ -55,6 +55,7 @@ __all__ = [
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_tox_suffix() -> None:
+    """Add a suffix to test database names when tox runs in parallel."""
     skip_if_no_django()
 
     tox_environment = os.getenv("TOX_PARALLEL_ENV")
@@ -65,6 +66,7 @@ def django_db_modify_db_settings_tox_suffix() -> None:
 
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings_xdist_suffix(request: pytest.FixtureRequest) -> None:
+    """Add a suffix to test database names when pytest-xdist runs tests."""
     skip_if_no_django()
 
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
@@ -78,6 +80,7 @@ def django_db_modify_db_settings_parallel_suffix(
     django_db_modify_db_settings_tox_suffix: None,  # noqa: ARG001
     django_db_modify_db_settings_xdist_suffix: None,  # noqa: ARG001
 ) -> None:
+    """Add a suffix to test database names when tests run in parallel."""
     skip_if_no_django()
 
 
