@@ -2,6 +2,7 @@ import os
 import sys
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites import models as site_models
 from django.contrib.sites.models import Site
 from django.core import mail
@@ -379,6 +380,14 @@ def test_clear_site_cache_check_site_cache_size(site_name: str, settings) -> Non
     settings.SITE_ID = site.id
     assert Site.objects.get_current() == site
     assert len(site_models.SITE_CACHE) == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("model", [Item, Site])
+def test_clear_contenttypes_cache(model: type[Item] | type[Site]) -> None:
+    assert ContentType.objects._cache == {}
+    ContentType.objects.get_for_model(model)
+    assert ContentType.objects._cache
 
 
 @pytest.mark.django_project(
