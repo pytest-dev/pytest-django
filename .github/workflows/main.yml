@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload zizmor SARIF report into the GitHub repo code scanning
         if: contains(matrix.name, 'linting')
-        uses: github/codeql-action/upload-sarif@v4.37.3
+        uses: github/codeql-action/upload-sarif@v4.38.2
         with:
           sarif_file: zizmor.sarif
           category: zizmor
@@ -111,6 +111,6 @@ jobs:
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed
-      uses: re-actors/alls-green@2765efec08f0fd63e83ad900f5fd75646be69ff6
+      uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35
       with:
         jobs: ${{ toJSON(needs) }}
