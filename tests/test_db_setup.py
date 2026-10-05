@@ -620,3 +620,46 @@ class TestMigrations:
         assert result.ret == 0
         result.stdout.fnmatch_lines(["*test_something_without_db PASSED*"])
         result.stdout.no_fnmatch_line("*mark_migrations_run*")
+
+
+class TestSqliteReuseDbInMemory:
+    db_settings: ClassVar = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }
+
+    def test_reuse_db_warns_for_in_memory_database(self, django_pytester: DjangoPytester) -> None:
+        "--reuse-db can't reuse an in-memory database, so warn about it."
+        django_pytester.create_test_module(
+            """
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner():
+                pass
+        """
+        )
+
+        result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+        assert result.ret == 0
+        result.stdout.fnmatch_lines(
+            ["*--reuse-db has no effect for the in-memory sqlite database*"]
+        )
+
+    def test_no_warning_without_reuse_db(self, django_pytester: DjangoPytester) -> None:
+        "Without --reuse-db the warning must not be emitted."
+        django_pytester.create_test_module(
+            """
+            import pytest
+
+            @pytest.mark.django_db
+            def test_inner():
+                pass
+        """
+        )
+
+        result = django_pytester.runpytest_subprocess("-v")
+        assert result.ret == 0
+        result.stdout.no_fnmatch_line("*--reuse-db has no effect*")

@@ -9,6 +9,13 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Improvements
+^^^^^^^^^^^^
+
+* Warn when ``--reuse-db`` is used with an in-memory SQLite database, since
+  such a database only lives for the duration of the process and can't be
+  reused between test runs.
+
 v4.14.0 (2026-08-10)
 --------------------
 
