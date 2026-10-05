@@ -26,6 +26,30 @@ def test_no_ds(pytester: pytest.Pytester) -> None:
     assert r.ret == 0
 
 
+def test_django_asserts_max_diff_does_not_import_django(
+    pytester: pytest.Pytester,
+) -> None:
+    pytester.makeini(
+        """
+        [pytest]
+        django_asserts_max_diff = None
+        """
+    )
+    pytester.makepyfile(
+        """
+        import sys
+
+
+        def test_django_is_not_imported():
+            assert "django" not in sys.modules
+        """
+    )
+
+    result = pytester.runpytest_subprocess()
+
+    result.assert_outcomes(passed=1)
+
+
 def test_database(pytester: pytest.Pytester) -> None:
     pytester.makepyfile(
         """
