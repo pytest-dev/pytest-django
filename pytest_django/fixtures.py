@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+
 import os
 from collections.abc import Callable, Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
@@ -186,12 +188,10 @@ def django_db_setup(  # noqa: PLR0917
 
     connections.close_all()
     for alias in connections:
-        try:
+        # The alias may be configured but never materialized in this thread —
+        # there is no wrapper to evict then.
+        with contextlib.suppress(AttributeError):
             del connections[alias]
-        except AttributeError:
-            # The alias was configured but never materialized in this
-            # thread — there is no wrapper to evict.
-            pass
     # `del connections[alias]` only drops the wrapper; the per-alias settings
     # live in a cached_property without a public eviction API.
     connections.__dict__.pop("settings", None)
