@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 from collections.abc import Callable, Generator, Iterable, Sequence
 from contextlib import AbstractContextManager, contextmanager
@@ -173,7 +174,26 @@ def django_db_setup(  # noqa: PLR0917
     django_db_modify_db_settings: None,  # noqa: ARG001
 ) -> Generator[None]:
     """Top level fixture to ensure test databases are available"""
+    # django_db_modify_db_settings may have replaced settings.DATABASES
+    # (e.g. to point at a Testcontainer). If anything materialized a
+    # DatabaseWrapper before that (import-time ORM access, an app's
+    # AppConfig.ready, Django itself), the ConnectionHandler would keep
+    # serving the stale wrapper and setup_databases would connect to the
+    # pre-override host. Close connections and evict the materialized
+    # wrappers plus the handler's cached settings, so connections are
+    # re-created from the (possibly modified) settings. (#1317)
+    from django.db import connections
     from django.test.utils import setup_databases, teardown_databases
+
+    connections.close_all()
+    for alias in connections:
+        # The alias may be configured but never materialized in this thread —
+        # there is no wrapper to evict then.
+        with contextlib.suppress(AttributeError):
+            del connections[alias]
+    # `del connections[alias]` only drops the wrapper; the per-alias settings
+    # live in a cached_property without a public eviction API.
+    connections.__dict__.pop("settings", None)
 
     setup_databases_args = {}
 
