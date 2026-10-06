@@ -467,6 +467,38 @@ class TestSettings:
             ]
         )
 
+    def test_override_settings_exited_before_teardown(
+        self, django_pytester: DjangoPytester
+    ) -> None:
+        django_pytester.create_test_module(
+            """
+            import pytest
+
+            from django.conf import settings as django_settings
+            from django.test import override_settings
+
+
+            @pytest.fixture
+            def overrides():
+                with override_settings(OVERRIDDEN=1):
+                    yield
+
+
+            def test_override_inside_settings_fixture(settings, overrides):
+                settings.ADDED = 1
+                assert django_settings.OVERRIDDEN == 1
+                assert django_settings.ADDED == 1
+
+
+            def test_settings_restored():
+                assert not hasattr(django_settings, "OVERRIDDEN")
+                assert not hasattr(django_settings, "ADDED")
+        """
+        )
+
+        result = django_pytester.runpytest_subprocess("-v")
+        result.assert_outcomes(passed=2)
+
 
 class TestLiveServer:
     @pytest.mark.skipif("PYTEST_XDIST_WORKER" in os.environ, reason="xdist in use")
