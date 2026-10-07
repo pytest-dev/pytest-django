@@ -9,6 +9,15 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Fixed the :fixture:`settings` fixture restoring the settings of an
+  ``override_settings`` that was entered after the fixture was set up but
+  exited before it was torn down, which leaked those settings into later
+  tests and could eventually cause a ``RecursionError``
+  (`#809 <https://github.com/pytest-dev/pytest-django/issues/809>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 

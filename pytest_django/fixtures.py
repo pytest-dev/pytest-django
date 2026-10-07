@@ -562,8 +562,15 @@ class Settings:
         assert _is_pytest_django, (
             "Settings should only be instantiated from the `settings` fixture"
         )
+        from django.test import override_settings
+
+        # Disabled last, so the settings active when the fixture was set up
+        # are restored even if an override_settings entered later exits
+        # before the fixture is finalized.
+        base = override_settings()
+        base.enable()
         self._to_restore: list[django.test.override_settings]
-        object.__setattr__(self, "_to_restore", [])
+        object.__setattr__(self, "_to_restore", [base])
 
     def __delattr__(self, attr: str) -> None:
         from django.test import override_settings
