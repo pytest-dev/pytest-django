@@ -134,10 +134,11 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
                 _available_apps,
             ) = validate_django_db(marker_db)
         elif "db" in fixtures or "transactional_db" in fixtures or "live_server" in fixtures:
-            serialized_rollback = "django_db_serialized_rollback" in fixtures
+            serialized_rollback = False
             databases = None
         else:
             return (), False
+        serialized_rollback = serialized_rollback or ("django_db_serialized_rollback" in fixtures)
     if databases is None:
         return (DEFAULT_DB_ALIAS,), serialized_rollback
     elif databases == "__all__":
