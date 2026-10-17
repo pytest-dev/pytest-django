@@ -179,6 +179,62 @@ class TestDatabaseFixtures:
         result = django_pytester.runpytest_subprocess("-v")
         assert result.ret == 0
 
+    @pytest.mark.parametrize(
+        "marker",
+        [
+            "@pytest.mark.django_db(transaction=True)",
+            "@pytest.mark.django_db(transaction=True, serialized_rollback=False)",
+            "",
+        ],
+        ids=["marker", "marker-false", "no-marker"],
+    )
+    @pytest.mark.parametrize("indirect", [False, True], ids=["direct", "dependency"])
+    def test_serialized_rollback_fixture_with_marker(
+        self,
+        django_pytester: DjangoPytester,
+        marker: str,
+        indirect: bool,
+    ) -> None:
+        django_pytester.create_app_file(
+            """
+            from django.db import migrations
+
+            def load_data(apps, schema_editor):
+                Item = apps.get_model("app", "Item")
+                Item.objects.create(name="loaded-in-migration")
+
+            class Migration(migrations.Migration):
+                dependencies = [("app", "0001_initial")]
+                operations = [migrations.RunPython(load_data)]
+            """,
+            "migrations/0002_data_migration.py",
+        )
+
+        fixture = "rollback_db" if indirect else "django_db_serialized_rollback"
+        django_pytester.create_test_module(
+            f"""
+            import pytest
+            from .app.models import Item
+
+            @pytest.fixture
+            def rollback_db(django_db_serialized_rollback):
+                pass
+
+            {marker}
+            def test_first(transactional_db, {fixture}):
+                assert Item.objects.filter(name="loaded-in-migration").exists()
+                Item.objects.create(name="test-only")
+
+            {marker}
+            def test_second(transactional_db, {fixture}):
+                assert Item.objects.filter(name="loaded-in-migration").exists()
+                assert not Item.objects.filter(name="test-only").exists()
+            """
+        )
+
+        result = django_pytester.runpytest_subprocess("-v")
+        result.assert_outcomes(passed=2)
+
     @pytest.fixture
     def mydb(self, all_dbs: None) -> None:  # noqa: ARG002
         # This fixture must be able to access the database

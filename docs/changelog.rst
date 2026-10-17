@@ -9,6 +9,13 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Honor the ``django_db_serialized_rollback`` fixture when a test also has a
+  ``django_db`` marker, so data from migrations is restored between transactional
+  tests even when the marker does not enable ``serialized_rollback``.
+
 v4.14.0 (2026-08-10)
 --------------------
 
