@@ -47,6 +47,7 @@ __all__ = [
     "django_user_model",
     "django_username_field",
     "live_server",
+    "request_factory",
     "rf",
     "settings",
     "transactional_db",
@@ -536,6 +537,12 @@ def rf() -> django.test.RequestFactory:
     from django.test import RequestFactory
 
     return RequestFactory()
+
+
+@pytest.fixture
+def request_factory(rf: django.test.RequestFactory) -> django.test.RequestFactory:
+    """Alias for the rf fixture."""
+    return rf
 
 
 @pytest.fixture

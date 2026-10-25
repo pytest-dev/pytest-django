@@ -187,6 +187,8 @@ More information on fixtures is available in the :ref:`pytest documentation
 
 An instance of a :class:`django.test.RequestFactory`.
 
+Also available as :fixture:`request_factory`.
+
 Example
 """""""
 
@@ -203,6 +205,22 @@ Example
         request.user = admin_user
         response = my_view(request)
         assert response.status_code == 200
+
+.. fixture:: request_factory
+
+``request_factory`` - ``RequestFactory``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A readable alias for :fixture:`rf`. Both fixtures return the same
+:class:`django.test.RequestFactory` instance within a test, including when
+``rf`` is overridden by a custom fixture.
+
+Example::
+
+    def test_request(request_factory):
+        request = request_factory.get('/example/', {'name': 'pytest-django'})
+        assert request.path == '/example/'
+        assert request.GET['name'] == 'pytest-django'
 
 .. fixture:: async_rf
 

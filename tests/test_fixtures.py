@@ -102,6 +102,18 @@ def test_rf(rf: RequestFactory) -> None:
     assert isinstance(rf, RequestFactory)
 
 
+def test_request_factory(request_factory: RequestFactory) -> None:
+    assert isinstance(request_factory, RequestFactory)
+    request = request_factory.get("/example/", {"name": "pytest-django"})
+    assert request.method == "GET"
+    assert request.path == "/example/"
+    assert request.GET["name"] == "pytest-django"
+
+
+def test_request_factory_alias(rf: RequestFactory, request_factory: RequestFactory) -> None:
+    assert request_factory is rf
+
+
 def test_async_rf(async_rf: AsyncRequestFactory) -> None:
     assert isinstance(async_rf, AsyncRequestFactory)
 

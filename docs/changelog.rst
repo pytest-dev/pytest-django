@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Improvements
+^^^^^^^^^^^^
+
+* Added :fixture:`request_factory` as a readable alias for :fixture:`rf`
+  (`#1252 <https://github.com/pytest-dev/pytest-django/issues/1252>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 
