@@ -116,10 +116,11 @@ def _get_databases_for_test(test: pytest.Item) -> tuple[Iterable[str], bool]:
     """Get the database aliases that need to be setup for a test, and whether
     they need to be serialized."""
     from django.db import DEFAULT_DB_ALIAS, connections
-    from django.test import TransactionTestCase
+    from django.test import SimpleTestCase
 
     test_cls = getattr(test, "cls", None)
-    if test_cls and issubclass(test_cls, TransactionTestCase):
+    # A SimpleTestCase may also set `databases`; by default it has none.
+    if test_cls and issubclass(test_cls, SimpleTestCase):
         serialized_rollback = getattr(test_cls, "serialized_rollback", False)
         databases = getattr(test_cls, "databases", None)
     else:
