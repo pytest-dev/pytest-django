@@ -789,15 +789,15 @@ def _fail_for_invalid_template_variable() -> Generator[None]:
             return None
 
         def __mod__(self, var: str) -> str:
+            if not self.fail:
+                return self.origin_value
+            # Walks the whole stack, so only do it for the failure message.
             origin = self._get_origin()
             if origin:
                 msg = f"Undefined template variable '{var}' in '{origin}'"
             else:
                 msg = f"Undefined template variable '{var}'"
-            if self.fail:
-                pytest.fail(msg)
-            else:
-                return self.origin_value
+            pytest.fail(msg)
 
     with pytest.MonkeyPatch.context() as mp:
         if (

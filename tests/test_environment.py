@@ -189,6 +189,31 @@ def test_invalid_template_variable_behaves_normally_when_ignored(
     )
 
 
+def test_invalid_template_variable_ignored_skips_origin_lookup(
+    django_pytester: DjangoPytester,
+) -> None:
+    """The origin is only needed for the failure message, and looking it up
+    inspects the whole stack."""
+    django_pytester.create_test_module(
+        """
+        import inspect
+
+        import pytest
+        from django.template import Context, Template
+
+        @pytest.mark.ignore_template_errors
+        def test_ignore(monkeypatch):
+            def stack(*args, **kwargs):
+                raise AssertionError("inspect.stack() called")
+
+            monkeypatch.setattr(inspect, "stack", stack)
+            assert Template("<div>{{ invalid_var }}</div>").render(Context()) == "<div></div>"
+        """
+    )
+    result = django_pytester.runpytest_subprocess("--fail-on-template-vars")
+    result.assert_outcomes(passed=1)
+
+
 @pytest.mark.django_project(
     extra_settings="""
     TEMPLATE_LOADERS = (
