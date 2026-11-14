@@ -465,6 +465,39 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1)
 
 
+def test_failing_teardown_does_not_affect_next_test(django_pytester: DjangoPytester) -> None:
+    """A test whose database teardown fails doesn't leave its database
+    restrictions behind for the next test."""
+
+    django_pytester.create_test_module(
+        """
+        import pytest
+        from django.test import TestCase
+        from .app.models import SecondItem
+
+        original_fixture_teardown = TestCase._fixture_teardown
+
+        def failing_fixture_teardown(self):
+            TestCase._fixture_teardown = original_fixture_teardown
+            original_fixture_teardown(self)
+            raise RuntimeError("teardown failed")
+
+        TestCase._fixture_teardown = failing_fixture_teardown
+
+        @pytest.mark.django_db
+        def test_failing_teardown():
+            pass
+
+        @pytest.mark.django_db(databases=["default", "second"])
+        def test_second_db_access():
+            assert SecondItem.objects.count() == 0
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=2, errors=1)
+
+
 def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
     """Each test is set up by exactly one _pre_setup() call.
 

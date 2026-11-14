@@ -291,25 +291,32 @@ def _django_db_helper(
                 def tearDownClass(cls) -> None:
                     super(django.test.TestCase, cls).tearDownClass()
 
-        PytestDjangoTestCase.setUpClass()
+        # Like unittest, run the class cleanups even if the setup or teardown
+        # fails. Otherwise Django's database access guards stay in place for
+        # the following tests.
+        try:
+            PytestDjangoTestCase.setUpClass()
 
-        test_case = PytestDjangoTestCase(methodName="__init__")
-        if VERSION >= (6, 0):
-            pre_setup_ran_eagerly = PytestDjangoTestCase._pre_setup_ran_eagerly
-        else:
-            pre_setup_ran_eagerly = getattr(PytestDjangoTestCase, "_pre_setup_ran_eagerly", False)
-        if not pre_setup_ran_eagerly:
-            # For a TransactionTestCase, setUpClass() has already run _pre_setup() and set
-            # this flag to say so.
-            test_case._pre_setup()
+            try:
+                test_case = PytestDjangoTestCase(methodName="__init__")
+                if VERSION >= (6, 0):
+                    pre_setup_ran_eagerly = PytestDjangoTestCase._pre_setup_ran_eagerly
+                else:
+                    pre_setup_ran_eagerly = getattr(
+                        PytestDjangoTestCase, "_pre_setup_ran_eagerly", False
+                    )
+                if not pre_setup_ran_eagerly:
+                    # For a TransactionTestCase, setUpClass() has already run _pre_setup()
+                    # and set this flag to say so.
+                    test_case._pre_setup()
 
-        yield
+                yield
 
-        test_case._post_teardown()
-
-        PytestDjangoTestCase.tearDownClass()
-
-        PytestDjangoTestCase.doClassCleanups()
+                test_case._post_teardown()
+            finally:
+                PytestDjangoTestCase.tearDownClass()
+        finally:
+            PytestDjangoTestCase.doClassCleanups()
 
 
 def _django_db_signature(
