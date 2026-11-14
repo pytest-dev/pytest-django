@@ -594,10 +594,7 @@ def _django_db_marker(request: pytest.FixtureRequest) -> None:
 
 
 @pytest.fixture(autouse=True, scope="class")
-def _django_setup_unittest(
-    request: pytest.FixtureRequest,
-    django_db_blocker: DjangoDbBlocker,
-) -> Generator[None]:
+def _django_setup_unittest(request: pytest.FixtureRequest) -> Generator[None]:
     """Setup a django unittest, internal to pytest-django."""
     if not django_settings_is_configured() or not is_django_unittest(request):
         yield
@@ -623,6 +620,7 @@ def _django_setup_unittest(
         # The `databases` propery seems like the best indicator for that.
         if request.cls.databases:
             request.getfixturevalue("django_db_setup")
+            django_db_blocker: DjangoDbBlocker = request.getfixturevalue("django_db_blocker")
             db_unblock = django_db_blocker.unblock()
         else:
             db_unblock = contextlib.nullcontext()
@@ -820,10 +818,7 @@ def _fail_for_invalid_template_variable() -> Generator[None]:
 
 
 @pytest.fixture(autouse=True)
-def _template_string_if_invalid_marker(
-    monkeypatch: pytest.MonkeyPatch,
-    request: pytest.FixtureRequest,
-) -> None:
+def _template_string_if_invalid_marker(request: pytest.FixtureRequest) -> None:
     """Apply the @pytest.mark.ignore_template_errors marker,
     internal to pytest-django."""
     marker = request.keywords.get("ignore_template_errors", None)
@@ -832,6 +827,9 @@ def _template_string_if_invalid_marker(
             from django.conf import settings as dj_settings
 
             if dj_settings.TEMPLATES:
+                # Requested here and not as an argument, otherwise every
+                # test pays for a monkeypatch it doesn't use.
+                monkeypatch: pytest.MonkeyPatch = request.getfixturevalue("monkeypatch")
                 monkeypatch.setattr(
                     dj_settings.TEMPLATES[0]["OPTIONS"]["string_if_invalid"],
                     "fail",
