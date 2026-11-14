@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Fixed an error in the database setup or teardown of a test making later
+  tests fail with ``DatabaseOperationForbidden``.
+
 v4.14.0 (2026-08-10)
 --------------------
 
