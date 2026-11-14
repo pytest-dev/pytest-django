@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Fixed a ``SimpleTestCase`` with ``databases`` set running against the real
+  database instead of the test database when no other test used that database.
+
 v4.14.0 (2026-08-10)
 --------------------
 

@@ -465,6 +465,26 @@ def test_django_testcase_multi_db(django_pytester: DjangoPytester) -> None:
     result.assert_outcomes(passed=1)
 
 
+def test_django_simpletestcase_databases(django_pytester: DjangoPytester) -> None:
+    """A SimpleTestCase which sets `databases` gets the test database."""
+
+    django_pytester.create_test_module(
+        """
+        from django.test import SimpleTestCase
+        from .app.models import Item
+
+        class TestSimple(SimpleTestCase):
+            databases = ["default"]
+
+            def test_db_access(self):
+                assert Item.objects.count() == 0
+        """
+    )
+
+    result = django_pytester.runpytest_subprocess("-v", "--reuse-db")
+    result.assert_outcomes(passed=1)
+
+
 def test_pre_setup_runs_once_per_test(django_pytester: DjangoPytester) -> None:
     """Each test is set up by exactly one _pre_setup() call.
 
