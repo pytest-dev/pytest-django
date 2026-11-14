@@ -50,6 +50,12 @@ def nonverbose_config(config: pytest.Config) -> Generator[None]:
         config.option.verbose = saved
 
 
+def test_plain_test_sets_up_no_unused_fixtures(request: pytest.FixtureRequest) -> None:
+    """Our autouse fixtures don't drag other fixtures into every test."""
+    assert "monkeypatch" not in request.fixturenames
+    assert "django_db_blocker" not in request.fixturenames
+
+
 def test_client(client: Client) -> None:
     assert isinstance(client, Client)
 
