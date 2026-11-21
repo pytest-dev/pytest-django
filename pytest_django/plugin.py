@@ -322,7 +322,7 @@ def pytest_load_initial_conftests(
     early_config.stash[blocking_manager_key] = DjangoDbBlocker(_ispytest=True)
 
     try:
-        _initialize_django(early_config, options, args, report_header)
+        _initialize_django(early_config, options, report_header)
     except Exception:
         # `--help`/`--version` never run tests, so they must keep working on a
         # broken configuration (issue #235); a real run still fails loudly.
@@ -333,7 +333,6 @@ def pytest_load_initial_conftests(
 def _initialize_django(
     early_config: pytest.Config,
     options: argparse.Namespace,
-    args: list[str],
     report_header: list[str],
 ) -> None:
     """Configure and set up Django from the pytest options/ini/environment.
@@ -346,7 +345,7 @@ def _initialize_django(
     )
 
     if django_find_project:
-        _django_project_scan_outcome = _add_django_project_to_path(args)
+        _django_project_scan_outcome = _add_django_project_to_path(options.file_or_dir)
     else:
         _django_project_scan_outcome = PROJECT_SCAN_DISABLED
 

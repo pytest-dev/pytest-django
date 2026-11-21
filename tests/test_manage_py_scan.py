@@ -49,6 +49,35 @@ def test_django_project_found_with_k(
 
 
 @pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
+def test_django_project_ignores_keyword_value_in_cwd(
+    django_pytester: DjangoPytester,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    django_pytester.create_test_module("def test_other_project(): pass")
+    monkeypatch.chdir(django_pytester.project_root)
+    other_project = django_pytester.mkdir(django_pytester.project_root / "other_project")
+    (other_project / "manage.py").touch()
+
+    result = django_pytester.runpytest_subprocess("-k", "other_project")
+
+    result.assert_outcomes(passed=1)
+
+
+@pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
+def test_django_project_uses_paths_after_keyword_option(django_pytester: DjangoPytester) -> None:
+    django_pytester.makepyfile(test_outside="def test_outside(): pass")
+    other_project = django_pytester.mkdir("other_project")
+    (other_project / "manage.py").touch()
+    testfile = django_pytester.create_test_module("def test_other_project(): pass")
+
+    result = django_pytester.runpytest_subprocess(
+        "test_outside.py", "-k", "other_project", f"{testfile}::test_other_project"
+    )
+
+    result.assert_outcomes(passed=1, deselected=1)
+
+
+@pytest.mark.django_project(project_root="django_project_root", create_manage_py=True)
 def test_django_project_found_with_k_and_cwd(
     django_pytester: DjangoPytester,
     monkeypatch: pytest.MonkeyPatch,
