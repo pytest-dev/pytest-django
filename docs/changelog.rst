@@ -9,6 +9,12 @@ Compatibility
 
 * Official Django 6.1 support.
 
+Bugfixes
+^^^^^^^^
+
+* Find the Django project from pytest's positional collection paths even when
+  they follow options such as ``-k`` (`#689 <https://github.com/pytest-dev/pytest-django/issues/689>`__).
+
 v4.14.0 (2026-08-10)
 --------------------
 
